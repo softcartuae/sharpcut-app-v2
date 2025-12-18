@@ -1,0 +1,70 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:gradient_borders/box_borders/gradient_box_border.dart';
+import 'package:sharp_cut/utils/app_colors.dart';
+
+class CustomTextField extends StatelessWidget {
+  final String label;
+  final String hint;
+  final IconData icon;
+  final TextEditingController? controller;
+
+  const CustomTextField({
+    super.key,
+    required this.label,
+    required this.hint,
+    required this.icon,
+    this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.rajdhani(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: GradientBoxBorder(
+              gradient: LinearGradient(
+                colors: [AppColors.violetLight, AppColors.violetDark],
+              ),
+              width: .5,
+            ),
+          ),
+          child: TextField(
+            controller: controller,
+            style: GoogleFonts.rajdhani(color: Colors.white),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: GoogleFonts.rajdhani(
+                color: Colors.white.withOpacity(0.5),
+              ),
+              prefixIcon: Icon(
+                icon,
+                color: Colors.white.withOpacity(0.7),
+                size: 20,
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 10,
+              ),
+              isDense: true,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
