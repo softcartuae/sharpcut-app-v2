@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sharp_cut/presentation/expense/screens/screen_expense.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_home.dart';
 import 'package:sharp_cut/presentation/login/screens/screen_login.dart';
 import 'package:sharp_cut/utils/theme.dart';
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Spark Cut',
       theme: appTheme,
-      home: ScreenHome(),
+      home: ScreenExpense(),
     );
   }
 }
