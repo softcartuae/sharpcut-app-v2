@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/presentation/expense/screens/screen_settlement.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
 import 'package:sharp_cut/presentation/home/widgets/category_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/common_container.dart';
-import 'package:sharp_cut/presentation/home/widgets/search_dialog.dart';
 import 'package:sharp_cut/presentation/home/widgets/service_item.dart';
 
 class HomeServicesSection extends StatelessWidget {
@@ -147,10 +147,7 @@ class HomeServicesSection extends StatelessWidget {
                   isPrimary: true,
                   onTap: () {
                     // calling cutting_master_dialoge
-                    showDialog(
-                      context: context,
-                      builder: (context) =>  SearchDialog(),
-                    );
+                    showSettlementDialog(context);
                   },
                 ),
                 const SizedBox(height: 12),

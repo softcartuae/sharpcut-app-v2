@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Spark Cut',
       theme: appTheme,
-      home: ScreenPrintingSettings(),
+      home: ScreenHome(),
     );
   }
 }
