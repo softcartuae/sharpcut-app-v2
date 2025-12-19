@@ -311,95 +311,161 @@ class _SettlementDialogState extends State<SettlementDialog> {
                   // Main Content: 3 Columns
                   Expanded(
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Column 1: Payment Modes
                         Expanded(
                           flex: 3,
-                          child: Column(
-                            children: [
-                              // Cash Card
-                              const PaymentModeCard(
-                                title: "Cash (0.00)",
-                                amount: "0.00",
-                                color1: AppColors.violetNormal,
-                                color2: AppColors.redNormal,
-                              ),
-                              const SizedBox(height: 10),
-                              // Credit Card
-                              const PaymentModeCard(
-                                title: "Credit Card(0.00)",
-                                amount: "0.00",
-                                color1: Colors.white10,
-                                color2: Colors.transparent,
-                              ),
-                              const SizedBox(height: 20),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                // Cash Card
+                                const PaymentModeCard(
 
-                              // Split Payment & Inputs
-                              SettlementGlassContainer(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "Total Cash: 0.00",
-                                          style: GoogleFonts.rajdhani(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              "Split Payment",
-                                              style: GoogleFonts.rajdhani(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Switch(
-                                              value: _splitPayment,
-                                              onChanged: (val) => setState(
-                                                () => _splitPayment = val,
-                                              ),
-                                              activeColor:
-                                                  AppColors.violetNormal,
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const Divider(color: Colors.white24),
-                                    const SizedBox(height: 10),
-                                    SettlementLabelInput(
-                                      label: "Amount",
-                                      controller: _amountController,
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: SettlementLabelInput(
-                                            label: "Tender Cash",
-                                            controller: _tenderCashController,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: SettlementLabelInput(
-                                            label: "Charge",
-                                            controller: _chargeController,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                  
+                                  title: "Cash (0.00)",
+                                  amount: "0.00",
+                                  color1: AppColors.violetNormal,
+                                  color2: AppColors.redNormal,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 10),
+                                // Credit Card
+                                const PaymentModeCard(
+                                  title: "Credit Card(0.00)",
+                                  amount: "0.00",
+                                  color1: Colors.white10,
+                                  color2: Colors.transparent,
+                                ),
+                                const SizedBox(height: 20),
+
+                                // Split Payment & Inputs
+                                SettlementGlassContainer(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Total Cash: 0.00",
+                                            style: GoogleFonts.rajdhani(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "Split Payment",
+                                                style: GoogleFonts.rajdhani(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Switch(
+                                                value: _splitPayment,
+                                                onChanged: (val) => setState(
+                                                  () => _splitPayment = val,
+                                                ),
+                                                activeColor:
+                                                    AppColors.violetNormal,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      const Divider(color: Colors.white24),
+                                      const SizedBox(height: 10),
+                                      SettlementLabelInput(
+                                        label: "Amount",
+                                        controller: _amountController,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: SettlementLabelInput(
+                                              label: "Tender Cash",
+                                              controller: _tenderCashController,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: SettlementLabelInput(
+                                              label: "Charge",
+                                              controller: _chargeController,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(width: 20),
@@ -409,121 +475,123 @@ class _SettlementDialogState extends State<SettlementDialog> {
                           flex: 3,
                           child: SettlementGlassContainer(
                             padding: const EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                SettlementRowInput(
-                                  label: "Total Qty",
-                                  controller: _totalQtyController,
-                                ),
-                                const SizedBox(height: 10),
-                                SettlementRowInput(
-                                  label: "Sub Total",
-                                  controller: _subTotalController,
-                                ),
-                                const SizedBox(height: 10),
-                                SettlementRowInput(
-                                  label: "P. Discount",
-                                  controller: _discountController,
-                                ),
-                                const SizedBox(height: 10),
-                                SettlementRowInput(
-                                  label: "Round Off",
-                                  controller: _roundOffController,
-                                ),
-                                const SizedBox(height: 10),
-                                SettlementRowInput(
-                                  label: "VAT",
-                                  controller: _vatController,
-                                ),
-                                const SizedBox(height: 10),
-                                SettlementRowInput(
-                                  label: "Paid",
-                                  controller: _paidController,
-                                ),
-                                const SizedBox(height: 20),
-
-                                // Grand Total
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  SettlementRowInput(
+                                    label: "Total Qty",
+                                    controller: _totalQtyController,
                                   ),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        AppColors.violetNormal,
-                                        AppColors.redNormal,
+                                  const SizedBox(height: 10),
+                                  SettlementRowInput(
+                                    label: "Sub Total",
+                                    controller: _subTotalController,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  SettlementRowInput(
+                                    label: "P. Discount",
+                                    controller: _discountController,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  SettlementRowInput(
+                                    label: "Round Off",
+                                    controller: _roundOffController,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  SettlementRowInput(
+                                    label: "VAT",
+                                    controller: _vatController,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  SettlementRowInput(
+                                    label: "Paid",
+                                    controller: _paidController,
+                                  ),
+                                  const SizedBox(height: 20),
+
+                                  // Grand Total
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          AppColors.violetNormal,
+                                          AppColors.redNormal,
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "Grand Total",
+                                          style: GoogleFonts.rajdhani(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          "0.00",
+                                          style: GoogleFonts.rajdhani(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 24,
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Column(
+                                  const SizedBox(height: 20),
+
+                                  Row(
                                     children: [
-                                      Text(
-                                        "Grand Total",
-                                        style: GoogleFonts.rajdhani(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Cur. Payment",
+                                              style: GoogleFonts.rajdhani(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            SettlementSimpleInput(
+                                              controller: _curPaymentController,
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        "0.00",
-                                        style: GoogleFonts.rajdhani(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 24,
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Balance",
+                                              style: GoogleFonts.rajdhani(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            SettlementSimpleInput(
+                                              controller: _balanceController,
+                                              isReadOnly: true,
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                const SizedBox(height: 20),
-
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Cur. Payment",
-                                            style: GoogleFonts.rajdhani(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          SettlementSimpleInput(
-                                            controller: _curPaymentController,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Balance",
-                                            style: GoogleFonts.rajdhani(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          SettlementSimpleInput(
-                                            controller: _balanceController,
-                                            isReadOnly: true,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

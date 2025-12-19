@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_home.dart';
-import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings.dart';
-import 'package:sharp_cut/presentation/report/screens/screen_report_table.dart';
+
 import 'package:sharp_cut/utils/theme.dart';
 
 void main() {
