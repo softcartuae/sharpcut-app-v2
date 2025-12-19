@@ -313,78 +313,13 @@ class _SettlementDialogState extends State<SettlementDialog> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Column 1: Payment Modes
                         Expanded(
-                          flex: 3,
+                          flex: 1,
                           child: SingleChildScrollView(
                             child: Column(
                               children: [
                                 // Cash Card
                                 const PaymentModeCard(
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                  
                                   title: "Cash (0.00)",
                                   amount: "0.00",
                                   color1: AppColors.violetNormal,
@@ -399,15 +334,26 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                   color2: Colors.transparent,
                                 ),
                                 const SizedBox(height: 20),
-
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        // Column 1: Payment Modes
+                        Expanded(
+                          flex: 3,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
                                 // Split Payment & Inputs
                                 SettlementGlassContainer(
                                   padding: const EdgeInsets.all(16),
                                   child: Column(
                                     children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                      Wrap(
+                                        alignment: WrapAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
                                         children: [
                                           Text(
                                             "Total Cash: 0.00",
@@ -416,7 +362,9 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
+                                          SizedBox(width: 5),
                                           Row(
+                                            mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Text(
                                                 "Split Payment",
