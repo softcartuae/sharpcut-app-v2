@@ -118,13 +118,26 @@ class ReportFilters extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   TextField(
+                    style: const TextStyle(
+                      color: Colors.black, // typed text color
+                    ),
                     decoration: InputDecoration(
                       hintText: "Search here..",
                       hintStyle: GoogleFonts.rajdhani(color: Colors.grey),
                       suffixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
+                      enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(color: Colors.grey),
+                        borderSide: const BorderSide(
+                          color: Colors.grey,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(
+                          color: Colors.black,
+                          width: 1,
+                        ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
