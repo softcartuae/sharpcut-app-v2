@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
 import 'package:sharp_cut/presentation/home/widgets/category_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/common_container.dart';
-import 'package:sharp_cut/presentation/home/widgets/cutting_masters_dialog.dart';
+import 'package:sharp_cut/presentation/home/widgets/search_dialog.dart';
 import 'package:sharp_cut/presentation/home/widgets/service_item.dart';
 
 class HomeServicesSection extends StatelessWidget {
@@ -149,7 +149,7 @@ class HomeServicesSection extends StatelessWidget {
                     // calling cutting_master_dialoge
                     showDialog(
                       context: context,
-                      builder: (context) => const CuttingMastersDialog(),
+                      builder: (context) =>  SearchDialog(),
                     );
                   },
                 ),

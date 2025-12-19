@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sharp_cut/utils/app_colors.dart';
 
 class TotalItem extends StatelessWidget {
   final String label;

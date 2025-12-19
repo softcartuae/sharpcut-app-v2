@@ -4,7 +4,7 @@ import 'package:sharp_cut/presentation/home/widgets/home_input_section.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_services_section.dart';
 
 class ScreenHome extends StatelessWidget {
-  ScreenHome({super.key});
+  const ScreenHome({super.key});
 
   @override
   Widget build(BuildContext context) {
