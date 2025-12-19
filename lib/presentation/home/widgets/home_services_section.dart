@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
 import 'package:sharp_cut/presentation/home/widgets/category_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/common_container.dart';
-import 'package:sharp_cut/presentation/home/widgets/features_bottons.dart';
+import 'package:sharp_cut/presentation/home/widgets/cutting_masters_dialog.dart';
 import 'package:sharp_cut/presentation/home/widgets/service_item.dart';
 
 class HomeServicesSection extends StatelessWidget {
@@ -134,10 +134,24 @@ class HomeServicesSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Row(
+                  children: [
+                    SearchAndMenu(icon: Icons.search, onTap: () {}),
+                    const SizedBox(width: 12),
+                    SearchAndMenu(icon: Icons.menu, onTap: () {}),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 ActionButton(
                   label: "BOOK A SLOT",
                   isPrimary: true,
-                  onTap: () {},
+                  onTap: () {
+                    // calling cutting_master_dialoge
+                    showDialog(
+                      context: context,
+                      builder: (context) => const CuttingMastersDialog(),
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
                 ActionButton(label: "CLEAR"),
@@ -153,6 +167,32 @@ class HomeServicesSection extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class SearchAndMenu extends StatelessWidget {
+  SearchAndMenu({required this.icon, super.key, this.onTap});
+
+  final IconData icon;
+  void Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 50,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.black.withValues(alpha: 0.3),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          alignment: Alignment.center,
+          child: Center(child: Icon(icon)),
+        ),
       ),
     );
   }
