@@ -24,7 +24,7 @@ class ReportDataTable extends StatelessWidget {
                       maxHeight: constraints.maxHeight,
                     ),
                     child: SizedBox(
-                      width: 1500, // Fixed width to ensure scrolling works
+                      width: 1500, 
                       child: Column(
                         children: [
                           // Header Row

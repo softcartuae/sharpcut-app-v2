@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/utils/app_colors.dart';
 
 class ReportTableHeader extends StatelessWidget {
   const ReportTableHeader({super.key});
@@ -49,7 +50,10 @@ class ReportTableHeader extends StatelessWidget {
                 width: 18,
                 height: 18,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue, width: 2),
+                  border: Border.all(
+                    color: AppColors.violetDarkActive,
+                    width: 1,
+                  ),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),

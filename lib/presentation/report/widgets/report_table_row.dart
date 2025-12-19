@@ -58,7 +58,10 @@ class ReportTableRow extends StatelessWidget {
                 height: 18,
                 decoration: BoxDecoration(
                   color: isChecked ? Colors.blue : Colors.transparent,
-                  border: Border.all(color: Colors.blue, width: 2),
+                  border: Border.all(
+                    color: isChecked ? Colors.blue : Colors.grey,
+                    width: .5,
+                  ),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: isChecked
