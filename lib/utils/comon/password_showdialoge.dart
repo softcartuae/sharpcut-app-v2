@@ -1,148 +1,179 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/utils/app_colors.dart';
 
-void showPasswordDialoge(BuildContext context) {
+Future<void> showPasswordDialoge(BuildContext context) {
   final TextEditingController passwordController = TextEditingController();
   String? selectedStaff;
   List<String> staffList = ["Staff 1", "Staff 2", "Staff 3"];
+  bool obscurePassword = true;
 
-  showDialog(
+  return showDialog(
     context: context,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          return AlertDialog(
-            backgroundColor: Colors.white,
+          return Dialog(
+            backgroundColor: const Color(0xFF1E1E2C), // Dark background
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
-            title: Text(
-              "Select Staff",
-              style: GoogleFonts.rajdhani(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF1E1E1E),
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Staff Name",
-                  style: GoogleFonts.rajdhani(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1E1E1E),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: selectedStaff,
-                      hint: Text(
-                        "Select Staff",
-                        style: GoogleFonts.rajdhani(
-                          color: Colors.grey,
-                          fontSize: 16,
+            child: Container(
+              width: 400,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          "Select Staff",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.rajdhani(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      isExpanded: true,
-                      items: staffList.map((String staff) {
-                        return DropdownMenuItem<String>(
-                          value: staff,
-                          child: Text(
-                            staff,
-                            style: GoogleFonts.rajdhani(
-                              fontSize: 16,
-                              color: Colors.black,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedStaff = newValue;
-                        });
-                      },
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Staff Dropdown
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withAlpha(77)),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "Password",
-                  style: GoogleFonts.rajdhani(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1E1E1E),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  height: 48,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: TextField(
-                    controller: passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Enter Password",
-                      hintStyle: GoogleFonts.rajdhani(
-                        color: Colors.grey,
-                        fontSize: 16,
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: selectedStaff,
+                        dropdownColor: const Color(0xFF1E1E2C),
+                        icon: const Icon(
+                          Icons.arrow_drop_down,
+                          color: Colors.white,
+                        ),
+                        isExpanded: true,
+                        hint: Text(
+                          "Select Staff",
+                          style: GoogleFonts.rajdhani(
+                            color: Colors.white.withAlpha(179),
+                            fontSize: 16,
+                          ),
+                        ),
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                        items: staffList.map((String staff) {
+                          return DropdownMenuItem<String>(
+                            value: staff,
+                            child: Text(staff),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedStaff = newValue;
+                          });
+                        },
                       ),
                     ),
-                    style: GoogleFonts.rajdhani(
-                      fontSize: 16,
-                      color: Colors.black,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Password Field
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withAlpha(77)),
+                    ),
+                    child: TextField(
+                      controller: passwordController,
+                      obscureText: obscurePassword,
+                      style: GoogleFonts.rajdhani(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: "Enter Password",
+                        hintStyle: GoogleFonts.rajdhani(
+                          color: Colors.white.withAlpha(179),
+                          fontSize: 16,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: Colors.white.withAlpha(128),
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              obscurePassword = !obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 32),
+
+                  // Submit Button
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: const LinearGradient(
+                        colors: [AppColors.violetNormal, AppColors.redNormal],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Handle submit logic here
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Submit',
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  "Cancel",
-                  style: GoogleFonts.rajdhani(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Handle submit logic here
-                  Navigator.pop(context);
-                  passwordController.clear();
-                  setState(() {
-                    selectedStaff = null;
-                  });
-                },
-                child: Text(
-                  "Submit",
-                  style: GoogleFonts.rajdhani(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1E2130),
-                  ),
-                ),
-              ),
-            ],
           );
         },
       );

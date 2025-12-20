@@ -42,9 +42,14 @@ class CustomTextField extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: GradientBoxBorder(
                   gradient: LinearGradient(
-                    colors: [AppColors.violetLight, AppColors.violetDark],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.violetLight.withOpacity(0.9), // highlight
+                      AppColors.violetLight.withOpacity(0.6), // shadow
+                    ],
                   ),
-                  width: .5,
+                  width: 0.5,
                 ),
               ),
               child: TextField(

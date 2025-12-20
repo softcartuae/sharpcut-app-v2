@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gradient_borders/box_borders/gradient_box_border.dart';
+import 'package:sharp_cut/utils/app_colors.dart';
 
 class SettlementSimpleInput extends StatelessWidget {
   final TextEditingController controller;
@@ -18,7 +20,17 @@ class SettlementSimpleInput extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white12),
+        border: GradientBoxBorder(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.violetLight.withOpacity(0.9), // highlight
+              AppColors.violetLight.withOpacity(0.6), // shadow
+            ],
+          ),
+          width: 0.5,
+        ),
       ),
       child: TextField(
         controller: controller,

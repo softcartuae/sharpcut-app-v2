@@ -6,9 +6,7 @@ import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 
 class AddedItem extends StatelessWidget {
-  const AddedItem({
-    super.key,
-  });
+  const AddedItem({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,18 +20,17 @@ class AddedItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: GradientBoxBorder(
               gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
-                  AppColors.violetLight,
-                  AppColors.violetDark,
+                  AppColors.violetLight.withOpacity(0.9), // highlight
+                  AppColors.violetLight.withOpacity(0.6), // shadow
                 ],
               ),
-              width: .5,
+              width: 0.5,
             ),
           ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
               Expanded(
@@ -60,11 +57,7 @@ class AddedItem extends StatelessWidget {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
-                      Icon(
-                        Icons.arrow_drop_up,
-                        color: Colors.white,
-                        size: 16,
-                      ),
+                      Icon(Icons.arrow_drop_up, color: Colors.white, size: 16),
                       Icon(
                         Icons.arrow_drop_down,
                         color: Colors.white,
@@ -77,17 +70,10 @@ class AddedItem extends StatelessWidget {
               const SizedBox(width: 32),
               Text(
                 "\$681",
-                style: GoogleFonts.rajdhani(
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
+                style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 18),
               ),
               const SizedBox(width: 24),
-              const Icon(
-                Icons.delete,
-                color: Colors.white70,
-                size: 20,
-              ),
+              const Icon(Icons.delete, color: Colors.white70, size: 20),
             ],
           ),
         ),

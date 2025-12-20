@@ -41,7 +41,7 @@ class ActionButton extends StatelessWidget {
               ? null
               : const GradientBoxBorder(
                   gradient: LinearGradient(
-                    colors: [AppColors.violetLight, AppColors.violetDark],
+                    colors: [AppColors.violetLight, AppColors.violetLight],
                   ),
                   width: .10,
                 ),

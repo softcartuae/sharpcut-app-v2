@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 class CuttingMastersDialog extends StatelessWidget {
   const CuttingMastersDialog({super.key});
 
+  static void show(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const CuttingMastersDialog(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
