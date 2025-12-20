@@ -15,4 +15,5 @@ class ServiceCubit extends Cubit<ServiceState> {
       emit(ServiceStateError(message: e.toString()));
     }
   }
+  
 }
