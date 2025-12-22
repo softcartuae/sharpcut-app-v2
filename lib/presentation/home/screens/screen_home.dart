@@ -17,7 +17,7 @@ class _ScreenHomeState extends State<ScreenHome> {
   @override
   void initState() {
     super.initState();
-    context.read<ChairCubit>().getChairs();
+    context.read<ChairCubit>().getChairsAndStaffs();
   }
 
   @override

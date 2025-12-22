@@ -11,14 +11,18 @@ class PasswordRepoImp extends PasswordRepo {
   }) async {
     try {
       final response = await ApiClient.dio.post(
-        ApiClient.resetAdminPasswordapi,
+        ApiClient.resetUserPasswordapi,
         data: passwordData.toMap(),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return Right(response.data['message'] ?? "Password reset successful");
+      return Right(response.data['message'] ?? "Password reset successful");
+    } on DioException catch (e) {
+      if (e.response != null) {
+        // API responded with 400 / 401 / 500 etc
+        return Left(e.response?.data['message'] ?? "Something went wrong");
       } else {
-        return Left(response.data['message'] ?? "Failed to reset password");
+        // No response (timeout, no internet)
+        return Left("Network error. Please try again.");
       }
     } catch (e) {
       return Left(e.toString());

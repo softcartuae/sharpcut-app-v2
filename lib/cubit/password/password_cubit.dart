@@ -20,4 +20,16 @@ class PasswordCubit extends Cubit<PasswordState> {
       (success) => emit(PasswordSuccess(success)),
     );
   }
+
+
+  Future<void> resetAdminPassword(PasswordModel passwordData) async {
+    emit(PasswordLoading());
+    final result = await passwordRepo.resetAdminPassword(
+      passwordData: passwordData,
+    );
+    result.fold(
+      (failure) => emit(PasswordFailure(failure)),
+      (success) => emit(PasswordSuccess(success)),
+    );
+  }
 }

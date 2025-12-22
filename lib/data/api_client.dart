@@ -4,7 +4,7 @@ import 'package:sharp_cut/data/interceptors/auth_interceptor.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 
 class ApiClient {
-  static String baseUrl = "https://saloon-test.greendomains.in/";
+  static String baseUrl = "https://saloon-test2.greendomains.in/";
   static final dio = Dio(BaseOptions(baseUrl: baseUrl))
     ..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
 
@@ -23,7 +23,7 @@ class ApiClient {
   // GET API ENDPOINTS
   static final userExpenseGETapi = "api/user-expenses";
   static final transactionsGETApi = "api/transactions";
-  static final authentcatedUserApi = "api/user";
+  static final authentcatedUserApi = "api/shop";
   static final chairsApi = "api/chairs";
   static final serviceCategoriesApi = "api/service-categories";
   static final servicesApi = "api/services";

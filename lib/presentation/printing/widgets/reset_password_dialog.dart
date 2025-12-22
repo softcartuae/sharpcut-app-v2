@@ -5,6 +5,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
 import 'package:sharp_cut/domain/password/models/password_model.dart';
+import 'package:sharp_cut/cubit/home/chair_cubit.dart';
+import 'package:sharp_cut/cubit/home/chair_state.dart';
 
 class ResetPasswordDialog extends StatefulWidget {
   final String title;
@@ -230,32 +232,49 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
   }
 
   Widget _buildDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.3)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _selectedUserType,
-          dropdownColor: const Color(0xFF1E1E2C),
-          icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-          isExpanded: true,
-          style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 16),
-          items: widget.userTypes.map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Center(child: Text(value)),
-            );
-          }).toList(),
-          onChanged: (newValue) {
-            setState(() {
-              _selectedUserType = newValue;
-            });
-          },
-        ),
-      ),
+    return BlocBuilder<ChairCubit, ChairState>(
+      builder: (context, state) {
+        List<String> userTypes = widget.userTypes;
+        if (state is ChairSuccess) {
+          userTypes = state.staffs.map((e) => e.name).toList();
+        }
+
+        // Ensure selected value is in the list
+        if (_selectedUserType != null &&
+            !userTypes.contains(_selectedUserType)) {
+          _selectedUserType = userTypes.isNotEmpty ? userTypes.first : null;
+        } else if (_selectedUserType == null && userTypes.isNotEmpty) {
+          _selectedUserType = userTypes.first;
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.white.withOpacity(0.3)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedUserType,
+              dropdownColor: const Color(0xFF1E1E2C),
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+              isExpanded: true,
+              style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 16),
+              items: userTypes.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Center(child: Text(value)),
+                );
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  _selectedUserType = newValue;
+                });
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
