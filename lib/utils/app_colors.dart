@@ -24,4 +24,10 @@ class AppColors {
   static const Color redDarkHover = Color(0xFF77342B);
   static const Color redDarkActive = Color(0xFF592720);
   static const Color redDarker = Color(0xFF451E19);
+
+  // Green Palette
+  static const Color greenNormal = Color(
+    0xFF2E7D32,
+  ); // Adjust as needed to match image
+  static const Color greenLight = Color(0xFF4CAF50);
 }

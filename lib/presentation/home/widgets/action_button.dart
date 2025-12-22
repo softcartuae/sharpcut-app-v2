@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
+import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 
 class ActionButton extends StatelessWidget {
   final String label;
@@ -26,11 +27,24 @@ class ActionButton extends StatelessWidget {
               ? const LinearGradient(
                   colors: [AppColors.violetNormal, AppColors.redNormal],
                 )
-              : null,
-          color: isPrimary ? null : Colors.black.withOpacity(0.3),
+              : const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color.fromARGB(255, 47, 55, 70),
+                    Color.fromARGB(255, 35, 42, 54),
+                    Color.fromARGB(255, 25, 31, 40),
+                  ],
+                  stops: [0.0, 0.5, 1.0],
+                ),
           border: isPrimary
               ? null
-              : Border.all(color: Colors.white.withOpacity(0.1)),
+              : const GradientBoxBorder(
+                  gradient: LinearGradient(
+                    colors: [AppColors.violetLight, AppColors.violetLight],
+                  ),
+                  width: .10,
+                ),
         ),
         alignment: Alignment.center,
         child: Text(

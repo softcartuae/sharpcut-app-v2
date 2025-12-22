@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -13,10 +14,16 @@ class HomeAppBar extends StatelessWidget {
         // Left Section: Logo & Shop Name
         Row(
           children: [
-            Image.asset(
-              "lib/utils/images/sharp_cut.png",
-              height: 150,
-              width: 150,
+            GestureDetector(
+              onTap: () async {
+                final d = await TokenStorage().getToken();
+                print(d);
+              },
+              child: Image.asset(
+                "lib/utils/images/sharp_cut.png",
+                height: 150,
+                width: 150,
+              ),
             ),
             const SizedBox(width: 25),
             Image.asset(

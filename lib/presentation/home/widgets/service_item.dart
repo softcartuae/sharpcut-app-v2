@@ -36,7 +36,7 @@ class ServiceItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
-        ],
+        ]
       ),
     );
   }

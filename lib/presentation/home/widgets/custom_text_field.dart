@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
@@ -31,36 +32,47 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: GradientBoxBorder(
-              gradient: LinearGradient(
-                colors: [AppColors.violetLight, AppColors.violetDark],
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: GradientBoxBorder(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.violetLight.withOpacity(0.9), // highlight
+                      AppColors.violetLight.withOpacity(0.6), // shadow
+                    ],
+                  ),
+                  width: 0.5,
+                ),
               ),
-              width: .5,
-            ),
-          ),
-          child: TextField(
-            controller: controller,
-            style: GoogleFonts.rajdhani(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: GoogleFonts.rajdhani(
-                color: Colors.white.withOpacity(0.5),
+              child: TextField(
+                controller: controller,
+                style: GoogleFonts.rajdhani(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: hint,
+                  hintStyle: GoogleFonts.rajdhani(
+                    color: Colors.white.withOpacity(0.5),
+                  ),
+                  prefixIcon: Icon(
+                    icon,
+                    color: Colors.white.withOpacity(0.7),
+                    size: 20,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  isDense: true,
+                ),
               ),
-              prefixIcon: Icon(
-                icon,
-                color: Colors.white.withOpacity(0.7),
-                size: 20,
-              ),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 10,
-              ),
-              isDense: true,
             ),
           ),
         ),

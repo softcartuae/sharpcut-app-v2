@@ -28,13 +28,28 @@ class ScreenExpense extends StatelessWidget {
                     // Header
                     Padding(
                       padding: const EdgeInsets.all(24.0),
-                      child: Text(
-                        "ADD EXPENSE",
-                        style: GoogleFonts.rajdhani(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1E1E1E),
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "ADD EXPENSE",
+                            style: GoogleFonts.rajdhani(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1E1E1E),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(Icons.close, color: Colors.black),
+                            style: IconButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: const BorderSide(color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const Divider(height: 1, color: Color(0xFFE0E0E0)),

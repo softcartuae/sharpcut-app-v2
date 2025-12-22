@@ -21,7 +21,10 @@ class CategoryItem extends StatelessWidget {
       decoration: BoxDecoration(
         border: GradientBoxBorder(
           gradient: LinearGradient(
-            colors: [AppColors.violetLight, AppColors.violetDark],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: [0.0, 0.5],
+            colors: [AppColors.violetLight, AppColors.violetLight],
           ),
           width: .10,
         ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
-import 'package:sharp_cut/utils/app_colors.dart';
 
 class HomeInputSection extends StatelessWidget {
   const HomeInputSection({super.key});
