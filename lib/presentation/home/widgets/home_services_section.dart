@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/cubit/home/service_cubit.dart';
+import 'package:sharp_cut/cubit/home/service_cubit_state.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_expense.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_search.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
@@ -16,6 +19,7 @@ import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
 import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
+import 'package:sharp_cut/utils/helpers/icon_helper.dart';
 
 class HomeServicesSection extends StatefulWidget {
   const HomeServicesSection({super.key});
@@ -29,6 +33,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
   final ValueNotifier<String> _selectedButtonNotifier = ValueNotifier(
     "BOOK A SLOT",
   );
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ServiceCubit>().getServices();
+  }
 
   @override
   void dispose() {
@@ -113,28 +123,41 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           // 1. Category Sidebar
           SizedBox(
             width: 200,
-            child: ListView(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              children: [
-                CategoryItem(
-                  title: "ALL",
-                  icon: Icons.grid_view,
-                  isSelected: true,
-                ),
-                const SizedBox(height: 12),
-                CategoryItem(title: "Hair Cutting", icon: Icons.content_cut),
-                const SizedBox(height: 12),
-                CategoryItem(title: "Shaving", icon: Icons.face),
-                const SizedBox(height: 12),
-                CategoryItem(title: "Facial", icon: Icons.person_outline),
-                const SizedBox(height: 12),
-                CategoryItem(title: "Hair Cutting", icon: Icons.content_cut),
-                const SizedBox(height: 12),
-                CategoryItem(title: "Shaving", icon: Icons.face),
-                const SizedBox(height: 12),
-                CategoryItem(title: "Facial", icon: Icons.person_outline),
-              ],
+            child: BlocBuilder<ServiceCubit, ServiceState>(
+              builder: (context, state) {
+                List<Widget> categories = [
+                  CategoryItem(
+                    title: "ALL",
+                    icon: Icons.grid_view,
+                    isSelected: true,
+                  ),
+                  const SizedBox(height: 12),
+                ];
+
+                if (state is ServiceStateSuccess) {
+                  categories.addAll(
+                    state.services.map((service) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: CategoryItem(
+                          title: service.name ?? "Service",
+                          icon: getIconForService(service.name),
+                        ),
+                      );
+                    }),
+                  );
+                } else if (state is ServiceStateLoading) {
+                  categories.add(
+                    const Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                return ListView(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  children: categories,
+                );
+              },
             ),
           ),
           const SizedBox(width: 10),
@@ -251,7 +274,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                           icon: Icons.search,
                           onTap: () async {
                             await showPasswordDialoge(context);
-
                             if (true && context.mounted) {
                               Navigator.push(
                                 context,
@@ -322,7 +344,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                       onTap: () async {
                         _selectedButtonNotifier.value = "ADD EXPENSE";
                         await showPasswordDialoge(context);
-
                         if (true && context.mounted) {
                           Navigator.push(
                             context,

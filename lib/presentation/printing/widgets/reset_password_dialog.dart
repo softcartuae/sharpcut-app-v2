@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sharp_cut/cubit/password/password_cubit.dart';
+import 'package:sharp_cut/domain/password/models/password_model.dart';
 
 class ResetPasswordDialog extends StatefulWidget {
   final String title;
@@ -53,109 +57,175 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: const Color(0xFF1E1E2C), // Dark background
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        width: 400,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Stack(
-              alignment: Alignment.center,
+    return BlocConsumer<PasswordCubit, PasswordState>(
+      listener: (context, state) {
+        if (state is PasswordSuccess) {
+          Fluttertoast.showToast(
+            msg: state.message,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+          );
+          Navigator.of(context).pop();
+        } else if (state is PasswordFailure) {
+          Fluttertoast.showToast(
+            msg: state.error,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+          );
+        }
+      },
+      builder: (context, state) {
+        return Dialog(
+          backgroundColor: const Color(0xFF1E1E2C), // Dark background
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            width: 400,
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Align(
+                // Header
+                Stack(
                   alignment: Alignment.center,
-                  child: Text(
-                    widget.title,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.rajdhani(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        widget.title,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+
+                // Dropdown
+                _buildDropdown(),
+                const SizedBox(height: 16),
+
+                // Password Fields
+                _buildPasswordField(
+                  'Current Password',
+                  _currentPasswordController,
+                  _obscureCurrent,
+                  () => setState(() => _obscureCurrent = !_obscureCurrent),
+                ),
+                const SizedBox(height: 16),
+                _buildPasswordField(
+                  'New Password',
+                  _newPasswordController,
+                  _obscureNew,
+                  () => setState(() => _obscureNew = !_obscureNew),
+                ),
+                const SizedBox(height: 16),
+                _buildPasswordField(
+                  'Confirm Password',
+                  _confirmPasswordController,
+                  _obscureConfirm,
+                  () => setState(() => _obscureConfirm = !_obscureConfirm),
+                ),
+
+                const SizedBox(height: 32),
+
+                // OK Button
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: const LinearGradient(
+                      colors: [AppColors.violetNormal, AppColors.redNormal],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
                   ),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () => Navigator.of(context).pop(),
+                  child: ElevatedButton(
+                    onPressed: state is PasswordLoading
+                        ? null
+                        : () {
+                            final currentPassword =
+                                _currentPasswordController.text;
+                            final newPassword = _newPasswordController.text;
+                            final confirmPassword =
+                                _confirmPasswordController.text;
+
+                            if (newPassword != confirmPassword) {
+                              Fluttertoast.showToast(
+                                msg: "Passwords do not match",
+                                backgroundColor: Colors.red,
+                                textColor: Colors.white,
+                              );
+                              return;
+                            }
+
+                            if (currentPassword.isEmpty ||
+                                newPassword.isEmpty) {
+                              Fluttertoast.showToast(
+                                msg: "Please fill all fields",
+                                backgroundColor: Colors.red,
+                                textColor: Colors.white,
+                              );
+                              return;
+                            }
+
+                            final passwordModel = PasswordModel(
+                              staffId: "5",
+                              currentPassword: currentPassword,
+                              newPassword: newPassword,
+                              confirmPassword: confirmPassword,
+                            );
+
+                            context.read<PasswordCubit>().resetUserPassword(
+                              passwordModel,
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 48,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: state is PasswordLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'OK',
+                            style: GoogleFonts.rajdhani(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 32),
-
-            // Dropdown
-            _buildDropdown(),
-            const SizedBox(height: 16),
-
-            // Password Fields
-            _buildPasswordField(
-              'Current Password',
-              _currentPasswordController,
-              _obscureCurrent,
-              () => setState(() => _obscureCurrent = !_obscureCurrent),
-            ),
-            const SizedBox(height: 16),
-            _buildPasswordField(
-              'New Password',
-              _newPasswordController,
-              _obscureNew,
-              () => setState(() => _obscureNew = !_obscureNew),
-            ),
-            const SizedBox(height: 16),
-            _buildPasswordField(
-              'Confirm Password',
-              _confirmPasswordController,
-              _obscureConfirm,
-              () => setState(() => _obscureConfirm = !_obscureConfirm),
-            ),
-
-            const SizedBox(height: 32),
-
-            // OK Button
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: const LinearGradient(
-                  colors: [AppColors.violetNormal, AppColors.redNormal],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement reset password logic
-                  Navigator.of(context).pop();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 48,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'OK',
-                  style: GoogleFonts.rajdhani(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

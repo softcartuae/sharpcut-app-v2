@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sharp_cut/cubit/home/chair_cubit.dart';
+import 'package:sharp_cut/cubit/home/chair_state.dart';
+import 'package:sharp_cut/domain/home/models/chair_model.dart';
 
 class CuttingMastersDialog extends StatelessWidget {
   const CuttingMastersDialog({super.key});
@@ -48,7 +52,7 @@ class CuttingMastersDialog extends StatelessWidget {
         const Spacer(),
         IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.close, color: Colors.black ),
+          icon: const Icon(Icons.close, color: Colors.black),
           style: IconButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -61,17 +65,28 @@ class CuttingMastersDialog extends StatelessWidget {
   }
 
   Widget _buildChairList() {
-    return ListView.separated(
-      scrollDirection: Axis.horizontal,
-      itemCount: 9,
-      separatorBuilder: (context, index) => const SizedBox(width: 16),
-      itemBuilder: (context, index) {
-        return _buildChairItem(index + 1);
+    return BlocBuilder<ChairCubit, ChairState>(
+      builder: (context, state) {
+        if (state is ChairLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is ChairError) {
+          return Center(child: Text('Error: ${state.message}'));
+        } else if (state is ChairSuccess) {
+          return ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: state.chairs.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
+            itemBuilder: (context, index) {
+              return _buildChairItem(state.chairs[index]);
+            },
+          );
+        }
+        return const SizedBox.shrink();
       },
     );
   }
 
-  Widget _buildChairItem(int index) {
+  Widget _buildChairItem(ChairModel chair) {
     return Container(
       width: 120,
       decoration: BoxDecoration(
@@ -97,7 +112,7 @@ class CuttingMastersDialog extends StatelessWidget {
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
             ),
             child: Text(
-              'CHAR ${index.toString().padLeft(2, '0')}',
+              chair.name ?? 'Unknown',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,

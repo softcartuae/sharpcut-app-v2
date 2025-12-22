@@ -17,7 +17,7 @@ class AuthRepoImpl implements AuthRepo {
         throw Exception("Login failed: ${response.statusMessage}");
       }
     } catch (e) {
-      throw Exception("Login error: $e");
+      throw Exception("Login error: SOMETHING WENT WRONG");
     }
   }
 

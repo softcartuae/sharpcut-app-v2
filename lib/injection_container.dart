@@ -1,19 +1,40 @@
 import 'package:get_it/get_it.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
-import 'package:sharp_cut/cubit/home/home_cubit.dart';
+import 'package:sharp_cut/cubit/home/service_cubit.dart';
+import 'package:sharp_cut/cubit/home/chair_cubit.dart';
+import 'package:sharp_cut/cubit/password/password_cubit.dart';
 import 'package:sharp_cut/data/auth/services/auth_repo_impl.dart';
 import 'package:sharp_cut/data/home/service_repo_imp/service_repo_impl.dart';
+import 'package:sharp_cut/data/home/chair/chair_repo_impl.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
 import 'package:sharp_cut/domain/home/service/service_repo.dart';
+import 'package:sharp_cut/domain/home/chair/chair_repo.dart';
+import 'package:sharp_cut/domain/password/service/password_repo.dart';
+import 'package:sharp_cut/data/password/service/password_repo_imp.dart';
+import 'package:sharp_cut/data/local_storage/token_storage.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   // Cubits
-  sl.registerFactory(() => AuthCubit(sl()));
-  sl.registerFactory(() => ServiceCubit(serviceRepo: sl()));
+  sl.registerFactory<AuthCubit>(
+    () => AuthCubit(authRepo: sl<AuthRepo>(), tokenStorage: sl<TokenStorage>()),
+  );
+
+  sl.registerFactory<ServiceCubit>(
+    () => ServiceCubit(serviceRepo: sl<ServiceRepo>()),
+  );
+
+  sl.registerFactory<ChairCubit>(() => ChairCubit(chairRepo: sl<ChairRepo>()));
+
+  sl.registerFactory<PasswordCubit>(
+    () => PasswordCubit(passwordRepo: sl<PasswordRepo>()),
+  );
 
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
   sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
+  sl.registerLazySingleton<ChairRepo>(() => ChairRepoImpl());
+  sl.registerLazySingleton<PasswordRepo>(() => PasswordRepoImp());
+  sl.registerLazySingleton<TokenStorage>(() => TokenStorage());
 }

@@ -20,3 +20,5 @@ class AuthError extends AuthCubitState {
   final String message;
   AuthError(this.message);
 }
+
+class AuthUnauthenticated extends AuthCubitState {}

@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sharp_cut/data/api_client.dart';
+
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/domain/auth/models/user_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
@@ -8,19 +8,20 @@ part 'auth_cubit_state.dart';
 
 class AuthCubit extends Cubit<AuthCubitState> {
   final AuthRepo authRepo;
-  final TokenStorage tokenStorage = TokenStorage();
+  final TokenStorage tokenStorage;
 
-  AuthCubit(this.authRepo) : super(AuthInitial());
+  UserModel? currentUser;
+
+  AuthCubit({required this.authRepo, required this.tokenStorage})
+    : super(AuthInitial());
 
   Future<void> login(String licenseNo) async {
     emit(AuthLoading());
     try {
       final token = await authRepo.login(licenseNo);
       await tokenStorage.saveToken(token);
-      // Set the token in ApiClient for future requests
-      ApiClient.dio.options.headers["Authorization"] = "Bearer $token";
       emit(AuthLoginSuccess(token));
-      // Optionally fetch user immediately after login
+      // Fetch user immediately after login
       await getUser();
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -35,23 +36,30 @@ class AuthCubit extends Cubit<AuthCubitState> {
     }
 
     try {
-      if (ApiClient.dio.options.headers["Authorization"] == null) {
-        final token = await tokenStorage.getToken();
-        if (token != null) {
-          ApiClient.dio.options.headers["Authorization"] = "Bearer $token";
-        }
-      }
-
       final user = await authRepo.getUser();
+      currentUser = user;
       emit(AuthAuthenticated(user));
     } catch (e) {
       emit(AuthError(e.toString()));
     }
   }
 
+  Future<void> checkAuthStatus() async {
+    try {
+      final token = await tokenStorage.getToken();
+      if (token != null) {
+        await getUser();
+      } else {
+        emit(AuthUnauthenticated());
+      }
+    } catch (e) {
+      emit(AuthUnauthenticated());
+    }
+  }
+
   Future<void> logout() async {
     await tokenStorage.deleteToken();
-    ApiClient.dio.options.headers.remove("Authorization");
-    emit(AuthInitial());
+    currentUser = null;
+    emit(AuthUnauthenticated());
   }
 }

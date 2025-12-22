@@ -3,8 +3,22 @@ import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_input_section.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_services_section.dart';
 
-class ScreenHome extends StatelessWidget {
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sharp_cut/cubit/home/chair_cubit.dart';
+
+class ScreenHome extends StatefulWidget {
   const ScreenHome({super.key});
+
+  @override
+  State<ScreenHome> createState() => _ScreenHomeState();
+}
+
+class _ScreenHomeState extends State<ScreenHome> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ChairCubit>().getChairs();
+  }
 
   @override
   Widget build(BuildContext context) {

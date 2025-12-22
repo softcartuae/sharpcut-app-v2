@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:sharp_cut/domain/home/models/service_item_model.dart';
+import 'package:sharp_cut/domain/home/models/service_model.dart';
 
 abstract class ServiceState implements Equatable {}
 
@@ -20,7 +20,7 @@ class ServiceStateLoading extends ServiceState {
 }
 
 class ServiceStateSuccess extends ServiceState {
-  final List<ServiceItemModel> services;
+  final List<ServiceModel> services;
 
   ServiceStateSuccess({required this.services});
 
