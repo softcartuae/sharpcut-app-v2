@@ -202,11 +202,16 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                       itemCount: state.services.length,
                       itemBuilder: (context, index) {
                         final service = state.services[index];
-                        return ServiceItem(
-                          title: service.name ?? "Service",
-                          imagePath:
-                              service.image ??
-                              "lib/utils/images/hair_cut.png", // Placeholder image
+                        return InkWell(
+                          onTap: () {
+                            context.read<ServiceCubit>().addToCart(service);
+                          },
+                          child: ServiceItem(
+                            title: service.name ?? "Service",
+                            imagePath:
+                                service.image ??
+                                "lib/utils/images/hair_cut.png", // Placeholder image
+                          ),
                         );
                       },
                     );
@@ -266,15 +271,41 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                   const Divider(color: Colors.white24, height: 32),
 
                   Expanded(
-                    child: ListView.separated(
-                      padding: EdgeInsets.zero,
-                      separatorBuilder: (context, index) {
-                        return SizedBox(height: 10);
-                      },
-
-                      itemCount: 5,
-                      itemBuilder: (context, index) {
-                        return AddedItem();
+                    child: BlocBuilder<ServiceCubit, ServiceState>(
+                      builder: (context, state) {
+                        if (state is ServiceStateSuccess) {
+                          return ListView.separated(
+                            padding: EdgeInsets.zero,
+                            separatorBuilder: (context, index) {
+                              return const SizedBox(height: 10);
+                            },
+                            itemCount: state.cartItems.length,
+                            itemBuilder: (context, index) {
+                              final item = state.cartItems[index];
+                              return AddedItem(
+                                item: item,
+                                onIncrement: () {
+                                  context.read<ServiceCubit>().updateQuantity(
+                                    item,
+                                    1,
+                                  );
+                                },
+                                onDecrement: () {
+                                  context.read<ServiceCubit>().updateQuantity(
+                                    item,
+                                    -1,
+                                  );
+                                },
+                                onRemove: () {
+                                  context.read<ServiceCubit>().removeFromCart(
+                                    item,
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        }
+                        return const SizedBox();
                       },
                     ),
                   ),
@@ -283,14 +314,37 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                   const Divider(color: Colors.white24, height: 32),
 
                   // Totals
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TotalItem(label: "Sub Total", value: "0"),
-                      TotalItem(label: "Discount", value: "0"),
-                      TotalItem(label: "Vat", value: "0"),
-                      TotalItem(label: "Total", value: "0"),
-                    ],
+                  BlocBuilder<ServiceCubit, ServiceState>(
+                    builder: (context, state) {
+                      double subTotal = 0;
+                      double vat = 0;
+                      double total = 0;
+
+                      if (state is ServiceStateSuccess) {
+                        subTotal = state.subTotal;
+                        vat = state.vat;
+                        total = state.total;
+                      }
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TotalItem(
+                            label: "Sub Total",
+                            value: subTotal.toStringAsFixed(2),
+                          ),
+                          TotalItem(label: "Discount", value: "0"),
+                          TotalItem(
+                            label: "Vat",
+                            value: vat.toStringAsFixed(2),
+                          ),
+                          TotalItem(
+                            label: "Total",
+                            value: total.toStringAsFixed(2),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
