@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit_state.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_expense.dart';
@@ -188,54 +190,71 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           // 2. Services Grid
           Expanded(
             flex: 3,
-            child: CommonContainer(
-              borderRadius: BorderRadius.circular(15),
-              backgroundImageUrl: "lib/utils/images/Card.png",
-              padding: const EdgeInsets.all(16),
-              child: BlocBuilder<ServiceCubit, ServiceState>(
-                builder: (context, state) {
-                  if (state is ServiceStateSuccess) {
-                    if (state.isLoadingServices) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    return GridView.builder(
-                      padding: EdgeInsets.zero,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            childAspectRatio: 0.8,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                          ),
-                      itemCount: state.services.length,
-                      itemBuilder: (context, index) {
-                        final service = state.services[index];
-                        return InkWell(
-                          onTap: () {
-                            context.read<ServiceCubit>().addToCart(service);
-                          },
-                          child: ServiceItem(
-                            title: service.name ?? "Service",
-                            imagePath:
-                                service.image ??
-                                "lib/utils/images/hair_cut.png", // Placeholder image
-                          ),
-                        );
-                      },
-                    );
-                  } else if (state is ServiceStateLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is ServiceStateError) {
-                    return Center(
-                      child: Text(
-                        state.message,
-                        style: const TextStyle(color: Colors.white),
+            child: BlocBuilder<BookingCubit, BookingState>(
+              builder: (context, bookingState) {
+                final isBooked = bookingState is BookingSuccess;
+                return IgnorePointer(
+                  ignoring: !isBooked,
+                  child: Opacity(
+                    opacity: isBooked ? 1.0 : 0.5,
+                    child: CommonContainer(
+                      borderRadius: BorderRadius.circular(15),
+                      backgroundImageUrl: "lib/utils/images/Card.png",
+                      padding: const EdgeInsets.all(16),
+                      child: BlocBuilder<ServiceCubit, ServiceState>(
+                        builder: (context, state) {
+                          if (state is ServiceStateSuccess) {
+                            if (state.isLoadingServices) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            return GridView.builder(
+                              padding: EdgeInsets.zero,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    childAspectRatio: 0.8,
+                                    crossAxisSpacing: 16,
+                                    mainAxisSpacing: 16,
+                                  ),
+                              itemCount: state.services.length,
+                              itemBuilder: (context, index) {
+                                final service = state.services[index];
+                                return InkWell(
+                                  onTap: () {
+                                    context.read<ServiceCubit>().addToCart(
+                                      service,
+                                    );
+                                  },
+                                  child: ServiceItem(
+                                    title: service.name ?? "Service",
+                                    imagePath:
+                                        service.image ??
+                                        "lib/utils/images/hair_cut.png", // Placeholder image
+                                  ),
+                                );
+                              },
+                            );
+                          } else if (state is ServiceStateLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (state is ServiceStateError) {
+                            return Center(
+                              child: Text(
+                                state.message,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            );
+                          }
+                          return const SizedBox();
+                        },
                       ),
-                    );
-                  }
-                  return const SizedBox();
-                },
-              ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(width: 24),
@@ -363,101 +382,144 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           // 4. Action Buttons Sidebar
           SizedBox(
             width: 200,
-            child: ValueListenableBuilder<String>(
-              valueListenable: _selectedButtonNotifier,
-              builder: (context, selectedButton, child) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
+            child: BlocBuilder<BookingCubit, BookingState>(
+              builder: (context, bookingState) {
+                final isBooked = bookingState is BookingSuccess;
+
+                return ValueListenableBuilder<String>(
+                  valueListenable: _selectedButtonNotifier,
+                  builder: (context, selectedButton, child) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SearchAndMenu(
-                          icon: Icons.search,
+                        Row(
+                          children: [
+                            SearchAndMenu(
+                              icon: Icons.search,
+                              onTap: () async {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ScreenSearch(),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            SearchAndMenu(
+                              key: _menuKey,
+                              icon: Icons.menu,
+                              onTap: () {
+                                _showMenu();
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        // BOOK A SLOT - Disabled if already booked
+                        Opacity(
+                          opacity: isBooked ? 0.5 : 1.0,
+                          child: ActionButton(
+                            label: isBooked ? "SLOT BOOKED" : "BOOK A SLOT",
+                            isPrimary:
+                                !isBooked && selectedButton == "BOOK A SLOT",
+                            onTap: isBooked
+                                ? null
+                                : () {
+                                    _selectedButtonNotifier.value =
+                                        "BOOK A SLOT";
+                                    CuttingMastersDialog.show(context);
+                                  },
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ActionButton(
+                          label: "CLEAR",
+                          isPrimary: selectedButton == "CLEAR",
+                          onTap: () {
+                            _selectedButtonNotifier.value = "CLEAR";
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        // SAVE BOOKING - Disabled if NOT booked
+                        Opacity(
+                          opacity: !isBooked ? 0.5 : 1.0,
+                          child: ActionButton(
+                            label: "SAVE BOOKING",
+                            isPrimary:
+                                isBooked && selectedButton == "SAVE BOOKING",
+                            onTap: !isBooked
+                                ? null
+                                : () {
+                                    _selectedButtonNotifier.value =
+                                        "SAVE BOOKING";
+                                  },
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // QUICK PAYMENT - Disabled if NOT booked
+                        Opacity(
+                          opacity: !isBooked ? 0.5 : 1.0,
+                          child: ActionButton(
+                            key: quickPaymentKey,
+                            label: "QUICK PAYMENT",
+                            isPrimary:
+                                isBooked && selectedButton == "QUICK PAYMENT",
+                            onTap: !isBooked
+                                ? null
+                                : () {
+                                    _selectedButtonNotifier.value =
+                                        "QUICK PAYMENT";
+                                    showQuickPaymentPopup(
+                                      context,
+                                      () {},
+                                      () {},
+                                    );
+                                  },
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // SAVE & SETTLE BILL - Disabled if NOT booked
+                        Opacity(
+                          opacity: !isBooked ? 0.5 : 1.0,
+                          child: ActionButton(
+                            label: "SAVE & SETTLE BILL",
+                            isPrimary:
+                                isBooked &&
+                                selectedButton == "SAVE & SETTLE BILL",
+                            onTap: !isBooked
+                                ? null
+                                : () {
+                                    _selectedButtonNotifier.value =
+                                        "SAVE & SETTLE BILL";
+                                  },
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ActionButton(
+                          label: "ADD EXPENSE",
+                          isPrimary: selectedButton == "ADD EXPENSE",
                           onTap: () async {
+                            _selectedButtonNotifier.value = "ADD EXPENSE";
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ScreenSearch(),
+                                builder: (context) => ScreenExpense(),
                               ),
                             );
                           },
                         ),
-                        const SizedBox(width: 12),
-                        SearchAndMenu(
-                          key: _menuKey,
-                          icon: Icons.menu,
+                        const SizedBox(height: 12),
+                        ActionButton(
+                          label: "REPORT",
+                          isPrimary: selectedButton == "REPORT",
                           onTap: () {
-                            _showMenu();
+                            _selectedButtonNotifier.value = "REPORT";
                           },
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 12),
-                    ActionButton(
-                      label: "BOOK A SLOT",
-                      isPrimary: selectedButton == "BOOK A SLOT",
-                      onTap: () {
-                        _selectedButtonNotifier.value = "BOOK A SLOT";
-                        CuttingMastersDialog.show(context);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    ActionButton(
-                      label: "CLEAR",
-                      isPrimary: selectedButton == "CLEAR",
-                      onTap: () {
-                        _selectedButtonNotifier.value = "CLEAR";
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    ActionButton(
-                      label: "SAVE BOOKING",
-                      isPrimary: selectedButton == "SAVE BOOKING",
-                      onTap: () {
-                        _selectedButtonNotifier.value = "SAVE BOOKING";
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    ActionButton(
-                      key: quickPaymentKey,
-                      label: "QUICK PAYMENT",
-                      isPrimary: selectedButton == "QUICK PAYMENT",
-                      onTap: () {
-                        _selectedButtonNotifier.value = "QUICK PAYMENT";
-                        showQuickPaymentPopup(context, () {}, () {});
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    ActionButton(
-                      label: "SAVE & SETTLE BILL",
-                      isPrimary: selectedButton == "SAVE & SETTLE BILL",
-                      onTap: () {
-                        _selectedButtonNotifier.value = "SAVE & SETTLE BILL";
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    ActionButton(
-                      label: "ADD EXPENSE",
-                      isPrimary: selectedButton == "ADD EXPENSE",
-                      onTap: () async {
-                        _selectedButtonNotifier.value = "ADD EXPENSE";
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ScreenExpense(),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    ActionButton(
-                      label: "REPORT",
-                      isPrimary: selectedButton == "REPORT",
-                      onTap: () {
-                        _selectedButtonNotifier.value = "REPORT";
-                      },
-                    ),
-                  ],
+                    );
+                  },
                 );
               },
             ),
