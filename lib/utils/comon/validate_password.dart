@@ -8,7 +8,7 @@ import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 
-Future<void> showPasswordForValidation(BuildContext context) {
+Future<void> showPasswordForValidation(BuildContext context,bool isAdmin) {
   final TextEditingController passwordController = TextEditingController();
   StaffModel? selectedStaff;
   bool obscurePassword = true;
@@ -193,6 +193,7 @@ Future<void> showPasswordForValidation(BuildContext context) {
                                   context
                                       .read<PasswordCubit>()
                                       .validatePassword(
+                                        isAdmin: isAdmin,
                                         password: passwordController.text,
                                         userId: selectedStaff!.id,
                                       );

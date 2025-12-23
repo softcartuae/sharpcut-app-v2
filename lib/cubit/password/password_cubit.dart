@@ -26,11 +26,13 @@ class PasswordCubit extends Cubit<PasswordState> {
   }
 
   Future<void> validatePassword({
+    required bool isAdmin,
     required String password,
     required int userId,
   }) async {
     emit(PasswordValidationLoading());
     final result = await passwordRepo.validatePassword(
+      isAdmin: isAdmin,
       password: password,
       userId: userId,
     );

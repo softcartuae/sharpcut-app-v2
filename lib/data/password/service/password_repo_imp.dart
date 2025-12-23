@@ -35,10 +35,10 @@ class PasswordRepoImp extends PasswordRepo {
   }
   
   @override
-  Future<Either<String, String>> validatePassword({required String password, required int userId}) async {
+  Future<Either<String, String>> validatePassword({required String password, required int userId,required bool isAdmin}) async {
       try {
         final response = await ApiClient.dio.post(
-          ApiClient.validatePassword,
+          isAdmin ? ApiClient.validatePasswordAdminUser : ApiClient.validatePassword,
           data: {
             'password': password,
             'user_id': userId,

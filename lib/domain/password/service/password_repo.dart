@@ -8,6 +8,7 @@ abstract class PasswordRepo {
   });
 
   Future<Either<String, String>> validatePassword({
+    required bool isAdmin,
     required String password,
     required int userId,
   });

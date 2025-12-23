@@ -22,6 +22,7 @@ class ApiClient {
   static final slotBookingChairApi = "api/transactions/book-slot";
   static final cancelBookingApi = "api/transactions/cancel";
   static final validatePassword = "api/users/validate-password";
+  static final validatePasswordAdminUser = "api/shop-admins/validate-password";
 
   // GET API ENDPOINTS
   static final userExpenseGETapi = "api/user-expenses";

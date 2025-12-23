@@ -98,7 +98,7 @@ class CuttingMastersDialog extends StatelessWidget {
         if (chair.liveState != LiveState.occupied.name) {
           showPasswordDialoge(context, chair);
         } else {
-          showPasswordForValidation(context);
+          showPasswordForValidation(context, false);
           //show Toes
         }
       },
