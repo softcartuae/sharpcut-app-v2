@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -21,7 +22,18 @@ class ServiceItem extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Image.asset(imagePath, fit: BoxFit.cover),
+              child: imagePath.startsWith('http')
+                  ? CachedNetworkImage(
+                      imageUrl: imagePath,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) =>
+                          const Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) => Image.asset(
+                        "lib/utils/images/hair_cut.png",
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Image.asset(imagePath, fit: BoxFit.cover),
             ),
           ),
           Text(
@@ -36,7 +48,7 @@ class ServiceItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
-        ]
+        ],
       ),
     );
   }

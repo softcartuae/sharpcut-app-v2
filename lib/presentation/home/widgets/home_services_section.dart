@@ -37,7 +37,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
   @override
   void initState() {
     super.initState();
-    context.read<ServiceCubit>().getServices();
+    context.read<ServiceCubit>().getCategories();
   }
 
   @override
@@ -125,23 +125,38 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             width: 200,
             child: BlocBuilder<ServiceCubit, ServiceState>(
               builder: (context, state) {
-                List<Widget> categories = [
-                  CategoryItem(
-                    title: "ALL",
-                    icon: Icons.grid_view,
-                    isSelected: true,
-                  ),
-                  const SizedBox(height: 12),
-                ];
+                List<Widget> categories = [];
 
                 if (state is ServiceStateSuccess) {
+                  // Add "ALL" category
+                  categories.add(
+                    CategoryItem(
+                      onTap: () {
+                        context.read<ServiceCubit>().getServices(
+                          categoryId: null,
+                        );
+                      },
+                      title: "ALL",
+                      icon: Icons.grid_view,
+                      isSelected: state.selectedCategoryId == null,
+                    ),
+                  );
+                  categories.add(const SizedBox(height: 12));
+
+                  // Add dynamic categories
                   categories.addAll(
-                    state.services.map((service) {
+                    state.categories.map((category) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: CategoryItem(
-                          title: service.name ?? "Service",
-                          icon: getIconForService(service.name),
+                          onTap: () {
+                            context.read<ServiceCubit>().getServices(
+                              categoryId: category.id,
+                            );
+                          },
+                          title: category.name ?? "Service",
+                          icon: getIconForService(category.name),
+                          isSelected: state.selectedCategoryId == category.id,
                         ),
                       );
                     }),
@@ -169,19 +184,43 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               borderRadius: BorderRadius.circular(15),
               backgroundImageUrl: "lib/utils/images/Card.png",
               padding: const EdgeInsets.all(16),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  childAspectRatio: 0.8,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: 12,
-                itemBuilder: (context, index) {
-                  return ServiceItem(
-                    title: "Service $index",
-                    imagePath: "lib/utils/images/hair_cut.png",
-                  );
+              child: BlocBuilder<ServiceCubit, ServiceState>(
+                builder: (context, state) {
+                  if (state is ServiceStateSuccess) {
+                    if (state.isLoadingServices) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return GridView.builder(
+                      padding: EdgeInsets.zero,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            childAspectRatio: 0.8,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
+                      itemCount: state.services.length,
+                      itemBuilder: (context, index) {
+                        final service = state.services[index];
+                        return ServiceItem(
+                          title: service.name ?? "Service",
+                          imagePath:
+                              service.image ??
+                              "lib/utils/images/hair_cut.png", // Placeholder image
+                        );
+                      },
+                    );
+                  } else if (state is ServiceStateLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is ServiceStateError) {
+                    return Center(
+                      child: Text(
+                        state.message,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  }
+                  return const SizedBox();
                 },
               ),
             ),
