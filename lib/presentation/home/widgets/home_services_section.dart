@@ -20,6 +20,7 @@ import 'package:sharp_cut/presentation/home/widgets/service_item.dart';
 import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings.dart';
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 import 'package:sharp_cut/utils/helpers/icon_helper.dart';
 
@@ -193,64 +194,67 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             child: BlocBuilder<BookingCubit, BookingState>(
               builder: (context, bookingState) {
                 final isBooked = bookingState is BookingSuccess;
-                return IgnorePointer(
-                  ignoring: !isBooked,
-                  child: Opacity(
-                    opacity: isBooked ? 1.0 : 0.5,
-                    child: CommonContainer(
-                      borderRadius: BorderRadius.circular(15),
-                      backgroundImageUrl: "lib/utils/images/Card.png",
-                      padding: const EdgeInsets.all(16),
-                      child: BlocBuilder<ServiceCubit, ServiceState>(
-                        builder: (context, state) {
-                          if (state is ServiceStateSuccess) {
-                            if (state.isLoadingServices) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            return GridView.builder(
-                              padding: EdgeInsets.zero,
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 4,
-                                    childAspectRatio: 0.8,
-                                    crossAxisSpacing: 16,
-                                    mainAxisSpacing: 16,
-                                  ),
-                              itemCount: state.services.length,
-                              itemBuilder: (context, index) {
-                                final service = state.services[index];
-                                return InkWell(
-                                  onTap: () {
-                                    context.read<ServiceCubit>().addToCart(
-                                      service,
-                                    );
-                                  },
-                                  child: ServiceItem(
-                                    title: service.name ?? "Service",
-                                    imagePath:
-                                        service.image ??
-                                        "lib/utils/images/hair_cut.png", // Placeholder image
-                                  ),
-                                );
-                              },
-                            );
-                          } else if (state is ServiceStateLoading) {
+                return Opacity(
+                  opacity: isBooked ? 1.0 : 0.5,
+                  child: CommonContainer(
+                    borderRadius: BorderRadius.circular(15),
+                    backgroundImageUrl: "lib/utils/images/Card.png",
+                    padding: const EdgeInsets.all(16),
+                    child: BlocBuilder<ServiceCubit, ServiceState>(
+                      builder: (context, state) {
+                        if (state is ServiceStateSuccess) {
+                          if (state.isLoadingServices) {
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
-                          } else if (state is ServiceStateError) {
-                            return Center(
-                              child: Text(
-                                state.message,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            );
                           }
-                          return const SizedBox();
-                        },
-                      ),
+                          return GridView.builder(
+                            padding: EdgeInsets.zero,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  childAspectRatio: 0.8,
+                                  crossAxisSpacing: 16,
+                                  mainAxisSpacing: 16,
+                                ),
+                            itemCount: state.services.length,
+                            itemBuilder: (context, index) {
+                              final service = state.services[index];
+                              return InkWell(
+                                onTap: () {
+                                  if (!isBooked) {
+                                    ToastHelper.showError(
+                                      "You have to book first",
+                                    );
+                                    return;
+                                  }
+                                  context.read<ServiceCubit>().addToCart(
+                                    service,
+                                  );
+                                },
+                                child: ServiceItem(
+                                  title: service.name ?? "Service",
+                                  imagePath:
+                                      service.image ??
+                                      "lib/utils/images/hair_cut.png", // Placeholder image
+                                ),
+                              );
+                            },
+                          );
+                        } else if (state is ServiceStateLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (state is ServiceStateError) {
+                          return Center(
+                            child: Text(
+                              state.message,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          );
+                        }
+                        return const SizedBox();
+                      },
                     ),
                   ),
                 );

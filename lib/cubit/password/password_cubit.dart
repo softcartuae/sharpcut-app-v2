@@ -24,4 +24,19 @@ class PasswordCubit extends Cubit<PasswordState> {
       (success) => emit(PasswordSuccess(success)),
     );
   }
+
+  Future<void> validatePassword({
+    required String password,
+    required int userId,
+  }) async {
+    emit(PasswordValidationLoading());
+    final result = await passwordRepo.validatePassword(
+      password: password,
+      userId: userId,
+    );
+    result.fold(
+      (failure) => emit(PasswordValidationFailure(failure)),
+      (success) => emit(PasswordValidationSuccess(success)),
+    );
+  }
 }

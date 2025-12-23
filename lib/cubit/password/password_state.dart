@@ -28,3 +28,23 @@ class PasswordFailure extends PasswordState {
   @override
   List<Object> get props => [error];
 }
+
+class PasswordValidationLoading extends PasswordState {}
+
+class PasswordValidationSuccess extends PasswordState {
+  final String message;
+
+  const PasswordValidationSuccess(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class PasswordValidationFailure extends PasswordState {
+  final String error;
+
+  const PasswordValidationFailure(this.error);
+
+  @override
+  List<Object> get props => [error];
+}

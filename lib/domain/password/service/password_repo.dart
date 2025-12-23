@@ -6,4 +6,11 @@ abstract class PasswordRepo {
     required PasswordModel passwordData,
     required bool isAdmin,
   });
+
+  Future<Either<String, String>> validatePassword({
+    required String password,
+    required int userId,
+  });
+
+
 }
