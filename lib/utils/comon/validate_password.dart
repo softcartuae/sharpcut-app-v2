@@ -3,12 +3,12 @@ import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
-import 'package:sharp_cut/domain/home/models/chair_model.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 
-Future<void> showPasswordDialoge(BuildContext context, ChairModel chair) {
+Future<void> showPasswordForValidation(BuildContext context) {
   final TextEditingController passwordController = TextEditingController();
   StaffModel? selectedStaff;
   bool obscurePassword = true;
@@ -26,6 +26,7 @@ Future<void> showPasswordDialoge(BuildContext context, ChairModel chair) {
             listener: (context, state) {
               if (state is PasswordValidationSuccess) {
                 Navigator.of(context).pop();
+                context.read<BookingCubit>().restoreBooking();
                 ToastHelper.showSuccess(state.message);
               } else if (state is PasswordValidationFailure) {
                 ToastHelper.showError(state.error);

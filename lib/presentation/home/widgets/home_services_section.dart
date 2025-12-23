@@ -193,7 +193,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             flex: 3,
             child: BlocBuilder<BookingCubit, BookingState>(
               builder: (context, bookingState) {
-                final isBooked = bookingState is BookingSuccess;
+                final isBooked =
+                    bookingState is BookingSuccess ||
+                    bookingState is BookingRestored;
                 return Opacity(
                   opacity: isBooked ? 1.0 : 0.5,
                   child: CommonContainer(
@@ -388,7 +390,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             width: 200,
             child: BlocBuilder<BookingCubit, BookingState>(
               builder: (context, bookingState) {
-                final isBooked = bookingState is BookingSuccess;
+                final isBooked =
+                    bookingState is BookingSuccess ||
+                    bookingState is BookingRestored;
 
                 return ValueListenableBuilder<String>(
                   valueListenable: _selectedButtonNotifier,
@@ -438,10 +442,10 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                         ),
                         const SizedBox(height: 12),
                         ActionButton(
-                          label: "CLEAR",
-                          isPrimary: selectedButton == "CLEAR",
+                          label: "CANCEL",
+                          isPrimary: selectedButton == "CANCEL",
                           onTap: () {
-                            _selectedButtonNotifier.value = "CLEAR";
+                            _selectedButtonNotifier.value = "CANCEL";
                           },
                         ),
                         const SizedBox(height: 12),

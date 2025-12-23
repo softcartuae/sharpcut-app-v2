@@ -24,4 +24,8 @@ class BookingCubit extends Cubit<BookingState> {
           emit(BookingSuccess(bookingResponse: bookingResponse)),
     );
   }
+
+  void restoreBooking() {
+    emit(BookingRestored());
+  }
 }

@@ -15,3 +15,5 @@ class BookingError extends BookingState {
   final String message;
   BookingError({required this.message});
 }
+
+class BookingRestored extends BookingState {}

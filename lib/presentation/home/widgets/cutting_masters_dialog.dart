@@ -4,6 +4,7 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/domain/home/models/chair_model.dart';
 import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
+import 'package:sharp_cut/utils/comon/validate_password.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class CuttingMastersDialog extends StatelessWidget {
@@ -97,6 +98,7 @@ class CuttingMastersDialog extends StatelessWidget {
         if (chair.liveState != LiveState.occupied.name) {
           showPasswordDialoge(context, chair);
         } else {
+          showPasswordForValidation(context);
           //show Toes
         }
       },
