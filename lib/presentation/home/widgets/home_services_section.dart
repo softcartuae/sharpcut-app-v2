@@ -18,7 +18,7 @@ import 'package:sharp_cut/presentation/home/widgets/service_item.dart';
 import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings.dart';
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
-import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
+
 import 'package:sharp_cut/utils/helpers/icon_helper.dart';
 
 class HomeServicesSection extends StatefulWidget {
@@ -93,10 +93,18 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     if (selectedValue != null && mounted) {
       switch (selectedValue) {
         case 1:
-          ResetPasswordDialog.show(context, title: 'Reset Admin Password');
+          ResetPasswordDialog.show(
+            context,
+            title: 'Reset Admin Password',
+            isAdmin: true,
+          );
           break;
         case 2:
-          ResetPasswordDialog.show(context, title: 'Reset Staff Password');
+          ResetPasswordDialog.show(
+            context,
+            title: 'Reset Staff Password',
+            isAdmin: false,
+          );
           break;
         case 3:
           Navigator.push(
@@ -366,15 +374,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                         SearchAndMenu(
                           icon: Icons.search,
                           onTap: () async {
-                            await showPasswordDialoge(context);
-                            if (true && context.mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ScreenSearch(),
-                                ),
-                              );
-                            }
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ScreenSearch(),
+                              ),
+                            );
                           },
                         ),
                         const SizedBox(width: 12),
@@ -436,15 +441,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                       isPrimary: selectedButton == "ADD EXPENSE",
                       onTap: () async {
                         _selectedButtonNotifier.value = "ADD EXPENSE";
-                        await showPasswordDialoge(context);
-                        if (true && context.mounted) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ScreenExpense(),
-                            ),
-                          );
-                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ScreenExpense(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(height: 12),

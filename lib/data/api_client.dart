@@ -19,6 +19,7 @@ class ApiClient {
   static final resetAdminPasswordapi = "api/reset-password";
   static final shopAdminLoginapi = "api/shop-admin-login";
   static final invoiceSettingsPOSTApi = "api/invoice-settings";
+  static final slotBookingChairApi = "api/transactions/book-slot";
 
   // GET API ENDPOINTS
   static final userExpenseGETapi = "api/user-expenses";

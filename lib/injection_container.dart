@@ -12,6 +12,9 @@ import 'package:sharp_cut/domain/home/chair/chair_repo.dart';
 import 'package:sharp_cut/domain/password/service/password_repo.dart';
 import 'package:sharp_cut/data/password/service/password_repo_imp.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
+import 'package:sharp_cut/domain/booking/booking_repo.dart';
+import 'package:sharp_cut/data/booking/booking_repo_imp.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -31,10 +34,15 @@ Future<void> init() async {
     () => PasswordCubit(passwordRepo: sl<PasswordRepo>()),
   );
 
+  sl.registerFactory<BookingCubit>(
+    () => BookingCubit(bookingRepo: sl<BookingRepo>()),
+  );
+
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
   sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
   sl.registerLazySingleton<ChairRepo>(() => ChairRepoImpl());
   sl.registerLazySingleton<PasswordRepo>(() => PasswordRepoImp());
   sl.registerLazySingleton<TokenStorage>(() => TokenStorage());
+  sl.registerLazySingleton<BookingRepo>(() => BookingRepoImp());
 }

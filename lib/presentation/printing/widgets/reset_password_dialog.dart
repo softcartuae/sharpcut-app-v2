@@ -12,16 +12,23 @@ class ResetPasswordDialog extends StatefulWidget {
   final String title;
   final List<String> userTypes;
 
+  final bool isAdmin;
+
   const ResetPasswordDialog({
     super.key,
     required this.title,
     this.userTypes = const ['Main'],
+    this.isAdmin = false,
   });
 
-  static Future<void> show(BuildContext context, {required String title}) {
+  static Future<void> show(
+    BuildContext context, {
+    required String title,
+    bool isAdmin = false,
+  }) {
     return showDialog(
       context: context,
-      builder: (context) => ResetPasswordDialog(title: title),
+      builder: (context) => ResetPasswordDialog(title: title, isAdmin: isAdmin),
     );
   }
 
@@ -189,8 +196,9 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                               confirmPassword: confirmPassword,
                             );
 
-                            context.read<PasswordCubit>().resetUserPassword(
+                            context.read<PasswordCubit>().resetPassword(
                               passwordModel,
+                              isAdmin: widget.isAdmin,
                             );
                           },
                     style: ElevatedButton.styleFrom(

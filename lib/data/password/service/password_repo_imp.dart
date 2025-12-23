@@ -6,36 +6,17 @@ import 'package:sharp_cut/domain/password/service/password_repo.dart';
 
 class PasswordRepoImp extends PasswordRepo {
   @override
-  Future<Either<String, String>> resetAdminPassword({
+  Future<Either<String, String>> resetPassword({
     required PasswordModel passwordData,
+    required bool isAdmin,
   }) async {
     try {
-      final response = await ApiClient.dio.post(
-        ApiClient.resetUserPasswordapi,
-        data: passwordData.toMap(),
-      );
+      final endpoint = isAdmin
+          ? ApiClient.resetAdminPasswordapi
+          : ApiClient.resetUserPasswordapi;
 
-      return Right(response.data['message'] ?? "Password reset successful");
-    } on DioException catch (e) {
-      if (e.response != null) {
-        // API responded with 400 / 401 / 500 etc
-        return Left(e.response?.data['message'] ?? "Something went wrong");
-      } else {
-        // No response (timeout, no internet)
-        return Left("Network error. Please try again.");
-      }
-    } catch (e) {
-      return Left(e.toString());
-    }
-  }
-
-  @override
-  Future<Either<String, String>> resetUserPassword({
-    required PasswordModel passwordData,
-  }) async {
-    try {
       final response = await ApiClient.dio.post(
-        ApiClient.resetUserPasswordapi,
+        endpoint,
         data: passwordData.toMap(),
       );
 
