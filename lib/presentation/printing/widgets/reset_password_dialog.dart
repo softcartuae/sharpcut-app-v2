@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
 import 'package:sharp_cut/domain/password/models/password_model.dart';
@@ -69,18 +69,10 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
     return BlocConsumer<PasswordCubit, PasswordState>(
       listener: (context, state) {
         if (state is PasswordSuccess) {
-          Fluttertoast.showToast(
-            msg: state.message,
-            backgroundColor: Colors.green,
-            textColor: Colors.white,
-          );
+          ToastHelper.showSuccess(state.message);
           Navigator.of(context).pop();
         } else if (state is PasswordFailure) {
-          Fluttertoast.showToast(
-            msg: state.error,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-          );
+          ToastHelper.showError(state.error);
         }
       },
       builder: (context, state) {
@@ -171,21 +163,13 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                                 _confirmPasswordController.text;
 
                             if (newPassword != confirmPassword) {
-                              Fluttertoast.showToast(
-                                msg: "Passwords do not match",
-                                backgroundColor: Colors.red,
-                                textColor: Colors.white,
-                              );
+                              ToastHelper.showError("Passwords do not match");
                               return;
                             }
 
                             if (currentPassword.isEmpty ||
                                 newPassword.isEmpty) {
-                              Fluttertoast.showToast(
-                                msg: "Please fill all fields",
-                                backgroundColor: Colors.red,
-                                textColor: Colors.white,
-                              );
+                              ToastHelper.showError("Please fill all fields");
                               return;
                             }
 

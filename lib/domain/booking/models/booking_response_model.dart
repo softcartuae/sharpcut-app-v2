@@ -1,3 +1,5 @@
+import 'package:sharp_cut/domain/home/models/staff_model.dart';
+
 class BookingResponseModel {
   final int? id;
   final String? appId;
@@ -10,6 +12,7 @@ class BookingResponseModel {
   final String? invoiceDate;
   final String? status;
   final String? createdAt;
+  final StaffModel? staff;
 
   BookingResponseModel({
     this.id,
@@ -23,11 +26,13 @@ class BookingResponseModel {
     this.invoiceDate,
     this.status,
     this.createdAt,
+    this.staff,
   });
 
   factory BookingResponseModel.fromJson(Map<String, dynamic> json) {
     return BookingResponseModel(
       id: json['id'],
+      staff: StaffModel.fromJson(json['user']),
       appId: json['app_id'],
       chairId: json['chair_id'],
       userId: json['user_id'],

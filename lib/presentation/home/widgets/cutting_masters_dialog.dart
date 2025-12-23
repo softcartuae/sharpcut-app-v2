@@ -4,6 +4,7 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/domain/home/models/chair_model.dart';
 import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class CuttingMastersDialog extends StatelessWidget {
   const CuttingMastersDialog({super.key});
@@ -93,14 +94,28 @@ class CuttingMastersDialog extends StatelessWidget {
         // Close the current dialog
         Navigator.of(context).pop();
         // Open the password dialog with the selected chair
-        showPasswordDialoge(context, chair);
+        if(chair.liveState != LiveState.occupied.name){
+           showPasswordDialoge(context, chair);
+        }else{
+          //show Toes
+        }
+       
       },
       child: Container(
         width: 120,
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1B25), // Dark background from image
+          border: Border.all(
+            width: 2,
+            color: chair.liveState == LiveState.available.name
+                ? Colors.green
+                : chair.liveState == LiveState.occupied.name
+                ? Colors.red
+                : Colors.grey, // fallback
+          ),
+          color: const Color(0xFF1A1B25),
           borderRadius: BorderRadius.circular(8),
         ),
+
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

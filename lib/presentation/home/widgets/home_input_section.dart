@@ -33,6 +33,7 @@ class HomeInputSection extends StatelessWidget {
           String date = "28-04-2024";
           String bookingTime = "Booking Time";
           String customerName = "Customer Name";
+          String staffName = "Sales Man";
 
           if (state is BookingSuccess) {
             final booking = state.bookingResponse;
@@ -56,6 +57,7 @@ class HomeInputSection extends StatelessWidget {
               }
             }
             customerName = booking.customerName ?? "Customer Name";
+            staffName = booking.staff?.name ?? "Sales Man";
           }
 
           return Column(
@@ -88,14 +90,6 @@ class HomeInputSection extends StatelessWidget {
                       readOnly: true,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: CustomTextField(
-                      label: "Custom",
-                      hint: "Custom",
-                      icon: Icons.receipt_long_outlined, // Placeholder icon
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -121,18 +115,9 @@ class HomeInputSection extends StatelessWidget {
                   Expanded(
                     child: CustomTextField(
                       label: "Sales Man",
-                      hint: "Sales Man",
+                      hint: staffName,
                       icon: Icons
                           .groups_outlined, // Or person_pin_circle_outlined
-                      readOnly: true,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: CustomTextField(
-                      label: "Custom",
-                      hint: "Custom",
-                      icon: Icons.receipt_long_outlined, // Placeholder icon
                       readOnly: true,
                     ),
                   ),

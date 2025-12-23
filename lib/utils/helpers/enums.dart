@@ -1,0 +1,4 @@
+enum LiveState {
+  available,
+  occupied,
+}

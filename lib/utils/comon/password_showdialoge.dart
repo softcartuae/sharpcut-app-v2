@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
@@ -27,21 +27,9 @@ Future<void> showPasswordDialoge(BuildContext context, ChairModel chair) {
             listener: (context, state) {
               if (state is BookingSuccess) {
                 Navigator.of(context).pop();
-                Fluttertoast.showToast(
-                  msg: "Booking Success",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM,
-                  backgroundColor: Colors.green,
-                  textColor: Colors.white,
-                );
+                ToastHelper.showSuccess("Booking Success");
               } else if (state is BookingError) {
-                Fluttertoast.showToast(
-                  msg: state.message,
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM,
-                  backgroundColor: Colors.red,
-                  textColor: Colors.white,
-                );
+                ToastHelper.showError(state.message);
               }
             },
             builder: (context, state) {
@@ -191,22 +179,14 @@ Future<void> showPasswordDialoge(BuildContext context, ChairModel chair) {
                               ? null
                               : () {
                                   if (selectedStaff == null) {
-                                    Fluttertoast.showToast(
-                                      msg: "Please select a staff",
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      gravity: ToastGravity.BOTTOM,
-                                      backgroundColor: Colors.red,
-                                      textColor: Colors.white,
+                                    ToastHelper.showError(
+                                      "Please select a staff",
                                     );
                                     return;
                                   }
                                   if (passwordController.text.isEmpty) {
-                                    Fluttertoast.showToast(
-                                      msg: "Please enter password",
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      gravity: ToastGravity.BOTTOM,
-                                      backgroundColor: Colors.red,
-                                      textColor: Colors.white,
+                                    ToastHelper.showError(
+                                      "Please enter password",
                                     );
                                     return;
                                   }
