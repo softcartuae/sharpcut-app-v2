@@ -7,6 +7,7 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
 import 'package:sharp_cut/utils/simple_bloc_observer.dart';
 
 import 'package:sharp_cut/utils/theme.dart';
@@ -27,6 +28,7 @@ void main() async {
           BlocProvider(create: (_) => di.sl<ChairCubit>()),
           BlocProvider(create: (_) => di.sl<PasswordCubit>()),
           BlocProvider(create: (_) => di.sl<BookingCubit>()),
+          BlocProvider(create: (_) => di.sl<ExpenseCubit>()),
         ],
         child: MyApp(),
       ), // Wrap your app

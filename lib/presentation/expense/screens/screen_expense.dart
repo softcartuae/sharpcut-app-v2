@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
+import 'package:sharp_cut/cubit/expenses/expense_state.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
 
-class ScreenExpense extends StatelessWidget {
+class ScreenExpense extends StatefulWidget {
   const ScreenExpense({super.key});
+
+  @override
+  State<ScreenExpense> createState() => _ScreenExpenseState();
+}
+
+class _ScreenExpenseState extends State<ScreenExpense> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ExpenseCubit>().getExpenses();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -191,79 +205,117 @@ class ScreenExpense extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    // Table Row (Example)
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                    horizontal: 24,
-                                  ),
-                                  color: const Color(0xFFF9F9F9),
-                                  child: Text(
-                                    "16/06/2024",
-                                    style: GoogleFonts.rajdhani(
-                                      fontSize: 16,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
+                    // Expenses List
+                    Expanded(
+                      child: BlocBuilder<ExpenseCubit, ExpenseState>(
+                        builder: (context, state) {
+                          if (state is ExpenseLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (state is ExpenseError) {
+                            return Center(
+                              child: Text(
+                                state.message,
+                                style: GoogleFonts.rajdhani(
+                                  color: Colors.red,
+                                  fontSize: 16,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                flex: 3,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(),
-                                  color: const Color(0xFFF9F9F9),
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: "Name",
-                                      hintStyle: GoogleFonts.rajdhani(
-                                        color: Colors.grey,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    style: GoogleFonts.rajdhani(
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                    ),
+                            );
+                          } else if (state is ExpenseLoaded) {
+                            if (state.expenses.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  "No expenses found",
+                                  style: GoogleFonts.rajdhani(
+                                    color: Colors.grey,
+                                    fontSize: 16,
                                   ),
                                 ),
+                              );
+                            }
+                            return ListView.separated(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(),
-                                  color: const Color(0xFFF9F9F9),
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: "Amount",
-                                      hintStyle: GoogleFonts.rajdhani(
-                                        color: Colors.grey,
-                                        fontSize: 16,
-                                      ),
+                              itemCount: state.expenses.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final expense = state.expenses[index];
+                                return Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 2,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                              horizontal: 24,
+                                            ),
+                                            color: const Color(0xFFF9F9F9),
+                                            child: Text(
+                                              expense.purchaseDate ?? "",
+                                              style: GoogleFonts.rajdhani(
+                                                fontSize: 16,
+                                                color: Colors.grey[600],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          flex: 3,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                              horizontal: 24,
+                                            ),
+                                            color: const Color(0xFFF9F9F9),
+                                            child: Text(
+                                              expense.itemName ?? "",
+                                              style: GoogleFonts.rajdhani(
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                              horizontal: 24,
+                                            ),
+                                            color: const Color(0xFFF9F9F9),
+                                            child: Text(
+                                              expense.price ?? "",
+                                              style: GoogleFonts.rajdhani(
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    style: GoogleFonts.rajdhani(
-                                      fontSize: 16,
-                                      color: Colors.black,
+                                    const SizedBox(height: 12),
+                                    const Divider(
+                                      height: 1,
+                                      color: Color(0xFFE0E0E0),
                                     ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          const Divider(height: 1, color: Color(0xFFE0E0E0)),
-                        ],
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                          return const SizedBox();
+                        },
                       ),
                     ),
                   ],
