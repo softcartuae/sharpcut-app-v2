@@ -13,6 +13,7 @@ import 'package:sharp_cut/presentation/home/widgets/cash_or_card.dart';
 import 'package:sharp_cut/presentation/home/widgets/category_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/common_container.dart';
 import 'package:sharp_cut/presentation/home/widgets/cutting_masters_dialog.dart';
+import 'package:sharp_cut/presentation/home/widgets/cancellation_dialog.dart';
 import 'package:sharp_cut/presentation/home/widgets/features_bottons.dart';
 import 'package:sharp_cut/presentation/home/widgets/menu_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/search_and_menu.dart';
@@ -23,6 +24,7 @@ import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.da
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 import 'package:sharp_cut/utils/helpers/icon_helper.dart';
+import 'package:sharp_cut/utils/comon/validate_password.dart';
 
 class HomeServicesSection extends StatefulWidget {
   const HomeServicesSection({super.key});
@@ -404,22 +406,33 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                           children: [
                             SearchAndMenu(
                               icon: Icons.search,
-                              onTap: () async {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ScreenSearch(),
-                                  ),
-                                );
-                              },
+                              onTap: isBooked
+                                  ? null
+                                  : () async {
+                                      showPasswordForValidation(
+                                        context,
+                                        false,
+                                        onSuccess: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ScreenSearch(),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
                             ),
                             const SizedBox(width: 12),
                             SearchAndMenu(
                               key: _menuKey,
                               icon: Icons.menu,
-                              onTap: () {
-                                _showMenu();
-                              },
+                              onTap: isBooked
+                                  ? null
+                                  : () {
+                                      _showMenu();
+                                    },
                             ),
                           ],
                         ),
@@ -441,12 +454,37 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ActionButton(
-                          label: "CANCEL",
-                          isPrimary: selectedButton == "CANCEL",
-                          onTap: () {
-                            _selectedButtonNotifier.value = "CANCEL";
-                          },
+                        Opacity(
+                          opacity: isBooked ? 1.0 : 0.5,
+                          child: ActionButton(
+                            label: "CANCEL",
+                            isPrimary: selectedButton == "CANCEL",
+                            onTap: !isBooked
+                                ? null
+                                : () {
+                                    _selectedButtonNotifier.value = "CANCEL";
+                                    int? transactionId;
+                                    if (bookingState is BookingSuccess) {
+                                      transactionId =
+                                          bookingState.bookingResponse.id;
+                                    } else if (bookingState
+                                        is BookingRestored) {
+                                      transactionId =
+                                          bookingState.bookingResponse.id;
+                                    }
+
+                                    if (transactionId != null) {
+                                      CancellationDialog.show(
+                                        context,
+                                        transactionId,
+                                      );
+                                    } else {
+                                      ToastHelper.showError(
+                                        "Invalid booking details",
+                                      );
+                                    }
+                                  },
+                          ),
                         ),
                         const SizedBox(height: 12),
                         // SAVE BOOKING - Disabled if NOT booked
@@ -507,13 +545,19 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                         ActionButton(
                           label: "ADD EXPENSE",
                           isPrimary: selectedButton == "ADD EXPENSE",
-                          onTap: () async {
+                          onTap: () {
                             _selectedButtonNotifier.value = "ADD EXPENSE";
-                            Navigator.push(
+                            showPasswordForValidation(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => ScreenExpense(),
-                              ),
+                              false,
+                              onSuccess: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ScreenExpense(),
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
+import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 
 class BookingCubit extends Cubit<BookingState> {
   final BookingRepo bookingRepo;
@@ -25,7 +26,26 @@ class BookingCubit extends Cubit<BookingState> {
     );
   }
 
-  void restoreBooking() {
-    emit(BookingRestored());
+  void restoreBooking({required BookingResponseModel bookingResponse}) {
+    emit(BookingRestored(bookingResponse: bookingResponse));
+  }
+
+  Future<void> cancelBooking({
+    required int transactionId,
+    required int userId,
+    required String userPassword,
+    required String reason,
+  }) async {
+    emit(BookingLoading());
+    final result = await bookingRepo.cancelBooking(
+      transactionId: transactionId,
+      userId: userId,
+      userPassword: userPassword,
+      reason: reason,
+    );
+    result.fold(
+      (error) => emit(BookingError(message: error)),
+      (message) => emit(BookingCancelled(message: message)),
+    );
   }
 }

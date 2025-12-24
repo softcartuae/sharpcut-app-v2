@@ -1,3 +1,5 @@
+import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
+
 class ChairModel {
   final int? id;
   final int? shopId;
@@ -8,6 +10,7 @@ class ChairModel {
   final String? createdAt;
   final String? updatedAt;
   final String? liveState;
+  final BookingResponseModel? transaction;
 
   ChairModel({
     this.id,
@@ -18,7 +21,8 @@ class ChairModel {
     this.status,
     this.createdAt,
     this.updatedAt,
-    this.liveState
+    this.liveState,
+    this.transaction,
   });
 
   factory ChairModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +36,9 @@ class ChairModel {
       status: json['status'],
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
+      transaction: json['transaction'] != null
+          ? BookingResponseModel.fromJson(json['transaction'])
+          : null,
     );
   }
 
@@ -45,6 +52,8 @@ class ChairModel {
       'status': status,
       'created_at': createdAt,
       'updated_at': updatedAt,
+      'transaction':
+          transaction, // Note: BookingResponseModel needs toJson if we want full serialization, but for now this is enough for the requirement.
     };
   }
 }

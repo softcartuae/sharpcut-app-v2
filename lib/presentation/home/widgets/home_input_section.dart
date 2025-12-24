@@ -30,10 +30,11 @@ class HomeInputSection extends StatelessWidget {
       child: BlocBuilder<BookingCubit, BookingState>(
         builder: (context, state) {
           String invoiceNo = "Invoice no";
-          String date = "28-04-2024";
+          String date = "Date";
           String bookingTime = "Booking Time";
           String customerName = "Customer Name";
           String staffName = "Sales Man";
+          final isBooked = state is BookingSuccess || state is BookingRestored;
 
           if (state is BookingSuccess) {
             final booking = state.bookingResponse;
@@ -97,6 +98,7 @@ class HomeInputSection extends StatelessWidget {
                 children: [
                   Expanded(
                     child: CustomTextField(
+                      readOnly: isBooked == true ? false : true,
                       label: "Customer Name",
                       hint: customerName,
                       icon: Icons.person_outline,
@@ -108,7 +110,7 @@ class HomeInputSection extends StatelessWidget {
                       label: "Custom",
                       hint: "Custom",
                       icon: Icons.receipt_long_outlined, // Placeholder icon
-                      readOnly: true,
+                      readOnly: isBooked == true ? false : true,
                     ),
                   ),
                   const SizedBox(width: 16),

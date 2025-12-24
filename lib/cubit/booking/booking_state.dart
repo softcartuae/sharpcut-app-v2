@@ -16,4 +16,13 @@ class BookingError extends BookingState {
   BookingError({required this.message});
 }
 
-class BookingRestored extends BookingState {}
+class BookingRestored extends BookingState {
+  final BookingResponseModel bookingResponse;
+  BookingRestored({required this.bookingResponse});
+}
+
+class BookingCancelled extends BookingState {
+  final String message;
+  BookingCancelled({required this.message});
+}
+

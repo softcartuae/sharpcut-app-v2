@@ -7,4 +7,11 @@ abstract class BookingRepo {
     required int userId,
     required String userPassword,
   });
+
+  Future<Either<String, String>> cancelBooking({
+    required int transactionId,
+    required int userId,
+    required String userPassword,
+    required String reason,
+  });
 }

@@ -6,9 +6,13 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
-import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 
-Future<void> showPasswordForValidation(BuildContext context,bool isAdmin) {
+Future<void> showPasswordForValidation(
+  BuildContext context,
+  bool isAdmin, {
+  StaffModel? preSelectedStaff,
+  VoidCallback? onSuccess,
+}) {
   final TextEditingController passwordController = TextEditingController();
   StaffModel? selectedStaff;
   bool obscurePassword = true;
@@ -16,6 +20,18 @@ Future<void> showPasswordForValidation(BuildContext context,bool isAdmin) {
   // Fetch staffs from ChairCubit
   final chairCubit = context.read<ChairCubit>();
   final staffList = chairCubit.staffs;
+
+  // If preSelectedStaff is provided, try to find it in the list to ensure object equality for Dropdown
+  if (preSelectedStaff != null) {
+    try {
+      selectedStaff = staffList.firstWhere(
+        (element) => element.id == preSelectedStaff.id,
+      );
+    } catch (e) {
+      // Fallback if not found in the list (shouldn't happen ideally if data is consistent)
+      selectedStaff = preSelectedStaff;
+    }
+  }
 
   return showDialog(
     context: context,
@@ -26,8 +42,10 @@ Future<void> showPasswordForValidation(BuildContext context,bool isAdmin) {
             listener: (context, state) {
               if (state is PasswordValidationSuccess) {
                 Navigator.of(context).pop();
-                context.read<BookingCubit>().restoreBooking();
                 ToastHelper.showSuccess(state.message);
+                if (onSuccess != null) {
+                  onSuccess();
+                }
               } else if (state is PasswordValidationFailure) {
                 ToastHelper.showError(state.error);
               }
@@ -90,6 +108,14 @@ Future<void> showPasswordForValidation(BuildContext context,bool isAdmin) {
                               color: Colors.white,
                             ),
                             isExpanded: true,
+                            // Disable dropdown if staff is pre-selected
+                            onChanged: preSelectedStaff != null
+                                ? null
+                                : (StaffModel? newValue) {
+                                    setState(() {
+                                      selectedStaff = newValue;
+                                    });
+                                  },
                             hint: Text(
                               "Select Staff",
                               style: GoogleFonts.rajdhani(
@@ -107,11 +133,6 @@ Future<void> showPasswordForValidation(BuildContext context,bool isAdmin) {
                                 child: Text(staff.name),
                               );
                             }).toList(),
-                            onChanged: (StaffModel? newValue) {
-                              setState(() {
-                                selectedStaff = newValue;
-                              });
-                            },
                           ),
                         ),
                       ),
