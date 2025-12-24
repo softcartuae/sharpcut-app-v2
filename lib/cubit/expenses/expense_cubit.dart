@@ -7,9 +7,9 @@ class ExpenseCubit extends Cubit<ExpenseState> {
 
   ExpenseCubit({required this.expenseRepo}) : super(ExpenseInitial());
 
-  Future<void> getExpenses() async {
+  Future<void> getExpensesBySpecificUser({required int userId}) async {
     emit(ExpenseLoading());
-    final result = await expenseRepo.getExpenses();
+    final result = await expenseRepo.getExpensesBySpecificUser(userId: userId);
     result.fold(
       (error) => emit(ExpenseError(message: error)),
       (expenses) => emit(ExpenseLoaded(expenses: expenses)),

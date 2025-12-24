@@ -12,6 +12,7 @@ Future<void> showPasswordForValidation(
   bool isAdmin, {
   StaffModel? preSelectedStaff,
   VoidCallback? onSuccess,
+  Function(StaffModel)? onSuccessWithStaff,
 }) {
   final TextEditingController passwordController = TextEditingController();
   StaffModel? selectedStaff;
@@ -45,6 +46,9 @@ Future<void> showPasswordForValidation(
                 ToastHelper.showSuccess(state.message);
                 if (onSuccess != null) {
                   onSuccess();
+                }
+                if (onSuccessWithStaff != null && selectedStaff != null) {
+                  onSuccessWithStaff(selectedStaff!);
                 }
               } else if (state is PasswordValidationFailure) {
                 ToastHelper.showError(state.error);

@@ -6,7 +6,43 @@ import 'package:sharp_cut/domain/expenses/models/expense_model.dart';
 
 class ExpenseRepoImpl implements ExpenseRepo {
   @override
-  Future<Either<String, List<ExpenseModel>>> getExpenses() async {
+  Future<Either<String, List<ExpenseModel>>> getExpensesBySpecificUser({
+    required int userId,
+  }) async {
+    try {
+      final response = await ApiClient.dio.get(
+        "${ApiClient.userExpenseGETapi}?user_id=$userId",
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true) {
+          final List<dynamic> expenseList = data['data'];
+          final expenses = expenseList
+              .map((json) => ExpenseModel.fromJson(json))
+              .toList();
+          return Right(expenses);
+        } else {
+          return Left(data['message'] ?? 'Failed to fetch expenses');
+        }
+      } else {
+        return Left('Failed to fetch expenses: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        final data = e.response!.data;
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return Left(data['message']);
+        }
+      }
+      return Left('Error fetching expenses: ${e.message}');
+    } catch (e) {
+      return Left('Error fetching expenses: $e');
+    }
+  }
+  
+  @override
+  Future<Either<String, List<ExpenseModel>>> getExpenses()async {
     try {
       final response = await ApiClient.dio.get(ApiClient.userExpenseGETapi);
 

@@ -25,7 +25,7 @@ class ApiClient {
   static final validatePasswordAdminUser = "api/shop-admins/validate-password";
 
   // GET API ENDPOINTS
-  static final userExpenseGETapi = "api/user-expenses";
+  static final userExpenseGETapi = "api/users/expenses";
   static final transactionsGETApi = "api/transactions";
   static final authentcatedUserApi = "api/shop";
   static final chairsApi = "api/chairs";

@@ -550,11 +550,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                             showPasswordForValidation(
                               context,
                               false,
-                              onSuccess: () {
+                              onSuccessWithStaff: (staff) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ScreenExpense(),
+                                    builder: (context) =>
+                                        ScreenExpense(staff: staff),
                                   ),
                                 );
                               },

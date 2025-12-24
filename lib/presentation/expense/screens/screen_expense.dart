@@ -5,8 +5,12 @@ import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
 import 'package:sharp_cut/cubit/expenses/expense_state.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
 
+import 'package:sharp_cut/domain/home/models/staff_model.dart';
+import 'package:sharp_cut/presentation/expense/screens/screen_add_expense.dart';
+
 class ScreenExpense extends StatefulWidget {
-  const ScreenExpense({super.key});
+  final StaffModel staff;
+  const ScreenExpense({super.key, required this.staff});
 
   @override
   State<ScreenExpense> createState() => _ScreenExpenseState();
@@ -16,7 +20,9 @@ class _ScreenExpenseState extends State<ScreenExpense> {
   @override
   void initState() {
     super.initState();
-    context.read<ExpenseCubit>().getExpenses();
+    context.read<ExpenseCubit>().getExpensesBySpecificUser(
+      userId: widget.staff.id,
+    );
   }
 
   @override
@@ -46,7 +52,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "ADD EXPENSE",
+                            "VIEW EXPENSE",
                             style: GoogleFonts.rajdhani(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -91,7 +97,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                               ),
                               color: const Color(0xFFF9F9F9),
                               child: Text(
-                                "Name",
+                                widget.staff.name,
                                 style: GoogleFonts.rajdhani(
                                   fontSize: 16,
                                   color: Colors.grey[600],
@@ -100,53 +106,66 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                             ),
                           ),
                           const SizedBox(width: 24),
-                          Container(
-                            height: 48,
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1E2130),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Add",
-                                  style: GoogleFonts.rajdhani(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ScreenAddExpense(staff: widget.staff),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              height: 48,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E2130),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Add Expense",
+                                    style: GoogleFonts.rajdhani(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ],
+                                  const SizedBox(width: 8),
+                                  const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           const SizedBox(width: 24),
-                          Container(
-                            height: 48,
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1E2130),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(
-                                  "Submit",
-                                  style: GoogleFonts.rajdhani(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          // Container(
+                          //   height: 48,
+                          //   padding: const EdgeInsets.symmetric(horizontal: 24),
+                          //   decoration: BoxDecoration(
+                          //     color: const Color(0xFF1E2130),
+                          //     borderRadius: BorderRadius.circular(4),
+                          //   ),
+                          //   child: Row(
+                          //     children: [
+                          //       Text(
+                          //         "Submit",
+                          //         style: GoogleFonts.rajdhani(
+                          //           color: Colors.white,
+                          //           fontSize: 16,
+                          //           fontWeight: FontWeight.w600,
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
