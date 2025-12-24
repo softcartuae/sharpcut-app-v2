@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
+import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 
 abstract class BookingRepo {
   Future<Either<String, BookingResponseModel>> bookSlot({
@@ -14,4 +15,6 @@ abstract class BookingRepo {
     required String userPassword,
     required String reason,
   });
+
+  Future<Either<String, String>> saveBooking(SaveBookingRequestModel request);
 }

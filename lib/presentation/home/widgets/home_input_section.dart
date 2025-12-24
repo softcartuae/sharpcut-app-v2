@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
+import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
 
 class HomeInputSection extends StatelessWidget {
@@ -57,75 +58,97 @@ class HomeInputSection extends StatelessWidget {
                 // Fallback if parsing fails
               }
             }
+
             customerName = booking.customerName ?? "Customer Name";
             staffName = booking.staff?.name ?? "Sales Man";
           }
 
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextField(
-                      label: "Invoice no",
-                      hint: invoiceNo,
-                      icon: Icons.receipt_long_outlined,
-                      readOnly: true,
+          return BlocListener<BookingCubit, BookingState>(
+            listener: (context, state) {
+              if (state is BookingSuccess) {
+                context.read<BookingFormCubit>().setInitialData(
+                  name: state.bookingResponse.customerName ?? "",
+                  number: state.bookingResponse.customerNumber ?? "",
+                );
+              } else if (state is BookingRestored) {
+                context.read<BookingFormCubit>().setInitialData(
+                  name: state.bookingResponse.customerName ?? "",
+                  number: state.bookingResponse.customerNumber ?? "",
+                );
+              }
+            },
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        label: "Invoice no",
+                        hint: invoiceNo,
+                        icon: Icons.receipt_long_outlined,
+                        readOnly: true,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: CustomTextField(
-                      label: "Date",
-                      hint: date,
-                      icon: Icons.calendar_today_outlined,
-                      readOnly: true,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: CustomTextField(
+                        label: "Date",
+                        hint: date,
+                        icon: Icons.calendar_today_outlined,
+                        readOnly: true,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: CustomTextField(
-                      label: "Booking Time",
-                      hint: bookingTime,
-                      icon: Icons.history, // Or another suitable icon
-                      readOnly: true,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: CustomTextField(
+                        label: "Booking Time",
+                        hint: bookingTime,
+                        icon: Icons.history, // Or another suitable icon
+                        readOnly: true,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextField(
-                      readOnly: isBooked == true ? false : true,
-                      label: "Customer Name",
-                      hint: customerName,
-                      icon: Icons.person_outline,
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        readOnly: isBooked == true ? false : true,
+                        label: "Customer Name",
+                        hint: customerName,
+                        icon: Icons.person_outline,
+                        onChanged: (value) {
+                          context.read<BookingFormCubit>().updateName(value);
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: CustomTextField(
-                      label: "Custom",
-                      hint: "Custom",
-                      icon: Icons.receipt_long_outlined, // Placeholder icon
-                      readOnly: isBooked == true ? false : true,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: CustomTextField(
+                        label: "Customer Number",
+                        hint: "Customer Number",
+                        icon: Icons.phone_outlined, // Placeholder icon
+                        readOnly: isBooked == true ? false : true,
+                        onChanged: (value) {
+                          context.read<BookingFormCubit>().updateNumber(value);
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: CustomTextField(
-                      label: "Sales Man",
-                      hint: staffName,
-                      icon: Icons
-                          .groups_outlined, // Or person_pin_circle_outlined
-                      readOnly: true,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: CustomTextField(
+                        label: "Sales Man",
+                        hint: staffName,
+                        icon: Icons
+                            .groups_outlined, // Or person_pin_circle_outlined
+                        readOnly: true,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           );
         },
       ),

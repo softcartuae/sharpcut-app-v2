@@ -10,6 +10,7 @@ class CustomTextField extends StatelessWidget {
   final IconData icon;
   final TextEditingController? controller;
   final bool readOnly;
+  final Function(String)? onChanged;
 
   const CustomTextField({
     super.key,
@@ -18,6 +19,7 @@ class CustomTextField extends StatelessWidget {
     required this.icon,
     this.controller,
     this.readOnly = false,
+    this.onChanged,
   });
 
   @override
@@ -55,6 +57,7 @@ class CustomTextField extends StatelessWidget {
                 ),
               ),
               child: TextField(
+                onChanged: onChanged,
                 readOnly: readOnly,
                 controller: controller,
                 style: GoogleFonts.rajdhani(color: Colors.white),

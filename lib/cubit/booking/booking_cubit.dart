@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
+import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 
 class BookingCubit extends Cubit<BookingState> {
   final BookingRepo bookingRepo;
@@ -46,6 +47,16 @@ class BookingCubit extends Cubit<BookingState> {
     result.fold(
       (error) => emit(BookingError(message: error)),
       (message) => emit(BookingCancelled(message: message)),
+    );
+  }
+
+  Future<void> saveBooking({required SaveBookingRequestModel request}) async {
+    return;
+    emit(BookingLoading());
+    final result = await bookingRepo.saveBooking(request);
+    result.fold(
+      (error) => emit(BookingError(message: error)),
+      (message) => emit(BookingSaved(message: message)),
     );
   }
 }

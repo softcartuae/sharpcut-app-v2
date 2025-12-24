@@ -107,14 +107,22 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                           ),
                           const SizedBox(width: 24),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.push(
+                            onTap: () async {
+                              final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
                                       ScreenAddExpense(staff: widget.staff),
                                 ),
                               );
+
+                              if (result == true && context.mounted) {
+                                context
+                                    .read<ExpenseCubit>()
+                                    .getExpensesBySpecificUser(
+                                      userId: widget.staff.id,
+                                    );
+                              }
                             },
                             child: Container(
                               height: 48,

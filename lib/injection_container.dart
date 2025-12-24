@@ -15,6 +15,7 @@ import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/data/booking/booking_repo_imp.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
 import 'package:sharp_cut/domain/expenses/expense_repo.dart';
 import 'package:sharp_cut/data/expenses/expense_repo_impl.dart';
@@ -44,6 +45,8 @@ Future<void> init() async {
   sl.registerFactory<ExpenseCubit>(
     () => ExpenseCubit(expenseRepo: sl<ExpenseRepo>()),
   );
+
+  sl.registerFactory<BookingFormCubit>(() => BookingFormCubit());
 
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());

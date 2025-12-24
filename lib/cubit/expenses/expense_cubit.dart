@@ -15,4 +15,19 @@ class ExpenseCubit extends Cubit<ExpenseState> {
       (expenses) => emit(ExpenseLoaded(expenses: expenses)),
     );
   }
+
+  Future<void> submitExpense({
+    required int userId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    emit(ExpenseSubmitting());
+    final result = await expenseRepo.submitExpense(
+      userId: userId,
+      items: items,
+    );
+    result.fold(
+      (error) => emit(ExpenseError(message: error)),
+      (message) => emit(ExpenseSubmitted(message: message)),
+    );
+  }
 }

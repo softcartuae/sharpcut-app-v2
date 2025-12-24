@@ -31,4 +31,25 @@ class ExpenseModel {
       updatedAt: json['updated_at'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'app_id': appId,
+      'user_id': userId,
+      'item_name': itemName,
+      'price': price,
+      'purchase_date': purchaseDate,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+    };
+  }
+
+  Map<String, dynamic> toAddExpenseJson() {
+    return {
+      'item_name': itemName,
+      'price': double.tryParse(price ?? '0') ?? 0.0,
+      'purchase_date': purchaseDate,
+    };
+  }
 }

@@ -26,3 +26,7 @@ class BookingCancelled extends BookingState {
   BookingCancelled({required this.message});
 }
 
+class BookingSaved extends BookingState {
+  final String message;
+  BookingSaved({required this.message});
+}

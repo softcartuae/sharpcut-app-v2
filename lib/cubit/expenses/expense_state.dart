@@ -17,3 +17,11 @@ class ExpenseError extends ExpenseState {
 
   ExpenseError({required this.message});
 }
+
+class ExpenseSubmitting extends ExpenseState {}
+
+class ExpenseSubmitted extends ExpenseState {
+  final String message;
+
+  ExpenseSubmitted({required this.message});
+}

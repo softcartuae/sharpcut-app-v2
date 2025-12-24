@@ -11,7 +11,7 @@ class ApiClient {
   //POST API ENDPOINTS
   static final loginApi = "api/login";
   static final logoutApi = "api/logout";
-  static final userExpensePostApi = "api/user-expenses";
+  static final userExpensePostApi = "api/users/expenses";
   static final bookingsPostApi = "api/bookings";
   static final transactionsPOSTapi = "api/transactions";
   static final transactionsSYNCPOSTapi = "api/transactions";
@@ -23,7 +23,7 @@ class ApiClient {
   static final cancelBookingApi = "api/transactions/cancel";
   static final validatePassword = "api/users/validate-password";
   static final validatePasswordAdminUser = "api/shop-admins/validate-password";
-
+  static final saveBookingApi = "api/transactions/save-booking";
   // GET API ENDPOINTS
   static final userExpenseGETapi = "api/users/expenses";
   static final transactionsGETApi = "api/transactions";

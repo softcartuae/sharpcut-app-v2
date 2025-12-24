@@ -80,4 +80,6 @@ class ServiceModel {
       'updated_at': updatedAt,
     };
   }
+
+  String? get price => charge;
 }

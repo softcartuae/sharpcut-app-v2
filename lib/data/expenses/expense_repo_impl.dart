@@ -40,9 +40,9 @@ class ExpenseRepoImpl implements ExpenseRepo {
       return Left('Error fetching expenses: $e');
     }
   }
-  
+
   @override
-  Future<Either<String, List<ExpenseModel>>> getExpenses()async {
+  Future<Either<String, List<ExpenseModel>>> getExpenses() async {
     try {
       final response = await ApiClient.dio.get(ApiClient.userExpenseGETapi);
 
@@ -70,6 +70,40 @@ class ExpenseRepoImpl implements ExpenseRepo {
       return Left('Error fetching expenses: ${e.message}');
     } catch (e) {
       return Left('Error fetching expenses: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, String>> submitExpense({
+    required int userId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    try {
+      final response = await ApiClient.dio.post(
+        ApiClient.userExpensePostApi,
+        data: {"user_id": userId, "items": items},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true) {
+          return Right(data['message'] ?? 'User Expense Saved Successfully');
+        } else {
+          return Left(data['message'] ?? 'Failed to save expense');
+        }
+      } else {
+        return Left('Failed to save expense: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        final data = e.response!.data;
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return Left(data['message']);
+        }
+      }
+      return Left('Error saving expense: ${e.message}');
+    } catch (e) {
+      return Left('Error saving expense: $e');
     }
   }
 }
