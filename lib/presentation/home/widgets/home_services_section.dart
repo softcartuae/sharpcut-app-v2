@@ -508,99 +508,100 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               onTap: !isBooked
                                   ? null
                                   : () {
-                                      _selectedButtonNotifier.value =
-                                          "SAVE BOOKING";
-                                      final serviceState = context
-                                          .read<ServiceCubit>()
-                                          .state;
-                                      if (serviceState is ServiceStateSuccess) {
-                                        if (serviceState.cartItems.isEmpty) {
-                                          ToastHelper.showError(
-                                            "You have to select the services",
-                                          );
-                                          return;
-                                        }
+                                    
+                                      // _selectedButtonNotifier.value =
+                                      //     "SAVE BOOKING";
+                                      // final serviceState = context
+                                      //     .read<ServiceCubit>()
+                                      //     .state;
+                                      // if (serviceState is ServiceStateSuccess) {
+                                      //   if (serviceState.cartItems.isEmpty) {
+                                      //     ToastHelper.showError(
+                                      //       "You have to select the services",
+                                      //     );
+                                      //     return;
+                                      //   }
 
-                                        int? transactionId;
-                                        if (bookingState is BookingSuccess) {
-                                          transactionId =
-                                              bookingState.bookingResponse.id;
-                                        } else if (bookingState
-                                            is BookingRestored) {
-                                          transactionId =
-                                              bookingState.bookingResponse.id;
-                                        }
+                                      //   int? transactionId;
+                                      //   if (bookingState is BookingSuccess) {
+                                      //     transactionId =
+                                      //         bookingState.bookingResponse.id;
+                                      //   } else if (bookingState
+                                      //       is BookingRestored) {
+                                      //     transactionId =
+                                      //         bookingState.bookingResponse.id;
+                                      //   }
 
-                                        final bookingFormState = context
-                                            .read<BookingFormCubit>()
-                                            .state;
+                                      //   final bookingFormState = context
+                                      //       .read<BookingFormCubit>()
+                                      //       .state;
 
-                                        final request = SaveBookingRequestModel(
-                                          transactionId: transactionId,
-                                          customerName:
-                                              bookingFormState.customerName,
-                                          customerNumber:
-                                              bookingFormState.customerNumber,
-                                          grandTotal: serviceState.total,
-                                          taxTotal: serviceState.vat,
-                                          discount: 0.0,
-                                          roundOff: 0.0,
-                                          finalTotal: serviceState.total,
-                                          serviceId: serviceState.cartItems
-                                              .map((e) => e.service.id!)
-                                              .toList(),
-                                          quantity: serviceState.cartItems
-                                              .map((e) => e.quantity)
-                                              .toList(),
-                                          rate: serviceState.cartItems
-                                              .map(
-                                                (e) =>
-                                                    double.tryParse(
-                                                      e.service.price ?? "0",
-                                                    ) ??
-                                                    0.0,
-                                              )
-                                              .toList(),
-                                          taxAmount: serviceState.cartItems
-                                              .map((e) => 0.0) // Placeholder
-                                              .toList(),
-                                          currency: serviceState.cartItems
-                                              .map((e) => "AED")
-                                              .toList(),
-                                          amountTotal: serviceState.cartItems
-                                              .map(
-                                                (e) =>
-                                                    (double.tryParse(
-                                                          e.service.price ??
-                                                              "0",
-                                                        ) ??
-                                                        0.0) *
-                                                    e.quantity,
-                                              )
-                                              .toList(),
-                                          tax: serviceState.cartItems
-                                              .map((e) => 0.0) // Placeholder
-                                              .toList(),
-                                          subTotal: serviceState.cartItems
-                                              .map(
-                                                (e) =>
-                                                    (double.tryParse(
-                                                          e.service.price ??
-                                                              "0",
-                                                        ) ??
-                                                        0.0) *
-                                                    e.quantity,
-                                              )
-                                              .toList(),
-                                          isTip: serviceState.cartItems
-                                              .map((e) => 0)
-                                              .toList(),
-                                        );
+                                      //   final request = SaveBookingRequestModel(
+                                      //     transactionId: transactionId,
+                                      //     customerName:
+                                      //         bookingFormState.customerName,
+                                      //     customerNumber:
+                                      //         bookingFormState.customerNumber,
+                                      //     grandTotal: serviceState.total,
+                                      //     taxTotal: serviceState.vat,
+                                      //     discount: 0.0,
+                                      //     roundOff: 0.0,
+                                      //     finalTotal: serviceState.total,
+                                      //     serviceId: serviceState.cartItems
+                                      //         .map((e) => e.service.id!)
+                                      //         .toList(),
+                                      //     quantity: serviceState.cartItems
+                                      //         .map((e) => e.quantity)
+                                      //         .toList(),
+                                      //     rate: serviceState.cartItems
+                                      //         .map(
+                                      //           (e) =>
+                                      //               double.tryParse(
+                                      //                 e.service.price ?? "0",
+                                      //               ) ??
+                                      //               0.0,
+                                      //         )
+                                      //         .toList(),
+                                      //     taxAmount: serviceState.cartItems
+                                      //         .map((e) => 0.0) // Placeholder
+                                      //         .toList(),
+                                      //     currency: serviceState.cartItems
+                                      //         .map((e) => "AED")
+                                      //         .toList(),
+                                      //     amountTotal: serviceState.cartItems
+                                      //         .map(
+                                      //           (e) =>
+                                      //               (double.tryParse(
+                                      //                     e.service.price ??
+                                      //                         "0",
+                                      //                   ) ??
+                                      //                   0.0) *
+                                      //               e.quantity,
+                                      //         )
+                                      //         .toList(),
+                                      //     tax: serviceState.cartItems
+                                      //         .map((e) => 0.0) // Placeholder
+                                      //         .toList(),
+                                      //     subTotal: serviceState.cartItems
+                                      //         .map(
+                                      //           (e) =>
+                                      //               (double.tryParse(
+                                      //                     e.service.price ??
+                                      //                         "0",
+                                      //                   ) ??
+                                      //                   0.0) *
+                                      //               e.quantity,
+                                      //         )
+                                      //         .toList(),
+                                      //     isTip: serviceState.cartItems
+                                      //         .map((e) => 0)
+                                      //         .toList(),
+                                      //   );
 
-                                        context
-                                            .read<BookingCubit>()
-                                            .saveBooking(request: request);
-                                      }
+                                      //   context
+                                      //       .read<BookingCubit>()
+                                      //       .saveBooking(request: request);
+                                      // }
                                     },
                             ),
                           ),
