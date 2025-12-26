@@ -548,83 +548,71 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                           return;
                                         }
 
-                                        showPasswordForValidation(
-                                          context,
-                                          false,
-                                          onSuccess: () {
-                                            final request = SaveBookingRequestModel(
-                                              transactionId: transactionId,
-                                              customerName:
-                                                  bookingFormState.customerName,
-                                              customerNumber: bookingFormState
-                                                  .customerNumber,
-                                              grandTotal: serviceState.total,
-                                              taxTotal: serviceState.vat,
-                                              discount: 0.0,
-                                              roundOff: 0.0,
-                                              finalTotal: serviceState.total,
-                                              serviceId: serviceState.cartItems
-                                                  .map((e) => e.service.id!)
-                                                  .toList(),
-                                              quantity: serviceState.cartItems
-                                                  .map((e) => e.quantity)
-                                                  .toList(),
-                                              rate: serviceState.cartItems
-                                                  .map(
-                                                    (e) =>
-                                                        double.tryParse(
+                                        final request = SaveBookingRequestModel(
+                                          transactionId: transactionId,
+                                          customerName:
+                                              bookingFormState.customerName,
+                                          customerNumber:
+                                              bookingFormState.customerNumber,
+                                          grandTotal: serviceState.total,
+                                          taxTotal: serviceState.vat,
+                                          discount: 0.0,
+                                          roundOff: 0.0,
+                                          finalTotal: serviceState.total,
+                                          serviceId: serviceState.cartItems
+                                              .map((e) => e.service.id!)
+                                              .toList(),
+                                          quantity: serviceState.cartItems
+                                              .map((e) => e.quantity)
+                                              .toList(),
+                                          rate: serviceState.cartItems
+                                              .map(
+                                                (e) =>
+                                                    double.tryParse(
+                                                      e.service.price ?? "0",
+                                                    ) ??
+                                                    0.0,
+                                              )
+                                              .toList(),
+                                          taxAmount: serviceState.cartItems
+                                              .map((e) => 0.0) // Placeholder
+                                              .toList(),
+                                          currency: serviceState.cartItems
+                                              .map((e) => "AED")
+                                              .toList(),
+                                          amountTotal: serviceState.cartItems
+                                              .map(
+                                                (e) =>
+                                                    (double.tryParse(
                                                           e.service.price ??
                                                               "0",
                                                         ) ??
-                                                        0.0,
-                                                  )
-                                                  .toList(),
-                                              taxAmount: serviceState.cartItems
-                                                  .map(
-                                                    (e) => 0.0,
-                                                  ) // Placeholder
-                                                  .toList(),
-                                              currency: serviceState.cartItems
-                                                  .map((e) => "AED")
-                                                  .toList(),
-                                              amountTotal: serviceState
-                                                  .cartItems
-                                                  .map(
-                                                    (e) =>
-                                                        (double.tryParse(
-                                                              e.service.price ??
-                                                                  "0",
-                                                            ) ??
-                                                            0.0) *
-                                                        e.quantity,
-                                                  )
-                                                  .toList(),
-                                              tax: serviceState.cartItems
-                                                  .map(
-                                                    (e) => 0.0,
-                                                  ) // Placeholder
-                                                  .toList(),
-                                              subTotal: serviceState.cartItems
-                                                  .map(
-                                                    (e) =>
-                                                        (double.tryParse(
-                                                              e.service.price ??
-                                                                  "0",
-                                                            ) ??
-                                                            0.0) *
-                                                        e.quantity,
-                                                  )
-                                                  .toList(),
-                                              isTip: serviceState.cartItems
-                                                  .map((e) => 0)
-                                                  .toList(),
-                                            );
-
-                                            context
-                                                .read<BookingCubit>()
-                                                .saveBooking(request: request);
-                                          },
+                                                        0.0) *
+                                                    e.quantity,
+                                              )
+                                              .toList(),
+                                          tax: serviceState.cartItems
+                                              .map((e) => 0.0) // Placeholder
+                                              .toList(),
+                                          subTotal: serviceState.cartItems
+                                              .map(
+                                                (e) =>
+                                                    (double.tryParse(
+                                                          e.service.price ??
+                                                              "0",
+                                                        ) ??
+                                                        0.0) *
+                                                    e.quantity,
+                                              )
+                                              .toList(),
+                                          isTip: serviceState.cartItems
+                                              .map((e) => 0)
+                                              .toList(),
                                         );
+
+                                        context
+                                            .read<BookingCubit>()
+                                            .saveBooking(request: request);
                                       }
                                     },
                             ),
@@ -709,34 +697,28 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                           return;
                                         }
 
-                                        showPasswordForValidation(
+                                        showQuickPaymentPopup(
                                           context,
-                                          false,
-                                          onSuccess: () {
-                                            showQuickPaymentPopup(
+                                          () {
+                                            // Cash Selected
+                                            _settlePayment(
                                               context,
-                                              () {
-                                                // Cash Selected
-                                                _settlePayment(
-                                                  context,
-                                                  transactionId,
-                                                  userId,
-                                                  serviceState,
-                                                  bookingFormState,
-                                                  "Cash",
-                                                );
-                                              },
-                                              () {
-                                                // Card Selected
-                                                _settlePayment(
-                                                  context,
-                                                  transactionId,
-                                                  userId,
-                                                  serviceState,
-                                                  bookingFormState,
-                                                  "Card",
-                                                );
-                                              },
+                                              transactionId,
+                                              userId,
+                                              serviceState,
+                                              bookingFormState,
+                                              "Cash",
+                                            );
+                                          },
+                                          () {
+                                            // Card Selected
+                                            _settlePayment(
+                                              context,
+                                              transactionId,
+                                              userId,
+                                              serviceState,
+                                              bookingFormState,
+                                              "Card",
                                             );
                                           },
                                         );
