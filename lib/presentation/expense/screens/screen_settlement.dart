@@ -1,8 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/presentation/expense/widgets/payment_mode_card.dart';
 import 'package:sharp_cut/presentation/expense/widgets/settlement_glass_container.dart';
 import 'package:sharp_cut/presentation/expense/widgets/settlement_text_fields.dart';
@@ -10,16 +13,20 @@ import 'package:sharp_cut/presentation/expense/widgets/settlement_time_container
 import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 
-Future<void> showSettlementDialog(BuildContext context) {
+Future<void> showSettlementDialog(
+  BuildContext context, {
+  required SettlePaymentRequestModel settlePayment,
+}) {
   return showDialog(
     context: context,
     barrierColor: Colors.black.withValues(alpha: 0.5),
-    builder: (context) => const SettlementDialog(),
+    builder: (context) => SettlementDialog(settlePayment: settlePayment),
   );
 }
 
 class SettlementDialog extends StatefulWidget {
-  const SettlementDialog({super.key});
+  final SettlePaymentRequestModel settlePayment;
+  const SettlementDialog({super.key, required this.settlePayment});
 
   @override
   State<SettlementDialog> createState() => _SettlementDialogState();
@@ -70,6 +77,42 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
   DateTime _selectedDate = DateTime.now();
   bool _splitPayment = false;
+  String _selectedPaymentMode = 'Cash';
+
+  @override
+  void initState() {
+    super.initState();
+    _populateData();
+  }
+
+  void _populateData() {
+    _mobileController.text = widget.settlePayment.customerNumber ?? '';
+    _nameController.text = widget.settlePayment.customerName ?? '';
+
+    // Calculate total quantity
+    int totalQty = 0;
+    if (widget.settlePayment.quantity != null) {
+      for (var qty in widget.settlePayment.quantity!) {
+        totalQty += qty;
+      }
+    }
+    _totalQtyController.text = totalQty.toString();
+
+    _subTotalController.text = (widget.settlePayment.grandTotal ?? 0.0)
+        .toStringAsFixed(2);
+    _discountController.text = (widget.settlePayment.discount ?? 0.0)
+        .toStringAsFixed(2);
+    _roundOffController.text = (widget.settlePayment.roundOff ?? 0.0)
+        .toStringAsFixed(2);
+    _vatController.text = (widget.settlePayment.taxTotal ?? 0.0)
+        .toStringAsFixed(2);
+
+    // Amount to pay is usually the final total
+    _amountController.text = (widget.settlePayment.finalTotal ?? 0.0)
+        .toStringAsFixed(2);
+
+    // Grand total display at the bottom usually matches final total
+  }
 
   @override
   void dispose() {
@@ -118,6 +161,51 @@ class _SettlementDialogState extends State<SettlementDialog> {
         _selectedDate = picked;
       });
     }
+  }
+
+  void _onSettle() {
+    final double amount = double.tryParse(_amountController.text) ?? 0.0;
+    final double tenderCash =
+        double.tryParse(_tenderCashController.text) ?? 0.0;
+    final double change = double.tryParse(_chargeController.text) ?? 0.0;
+
+    // Create a new request model with updated values
+    // We need to create a copy of the existing model but with updated payment details
+    // Since SettlePaymentRequestModel fields are final, we might need to create a new instance
+    // utilizing the data from the widget.settlePayment and the new input values.
+
+    // Note: The current SettlePaymentRequestModel definition in the file view
+    // doesn't show a copyWith method, so I'll construct a new one.
+
+    final request = SettlePaymentRequestModel(
+      transactionId: widget.settlePayment.transactionId,
+      customerName: _nameController.text,
+      customerNumber: _mobileController.text,
+      grandTotal: widget.settlePayment.grandTotal,
+      taxTotal: widget.settlePayment.taxTotal,
+      discount: widget.settlePayment.discount,
+      roundOff: widget.settlePayment.roundOff,
+      finalTotal: widget.settlePayment.finalTotal, // Or amount if it can change
+      serviceId: widget.settlePayment.serviceId,
+      quantity: widget.settlePayment.quantity,
+      rate: widget.settlePayment.rate,
+      taxAmount: widget.settlePayment.taxAmount,
+      currency: widget.settlePayment.currency,
+      amountTotal: widget.settlePayment.amountTotal,
+      tax: widget.settlePayment.tax,
+      subTotal: widget.settlePayment.subTotal,
+      isTip: widget.settlePayment.isTip,
+      collectedUserId: widget.settlePayment.collectedUserId,
+      mode: [_selectedPaymentMode], // 'Cash' or 'Card'
+      amount: [amount],
+      tenderCash: _selectedPaymentMode == 'Cash'
+          ? [tenderCash]
+          : [amount], // If card, tender usually equals amount
+      change: _selectedPaymentMode == 'Cash' ? [change] : [0.0],
+    );
+
+    context.read<BookingCubit>().settlePayment(request: request);
+    Navigator.pop(context); // Close the dialog
   }
 
   @override
@@ -319,19 +407,41 @@ class _SettlementDialogState extends State<SettlementDialog> {
                             child: Column(
                               children: [
                                 // Cash Card
-                                const PaymentModeCard(
-                                  title: "Cash (0.00)",
-                                  amount: "0.00",
-                                  color1: AppColors.violetNormal,
-                                  color2: AppColors.redNormal,
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedPaymentMode = 'Cash';
+                                    });
+                                  },
+                                  child: PaymentModeCard(
+                                    title: "Cash (0.00)",
+                                    amount: "0.00",
+                                    color1: _selectedPaymentMode == 'Cash'
+                                        ? AppColors.violetNormal
+                                        : Colors.white10,
+                                    color2: _selectedPaymentMode == 'Cash'
+                                        ? AppColors.redNormal
+                                        : Colors.transparent,
+                                  ),
                                 ),
                                 const SizedBox(height: 10),
                                 // Credit Card
-                                const PaymentModeCard(
-                                  title: "Credit Card(0.00)",
-                                  amount: "0.00",
-                                  color1: Colors.white10,
-                                  color2: Colors.transparent,
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedPaymentMode = 'Card';
+                                    });
+                                  },
+                                  child: PaymentModeCard(
+                                    title: "Credit Card(0.00)",
+                                    amount: "0.00",
+                                    color1: _selectedPaymentMode == 'Card'
+                                        ? AppColors.violetNormal
+                                        : Colors.white10,
+                                    color2: _selectedPaymentMode == 'Card'
+                                        ? AppColors.redNormal
+                                        : Colors.transparent,
+                                  ),
                                 ),
                                 const SizedBox(height: 20),
                               ],
@@ -392,23 +502,25 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                         controller: _amountController,
                                       ),
                                       const SizedBox(height: 10),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: SettlementLabelInput(
-                                              label: "Tender Cash",
-                                              controller: _tenderCashController,
+                                      if (_selectedPaymentMode == 'Cash')
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: SettlementLabelInput(
+                                                label: "Tender Cash",
+                                                controller:
+                                                    _tenderCashController,
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: SettlementLabelInput(
-                                              label: "Charge",
-                                              controller: _chargeController,
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: SettlementLabelInput(
+                                                label: "Charge",
+                                                controller: _chargeController,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
+                                          ],
+                                        ),
                                     ],
                                   ),
                                 ),
@@ -484,7 +596,9 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          "0.00",
+                                          (widget.settlePayment.finalTotal ??
+                                                  0.0)
+                                              .toStringAsFixed(2),
                                           style: GoogleFonts.rajdhani(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
@@ -576,6 +690,28 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                   ),
                                 ),
                                 const SizedBox(height: 20),
+                                // Settle Button
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: _onSettle,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.violetNormal,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      "SETTLE",
+                                      style: GoogleFonts.rajdhani(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

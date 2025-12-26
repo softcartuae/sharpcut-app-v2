@@ -8,6 +8,7 @@ import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit_state.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_expense.dart';
+import 'package:sharp_cut/presentation/expense/screens/screen_settlement.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_search.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
 import 'package:sharp_cut/presentation/home/widgets/added_item.dart';
@@ -675,52 +676,83 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                               .userId;
                                         }
 
-                                        final bookingFormState = context
-                                            .read<BookingFormCubit>()
-                                            .state;
+                                        SettlePaymentRequestModel request =
+                                            SettlePaymentRequestModel(
+                                              transactionId: transactionId,
+                                              customerName: bookingState
+                                                  .bookingResponse
+                                                  .customerName,
+                                              customerNumber: bookingState
+                                                  .bookingResponse
+                                                  .customerNumber,
+                                              grandTotal: serviceState.total,
+                                              taxTotal: serviceState.vat,
+                                              discount: 0.0,
+                                              roundOff: 0.0,
+                                              finalTotal: serviceState.total,
+                                              serviceId: serviceState.cartItems
+                                                  .map((e) => e.service.id!)
+                                                  .toList(),
+                                              quantity: serviceState.cartItems
+                                                  .map((e) => e.quantity)
+                                                  .toList(),
+                                              rate: serviceState.cartItems
+                                                  .map(
+                                                    (e) =>
+                                                        double.tryParse(
+                                                          e.service.price ??
+                                                              "0",
+                                                        ) ??
+                                                        0.0,
+                                                  )
+                                                  .toList(),
+                                              taxAmount: serviceState.cartItems
+                                                  .map((e) => 0.0)
+                                                  .toList(), // Placeholder
+                                              currency: serviceState.cartItems
+                                                  .map((e) => "AED")
+                                                  .toList(),
+                                              amountTotal: serviceState
+                                                  .cartItems
+                                                  .map(
+                                                    (e) =>
+                                                        (double.tryParse(
+                                                              e.service.price ??
+                                                                  "0",
+                                                            ) ??
+                                                            0.0) *
+                                                        e.quantity,
+                                                  )
+                                                  .toList(),
+                                              tax: serviceState.cartItems
+                                                  .map((e) => 0.0)
+                                                  .toList(), // Placeholder
+                                              subTotal: serviceState.cartItems
+                                                  .map(
+                                                    (e) =>
+                                                        (double.tryParse(
+                                                              e.service.price ??
+                                                                  "0",
+                                                            ) ??
+                                                            0.0) *
+                                                        e.quantity,
+                                                  )
+                                                  .toList(),
+                                              isTip: serviceState.cartItems
+                                                  .map((e) => 0)
+                                                  .toList(),
+                                              collectedUserId: [
+                                                userId!,
+                                              ], // Placeholder
+                                              mode: [],
+                                              amount: [serviceState.total],
+                                              tenderCash: [0.0],
+                                              change: [0.0],
+                                            );
 
-                                        if (bookingFormState
-                                            .customerName
-                                            .isEmpty) {
-                                          ToastHelper.showError(
-                                            "Customer name is required",
-                                          );
-                                          return;
-                                        }
-
-                                        if (bookingFormState
-                                            .customerNumber
-                                            .isEmpty) {
-                                          ToastHelper.showError(
-                                            "Customer number is required",
-                                          );
-                                          return;
-                                        }
-
-                                        showQuickPaymentPopup(
+                                        showSettlementDialog(
                                           context,
-                                          () {
-                                            // Cash Selected
-                                            _settlePayment(
-                                              context,
-                                              transactionId,
-                                              userId,
-                                              serviceState,
-                                              bookingFormState,
-                                              "Cash",
-                                            );
-                                          },
-                                          () {
-                                            // Card Selected
-                                            _settlePayment(
-                                              context,
-                                              transactionId,
-                                              userId,
-                                              serviceState,
-                                              bookingFormState,
-                                              "Card",
-                                            );
-                                          },
+                                          settlePayment: request,
                                         );
                                       }
                                     },
@@ -777,53 +809,5 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         ),
       ),
     );
-  }
-
-  void _settlePayment(
-    BuildContext context,
-    int? transactionId,
-    int? userId,
-    ServiceStateSuccess serviceState,
-    BookingFormState bookingFormState,
-    String paymentMode,
-  ) {
-    final request = SettlePaymentRequestModel(
-      transactionId: transactionId,
-      customerName: bookingFormState.customerName,
-      customerNumber: bookingFormState.customerNumber,
-      grandTotal: serviceState.total,
-      taxTotal: serviceState.vat,
-      discount: 0.0,
-      roundOff: 0.0,
-      finalTotal: serviceState.total,
-      serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
-      quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
-      rate: serviceState.cartItems
-          .map((e) => double.tryParse(e.service.price ?? "0") ?? 0.0)
-          .toList(),
-      taxAmount: serviceState.cartItems.map((e) => 0.0).toList(), // Placeholder
-      currency: serviceState.cartItems.map((e) => "AED").toList(),
-      amountTotal: serviceState.cartItems
-          .map(
-            (e) =>
-                (double.tryParse(e.service.price ?? "0") ?? 0.0) * e.quantity,
-          )
-          .toList(),
-      tax: serviceState.cartItems.map((e) => 0.0).toList(), // Placeholder
-      subTotal: serviceState.cartItems
-          .map(
-            (e) =>
-                (double.tryParse(e.service.price ?? "0") ?? 0.0) * e.quantity,
-          )
-          .toList(),
-      isTip: serviceState.cartItems.map((e) => 0).toList(),
-      collectedUserId: [userId!], // Placeholder
-      mode: [paymentMode],
-      amount: [serviceState.total],
-      tenderCash: [0.0],
-      change: [0.0],
-    );
-
-    context.read<BookingCubit>().settlePayment(request: request);
   }
 }
