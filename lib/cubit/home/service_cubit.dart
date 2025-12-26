@@ -73,6 +73,14 @@ class ServiceCubit extends Cubit<ServiceState> {
     }
   }
 
+
+void clearCart() {
+    final currentState = state;
+    if (currentState is ServiceStateSuccess) {
+      emit(currentState.copyWith(cartItems: []));
+    }
+  }
+
   void removeFromCart(CartItemModel item) {
     final currentState = state;
     if (currentState is ServiceStateSuccess) {

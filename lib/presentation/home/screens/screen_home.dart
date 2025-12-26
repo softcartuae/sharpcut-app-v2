@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_input_section.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_services_section.dart';
@@ -27,8 +28,11 @@ class _ScreenHomeState extends State<ScreenHome> {
     return Scaffold(
       body: BlocListener<BookingCubit, BookingState>(
         listener: (context, state) {
-          if (state is BookingCancelled) {
+          if (state is BookingCancelled || state is BookingInitial) {
             context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
+            if (state is BookingCancelled) {
+              context.read<ServiceCubit>().clearCart();
+            }
           }
         },
         child: SingleChildScrollView(

@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
+import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
+import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
 
 abstract class BookingRepo {
   Future<Either<String, BookingResponseModel>> bookSlot({
@@ -17,4 +19,8 @@ abstract class BookingRepo {
   });
 
   Future<Either<String, String>> saveBooking(SaveBookingRequestModel request);
+
+  Future<Either<String, SettlePaymentResponseModel>> settlePayment(
+    SettlePaymentRequestModel request,
+  );
 }

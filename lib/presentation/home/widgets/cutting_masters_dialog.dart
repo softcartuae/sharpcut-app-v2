@@ -105,7 +105,7 @@ class CuttingMastersDialog extends StatelessWidget {
               onSuccess: () {
                 context.read<BookingCubit>().restoreBooking(
                   bookingResponse: chair.transaction!,
-                );  
+                );
                 Navigator.of(context).pop();
               },
             );
@@ -137,7 +137,9 @@ class CuttingMastersDialog extends StatelessWidget {
             const SizedBox(height: 16),
             Expanded(
               child: Image.asset(
-                'lib/utils/images/chair.png',
+                chair.liveState == LiveState.occupied.name
+                    ? 'lib/utils/images/chair.png'
+                    : "lib/utils/images/chair-green.png",
                 fit: BoxFit.contain,
               ),
             ),

@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
+import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit_state.dart';
+import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_expense.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_search.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
@@ -25,7 +27,7 @@ import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 import 'package:sharp_cut/utils/helpers/icon_helper.dart';
 import 'package:sharp_cut/utils/comon/validate_password.dart';
-import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
+import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 
 class HomeServicesSection extends StatefulWidget {
@@ -137,6 +139,11 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           // Optionally clear cart or reset state
         } else if (state is BookingError) {
           ToastHelper.showError(state.message);
+        } else if (state is BookingPaymentSettled) {
+          ToastHelper.showSuccess(state.message);
+          context.read<ServiceCubit>().clearCart();
+          context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
+          // Optionally clear cart or reset state
         }
       },
       child: SizedBox(
@@ -206,9 +213,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               flex: 3,
               child: BlocBuilder<BookingCubit, BookingState>(
                 builder: (context, bookingState) {
-                  final isBooked =
-                      bookingState is BookingSuccess ||
-                      bookingState is BookingRestored;
+                  final isBooked = bookingState is BookingSuccess;
                   return Opacity(
                     opacity: isBooked ? 1.0 : 0.5,
                     child: CommonContainer(
@@ -403,9 +408,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               width: 200,
               child: BlocBuilder<BookingCubit, BookingState>(
                 builder: (context, bookingState) {
-                  final isBooked =
-                      bookingState is BookingSuccess ||
-                      bookingState is BookingRestored;
+                  final isBooked = bookingState is BookingSuccess;
 
                   return ValueListenableBuilder<String>(
                     valueListenable: _selectedButtonNotifier,
@@ -478,10 +481,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                       if (bookingState is BookingSuccess) {
                                         transactionId =
                                             bookingState.bookingResponse.id;
-                                      } else if (bookingState
-                                          is BookingRestored) {
-                                        transactionId =
-                                            bookingState.bookingResponse.id;
                                       }
 
                                       if (transactionId != null) {
@@ -508,100 +507,125 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               onTap: !isBooked
                                   ? null
                                   : () {
-                                    
-                                      // _selectedButtonNotifier.value =
-                                      //     "SAVE BOOKING";
-                                      // final serviceState = context
-                                      //     .read<ServiceCubit>()
-                                      //     .state;
-                                      // if (serviceState is ServiceStateSuccess) {
-                                      //   if (serviceState.cartItems.isEmpty) {
-                                      //     ToastHelper.showError(
-                                      //       "You have to select the services",
-                                      //     );
-                                      //     return;
-                                      //   }
+                                      _selectedButtonNotifier.value =
+                                          "SAVE BOOKING";
+                                      final serviceState = context
+                                          .read<ServiceCubit>()
+                                          .state;
+                                      if (serviceState is ServiceStateSuccess) {
+                                        if (serviceState.cartItems.isEmpty) {
+                                          ToastHelper.showError(
+                                            "You have to select the services",
+                                          );
+                                          return;
+                                        }
 
-                                      //   int? transactionId;
-                                      //   if (bookingState is BookingSuccess) {
-                                      //     transactionId =
-                                      //         bookingState.bookingResponse.id;
-                                      //   } else if (bookingState
-                                      //       is BookingRestored) {
-                                      //     transactionId =
-                                      //         bookingState.bookingResponse.id;
-                                      //   }
+                                        int? transactionId;
+                                        if (bookingState is BookingSuccess) {
+                                          transactionId =
+                                              bookingState.bookingResponse.id;
+                                        }
 
-                                      //   final bookingFormState = context
-                                      //       .read<BookingFormCubit>()
-                                      //       .state;
+                                        final bookingFormState = context
+                                            .read<BookingFormCubit>()
+                                            .state;
 
-                                      //   final request = SaveBookingRequestModel(
-                                      //     transactionId: transactionId,
-                                      //     customerName:
-                                      //         bookingFormState.customerName,
-                                      //     customerNumber:
-                                      //         bookingFormState.customerNumber,
-                                      //     grandTotal: serviceState.total,
-                                      //     taxTotal: serviceState.vat,
-                                      //     discount: 0.0,
-                                      //     roundOff: 0.0,
-                                      //     finalTotal: serviceState.total,
-                                      //     serviceId: serviceState.cartItems
-                                      //         .map((e) => e.service.id!)
-                                      //         .toList(),
-                                      //     quantity: serviceState.cartItems
-                                      //         .map((e) => e.quantity)
-                                      //         .toList(),
-                                      //     rate: serviceState.cartItems
-                                      //         .map(
-                                      //           (e) =>
-                                      //               double.tryParse(
-                                      //                 e.service.price ?? "0",
-                                      //               ) ??
-                                      //               0.0,
-                                      //         )
-                                      //         .toList(),
-                                      //     taxAmount: serviceState.cartItems
-                                      //         .map((e) => 0.0) // Placeholder
-                                      //         .toList(),
-                                      //     currency: serviceState.cartItems
-                                      //         .map((e) => "AED")
-                                      //         .toList(),
-                                      //     amountTotal: serviceState.cartItems
-                                      //         .map(
-                                      //           (e) =>
-                                      //               (double.tryParse(
-                                      //                     e.service.price ??
-                                      //                         "0",
-                                      //                   ) ??
-                                      //                   0.0) *
-                                      //               e.quantity,
-                                      //         )
-                                      //         .toList(),
-                                      //     tax: serviceState.cartItems
-                                      //         .map((e) => 0.0) // Placeholder
-                                      //         .toList(),
-                                      //     subTotal: serviceState.cartItems
-                                      //         .map(
-                                      //           (e) =>
-                                      //               (double.tryParse(
-                                      //                     e.service.price ??
-                                      //                         "0",
-                                      //                   ) ??
-                                      //                   0.0) *
-                                      //               e.quantity,
-                                      //         )
-                                      //         .toList(),
-                                      //     isTip: serviceState.cartItems
-                                      //         .map((e) => 0)
-                                      //         .toList(),
-                                      //   );
+                                        if (bookingFormState
+                                            .customerName
+                                            .isEmpty) {
+                                          ToastHelper.showError(
+                                            "Customer name is required",
+                                          );
+                                          return;
+                                        }
 
-                                      //   context
-                                      //       .read<BookingCubit>()
-                                      //       .saveBooking(request: request);
-                                      // }
+                                        if (bookingFormState
+                                            .customerNumber
+                                            .isEmpty) {
+                                          ToastHelper.showError(
+                                            "Customer number is required",
+                                          );
+                                          return;
+                                        }
+
+                                        showPasswordForValidation(
+                                          context,
+                                          false,
+                                          onSuccess: () {
+                                            final request = SaveBookingRequestModel(
+                                              transactionId: transactionId,
+                                              customerName:
+                                                  bookingFormState.customerName,
+                                              customerNumber: bookingFormState
+                                                  .customerNumber,
+                                              grandTotal: serviceState.total,
+                                              taxTotal: serviceState.vat,
+                                              discount: 0.0,
+                                              roundOff: 0.0,
+                                              finalTotal: serviceState.total,
+                                              serviceId: serviceState.cartItems
+                                                  .map((e) => e.service.id!)
+                                                  .toList(),
+                                              quantity: serviceState.cartItems
+                                                  .map((e) => e.quantity)
+                                                  .toList(),
+                                              rate: serviceState.cartItems
+                                                  .map(
+                                                    (e) =>
+                                                        double.tryParse(
+                                                          e.service.price ??
+                                                              "0",
+                                                        ) ??
+                                                        0.0,
+                                                  )
+                                                  .toList(),
+                                              taxAmount: serviceState.cartItems
+                                                  .map(
+                                                    (e) => 0.0,
+                                                  ) // Placeholder
+                                                  .toList(),
+                                              currency: serviceState.cartItems
+                                                  .map((e) => "AED")
+                                                  .toList(),
+                                              amountTotal: serviceState
+                                                  .cartItems
+                                                  .map(
+                                                    (e) =>
+                                                        (double.tryParse(
+                                                              e.service.price ??
+                                                                  "0",
+                                                            ) ??
+                                                            0.0) *
+                                                        e.quantity,
+                                                  )
+                                                  .toList(),
+                                              tax: serviceState.cartItems
+                                                  .map(
+                                                    (e) => 0.0,
+                                                  ) // Placeholder
+                                                  .toList(),
+                                              subTotal: serviceState.cartItems
+                                                  .map(
+                                                    (e) =>
+                                                        (double.tryParse(
+                                                              e.service.price ??
+                                                                  "0",
+                                                            ) ??
+                                                            0.0) *
+                                                        e.quantity,
+                                                  )
+                                                  .toList(),
+                                              isTip: serviceState.cartItems
+                                                  .map((e) => 0)
+                                                  .toList(),
+                                            );
+
+                                            context
+                                                .read<BookingCubit>()
+                                                .saveBooking(request: request);
+                                          },
+                                        );
+                                      }
                                     },
                             ),
                           ),
@@ -641,37 +665,124 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                   : () {
                                       _selectedButtonNotifier.value =
                                           "SAVE & SETTLE BILL";
+
+                                      final serviceState = context
+                                          .read<ServiceCubit>()
+                                          .state;
+                                      if (serviceState is ServiceStateSuccess) {
+                                        if (serviceState.cartItems.isEmpty) {
+                                          ToastHelper.showError(
+                                            "You have to select the services",
+                                          );
+                                          return;
+                                        }
+
+                                        int? transactionId;
+                                        int? userId;
+                                        if (bookingState is BookingSuccess) {
+                                          transactionId =
+                                              bookingState.bookingResponse.id;
+                                          userId = bookingState
+                                              .bookingResponse
+                                              .userId;
+                                        }
+
+                                        final bookingFormState = context
+                                            .read<BookingFormCubit>()
+                                            .state;
+
+                                        if (bookingFormState
+                                            .customerName
+                                            .isEmpty) {
+                                          ToastHelper.showError(
+                                            "Customer name is required",
+                                          );
+                                          return;
+                                        }
+
+                                        if (bookingFormState
+                                            .customerNumber
+                                            .isEmpty) {
+                                          ToastHelper.showError(
+                                            "Customer number is required",
+                                          );
+                                          return;
+                                        }
+
+                                        showPasswordForValidation(
+                                          context,
+                                          false,
+                                          onSuccess: () {
+                                            showQuickPaymentPopup(
+                                              context,
+                                              () {
+                                                // Cash Selected
+                                                _settlePayment(
+                                                  context,
+                                                  transactionId,
+                                                  userId,
+                                                  serviceState,
+                                                  bookingFormState,
+                                                  "Cash",
+                                                );
+                                              },
+                                              () {
+                                                // Card Selected
+                                                _settlePayment(
+                                                  context,
+                                                  transactionId,
+                                                  userId,
+                                                  serviceState,
+                                                  bookingFormState,
+                                                  "Card",
+                                                );
+                                              },
+                                            );
+                                          },
+                                        );
+                                      }
                                     },
                             ),
                           ),
                           const SizedBox(height: 12),
-                          ActionButton(
-                            label: "ADD EXPENSE",
-                            isPrimary: selectedButton == "ADD EXPENSE",
-                            onTap: () {
-                              _selectedButtonNotifier.value = "ADD EXPENSE";
-                              showPasswordForValidation(
-                                context,
-                                false,
-                                onSuccessWithStaff: (staff) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ScreenExpense(staff: staff),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
+                          Opacity(
+                            opacity: isBooked ? 0.5 : 1.0,
+                            child: ActionButton(
+                              label: "ADD EXPENSE",
+                              isPrimary: selectedButton == "ADD EXPENSE",
+                              onTap: isBooked
+                                  ? null
+                                  : () {
+                                      _selectedButtonNotifier.value =
+                                          "ADD EXPENSE";
+                                      showPasswordForValidation(
+                                        context,
+                                        false,
+                                        onSuccessWithStaff: (staff) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ScreenExpense(staff: staff),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                            ),
                           ),
                           const SizedBox(height: 12),
-                          ActionButton(
-                            label: "REPORT",
-                            isPrimary: selectedButton == "REPORT",
-                            onTap: () {
-                              _selectedButtonNotifier.value = "REPORT";
-                            },
+                          Opacity(
+                            opacity: isBooked ? 0.5 : 1.0,
+                            child: ActionButton(
+                              label: "REPORT",
+                              isPrimary: selectedButton == "REPORT",
+                              onTap: isBooked
+                                  ? null
+                                  : () {
+                                      _selectedButtonNotifier.value = "REPORT";
+                                    },
+                            ),
                           ),
                         ],
                       );
@@ -684,5 +795,53 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         ),
       ),
     );
+  }
+
+  void _settlePayment(
+    BuildContext context,
+    int? transactionId,
+    int? userId,
+    ServiceStateSuccess serviceState,
+    BookingFormState bookingFormState,
+    String paymentMode,
+  ) {
+    final request = SettlePaymentRequestModel(
+      transactionId: transactionId,
+      customerName: bookingFormState.customerName,
+      customerNumber: bookingFormState.customerNumber,
+      grandTotal: serviceState.total,
+      taxTotal: serviceState.vat,
+      discount: 0.0,
+      roundOff: 0.0,
+      finalTotal: serviceState.total,
+      serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
+      quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
+      rate: serviceState.cartItems
+          .map((e) => double.tryParse(e.service.price ?? "0") ?? 0.0)
+          .toList(),
+      taxAmount: serviceState.cartItems.map((e) => 0.0).toList(), // Placeholder
+      currency: serviceState.cartItems.map((e) => "AED").toList(),
+      amountTotal: serviceState.cartItems
+          .map(
+            (e) =>
+                (double.tryParse(e.service.price ?? "0") ?? 0.0) * e.quantity,
+          )
+          .toList(),
+      tax: serviceState.cartItems.map((e) => 0.0).toList(), // Placeholder
+      subTotal: serviceState.cartItems
+          .map(
+            (e) =>
+                (double.tryParse(e.service.price ?? "0") ?? 0.0) * e.quantity,
+          )
+          .toList(),
+      isTip: serviceState.cartItems.map((e) => 0).toList(),
+      collectedUserId: [userId!], // Placeholder
+      mode: [paymentMode],
+      amount: [serviceState.total],
+      tenderCash: [0.0],
+      change: [0.0],
+    );
+
+    context.read<BookingCubit>().settlePayment(request: request);
   }
 }

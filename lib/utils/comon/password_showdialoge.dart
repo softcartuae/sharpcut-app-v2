@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +17,10 @@ Future<void> showPasswordDialoge(BuildContext context, ChairModel chair) {
 
   // Fetch staffs from ChairCubit
   final chairCubit = context.read<ChairCubit>();
-  final staffList = chairCubit.staffs;
+  List<StaffModel> staffListAll = List<StaffModel>.from(chairCubit.staffs);
+  List<StaffModel> staffList = staffListAll
+      .where((element) => element.role != Role.admin)
+      .toList();
 
   return showDialog(
     context: context,
@@ -25,7 +29,7 @@ Future<void> showPasswordDialoge(BuildContext context, ChairModel chair) {
         builder: (context, setState) {
           return BlocConsumer<BookingCubit, BookingState>(
             listener: (context, state) {
-              if (state is BookingSuccess) {
+              if (state is BookingInitial) {
                 Navigator.of(context).pop();
                 ToastHelper.showSuccess("Booking Success");
               } else if (state is BookingError) {

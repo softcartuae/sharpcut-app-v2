@@ -4,6 +4,8 @@ import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
+import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
+import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
 
 class BookingRepoImp implements BookingRepo {
   @override
@@ -120,6 +122,39 @@ class BookingRepoImp implements BookingRepo {
       return Left('Error saving booking: ${e.message}');
     } catch (e) {
       return Left('Error saving booking: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, SettlePaymentResponseModel>> settlePayment(
+    SettlePaymentRequestModel request,
+  ) async {
+    try {
+      final response = await ApiClient.dio.post(
+        ApiClient.settlePayment,
+        data: request.toJson(),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true) {
+          return Right(SettlePaymentResponseModel.fromJson(data));
+        } else {
+          return Left(data['message'] ?? 'Payment settlement failed');
+        }
+      } else {
+        return Left('Failed to settle payment: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        final data = e.response!.data;
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return Left(data['message']);
+        }
+      }
+      return Left('Error settling payment: ${e.message}');
+    } catch (e) {
+      return Left('Error settling payment: $e');
     }
   }
 }

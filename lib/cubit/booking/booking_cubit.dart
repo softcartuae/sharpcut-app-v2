@@ -1,8 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
+import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class BookingCubit extends Cubit<BookingState> {
   final BookingRepo bookingRepo;
@@ -22,13 +25,12 @@ class BookingCubit extends Cubit<BookingState> {
     );
     result.fold(
       (error) => emit(BookingError(message: error)),
-      (bookingResponse) =>
-          emit(BookingSuccess(bookingResponse: bookingResponse)),
+      (bookingResponse) => emit(BookingInitial()),
     );
   }
 
   void restoreBooking({required BookingResponseModel bookingResponse}) {
-    emit(BookingRestored(bookingResponse: bookingResponse));
+    emit(BookingSuccess(bookingResponse: bookingResponse));
   }
 
   Future<void> cancelBooking({
@@ -51,12 +53,27 @@ class BookingCubit extends Cubit<BookingState> {
   }
 
   Future<void> saveBooking({required SaveBookingRequestModel request}) async {
-    return;
-    emit(BookingLoading());
+    // emit(BookingLoading());
     final result = await bookingRepo.saveBooking(request);
     result.fold(
+      (error) => ToastHelper.showError(error),
+      (message) => ToastHelper.showSuccess(message),
+    );
+  }
+
+  Future<void> settlePayment({
+    required SettlePaymentRequestModel request,
+  }) async {
+    emit(BookingLoading());
+    final result = await bookingRepo.settlePayment(request);
+    result.fold(
       (error) => emit(BookingError(message: error)),
-      (message) => emit(BookingSaved(message: message)),
+      (response) => emit(
+        BookingPaymentSettled(
+          message: response.message ?? 'Payment settled',
+          response: response,
+        ),
+      ),
     );
   }
 }

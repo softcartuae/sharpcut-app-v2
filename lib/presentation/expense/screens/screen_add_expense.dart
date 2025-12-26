@@ -21,6 +21,14 @@ class ScreenAddExpense extends StatefulWidget {
 class _ScreenAddExpenseState extends State<ScreenAddExpense> {
   final List<ExpenseModel> _addedExpenses = [];
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showAddExpenseDialog();
+    });
+  }
+
   void _showAddExpenseDialog() {
     String itemName = '';
     String amount = '';

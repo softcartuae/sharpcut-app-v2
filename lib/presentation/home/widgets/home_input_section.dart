@@ -1,12 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
 
-class HomeInputSection extends StatelessWidget {
+class HomeInputSection extends StatefulWidget {
   const HomeInputSection({super.key});
+
+  @override
+  State<HomeInputSection> createState() => _HomeInputSectionState();
+}
+
+class _HomeInputSectionState extends State<HomeInputSection> {
+  late TextEditingController _nameController;
+  late TextEditingController _numberController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _numberController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _numberController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +57,9 @@ class HomeInputSection extends StatelessWidget {
           String date = "Date";
           String bookingTime = "Booking Time";
           String customerName = "Customer Name";
+          String customerNumber = "Customer Number";
           String staffName = "Sales Man";
-          final isBooked = state is BookingSuccess || state is BookingRestored;
+          final isBooked = state is BookingSuccess;
 
           if (state is BookingSuccess) {
             final booking = state.bookingResponse;
@@ -59,21 +83,23 @@ class HomeInputSection extends StatelessWidget {
               }
             }
 
-            customerName = booking.customerName ?? "Customer Name";
+            customerName = booking.customerName ?? "";
+            customerNumber = booking.customerNumber ?? "";
             staffName = booking.staff?.name ?? "Sales Man";
           }
 
           return BlocListener<BookingCubit, BookingState>(
             listener: (context, state) {
               if (state is BookingSuccess) {
+                final name = state.bookingResponse.customerName ?? "";
+                final number = state.bookingResponse.customerNumber ?? "";
+
+                _nameController.text = name;
+                _numberController.text = number;
+
                 context.read<BookingFormCubit>().setInitialData(
-                  name: state.bookingResponse.customerName ?? "",
-                  number: state.bookingResponse.customerNumber ?? "",
-                );
-              } else if (state is BookingRestored) {
-                context.read<BookingFormCubit>().setInitialData(
-                  name: state.bookingResponse.customerName ?? "",
-                  number: state.bookingResponse.customerNumber ?? "",
+                  name: name,
+                  number: number,
                 );
               }
             },
@@ -114,6 +140,7 @@ class HomeInputSection extends StatelessWidget {
                   children: [
                     Expanded(
                       child: CustomTextField(
+                        controller: _nameController,
                         readOnly: isBooked == true ? false : true,
                         label: "Customer Name",
                         hint: customerName,
@@ -126,10 +153,15 @@ class HomeInputSection extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: CustomTextField(
+                        controller: _numberController,
                         label: "Customer Number",
                         hint: "Customer Number",
                         icon: Icons.phone_outlined, // Placeholder icon
                         readOnly: isBooked == true ? false : true,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         onChanged: (value) {
                           context.read<BookingFormCubit>().updateNumber(value);
                         },
