@@ -37,13 +37,13 @@ class _ScreenHomeState extends State<ScreenHome> {
         },
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(39.0),
+            padding: const EdgeInsets.symmetric(horizontal: 39.0, vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 HomeAppBar(),
                 HomeInputSection(),
-                SizedBox(height: 40),
+                SizedBox(height: 20),
                 HomeServicesSection(),
               ],
             ),

@@ -23,4 +23,8 @@ abstract class BookingRepo {
   Future<Either<String, SettlePaymentResponseModel>> settlePayment(
     SettlePaymentRequestModel request,
   );
+
+  Future<Either<String, SettlePaymentResponseModel>> quickPayment(
+    SettlePaymentRequestModel request,
+  );
 }

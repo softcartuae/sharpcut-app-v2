@@ -37,14 +37,14 @@ class _HomeAppBarState extends State<HomeAppBar> {
           children: [
             Image.asset(
               "lib/utils/images/sharp_cut.png",
-              height: 150,
-              width: 150,
+              height: 80,
+              width: 80,
             ),
             const SizedBox(width: 25),
             Image.asset(
               "lib/utils/images/Shop Location.png",
-              height: 40,
-              width: 40,
+              height: 30,
+              width: 30,
               color: AppColors.violetLight,
             ),
             const SizedBox(width: 12),

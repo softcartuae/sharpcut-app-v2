@@ -34,7 +34,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 100, vertical: 24),
+      padding: EdgeInsets.symmetric(horizontal: 100, vertical: 20),
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage("lib/utils/images/rectangle.png"),
@@ -143,7 +143,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                         controller: _nameController,
                         readOnly: isBooked == true ? false : true,
                         label: "Customer Name",
-                        hint: customerName,
+                        hint: "Customer Name",
                         icon: Icons.person_outline,
                         onChanged: (value) {
                           context.read<BookingFormCubit>().updateName(value);

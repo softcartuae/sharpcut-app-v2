@@ -50,6 +50,54 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     context.read<ServiceCubit>().getCategories();
   }
 
+  void _settlePayment(
+    BuildContext context,
+    int? transactionId,
+    int? userId,
+    ServiceStateSuccess serviceState,
+    BookingFormState bookingFormState,
+    String paymentMode,
+  ) {
+    final request = SettlePaymentRequestModel(
+      transactionId: transactionId,
+      customerName: bookingFormState.customerName,
+      customerNumber: bookingFormState.customerNumber,
+      grandTotal: serviceState.total,
+      taxTotal: serviceState.vat,
+      discount: 0.0,
+      roundOff: 0.0,
+      finalTotal: serviceState.total,
+      serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
+      quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
+      rate: serviceState.cartItems
+          .map((e) => double.tryParse(e.service.price ?? "0") ?? 0.0)
+          .toList(),
+      taxAmount: serviceState.cartItems.map((e) => 0.0).toList(), // Placeholder
+      currency: serviceState.cartItems.map((e) => "AED").toList(),
+      amountTotal: serviceState.cartItems
+          .map(
+            (e) =>
+                (double.tryParse(e.service.price ?? "0") ?? 0.0) * e.quantity,
+          )
+          .toList(),
+      tax: serviceState.cartItems.map((e) => 0.0).toList(), // Placeholder
+      subTotal: serviceState.cartItems
+          .map(
+            (e) =>
+                (double.tryParse(e.service.price ?? "0") ?? 0.0) * e.quantity,
+          )
+          .toList(),
+      isTip: serviceState.cartItems.map((e) => 0).toList(),
+      collectedUserId: [userId!], // Placeholder
+      mode: [paymentMode],
+      amount: [serviceState.total],
+      tenderCash: [0.0],
+      change: [0.0],
+    );
+
+    context.read<BookingCubit>().quickPayment(request: request);
+  }
+
   @override
   void dispose() {
     _selectedButtonNotifier.dispose();
@@ -148,63 +196,65 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         }
       },
       child: SizedBox(
-        height: 600, // Fixed height for now, can be flexible later
+        height: 450, // Fixed height for now, can be flexible later
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Category Sidebar
-            SizedBox(
-              width: 200,
-              child: BlocBuilder<ServiceCubit, ServiceState>(
-                builder: (context, state) {
-                  List<Widget> categories = [];
+            SingleChildScrollView(
+              child: SizedBox(
+                width: 200,
+                child: BlocBuilder<ServiceCubit, ServiceState>(
+                  builder: (context, state) {
+                    List<Widget> categories = [];
+                    if (state is ServiceStateSuccess) {
+                      // Add "ALL" category
+                      categories.add(
+                        CategoryItem(
+                          onTap: () {
+                            context.read<ServiceCubit>().getServices(
+                              categoryId: null,
+                            );
+                          },
+                          title: "ALL",
+                          icon: Icons.grid_view,
+                          isSelected: state.selectedCategoryId == null,
+                        ),
+                      );
+                      categories.add(const SizedBox(height: 12));
 
-                  if (state is ServiceStateSuccess) {
-                    // Add "ALL" category
-                    categories.add(
-                      CategoryItem(
-                        onTap: () {
-                          context.read<ServiceCubit>().getServices(
-                            categoryId: null,
+                      // Add dynamic categories
+                      categories.addAll(
+                        state.categories.map((category) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: CategoryItem(
+                              onTap: () {
+                                context.read<ServiceCubit>().getServices(
+                                  categoryId: category.id,
+                                );
+                              },
+                              title: category.name ?? "Service",
+                              icon: getIconForService(category.name),
+                              isSelected:
+                                  state.selectedCategoryId == category.id,
+                            ),
                           );
-                        },
-                        title: "ALL",
-                        icon: Icons.grid_view,
-                        isSelected: state.selectedCategoryId == null,
-                      ),
-                    );
-                    categories.add(const SizedBox(height: 12));
+                        }),
+                      );
+                    } else if (state is ServiceStateLoading) {
+                      categories.add(
+                        const Center(child: CircularProgressIndicator()),
+                      );
+                    }
 
-                    // Add dynamic categories
-                    categories.addAll(
-                      state.categories.map((category) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: CategoryItem(
-                            onTap: () {
-                              context.read<ServiceCubit>().getServices(
-                                categoryId: category.id,
-                              );
-                            },
-                            title: category.name ?? "Service",
-                            icon: getIconForService(category.name),
-                            isSelected: state.selectedCategoryId == category.id,
-                          ),
-                        );
-                      }),
+                    return ListView(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      children: categories,
                     );
-                  } else if (state is ServiceStateLoading) {
-                    categories.add(
-                      const Center(child: CircularProgressIndicator()),
-                    );
-                  }
-
-                  return ListView(
-                    padding: EdgeInsets.zero,
-                    shrinkWrap: true,
-                    children: categories,
-                  );
-                },
+                  },
+                ),
               ),
             ),
             const SizedBox(width: 10),
@@ -405,404 +455,487 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             const SizedBox(width: 24),
 
             // 4. Action Buttons Sidebar
-            SizedBox(
-              width: 200,
-              child: BlocBuilder<BookingCubit, BookingState>(
-                builder: (context, bookingState) {
-                  final isBooked = bookingState is BookingSuccess;
+            SingleChildScrollView(
+              child: SizedBox(
+                width: 200,
+                child: BlocBuilder<BookingCubit, BookingState>(
+                  builder: (context, bookingState) {
+                    final isBooked = bookingState is BookingSuccess;
 
-                  return ValueListenableBuilder<String>(
-                    valueListenable: _selectedButtonNotifier,
-                    builder: (context, selectedButton, child) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            children: [
-                              SearchAndMenu(
-                                icon: Icons.search,
+                    return ValueListenableBuilder<String>(
+                      valueListenable: _selectedButtonNotifier,
+                      builder: (context, selectedButton, child) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              children: [
+                                SearchAndMenu(
+                                  icon: Icons.search,
+                                  onTap: isBooked
+                                      ? null
+                                      : () async {
+                                          showPasswordForValidation(
+                                            context,
+                                            false,
+                                            onSuccess: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ScreenSearch(),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                ),
+                                const SizedBox(width: 12),
+                                SearchAndMenu(
+                                  key: _menuKey,
+                                  icon: Icons.menu,
+                                  onTap: isBooked
+                                      ? null
+                                      : () {
+                                          _showMenu();
+                                        },
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            // BOOK A SLOT - Disabled if already booked
+                            Opacity(
+                              opacity: isBooked ? 0.5 : 1.0,
+                              child: ActionButton(
+                                label: isBooked ? "SLOT BOOKED" : "BOOK A SLOT",
+                                isPrimary:
+                                    !isBooked &&
+                                    selectedButton == "BOOK A SLOT",
                                 onTap: isBooked
                                     ? null
-                                    : () async {
+                                    : () {
+                                        _selectedButtonNotifier.value =
+                                            "BOOK A SLOT";
+                                        CuttingMastersDialog.show(context);
+                                      },
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Opacity(
+                              opacity: isBooked ? 1.0 : 0.5,
+                              child: ActionButton(
+                                label: "CANCEL",
+                                isPrimary: selectedButton == "CANCEL",
+                                onTap: !isBooked
+                                    ? null
+                                    : () {
+                                        _selectedButtonNotifier.value =
+                                            "CANCEL";
+                                        int? transactionId;
+                                        if (bookingState is BookingSuccess) {
+                                          transactionId =
+                                              bookingState.bookingResponse.id;
+                                        }
+
+                                        if (transactionId != null) {
+                                          CancellationDialog.show(
+                                            context,
+                                            transactionId,
+                                          );
+                                        } else {
+                                          ToastHelper.showError(
+                                            "Invalid booking details",
+                                          );
+                                        }
+                                      },
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // SAVE BOOKING - Disabled if NOT booked
+                            Opacity(
+                              opacity: !isBooked ? 0.5 : 1.0,
+                              child: ActionButton(
+                                label: "SAVE BOOKING",
+                                isPrimary:
+                                    isBooked &&
+                                    selectedButton == "SAVE BOOKING",
+                                onTap: !isBooked
+                                    ? null
+                                    : () {
+                                        _selectedButtonNotifier.value =
+                                            "SAVE BOOKING";
+                                        final serviceState = context
+                                            .read<ServiceCubit>()
+                                            .state;
+                                        if (serviceState
+                                            is ServiceStateSuccess) {
+                                          if (serviceState.cartItems.isEmpty) {
+                                            ToastHelper.showError(
+                                              "You have to select the services",
+                                            );
+                                            return;
+                                          }
+
+                                          int? transactionId;
+                                          if (bookingState is BookingSuccess) {
+                                            transactionId =
+                                                bookingState.bookingResponse.id;
+                                          }
+
+                                          final bookingFormState = context
+                                              .read<BookingFormCubit>()
+                                              .state;
+
+                                          if (bookingFormState
+                                              .customerName
+                                              .isEmpty) {
+                                            ToastHelper.showError(
+                                              "Customer name is required",
+                                            );
+                                            return;
+                                          }
+
+                                          if (bookingFormState
+                                              .customerNumber
+                                              .isEmpty) {
+                                            ToastHelper.showError(
+                                              "Customer number is required",
+                                            );
+                                            return;
+                                          }
+
+                                          final request = SaveBookingRequestModel(
+                                            transactionId: transactionId,
+                                            customerName:
+                                                bookingFormState.customerName,
+                                            customerNumber:
+                                                bookingFormState.customerNumber,
+                                            grandTotal: serviceState.total,
+                                            taxTotal: serviceState.vat,
+                                            discount: 0.0,
+                                            roundOff: 0.0,
+                                            finalTotal: serviceState.total,
+                                            serviceId: serviceState.cartItems
+                                                .map((e) => e.service.id!)
+                                                .toList(),
+                                            quantity: serviceState.cartItems
+                                                .map((e) => e.quantity)
+                                                .toList(),
+                                            rate: serviceState.cartItems
+                                                .map(
+                                                  (e) =>
+                                                      double.tryParse(
+                                                        e.service.price ?? "0",
+                                                      ) ??
+                                                      0.0,
+                                                )
+                                                .toList(),
+                                            taxAmount: serviceState.cartItems
+                                                .map((e) => 0.0) // Placeholder
+                                                .toList(),
+                                            currency: serviceState.cartItems
+                                                .map((e) => "AED")
+                                                .toList(),
+                                            amountTotal: serviceState.cartItems
+                                                .map(
+                                                  (e) =>
+                                                      (double.tryParse(
+                                                            e.service.price ??
+                                                                "0",
+                                                          ) ??
+                                                          0.0) *
+                                                      e.quantity,
+                                                )
+                                                .toList(),
+                                            tax: serviceState.cartItems
+                                                .map((e) => 0.0) // Placeholder
+                                                .toList(),
+                                            subTotal: serviceState.cartItems
+                                                .map(
+                                                  (e) =>
+                                                      (double.tryParse(
+                                                            e.service.price ??
+                                                                "0",
+                                                          ) ??
+                                                          0.0) *
+                                                      e.quantity,
+                                                )
+                                                .toList(),
+                                            isTip: serviceState.cartItems
+                                                .map((e) => 0)
+                                                .toList(),
+                                          );
+
+                                          context
+                                              .read<BookingCubit>()
+                                              .saveBooking(request: request);
+                                        }
+                                      },
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // QUICK PAYMENT - Disabled if NOT booked
+                            Opacity(
+                              opacity: !isBooked ? 0.5 : 1.0,
+                              child: ActionButton(
+                                key: quickPaymentKey,
+                                label: "QUICK PAYMENT",
+                                isPrimary:
+                                    isBooked &&
+                                    selectedButton == "QUICK PAYMENT",
+                                onTap: !isBooked
+                                    ? null
+                                    : () {
+                                        _selectedButtonNotifier.value =
+                                            "QUICK PAYMENT";
+
+                                        final serviceState = context
+                                            .read<ServiceCubit>()
+                                            .state;
+                                        if (serviceState
+                                            is ServiceStateSuccess) {
+                                          if (serviceState.cartItems.isEmpty) {
+                                            ToastHelper.showError(
+                                              "You have to select the services",
+                                            );
+                                            return;
+                                          }
+
+                                          int? transactionId;
+                                          int? userId;
+                                          if (bookingState is BookingSuccess) {
+                                            transactionId =
+                                                bookingState.bookingResponse.id;
+                                            userId = bookingState
+                                                .bookingResponse
+                                                .userId;
+                                          }
+
+                                          final bookingFormState = context
+                                              .read<BookingFormCubit>()
+                                              .state;
+
+                                          if (bookingFormState
+                                              .customerName
+                                              .isEmpty) {
+                                            ToastHelper.showError(
+                                              "Customer name is required",
+                                            );
+                                            return;
+                                          }
+
+                                          if (bookingFormState
+                                              .customerNumber
+                                              .isEmpty) {
+                                            ToastHelper.showError(
+                                              "Customer number is required",
+                                            );
+                                            return;
+                                          }
+
+                                          showQuickPaymentPopup(
+                                            context,
+                                            () {
+                                              // Cash Selected
+                                              _settlePayment(
+                                                context,
+                                                transactionId,
+                                                userId,
+                                                serviceState,
+                                                bookingFormState,
+                                                "Cash",
+                                              );
+                                            },
+                                            () {
+                                              // Card Selected
+                                              _settlePayment(
+                                                context,
+                                                transactionId,
+                                                userId,
+                                                serviceState,
+                                                bookingFormState,
+                                                "Card",
+                                              );
+                                            },
+                                          );
+                                        }
+                                      },
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // SAVE & SETTLE BILL - Disabled if NOT booked
+                            Opacity(
+                              opacity: !isBooked ? 0.5 : 1.0,
+                              child: ActionButton(
+                                label: "SAVE & SETTLE BILL",
+                                isPrimary:
+                                    isBooked &&
+                                    selectedButton == "SAVE & SETTLE BILL",
+                                onTap: !isBooked
+                                    ? null
+                                    : () {
+                                        _selectedButtonNotifier.value =
+                                            "SAVE & SETTLE BILL";
+
+                                        final serviceState = context
+                                            .read<ServiceCubit>()
+                                            .state;
+                                        if (serviceState
+                                            is ServiceStateSuccess) {
+                                          if (serviceState.cartItems.isEmpty) {
+                                            ToastHelper.showError(
+                                              "You have to select the services",
+                                            );
+                                            return;
+                                          }
+
+                                          int? transactionId;
+                                          int? userId;
+                                          if (bookingState is BookingSuccess) {
+                                            transactionId =
+                                                bookingState.bookingResponse.id;
+                                            userId = bookingState
+                                                .bookingResponse
+                                                .userId;
+                                          }
+
+                                          SettlePaymentRequestModel
+                                          request = SettlePaymentRequestModel(
+                                            transactionId: transactionId,
+                                            customerName: bookingState
+                                                .bookingResponse
+                                                .customerName,
+                                            customerNumber: bookingState
+                                                .bookingResponse
+                                                .customerNumber,
+                                            grandTotal: serviceState.total,
+                                            taxTotal: serviceState.vat,
+                                            discount: 0.0,
+                                            roundOff: 0.0,
+                                            finalTotal: serviceState.total,
+                                            serviceId: serviceState.cartItems
+                                                .map((e) => e.service.id!)
+                                                .toList(),
+                                            quantity: serviceState.cartItems
+                                                .map((e) => e.quantity)
+                                                .toList(),
+                                            rate: serviceState.cartItems
+                                                .map(
+                                                  (e) =>
+                                                      double.tryParse(
+                                                        e.service.price ?? "0",
+                                                      ) ??
+                                                      0.0,
+                                                )
+                                                .toList(),
+                                            taxAmount: serviceState.cartItems
+                                                .map((e) => 0.0)
+                                                .toList(), // Placeholder
+                                            currency: serviceState.cartItems
+                                                .map((e) => "AED")
+                                                .toList(),
+                                            amountTotal: serviceState.cartItems
+                                                .map(
+                                                  (e) =>
+                                                      (double.tryParse(
+                                                            e.service.price ??
+                                                                "0",
+                                                          ) ??
+                                                          0.0) *
+                                                      e.quantity,
+                                                )
+                                                .toList(),
+                                            tax: serviceState.cartItems
+                                                .map((e) => 0.0)
+                                                .toList(), // Placeholder
+                                            subTotal: serviceState.cartItems
+                                                .map(
+                                                  (e) =>
+                                                      (double.tryParse(
+                                                            e.service.price ??
+                                                                "0",
+                                                          ) ??
+                                                          0.0) *
+                                                      e.quantity,
+                                                )
+                                                .toList(),
+                                            isTip: serviceState.cartItems
+                                                .map((e) => 0)
+                                                .toList(),
+                                            collectedUserId: [
+                                              userId!,
+                                            ], // Placeholder
+                                            mode: [],
+                                            amount: [serviceState.total],
+                                            tenderCash: [0.0],
+                                            change: [0.0],
+                                          );
+
+                                          showSettlementDialog(
+                                            context,
+                                            settlePayment: request,
+                                            staffName: bookingState
+                                                .bookingResponse
+                                                .staff
+                                                ?.name,
+                                            bookingTime: bookingState
+                                                .bookingResponse
+                                                .createdAt,
+                                            invoiceNumber: bookingState
+                                                .bookingResponse
+                                                .invoiceNo,
+                                          );
+                                        }
+                                      },
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Opacity(
+                              opacity: isBooked ? 0.5 : 1.0,
+                              child: ActionButton(
+                                label: "ADD EXPENSE",
+                                isPrimary: selectedButton == "ADD EXPENSE",
+                                onTap: isBooked
+                                    ? null
+                                    : () {
+                                        _selectedButtonNotifier.value =
+                                            "ADD EXPENSE";
                                         showPasswordForValidation(
                                           context,
                                           false,
-                                          onSuccess: () {
+                                          onSuccessWithStaff: (staff) {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
-                                                    ScreenSearch(),
+                                                    ScreenExpense(staff: staff),
                                               ),
                                             );
                                           },
                                         );
                                       },
                               ),
-                              const SizedBox(width: 12),
-                              SearchAndMenu(
-                                key: _menuKey,
-                                icon: Icons.menu,
+                            ),
+                            const SizedBox(height: 12),
+                            Opacity(
+                              opacity: isBooked ? 0.5 : 1.0,
+                              child: ActionButton(
+                                label: "REPORT",
+                                isPrimary: selectedButton == "REPORT",
                                 onTap: isBooked
                                     ? null
                                     : () {
-                                        _showMenu();
+                                        _selectedButtonNotifier.value =
+                                            "REPORT";
                                       },
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          // BOOK A SLOT - Disabled if already booked
-                          Opacity(
-                            opacity: isBooked ? 0.5 : 1.0,
-                            child: ActionButton(
-                              label: isBooked ? "SLOT BOOKED" : "BOOK A SLOT",
-                              isPrimary:
-                                  !isBooked && selectedButton == "BOOK A SLOT",
-                              onTap: isBooked
-                                  ? null
-                                  : () {
-                                      _selectedButtonNotifier.value =
-                                          "BOOK A SLOT";
-                                      CuttingMastersDialog.show(context);
-                                    },
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Opacity(
-                            opacity: isBooked ? 1.0 : 0.5,
-                            child: ActionButton(
-                              label: "CANCEL",
-                              isPrimary: selectedButton == "CANCEL",
-                              onTap: !isBooked
-                                  ? null
-                                  : () {
-                                      _selectedButtonNotifier.value = "CANCEL";
-                                      int? transactionId;
-                                      if (bookingState is BookingSuccess) {
-                                        transactionId =
-                                            bookingState.bookingResponse.id;
-                                      }
-
-                                      if (transactionId != null) {
-                                        CancellationDialog.show(
-                                          context,
-                                          transactionId,
-                                        );
-                                      } else {
-                                        ToastHelper.showError(
-                                          "Invalid booking details",
-                                        );
-                                      }
-                                    },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          // SAVE BOOKING - Disabled if NOT booked
-                          Opacity(
-                            opacity: !isBooked ? 0.5 : 1.0,
-                            child: ActionButton(
-                              label: "SAVE BOOKING",
-                              isPrimary:
-                                  isBooked && selectedButton == "SAVE BOOKING",
-                              onTap: !isBooked
-                                  ? null
-                                  : () {
-                                      _selectedButtonNotifier.value =
-                                          "SAVE BOOKING";
-                                      final serviceState = context
-                                          .read<ServiceCubit>()
-                                          .state;
-                                      if (serviceState is ServiceStateSuccess) {
-                                        if (serviceState.cartItems.isEmpty) {
-                                          ToastHelper.showError(
-                                            "You have to select the services",
-                                          );
-                                          return;
-                                        }
-
-                                        int? transactionId;
-                                        if (bookingState is BookingSuccess) {
-                                          transactionId =
-                                              bookingState.bookingResponse.id;
-                                        }
-
-                                        final bookingFormState = context
-                                            .read<BookingFormCubit>()
-                                            .state;
-
-                                        if (bookingFormState
-                                            .customerName
-                                            .isEmpty) {
-                                          ToastHelper.showError(
-                                            "Customer name is required",
-                                          );
-                                          return;
-                                        }
-
-                                        if (bookingFormState
-                                            .customerNumber
-                                            .isEmpty) {
-                                          ToastHelper.showError(
-                                            "Customer number is required",
-                                          );
-                                          return;
-                                        }
-
-                                        final request = SaveBookingRequestModel(
-                                          transactionId: transactionId,
-                                          customerName:
-                                              bookingFormState.customerName,
-                                          customerNumber:
-                                              bookingFormState.customerNumber,
-                                          grandTotal: serviceState.total,
-                                          taxTotal: serviceState.vat,
-                                          discount: 0.0,
-                                          roundOff: 0.0,
-                                          finalTotal: serviceState.total,
-                                          serviceId: serviceState.cartItems
-                                              .map((e) => e.service.id!)
-                                              .toList(),
-                                          quantity: serviceState.cartItems
-                                              .map((e) => e.quantity)
-                                              .toList(),
-                                          rate: serviceState.cartItems
-                                              .map(
-                                                (e) =>
-                                                    double.tryParse(
-                                                      e.service.price ?? "0",
-                                                    ) ??
-                                                    0.0,
-                                              )
-                                              .toList(),
-                                          taxAmount: serviceState.cartItems
-                                              .map((e) => 0.0) // Placeholder
-                                              .toList(),
-                                          currency: serviceState.cartItems
-                                              .map((e) => "AED")
-                                              .toList(),
-                                          amountTotal: serviceState.cartItems
-                                              .map(
-                                                (e) =>
-                                                    (double.tryParse(
-                                                          e.service.price ??
-                                                              "0",
-                                                        ) ??
-                                                        0.0) *
-                                                    e.quantity,
-                                              )
-                                              .toList(),
-                                          tax: serviceState.cartItems
-                                              .map((e) => 0.0) // Placeholder
-                                              .toList(),
-                                          subTotal: serviceState.cartItems
-                                              .map(
-                                                (e) =>
-                                                    (double.tryParse(
-                                                          e.service.price ??
-                                                              "0",
-                                                        ) ??
-                                                        0.0) *
-                                                    e.quantity,
-                                              )
-                                              .toList(),
-                                          isTip: serviceState.cartItems
-                                              .map((e) => 0)
-                                              .toList(),
-                                        );
-
-                                        context
-                                            .read<BookingCubit>()
-                                            .saveBooking(request: request);
-                                      }
-                                    },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          // QUICK PAYMENT - Disabled if NOT booked
-                          Opacity(
-                            opacity: !isBooked ? 0.5 : 1.0,
-                            child: ActionButton(
-                              key: quickPaymentKey,
-                              label: "QUICK PAYMENT",
-                              isPrimary:
-                                  isBooked && selectedButton == "QUICK PAYMENT",
-                              onTap: !isBooked
-                                  ? null
-                                  : () {
-                                      _selectedButtonNotifier.value =
-                                          "QUICK PAYMENT";
-                                      showQuickPaymentPopup(
-                                        context,
-                                        () {},
-                                        () {},
-                                      );
-                                    },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          // SAVE & SETTLE BILL - Disabled if NOT booked
-                          Opacity(
-                            opacity: !isBooked ? 0.5 : 1.0,
-                            child: ActionButton(
-                              label: "SAVE & SETTLE BILL",
-                              isPrimary:
-                                  isBooked &&
-                                  selectedButton == "SAVE & SETTLE BILL",
-                              onTap: !isBooked
-                                  ? null
-                                  : () {
-                                      _selectedButtonNotifier.value =
-                                          "SAVE & SETTLE BILL";
-
-                                      final serviceState = context
-                                          .read<ServiceCubit>()
-                                          .state;
-                                      if (serviceState is ServiceStateSuccess) {
-                                        if (serviceState.cartItems.isEmpty) {
-                                          ToastHelper.showError(
-                                            "You have to select the services",
-                                          );
-                                          return;
-                                        }
-
-                                        int? transactionId;
-                                        int? userId;
-                                        if (bookingState is BookingSuccess) {
-                                          transactionId =
-                                              bookingState.bookingResponse.id;
-                                          userId = bookingState
-                                              .bookingResponse
-                                              .userId;
-                                        }
-
-                                        SettlePaymentRequestModel request =
-                                            SettlePaymentRequestModel(
-                                              transactionId: transactionId,
-                                              customerName: bookingState
-                                                  .bookingResponse
-                                                  .customerName,
-                                              customerNumber: bookingState
-                                                  .bookingResponse
-                                                  .customerNumber,
-                                              grandTotal: serviceState.total,
-                                              taxTotal: serviceState.vat,
-                                              discount: 0.0,
-                                              roundOff: 0.0,
-                                              finalTotal: serviceState.total,
-                                              serviceId: serviceState.cartItems
-                                                  .map((e) => e.service.id!)
-                                                  .toList(),
-                                              quantity: serviceState.cartItems
-                                                  .map((e) => e.quantity)
-                                                  .toList(),
-                                              rate: serviceState.cartItems
-                                                  .map(
-                                                    (e) =>
-                                                        double.tryParse(
-                                                          e.service.price ??
-                                                              "0",
-                                                        ) ??
-                                                        0.0,
-                                                  )
-                                                  .toList(),
-                                              taxAmount: serviceState.cartItems
-                                                  .map((e) => 0.0)
-                                                  .toList(), // Placeholder
-                                              currency: serviceState.cartItems
-                                                  .map((e) => "AED")
-                                                  .toList(),
-                                              amountTotal: serviceState
-                                                  .cartItems
-                                                  .map(
-                                                    (e) =>
-                                                        (double.tryParse(
-                                                              e.service.price ??
-                                                                  "0",
-                                                            ) ??
-                                                            0.0) *
-                                                        e.quantity,
-                                                  )
-                                                  .toList(),
-                                              tax: serviceState.cartItems
-                                                  .map((e) => 0.0)
-                                                  .toList(), // Placeholder
-                                              subTotal: serviceState.cartItems
-                                                  .map(
-                                                    (e) =>
-                                                        (double.tryParse(
-                                                              e.service.price ??
-                                                                  "0",
-                                                            ) ??
-                                                            0.0) *
-                                                        e.quantity,
-                                                  )
-                                                  .toList(),
-                                              isTip: serviceState.cartItems
-                                                  .map((e) => 0)
-                                                  .toList(),
-                                              collectedUserId: [
-                                                userId!,
-                                              ], // Placeholder
-                                              mode: [],
-                                              amount: [serviceState.total],
-                                              tenderCash: [0.0],
-                                              change: [0.0],
-                                            );
-
-                                        showSettlementDialog(
-                                          context,
-                                          settlePayment: request,
-                                        );
-                                      }
-                                    },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Opacity(
-                            opacity: isBooked ? 0.5 : 1.0,
-                            child: ActionButton(
-                              label: "ADD EXPENSE",
-                              isPrimary: selectedButton == "ADD EXPENSE",
-                              onTap: isBooked
-                                  ? null
-                                  : () {
-                                      _selectedButtonNotifier.value =
-                                          "ADD EXPENSE";
-                                      showPasswordForValidation(
-                                        context,
-                                        false,
-                                        onSuccessWithStaff: (staff) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ScreenExpense(staff: staff),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Opacity(
-                            opacity: isBooked ? 0.5 : 1.0,
-                            child: ActionButton(
-                              label: "REPORT",
-                              isPrimary: selectedButton == "REPORT",
-                              onTap: isBooked
-                                  ? null
-                                  : () {
-                                      _selectedButtonNotifier.value = "REPORT";
-                                    },
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ],

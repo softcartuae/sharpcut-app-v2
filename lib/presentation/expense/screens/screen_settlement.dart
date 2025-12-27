@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
@@ -12,21 +14,39 @@ import 'package:sharp_cut/presentation/expense/widgets/settlement_text_fields.da
 import 'package:sharp_cut/presentation/expense/widgets/settlement_time_container.dart';
 import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 Future<void> showSettlementDialog(
   BuildContext context, {
   required SettlePaymentRequestModel settlePayment,
+  required String? staffName,
+  required String? bookingTime,
+  required String? invoiceNumber,
 }) {
   return showDialog(
     context: context,
     barrierColor: Colors.black.withValues(alpha: 0.5),
-    builder: (context) => SettlementDialog(settlePayment: settlePayment),
+    builder: (context) => SettlementDialog(
+      invoiceNumber: invoiceNumber,
+      settlePayment: settlePayment,
+      staffName: staffName,
+      bookingTime: bookingTime,
+    ),
   );
 }
 
 class SettlementDialog extends StatefulWidget {
   final SettlePaymentRequestModel settlePayment;
-  const SettlementDialog({super.key, required this.settlePayment});
+  final String? staffName;
+  final String? bookingTime;
+  final String? invoiceNumber;
+  const SettlementDialog({
+    super.key,
+    required this.settlePayment,
+    required this.staffName,
+    required this.bookingTime,
+    required this.invoiceNumber,
+  });
 
   @override
   State<SettlementDialog> createState() => _SettlementDialogState();
@@ -37,6 +57,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _trnController = TextEditingController();
+  final TextEditingController _staffNameController = TextEditingController();
 
   // Payment Section Controllers
   final TextEditingController _amountController = TextEditingController(
@@ -62,9 +83,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
   final TextEditingController _roundOffController = TextEditingController(
     text: "0.00",
   );
-  final TextEditingController _vatController = TextEditingController(
-    text: "0.00",
-  );
+
   final TextEditingController _paidController = TextEditingController(
     text: "0.00",
   );
@@ -75,9 +94,28 @@ class _SettlementDialogState extends State<SettlementDialog> {
     text: "0.00",
   );
 
-  DateTime _selectedDate = DateTime.now();
+  final TextEditingController _vatController = TextEditingController(
+    text: "0.00",
+  );
+
+  final TextEditingController _invoiceController = TextEditingController(
+    text: "0.00",
+  );
+
+  // Split Payment Controllers
+  final TextEditingController _cashAmountController = TextEditingController(
+    text: "0.00",
+  );
+  final TextEditingController _cardAmountController = TextEditingController(
+    text: "0.00",
+  );
+
   bool _splitPayment = false;
-  String _selectedPaymentMode = 'Cash';
+  // Track selected modes. If split is off, only one is true.
+  bool _isCashSelected = true;
+  bool _isCardSelected = false;
+
+  double _finalTotal = 0.0;
 
   @override
   void initState() {
@@ -88,7 +126,9 @@ class _SettlementDialogState extends State<SettlementDialog> {
   void _populateData() {
     _mobileController.text = widget.settlePayment.customerNumber ?? '';
     _nameController.text = widget.settlePayment.customerName ?? '';
-
+    _staffNameController.text = widget.staffName ?? "";
+    _vatController.text = widget.settlePayment.taxTotal.toString();
+    _invoiceController.text = widget.invoiceNumber ?? "";
     // Calculate total quantity
     int totalQty = 0;
     if (widget.settlePayment.quantity != null) {
@@ -104,14 +144,67 @@ class _SettlementDialogState extends State<SettlementDialog> {
         .toStringAsFixed(2);
     _roundOffController.text = (widget.settlePayment.roundOff ?? 0.0)
         .toStringAsFixed(2);
-    _vatController.text = (widget.settlePayment.taxTotal ?? 0.0)
-        .toStringAsFixed(2);
 
     // Amount to pay is usually the final total
     _amountController.text = (widget.settlePayment.finalTotal ?? 0.0)
         .toStringAsFixed(2);
 
+    // Initialize split controllers
+    _cashAmountController.text = (widget.settlePayment.finalTotal ?? 0.0)
+        .toStringAsFixed(2);
+    _cardAmountController.text = "0.00";
+
     // Grand total display at the bottom usually matches final total
+    _calculateFinalTotal();
+  }
+
+  void _calculateFinalTotal() {
+    final double subTotal = widget.settlePayment.grandTotal ?? 0.0;
+    final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
+    final double discount = double.tryParse(_discountController.text) ?? 0.0;
+    final double roundOff = double.tryParse(_roundOffController.text) ?? 0.0;
+
+    // User requested: "like minus from grand total" for both discount and round off.
+    // Final = SubTotal + Tax - Discount - RoundOff
+    setState(() {
+      _finalTotal = subTotal + taxTotal - discount - roundOff;
+
+      // Also update split amounts if they haven't been manually edited?
+      // Or just let the user handle it?
+      // If split is OFF, we might want to sync the amount controller?
+      if (!_splitPayment) {
+        _amountController.text = _finalTotal.toStringAsFixed(2);
+        _cashAmountController.text = _finalTotal.toStringAsFixed(2);
+      }
+      _calculatePaymentAndBalance();
+    });
+  }
+
+  void _calculatePaymentAndBalance() {
+    double cashAmount = 0.0;
+    double cardAmount = 0.0;
+
+    if (_splitPayment) {
+      if (_isCashSelected) {
+        cashAmount = double.tryParse(_cashAmountController.text) ?? 0.0;
+      }
+      if (_isCardSelected) {
+        cardAmount = double.tryParse(_cardAmountController.text) ?? 0.0;
+      }
+    } else {
+      final double amount = double.tryParse(_amountController.text) ?? 0.0;
+      if (_isCashSelected) {
+        cashAmount = amount;
+      } else {
+        cardAmount = amount;
+      }
+    }
+
+    final double curPayment = cashAmount + cardAmount;
+    final double balance = _finalTotal - curPayment;
+
+    _curPaymentController.text = curPayment.toStringAsFixed(2);
+    _balanceController.text = balance.toStringAsFixed(2);
   }
 
   @override
@@ -127,65 +220,124 @@ class _SettlementDialogState extends State<SettlementDialog> {
     _subTotalController.dispose();
     _discountController.dispose();
     _roundOffController.dispose();
-    _vatController.dispose();
     _paidController.dispose();
     _curPaymentController.dispose();
     _balanceController.dispose();
+    _cashAmountController.dispose();
+    _cardAmountController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: AppColors.violetNormal,
-              onPrimary: Colors.white,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
-            ),
-            // ignore: deprecated_member_use
-            dialogBackgroundColor: const Color(0xFF1E1E1E),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
   void _onSettle() {
-    final double amount = double.tryParse(_amountController.text) ?? 0.0;
+    final double discount = double.tryParse(_discountController.text) ?? 0.0;
+    final double roundOff = double.tryParse(_roundOffController.text) ?? 0.0;
+
+    // Recalculate final total based on current inputs
+    // final_total = grand_total + tax_total - discount + round_off
+    // Note: widget.settlePayment.grandTotal might be the subtotal before tax?
+    // Let's assume the formula: Final = (GrandTotal or SubTotal) + Tax - Discount + RoundOff
+    // Based on populateData: _subTotalController <-- grandTotal. _vatController <-- taxTotal.
+    // So Final = SubTotal + VAT - Discount + RoundOff.
+
+    final double subTotal = widget.settlePayment.grandTotal ?? 0.0;
+    final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
+
+    final double calculatedFinalTotal = _finalTotal;
+
+    // Get amounts based on selection
+    double cashAmount = 0.0;
+    double cardAmount = 0.0;
+
+    if (_splitPayment) {
+      if (_isCashSelected) {
+        cashAmount = double.tryParse(_cashAmountController.text) ?? 0.0;
+      }
+      if (_isCardSelected) {
+        cardAmount = double.tryParse(_cardAmountController.text) ?? 0.0;
+      }
+    } else {
+      // Split OFF: use the main amount controller for the selected mode
+      // Actually, to keep it simple, let's use the specific controllers if we expose them,
+      // OR map _amountController to the selected one.
+      // Current UI plan: If split OFF, show _amountController.
+      // So we read from _amountController and assign to selected mode.
+      final double amount = double.tryParse(_amountController.text) ?? 0.0;
+      if (_isCashSelected) {
+        cashAmount = amount;
+      } else {
+        cardAmount = amount;
+      }
+    }
+
+    final double totalPaid = cashAmount + cardAmount;
+
+    // Validation
+    if (totalPaid > calculatedFinalTotal) {
+      ToastHelper.showError("Total amount cannot be greater than Final Total");
+
+      return;
+    }
+
+    if (_nameController.text.isEmpty) {
+      ToastHelper.showError("Please Enter Customer Name");
+      return;
+    }
+
+    // Also check if totalPaid is 0? Maybe allow 0 for partial?
+    // User said "settlement is like can be partially gaven".
+    // So < finalTotal is allowed. > finalTotal is NOT allowed.
+
     final double tenderCash =
         double.tryParse(_tenderCashController.text) ?? 0.0;
     final double change = double.tryParse(_chargeController.text) ?? 0.0;
 
-    // Create a new request model with updated values
-    // We need to create a copy of the existing model but with updated payment details
-    // Since SettlePaymentRequestModel fields are final, we might need to create a new instance
-    // utilizing the data from the widget.settlePayment and the new input values.
+    // Construct lists
+    List<String> modes = [];
+    List<double> amounts = [];
+    List<double> tenders = [];
+    List<double> changes = [];
 
-    // Note: The current SettlePaymentRequestModel definition in the file view
-    // doesn't show a copyWith method, so I'll construct a new one.
+    if (cashAmount > 0 || (_splitPayment && _isCashSelected)) {
+      modes.add("Cash");
+      amounts.add(cashAmount);
+      tenders.add(tenderCash);
+      changes.add(change);
+    }
+
+    if (cardAmount > 0 || (_splitPayment && _isCardSelected)) {
+      modes.add("Card");
+      amounts.add(cardAmount);
+      // For card, tender is usually same as amount, change is 0
+      tenders.add(cardAmount);
+      changes.add(0.0);
+    }
+
+    // If nothing selected/entered but we need to send something?
+    // If totalPaid is 0, maybe we still send the modes with 0?
+    if (modes.isEmpty) {
+      // Fallback to selected mode with 0
+      if (_isCashSelected) {
+        modes.add("Cash");
+        amounts.add(0.0);
+        tenders.add(0.0);
+        changes.add(0.0);
+      } else {
+        modes.add("Card");
+        amounts.add(0.0);
+        tenders.add(0.0);
+        changes.add(0.0);
+      }
+    }
 
     final request = SettlePaymentRequestModel(
       transactionId: widget.settlePayment.transactionId,
       customerName: _nameController.text,
       customerNumber: _mobileController.text,
-      grandTotal: widget.settlePayment.grandTotal,
-      taxTotal: widget.settlePayment.taxTotal,
-      discount: widget.settlePayment.discount,
-      roundOff: widget.settlePayment.roundOff,
-      finalTotal: widget.settlePayment.finalTotal, // Or amount if it can change
+      grandTotal: subTotal,
+      taxTotal: taxTotal,
+      discount: discount,
+      roundOff: roundOff,
+      finalTotal: calculatedFinalTotal,
       serviceId: widget.settlePayment.serviceId,
       quantity: widget.settlePayment.quantity,
       rate: widget.settlePayment.rate,
@@ -195,17 +347,23 @@ class _SettlementDialogState extends State<SettlementDialog> {
       tax: widget.settlePayment.tax,
       subTotal: widget.settlePayment.subTotal,
       isTip: widget.settlePayment.isTip,
-      collectedUserId: widget.settlePayment.collectedUserId,
-      mode: [_selectedPaymentMode], // 'Cash' or 'Card'
-      amount: [amount],
-      tenderCash: _selectedPaymentMode == 'Cash'
-          ? [tenderCash]
-          : [amount], // If card, tender usually equals amount
-      change: _selectedPaymentMode == 'Cash' ? [change] : [0.0],
-    );
 
+      collectedUserId:
+          widget.settlePayment.collectedUserId != null &&
+              widget.settlePayment.collectedUserId!.isNotEmpty
+          ? List.filled(
+              modes.length,
+              widget.settlePayment.collectedUserId!.first,
+            )
+          : [],
+
+      mode: modes,
+      amount: amounts,
+      tenderCash: tenders,
+      change: changes,
+    );
     context.read<BookingCubit>().settlePayment(request: request);
-    Navigator.pop(context); // Close the dialog
+    Navigator.pop(context);
   }
 
   @override
@@ -213,516 +371,626 @@ class _SettlementDialogState extends State<SettlementDialog> {
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(20),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.95,
-        height: MediaQuery.of(context).size.height * 0.9,
-        child: Stack(
-          children: [
-            // Glassmorphism Background
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(
-                      0xFF2A1A3A,
-                    ).withValues(alpha: 0.9), // Darker background
-                    borderRadius: BorderRadius.circular(20),
-                    border: const GradientBoxBorder(
-                      gradient: LinearGradient(
-                        colors: [Colors.white24, Colors.white10],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+      child: SingleChildScrollView(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.95,
+          height: MediaQuery.of(context).size.height * 0.9,
+          child: Stack(
+            children: [
+              // Glassmorphism Background
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(
+                        0xFF2A1A3A,
+                      ).withValues(alpha: 0.9), // Darker background
+                      borderRadius: BorderRadius.circular(20),
+                      border: const GradientBoxBorder(
+                        gradient: LinearGradient(
+                          colors: [Colors.white24, Colors.white10],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        width: 1,
                       ),
-                      width: 1,
                     ),
                   ),
                 ),
               ),
-            ),
 
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header with Time
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const SettlementTimeContainer(
-                        label: "Time Starts",
-                        time: "10:15",
-                      ),
-                      const Spacer(),
-                      const SettlementTimeContainer(
-                        label: "Elapse Time",
-                        time: "12:15",
-                      ),
-                      const SizedBox(width: 20),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header with Time
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SettlementTimeContainer(
+                          label: "Time Starts",
+                          time: widget.bookingTime != null
+                              ? DateFormat(
+                                  'HH:mm',
+                                ).format(DateTime.parse(widget.bookingTime!))
+                              : "--:--",
+                        ),
+                        const Spacer(),
+                        SettlementTimeContainer(
+                          label: "Elapse Time",
+                          time: DateFormat('HH:mm').format(DateTime.now()),
+                        ),
+                        const SizedBox(width: 20),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
 
-                  // Customer Details Section
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: CustomTextField(
-                          label: "Mobile No.",
-                          hint: "Mobile no",
-                          icon: Icons.grid_view,
-                          controller: _mobileController,
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: CustomTextField(
-                          label: "Name",
-                          hint: "Name",
-                          icon: Icons.person,
-                          controller: _nameController,
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: CustomTextField(
-                          label: "Customer Address",
-                          hint: "Customer Address",
-                          icon: Icons.home,
-                          controller: _addressController,
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: CustomTextField(
-                          label: "TRN (VAT- TIN)",
-                          hint: "TRN(VAT-TIN)",
-                          icon: Icons.card_membership,
-                          controller: _trnController,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Date Row
-                  Row(
-                    children: [
-                      SizedBox(
-                        width:
-                            MediaQuery.of(context).size.width *
-                            0.22, // Match approx width of expanded above
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Bill Date",
-                              style: GoogleFonts.rajdhani(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () => _selectDate(context),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(
-                                    sigmaX: 10,
-                                    sigmaY: 10,
-                                  ),
-                                  child: Container(
-                                    height: 48,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: const GradientBoxBorder(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            AppColors.violetLight,
-                                            AppColors.violetDark,
-                                          ],
-                                        ),
-                                        width: .5,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.calendar_today,
-                                          color: Colors.white.withValues(
-                                            alpha: 0.7,
-                                          ),
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          DateFormat(
-                                            'dd/MM/yyyy',
-                                          ).format(_selectedDate),
-                                          style: GoogleFonts.rajdhani(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-                  const Divider(color: Colors.white24),
-                  const SizedBox(height: 20),
-
-                  // Main Content: 3 Columns
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                    // Customer Details Section
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          flex: 1,
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                // Cash Card
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedPaymentMode = 'Cash';
-                                    });
-                                  },
-                                  child: PaymentModeCard(
-                                    title: "Cash (0.00)",
-                                    amount: "0.00",
-                                    color1: _selectedPaymentMode == 'Cash'
-                                        ? AppColors.violetNormal
-                                        : Colors.white10,
-                                    color2: _selectedPaymentMode == 'Cash'
-                                        ? AppColors.redNormal
-                                        : Colors.transparent,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                // Credit Card
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedPaymentMode = 'Card';
-                                    });
-                                  },
-                                  child: PaymentModeCard(
-                                    title: "Credit Card(0.00)",
-                                    amount: "0.00",
-                                    color1: _selectedPaymentMode == 'Card'
-                                        ? AppColors.violetNormal
-                                        : Colors.white10,
-                                    color2: _selectedPaymentMode == 'Card'
-                                        ? AppColors.redNormal
-                                        : Colors.transparent,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                              ],
-                            ),
+                          child: CustomTextField(
+                            label: "Name",
+                            hint: "Name",
+                            icon: Icons.person,
+                            controller: _nameController,
                           ),
                         ),
                         const SizedBox(width: 20),
-                        // Column 1: Payment Modes
                         Expanded(
-                          flex: 3,
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                // Split Payment & Inputs
-                                SettlementGlassContainer(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    children: [
-                                      Wrap(
-                                        alignment: WrapAlignment.spaceBetween,
-                                        crossAxisAlignment:
-                                            WrapCrossAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Total Cash: 0.00",
-                                            style: GoogleFonts.rajdhani(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
+                          child: CustomTextField(
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            label: "Mobile No.",
+                            hint: "Mobile no",
+                            icon: Icons.phone,
+                            controller: _mobileController,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: CustomTextField(
+                            readOnly: true,
+                            label: "Sales Man",
+                            hint: "Sales Man",
+                            icon: Icons.groups_outlined,
+                            controller: _staffNameController,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: CustomTextField(
+                            controller: _invoiceController,
+                            label: "Invoice No.",
+                            hint: "Invoice No.",
+                            icon: Icons.receipt_long_outlined,
+                            readOnly: true,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+                    const Divider(color: Colors.white24),
+                    const SizedBox(height: 20),
+
+                    // Main Content: 3 Columns
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  // Cash Card
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        if (_splitPayment) {
+                                          // If trying to deselect Cash, check if Card is selected
+                                          if (_isCashSelected &&
+                                              !_isCardSelected) {
+                                            return; // Don't allow deselecting the last one
+                                          }
+                                          _isCashSelected = !_isCashSelected;
+                                        } else {
+                                          _isCashSelected = true;
+                                          _isCardSelected = false;
+                                        }
+                                        _calculatePaymentAndBalance();
+                                      });
+                                    },
+                                    child: PaymentModeCard(
+                                      title:
+                                          "Cash (${_cashAmountController.text})",
+                                      amount: _cashAmountController.text,
+                                      color1: _isCashSelected
+                                          ? AppColors.violetNormal
+                                          : Colors.white10,
+                                      color2: _isCashSelected
+                                          ? AppColors.redNormal
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  // Credit Card
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        if (_splitPayment) {
+                                          // If trying to deselect Card, check if Cash is selected
+                                          if (_isCardSelected &&
+                                              !_isCashSelected) {
+                                            return; // Don't allow deselecting the last one
+                                          }
+                                          _isCardSelected = !_isCardSelected;
+                                        } else {
+                                          _isCardSelected = true;
+                                          _isCashSelected = false;
+                                        }
+                                        _calculatePaymentAndBalance();
+                                      });
+                                    },
+                                    child: PaymentModeCard(
+                                      title:
+                                          "Credit Card(${_cardAmountController.text})",
+                                      amount: _cardAmountController.text,
+                                      color1: _isCardSelected
+                                          ? AppColors.violetNormal
+                                          : Colors.white10,
+                                      color2: _isCardSelected
+                                          ? AppColors.redNormal
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          // Column 1: Payment Modes
+                          Expanded(
+                            flex: 3,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  // Split Payment & Inputs
+                                  SettlementGlassContainer(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      children: [
+                                        Wrap(
+                                          alignment: WrapAlignment.spaceBetween,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
+                                          children: [
+                                            Text(
+                                              "Total Cash: ${_curPaymentController.text}",
+                                              style: GoogleFonts.rajdhani(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
+                                            SizedBox(width: 5),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  "Split Payment",
+                                                  style: GoogleFonts.rajdhani(
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Switch(
+                                                  value: _splitPayment,
+                                                  onChanged: (val) => setState(() {
+                                                    _splitPayment = val;
+                                                    // Reset selections when toggling split
+                                                    if (!_splitPayment) {
+                                                      _isCashSelected = true;
+                                                      _isCardSelected = false;
+                                                      // Reset amounts?
+                                                      _amountController.text =
+                                                          (widget
+                                                                      .settlePayment
+                                                                      .finalTotal ??
+                                                                  0.0)
+                                                              .toStringAsFixed(
+                                                                2,
+                                                              );
+                                                    } else {
+                                                      // If turning on split, maybe select both?
+                                                      // Or keep current selection.
+                                                      // Let's default to Cash selected, Card unselected but available.
+                                                      // Initialize controllers
+                                                      _cashAmountController
+                                                              .text =
+                                                          _amountController
+                                                              .text;
+                                                      _cardAmountController
+                                                              .text =
+                                                          "0.00";
+                                                    }
+                                                    _calculatePaymentAndBalance();
+                                                  }),
+                                                  activeColor:
+                                                      AppColors.violetNormal,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        const Divider(color: Colors.white24),
+                                        const SizedBox(height: 10),
+
+                                        // Dynamic Inputs based on selection
+                                        if (_isCashSelected) ...[
+                                          SettlementLabelInput(
+                                            label: _splitPayment
+                                                ? "Cash Amount"
+                                                : "Amount",
+                                            controller: _splitPayment
+                                                ? _cashAmountController
+                                                : _amountController,
+                                            onChanged: (val) {
+                                              // If split is off, sync _amountController to _cashAmountController for display?
+                                              // Actually, if split is off, we use _amountController in _onSettle.
+                                              // But for consistent display in the card, we might want to update it.
+                                              setState(() {
+                                                if (!_splitPayment) {
+                                                  _cashAmountController.text =
+                                                      val;
+                                                }
+                                                _calculatePaymentAndBalance();
+                                              });
+                                            },
+                                            keyboardType:
+                                                const TextInputType.numberWithOptions(
+                                                  decimal: true,
+                                                ),
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                RegExp(r'^\d*\.?\d{0,2}'),
+                                              ),
+                                            ],
                                           ),
-                                          SizedBox(width: 5),
+                                          const SizedBox(height: 10),
                                           Row(
-                                            mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text(
-                                                "Split Payment",
-                                                style: GoogleFonts.rajdhani(
-                                                  color: Colors.white,
+                                              Expanded(
+                                                child: SettlementLabelInput(
+                                                  label: "Tender Cash",
+                                                  controller:
+                                                      _tenderCashController,
+                                                  keyboardType:
+                                                      const TextInputType.numberWithOptions(
+                                                        decimal: true,
+                                                      ),
+                                                  inputFormatters: [
+                                                    FilteringTextInputFormatter.allow(
+                                                      RegExp(r'^\d*\.?\d{0,2}'),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                              const SizedBox(width: 8),
-                                              Switch(
-                                                value: _splitPayment,
-                                                onChanged: (val) => setState(
-                                                  () => _splitPayment = val,
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: SettlementLabelInput(
+                                                  label: "Change",
+                                                  controller: _chargeController,
+                                                  keyboardType:
+                                                      const TextInputType.numberWithOptions(
+                                                        decimal: true,
+                                                      ),
+                                                  inputFormatters: [
+                                                    FilteringTextInputFormatter.allow(
+                                                      RegExp(r'^\d*\.?\d{0,2}'),
+                                                    ),
+                                                  ],
                                                 ),
-                                                activeColor:
-                                                    AppColors.violetNormal,
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10),
+                                        ],
+
+                                        if (_isCardSelected) ...[
+                                          SettlementLabelInput(
+                                            label: _splitPayment
+                                                ? "Card Amount"
+                                                : "Amount",
+                                            controller: _splitPayment
+                                                ? _cardAmountController
+                                                : _amountController,
+                                            onChanged: (val) {
+                                              setState(() {
+                                                if (!_splitPayment) {
+                                                  _cardAmountController.text =
+                                                      val;
+                                                }
+                                                _calculatePaymentAndBalance();
+                                              });
+                                            },
+                                            keyboardType:
+                                                const TextInputType.numberWithOptions(
+                                                  decimal: true,
+                                                ),
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                RegExp(r'^\d*\.?\d{0,2}'),
                                               ),
                                             ],
                                           ),
                                         ],
-                                      ),
-                                      const Divider(color: Colors.white24),
-                                      const SizedBox(height: 10),
-                                      SettlementLabelInput(
-                                        label: "Amount",
-                                        controller: _amountController,
-                                      ),
-                                      const SizedBox(height: 10),
-                                      if (_selectedPaymentMode == 'Cash')
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: SettlementLabelInput(
-                                                label: "Tender Cash",
-                                                controller:
-                                                    _tenderCashController,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Expanded(
-                                              child: SettlementLabelInput(
-                                                label: "Charge",
-                                                controller: _chargeController,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-
-                        // Column 2: Totals & Calculations
-                        Expanded(
-                          flex: 3,
-                          child: SettlementGlassContainer(
-                            padding: const EdgeInsets.all(16),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  SettlementRowInput(
-                                    label: "Total Qty",
-                                    controller: _totalQtyController,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  SettlementRowInput(
-                                    label: "Sub Total",
-                                    controller: _subTotalController,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  SettlementRowInput(
-                                    label: "P. Discount",
-                                    controller: _discountController,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  SettlementRowInput(
-                                    label: "Round Off",
-                                    controller: _roundOffController,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  SettlementRowInput(
-                                    label: "VAT",
-                                    controller: _vatController,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  SettlementRowInput(
-                                    label: "Paid",
-                                    controller: _paidController,
-                                  ),
-                                  const SizedBox(height: 20),
-
-                                  // Grand Total
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          AppColors.violetNormal,
-                                          AppColors.redNormal,
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          "Grand Total",
-                                          style: GoogleFonts.rajdhani(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          (widget.settlePayment.finalTotal ??
-                                                  0.0)
-                                              .toStringAsFixed(2),
-                                          style: GoogleFonts.rajdhani(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 24,
-                                          ),
-                                        ),
                                       ],
                                     ),
-                                  ),
-                                  const SizedBox(height: 20),
-
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Cur. Payment",
-                                              style: GoogleFonts.rajdhani(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            SettlementSimpleInput(
-                                              controller: _curPaymentController,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Balance",
-                                              style: GoogleFonts.rajdhani(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            SettlementSimpleInput(
-                                              controller: _balanceController,
-                                              isReadOnly: true,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 20),
+                          const SizedBox(width: 20),
 
-                        // Column 3: Payment History
-                        Expanded(
-                          flex: 3,
-                          child: SettlementGlassContainer(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                Text(
-                                  "Payment History",
-                                  style: GoogleFonts.rajdhani(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                Expanded(
-                                  child: Container(
-                                    // Placeholder for list
-                                  ),
-                                ),
-                                const Divider(color: Colors.white24),
-                                const SizedBox(height: 10),
-                                Text(
-                                  "History Of Invoice",
-                                  style: GoogleFonts.rajdhani(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                // Settle Button
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 50,
-                                  child: ElevatedButton(
-                                    onPressed: _onSettle,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.violetNormal,
-                                      shape: RoundedRectangleBorder(
+                          // Column 2: Totals & Calculations
+                          Expanded(
+                            flex: 3,
+                            child: SettlementGlassContainer(
+                              padding: const EdgeInsets.all(16),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    SettlementRowInput(
+                                      label: "Total Qty",
+                                      controller: _totalQtyController,
+                                      isReadOnly: true,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    SettlementRowInput(
+                                      label: "Sub Total",
+                                      controller: _subTotalController,
+                                      isReadOnly: true,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    SettlementRowInput(
+                                      label: "P. Discount",
+                                      controller: _discountController,
+                                      onChanged: (val) =>
+                                          _calculateFinalTotal(),
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                          RegExp(r'^\d+\.?\d{0,2}'),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    SettlementRowInput(
+                                      label: "Round Off",
+                                      controller: _roundOffController,
+                                      onChanged: (val) =>
+                                          _calculateFinalTotal(),
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                          RegExp(r'^\d+\.?\d{0,2}'),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    SettlementRowInput(
+                                      label: "VAT",
+                                      controller: _vatController,
+                                      isReadOnly: true,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    SettlementRowInput(
+                                      isReadOnly: true,
+                                      label: "Paid",
+                                      controller: _paidController,
+                                    ),
+                                    const SizedBox(height: 20),
+
+                                    // Grand Total
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            AppColors.violetNormal,
+                                            AppColors.redNormal,
+                                          ],
+                                        ),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                    ),
-                                    child: Text(
-                                      "SETTLE",
-                                      style: GoogleFonts.rajdhani(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            "Grand Total",
+                                            style: GoogleFonts.rajdhani(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          Text(
+                                            _finalTotal.toStringAsFixed(2),
+                                            style: GoogleFonts.rajdhani(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 22,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ),
+                                    const SizedBox(height: 20),
+
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Cur. Payment",
+                                                style: GoogleFonts.rajdhani(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              SettlementSimpleInput(
+                                                controller:
+                                                    _curPaymentController,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Balance",
+                                                style: GoogleFonts.rajdhani(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              SettlementSimpleInput(
+                                                controller: _balanceController,
+                                                isReadOnly: true,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+
+                          // Column 3: Payment History
+                          Expanded(
+                            flex: 3,
+                            child: SettlementGlassContainer(
+                              padding: const EdgeInsets.all(16),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "Payment History",
+                                      style: GoogleFonts.rajdhani(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Container(
+                                      // Placeholder for list
+                                    ),
+                                    const Divider(color: Colors.white24),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      "History Of Invoice",
+                                      style: GoogleFonts.rajdhani(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _onSettle,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.violetNormal,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
+                          child: Text(
+                            "SETTLE & PRINT",
+                            style: GoogleFonts.rajdhani(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: _onSettle,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.violetNormal,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
+                          child: Text(
+                            "SETTLE",
+                            style: GoogleFonts.rajdhani(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

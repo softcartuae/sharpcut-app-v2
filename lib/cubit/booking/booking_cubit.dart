@@ -61,6 +61,22 @@ class BookingCubit extends Cubit<BookingState> {
     );
   }
 
+    Future<void> quickPayment({
+    required SettlePaymentRequestModel request,
+  }) async {
+    emit(BookingLoading());
+    final result = await bookingRepo.quickPayment(request);
+    result.fold(
+      (error) => emit(BookingError(message: error)),
+      (response) => emit(
+        BookingPaymentSettled(
+          message: response.message ?? 'Payment settled',
+          response: response,
+        ),
+      ),
+    );
+  }
+
   Future<void> settlePayment({
     required SettlePaymentRequestModel request,
   }) async {
