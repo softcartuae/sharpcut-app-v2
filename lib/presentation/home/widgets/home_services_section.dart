@@ -7,6 +7,8 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit_state.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
+import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
+import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_expense.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_settlement.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_search.dart';
@@ -181,20 +183,52 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BookingCubit, BookingState>(
-      listener: (context, state) {
-        if (state is BookingSaved) {
-          ToastHelper.showSuccess(state.message);
-          // Optionally clear cart or reset state
-        } else if (state is BookingError) {
-          ToastHelper.showError(state.message);
-        } else if (state is BookingPaymentSettled) {
-          ToastHelper.showSuccess(state.message);
-          context.read<ServiceCubit>().clearCart();
-          context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
-          // Optionally clear cart or reset state
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ChairCubit, ChairState>(
+          listener: (context, state) {
+            final bookingState = context.read<BookingCubit>().state;
+            if (state is ChairSuccess && bookingState is BookingSuccess) {
+              for (var chair in state.chairs) {
+                if (chair.transaction != null &&
+                    chair.transaction!.details != null &&
+                    chair.transaction!.details!.isNotEmpty) {
+                  final cartItems = chair.transaction!.details!
+                      .where((detail) => detail.service != null)
+                      .map(
+                        (detail) => CartItemModel(
+                          service: detail.service!,
+                          quantity: 1,
+                        ),
+                      )
+                      .toList();
+                  if (cartItems.isNotEmpty) {
+                    context.read<ServiceCubit>().setCart(cartItems);
+                    break;
+                  }
+                }
+              }
+            }
+          },
+        ),
+        BlocListener<BookingCubit, BookingState>(
+          listener: (context, state) {
+            if (state is BookingSaved) {
+              ToastHelper.showSuccess(state.message);
+              // Optionally clear cart or reset state
+            } else if (state is BookingError) {
+              ToastHelper.showError(state.message);
+            } else if (state is BookingPaymentSettled) {
+              ToastHelper.showSuccess(state.message);
+              context.read<ServiceCubit>().clearCart();
+              context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
+              // Optionally clear cart or reset state
+            } else if (state is BookingSuccess) {
+              context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
+            }
+          },
+        ),
+      ],
       child: SizedBox(
         height: 450, // Fixed height for now, can be flexible later
         child: Row(
@@ -265,6 +299,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               child: BlocBuilder<BookingCubit, BookingState>(
                 builder: (context, bookingState) {
                   final isBooked = bookingState is BookingSuccess;
+
                   return Opacity(
                     opacity: isBooked ? 1.0 : 0.5,
                     child: CommonContainer(
@@ -799,15 +834,17 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                 .userId;
                                           }
 
+                                          final bookingFormState = context
+                                              .read<BookingFormCubit>()
+                                              .state;
+
                                           SettlePaymentRequestModel
                                           request = SettlePaymentRequestModel(
                                             transactionId: transactionId,
-                                            customerName: bookingState
-                                                .bookingResponse
-                                                .customerName,
-                                            customerNumber: bookingState
-                                                .bookingResponse
-                                                .customerNumber,
+                                            customerName:
+                                                bookingFormState.customerName,
+                                            customerNumber:
+                                                bookingFormState.customerNumber,
                                             grandTotal: serviceState.total,
                                             taxTotal: serviceState.vat,
                                             discount: 0.0,

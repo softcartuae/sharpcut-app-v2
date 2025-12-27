@@ -56,12 +56,12 @@ class BookingCubit extends Cubit<BookingState> {
     // emit(BookingLoading());
     final result = await bookingRepo.saveBooking(request);
     result.fold(
-      (error) => ToastHelper.showError(error),
-      (message) => ToastHelper.showSuccess(message),
+      (error) => emit(BookingError(message: error)),
+      (message) => emit(BookingInitial()),
     );
   }
 
-    Future<void> quickPayment({
+  Future<void> quickPayment({
     required SettlePaymentRequestModel request,
   }) async {
     emit(BookingLoading());

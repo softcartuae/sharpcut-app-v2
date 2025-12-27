@@ -16,7 +16,7 @@ import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
-Future<void> showSettlementDialog(
+Future<void>  showSettlementDialog(
   BuildContext context, {
   required SettlePaymentRequestModel settlePayment,
   required String? staffName,

@@ -30,9 +30,8 @@ class _ScreenHomeState extends State<ScreenHome> {
         listener: (context, state) {
           if (state is BookingCancelled || state is BookingInitial) {
             context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
-            if (state is BookingCancelled) {
-              context.read<ServiceCubit>().clearCart();
-            }
+
+            context.read<ServiceCubit>().clearCart();
           }
         },
         child: SingleChildScrollView(
