@@ -264,6 +264,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                 state.connectedPrinter != null &&
                                 state.connectedPrinter!.name == printer.name &&
                                 state.status == PrintingStatus.connected;
+
                             return Card(
                               margin: const EdgeInsets.only(bottom: 8),
                               child: ListTile(
@@ -301,10 +302,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                                 ),
                                               ),
                                             ))
-                                    : (state.status ==
-                                                  PrintingStatus.connecting &&
-                                              state.connectedPrinter?.name ==
-                                                  printer.name
+                                    : (state.status == PrintingStatus.connecting
                                           ? const SizedBox(
                                               width: 24,
                                               height: 24,

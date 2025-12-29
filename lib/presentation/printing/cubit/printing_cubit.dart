@@ -43,7 +43,8 @@ class PrintingCubit extends Cubit<PrintingState> {
     emit(state.copyWith(status: PrintingStatus.connecting));
     try {
       // Stop scanning before connecting as requested
-      await stopScan();
+      await _printingRepo.stopScan();
+      _printerSubscription?.cancel();
 
       final isConnected = await _printingRepo.connect(printer);
       if (isConnected) {
@@ -89,6 +90,9 @@ class PrintingCubit extends Cubit<PrintingState> {
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
     required List<CartItemModel> cartItems,
+    required String? staffName,
+    required String? invoiceNumber,
+    required String? bookingTime,
   }) async {
     if (state.connectedPrinter == null) {
       emit(
@@ -107,6 +111,9 @@ class PrintingCubit extends Cubit<PrintingState> {
         request: request,
         shopData: shopData,
         cartItems: cartItems,
+        staffName: staffName,
+        invoiceNumber: invoiceNumber,
+        bookingTime: bookingTime,
       );
       emit(state.copyWith(status: PrintingStatus.printed));
     } catch (e) {

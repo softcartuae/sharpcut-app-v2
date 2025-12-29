@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
@@ -376,6 +375,11 @@ class _SettlementDialogState extends State<SettlementDialog> {
           request: request,
           shopData: shopData,
           cartItems: widget.cartItems,
+          staffName: widget.staffName,
+          invoiceNumber: widget.invoiceNumber,
+          bookingTime: widget.bookingTime != null
+              ? DateFormat('HH:mm').format(DateTime.parse(widget.bookingTime!))
+              : "--:--",
         );
       }
       context.read<BookingCubit>().settlePayment(request: request);

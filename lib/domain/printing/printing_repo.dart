@@ -14,5 +14,8 @@ abstract class PrintingRepo {
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
     required List<CartItemModel> cartItems,
+     required String? staffName,
+    required String? invoiceNumber,
+    required String? bookingTime,
   });
 }

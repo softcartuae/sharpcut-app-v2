@@ -1,14 +1,16 @@
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
 import 'package:flutter_thermal_printer/utils/printer.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:sharp_cut/domain/auth/models/user_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
-import 'dart:ui' as ui;
-import 'package:flutter/painting.dart';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
+
+import '../../presentation/printing/widgets/receipt_widget.dart';
 
 class PrintingRepoImp implements PrintingRepo {
   final FlutterThermalPrinter _printer = FlutterThermalPrinter.instance;
@@ -44,291 +46,68 @@ class PrintingRepoImp implements PrintingRepo {
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
     required List<CartItemModel> cartItems,
+
+    required String? staffName,
+    required String? invoiceNumber,
+    required String? bookingTime,
   }) async {
     final profile = await CapabilityProfile.load();
-    final generator = Generator(PaperSize.mm80, profile);
+    final generator = Generator(PaperSize.mm58, profile);
     List<int> bytes = [];
 
-    // Header
-    bytes.addAll(
-      generator.text(
-        shopData.name ?? 'Shop Name',
-        styles: const PosStyles(
-          align: PosAlign.center,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-          bold: true,
+    // Create the receipt widget
+    final receiptWidget = MediaQuery(
+      data: const MediaQueryData(),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: ThemeData(
+            useMaterial3: false,
+            scaffoldBackgroundColor: Colors.white,
+          ),
+          child: Material(
+            color: Colors.white,
+            child: ReceiptWidget(
+              staffName: staffName,
+              invoiceNumber: invoiceNumber,
+              bookingTime: bookingTime,
+              shopData: shopData,
+              request: request,
+              cartItems: cartItems,
+            ),
+          ),
         ),
       ),
     );
 
-    if (shopData.address != null) {
-      bytes.addAll(
-        generator.text(
-          shopData.address!,
-          styles: const PosStyles(align: PosAlign.center),
-        ),
-      );
-    }
-    if (shopData.vatNo != null) {
-      bytes.addAll(
-        generator.text(
-          'TRN: ${shopData.vatNo}',
-          styles: const PosStyles(align: PosAlign.center),
-        ),
-      );
-    }
+    // Calculate estimated height
+    // Base height (Header + Footer) ~ 600
+    // Per item ~ 60 (allowing for wrapping text)
+    double estimatedHeight = 600 + (cartItems.length * 60.0);
 
-    bytes.addAll(
-      generator.text(
-        'TAX INVOICE',
-        styles: const PosStyles(align: PosAlign.center, bold: true),
-      ),
-    );
-
-    bytes.addAll(generator.hr());
-
-    // Invoice Details
-    bytes.addAll(
-      generator.row([
-        PosColumn(
-          text: 'Date: ${request.transactionId}',
-          width: 6,
-          styles: const PosStyles(align: PosAlign.left),
-        ),
-        PosColumn(
-          text: 'Time: ',
-          width: 6,
-          styles: const PosStyles(align: PosAlign.right),
-        ),
-      ]),
-    );
-
-    bytes.addAll(
-      generator.row([
-        PosColumn(
-          text: 'Invoice No: ${request.transactionId}',
-          width: 12,
-          styles: const PosStyles(align: PosAlign.left),
-        ),
-      ]),
-    );
-
-    bytes.addAll(generator.hr());
-
-    // Items Header
-    bytes.addAll(
-      generator.row([
-        PosColumn(text: 'Item', width: 6, styles: const PosStyles(bold: true)),
-        PosColumn(
-          text: 'Qty',
-          width: 2,
-          styles: const PosStyles(bold: true, align: PosAlign.center),
-        ),
-        PosColumn(
-          text: 'Price',
-          width: 2,
-          styles: const PosStyles(bold: true, align: PosAlign.right),
-        ),
-        PosColumn(
-          text: 'Total',
-          width: 2,
-          styles: const PosStyles(bold: true, align: PosAlign.right),
-        ),
-      ]),
-    );
-
-    bytes.addAll(generator.hr());
-
-    // Items
-    for (var item in cartItems) {
-      double price = double.tryParse(item.service.price ?? '0') ?? 0.0;
-      double total = price * item.quantity;
-
-      // English Name
-      bytes.addAll(
-        generator.row([
-          PosColumn(text: item.service.name ?? '', width: 6),
-          PosColumn(
-            text: item.quantity.toString(),
-            width: 2,
-            styles: const PosStyles(align: PosAlign.center),
-          ),
-          PosColumn(
-            text: price.toStringAsFixed(2),
-            width: 2,
-            styles: const PosStyles(align: PosAlign.right),
-          ),
-          PosColumn(
-            text: total.toStringAsFixed(2),
-            width: 2,
-            styles: const PosStyles(align: PosAlign.right),
-          ),
-        ]),
-      );
-
-      // Arabic Name (if available)
-      if (item.service.nameArabic != null &&
-          item.service.nameArabic!.isNotEmpty) {
-        final arabicImage = await _textToImage(item.service.nameArabic!);
-        if (arabicImage != null) {
-          bytes.addAll(generator.image(arabicImage, align: PosAlign.right));
-        }
-      }
-    }
-
-    bytes.addAll(generator.hr());
-
-    // Totals
-    bytes.addAll(
-      generator.row([
-        PosColumn(
-          text: 'Sub Total',
-          width: 8,
-          styles: const PosStyles(align: PosAlign.right),
-        ),
-        PosColumn(
-          text: (request.grandTotal ?? 0).toStringAsFixed(2),
-          width: 4,
-          styles: const PosStyles(align: PosAlign.right),
-        ),
-      ]),
-    );
-
-    bytes.addAll(
-      generator.row([
-        PosColumn(
-          text: 'VAT Amount',
-          width: 8,
-          styles: const PosStyles(align: PosAlign.right),
-        ),
-        PosColumn(
-          text: (request.taxTotal ?? 0).toStringAsFixed(2),
-          width: 4,
-          styles: const PosStyles(align: PosAlign.right),
-        ),
-      ]),
-    );
-
-    if ((request.discount ?? 0) > 0) {
-      bytes.addAll(
-        generator.row([
-          PosColumn(
-            text: 'Discount',
-            width: 8,
-            styles: const PosStyles(align: PosAlign.right),
-          ),
-          PosColumn(
-            text: (request.discount ?? 0).toStringAsFixed(2),
-            width: 4,
-            styles: const PosStyles(align: PosAlign.right),
-          ),
-        ]),
-      );
-    }
-
-    bytes.addAll(
-      generator.row([
-        PosColumn(
-          text: 'Net Amount',
-          width: 8,
-          styles: const PosStyles(
-            align: PosAlign.right,
-            bold: true,
-            height: PosTextSize.size2,
-          ),
-        ),
-        PosColumn(
-          text: (request.finalTotal ?? 0).toStringAsFixed(2),
-          width: 4,
-          styles: const PosStyles(
-            align: PosAlign.right,
-            bold: true,
-            height: PosTextSize.size2,
-          ),
-        ),
-      ]),
-    );
-
-    bytes.addAll(generator.hr());
-
-    // Payment Mode
-    if (request.mode != null && request.mode!.isNotEmpty) {
-      for (int i = 0; i < request.mode!.length; i++) {
-        bytes.addAll(
-          generator.row([
-            PosColumn(
-              text: request.mode![i],
-              width: 8,
-              styles: const PosStyles(align: PosAlign.right),
-            ),
-            PosColumn(
-              text: (request.amount?[i] ?? 0).toStringAsFixed(2),
-              width: 4,
-              styles: const PosStyles(align: PosAlign.right),
-            ),
-          ]),
+    // Capture the widget as an image
+    final ScreenshotController screenshotController = ScreenshotController();
+    final Uint8List capturedImage = await screenshotController
+        .captureFromWidget(
+          receiptWidget,
+          delay: const Duration(milliseconds: 100),
+          pixelRatio: 1.0, // Reduced to avoid buffer overflow
+          targetSize: Size(370, estimatedHeight), // Ensure height is sufficient
         );
-      }
+
+    // Decode the image for the printer
+    final img.Image? image = img.decodePng(capturedImage);
+
+    if (image != null) {
+      // Resize to 384 (standard 58mm width, multiple of 8)
+      final img.Image resizedImage = img.copyResize(image, width: 384);
+
+      bytes.addAll(generator.image(resizedImage));
     }
 
     bytes.addAll(generator.feed(2));
     bytes.addAll(generator.cut());
 
     await _printer.printData(printer, bytes);
-  }
-
-  Future<img.Image?> _textToImage(String text) async {
-    try {
-      final recorder = ui.PictureRecorder();
-      final canvas = ui.Canvas(recorder);
-      const fontSize = 22.0;
-      const double maxWidth = 380; // Approx width for 80mm printer
-
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: text,
-          style: const TextStyle(
-            color: ui.Color(0xFF000000),
-            fontSize: fontSize,
-            fontFamily:
-                'Arial', // Use a font that supports Arabic if possible, or default
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        textDirection: TextDirection.rtl,
-        textAlign: TextAlign.right,
-      );
-
-      textPainter.layout(minWidth: 0, maxWidth: maxWidth);
-
-      // Add some padding
-      final width = textPainter.width.toInt() + 20; // +20 for padding
-      final height = textPainter.height.toInt();
-
-      // Draw white background (optional, but good for transparency handling)
-      final paint = Paint()..color = const ui.Color(0xFFFFFFFF);
-      canvas.drawRect(
-        ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
-        paint,
-      );
-
-      textPainter.paint(canvas, const ui.Offset(10, 0)); // 10 padding
-
-      final picture = recorder.endRecording();
-      final ui.Image uiImage = await picture.toImage(width, height);
-
-      final ByteData? byteData = await uiImage.toByteData(
-        format: ui.ImageByteFormat.png,
-      );
-
-      if (byteData != null) {
-        final Uint8List pngBytes = byteData.buffer.asUint8List();
-        return img.decodePng(pngBytes);
-      }
-    } catch (e) {
-      print('Error converting text to image: $e');
-    }
-    return null;
   }
 }
