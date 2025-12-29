@@ -22,13 +22,12 @@ class AuthRepoImpl implements AuthRepo {
   }
 
   @override
-  Future<UserModel> getUser() async {
+  Future<ShopModel> getUser() async {
     try {
-  
       final response = await ApiClient.dio.get(ApiClient.authentcatedUserApi);
 
       if (response.statusCode == 200) {
-        return UserModel.fromJson(response.data);
+        return ShopModel.fromJson(response.data);
       } else {
         throw Exception("Failed to get user: ${response.statusMessage}");
       }

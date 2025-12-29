@@ -268,7 +268,9 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                             ...state.printers.map((printer) {
                               final isConnected =
                                   state.connectedPrinter != null &&
-                                  state.connectedPrinter!.name == printer.name;
+                                  state.connectedPrinter!.name ==
+                                      printer.name &&
+                                  state.status == PrintingStatus.connected;
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 child: ListTile(
@@ -277,39 +279,71 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                     printer.name ?? "Unknown Printer",
                                   ),
                                   subtitle: Text(
-                                    "Vendor ID: ${printer.vendorId} | Product ID: ${printer.productId}",
+                                    "Connection Type: ${printer.connectionType == ConnectionType.BLE ? "Bluetooth" : "Usb"} | Product ID: ${printer.productId ?? ""}",
                                   ),
                                   trailing: isConnected
-                                      ? TextButton.icon(
-                                          onPressed: () {
-                                            context
-                                                .read<PrintingCubit>()
-                                                .disconnect();
-                                          },
-                                          icon: const Icon(
-                                            Icons.close,
-                                            color: Colors.red,
-                                          ),
-                                          label: Text(
-                                            "Disconnect",
-                                            style: GoogleFonts.rajdhani(
-                                              color: Colors.red,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        )
-                                      : ElevatedButton(
-                                          onPressed: () {
-                                            context
-                                                .read<PrintingCubit>()
-                                                .connect(printer);
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                AppColors.violetNormal,
-                                          ),
-                                          child: const Text("Connect"),
-                                        ),
+                                      ? (state.status ==
+                                                PrintingStatus.disconnecting
+                                            ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: Colors.red,
+                                                    ),
+                                              )
+                                            : TextButton.icon(
+                                                onPressed: () {
+                                                  context
+                                                      .read<PrintingCubit>()
+                                                      .disconnect();
+                                                },
+                                                icon: const Icon(
+                                                  Icons.close,
+                                                  color: Colors.red,
+                                                ),
+                                                label: Text(
+                                                  "Disconnect",
+                                                  style: GoogleFonts.rajdhani(
+                                                    color: Colors.red,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ))
+                                      : (state.status ==
+                                                    PrintingStatus.connecting &&
+                                                state.connectedPrinter?.name ==
+                                                    printer.name
+                                            ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: AppColors
+                                                          .violetNormal,
+                                                    ),
+                                              )
+                                            : ElevatedButton(
+                                                onPressed: () {
+                                                  context
+                                                      .read<PrintingCubit>()
+                                                      .connect(printer);
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      AppColors.violetNormal,
+                                                ),
+                                                child: Text(
+                                                  "Connect",
+                                                  style: GoogleFonts.rajdhani(
+                                                    color: AppColors
+                                                        .redLightActive,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              )),
                                 ),
                               );
                             }),

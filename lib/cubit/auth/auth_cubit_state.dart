@@ -7,7 +7,7 @@ class AuthInitial extends AuthCubitState {}
 class AuthLoading extends AuthCubitState {}
 
 class AuthAuthenticated extends AuthCubitState {
-  final UserModel user;
+  final ShopModel user;
   AuthAuthenticated(this.user);
 }
 

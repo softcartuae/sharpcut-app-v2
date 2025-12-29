@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
+import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/presentation/expense/widgets/payment_mode_card.dart';
@@ -13,15 +14,18 @@ import 'package:sharp_cut/presentation/expense/widgets/settlement_glass_containe
 import 'package:sharp_cut/presentation/expense/widgets/settlement_text_fields.dart';
 import 'package:sharp_cut/presentation/expense/widgets/settlement_time_container.dart';
 import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
+import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
+import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
-Future<void>  showSettlementDialog(
+Future<void> showSettlementDialog(
   BuildContext context, {
   required SettlePaymentRequestModel settlePayment,
   required String? staffName,
   required String? bookingTime,
   required String? invoiceNumber,
+  required List<CartItemModel> cartItems,
 }) {
   return showDialog(
     context: context,
@@ -31,6 +35,7 @@ Future<void>  showSettlementDialog(
       settlePayment: settlePayment,
       staffName: staffName,
       bookingTime: bookingTime,
+      cartItems: cartItems,
     ),
   );
 }
@@ -40,12 +45,14 @@ class SettlementDialog extends StatefulWidget {
   final String? staffName;
   final String? bookingTime;
   final String? invoiceNumber;
+  final List<CartItemModel> cartItems;
   const SettlementDialog({
     super.key,
     required this.settlePayment,
     required this.staffName,
     required this.bookingTime,
     required this.invoiceNumber,
+    required this.cartItems,
   });
 
   @override
@@ -228,7 +235,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     super.dispose();
   }
 
-  void _onSettle() {
+  void _onSettle({required bool alsoPrint}) {
     final double discount = double.tryParse(_discountController.text) ?? 0.0;
     final double roundOff = double.tryParse(_roundOffController.text) ?? 0.0;
 
@@ -362,7 +369,19 @@ class _SettlementDialogState extends State<SettlementDialog> {
       tenderCash: tenders,
       change: changes,
     );
-    context.read<BookingCubit>().settlePayment(request: request);
+    if (alsoPrint) {
+      final shopData = context.read<AuthCubit>().currentUser;
+      if (shopData != null) {
+        context.read<PrintingCubit>().printInvoice(
+          request: request,
+          shopData: shopData,
+          cartItems: widget.cartItems,
+        );
+      }
+      context.read<BookingCubit>().settlePayment(request: request);
+    } else {
+      context.read<BookingCubit>().settlePayment(request: request);
+    }
     Navigator.pop(context);
   }
 
@@ -942,7 +961,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         ElevatedButton(
-                          onPressed: _onSettle,
+                          onPressed: () => _onSettle(alsoPrint: true),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.violetNormal,
                             shape: RoundedRectangleBorder(
@@ -964,7 +983,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                         ),
                         const SizedBox(width: 20),
                         ElevatedButton(
-                          onPressed: _onSettle,
+                          onPressed: () => _onSettle(alsoPrint: false),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.violetNormal,
                             shape: RoundedRectangleBorder(

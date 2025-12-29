@@ -10,7 +10,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
   final AuthRepo authRepo;
   final TokenStorage tokenStorage;
 
-  UserModel? currentUser;
+  ShopModel? currentUser;
 
   AuthCubit({required this.authRepo, required this.tokenStorage})
     : super(AuthInitial());

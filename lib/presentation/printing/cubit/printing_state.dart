@@ -1,6 +1,15 @@
 part of 'printing_cubit.dart';
 
-enum PrintingStatus { initial, scanning, connecting, connected, error }
+enum PrintingStatus {
+  initial,
+  scanning,
+  connecting,
+  disconnecting,
+  connected,
+  printing,
+  printed,
+  error,
+}
 
 class PrintingState {
   final PrintingStatus status;

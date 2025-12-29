@@ -99,6 +99,7 @@ class BookingCubit extends Cubit<BookingState> {
     );
   }
 
+
   void backToInitialState() {
     emit(BookingInitial());
   }

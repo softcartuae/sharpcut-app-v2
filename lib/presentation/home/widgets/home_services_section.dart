@@ -921,6 +921,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             invoiceNumber: bookingState
                                                 .bookingResponse
                                                 .invoiceNo,
+                                            cartItems: serviceState.cartItems,
                                           );
                                         }
                                       },

@@ -7,6 +7,7 @@ import 'package:sharp_cut/data/auth/services/auth_repo_impl.dart';
 import 'package:sharp_cut/data/home/service_repo_imp/service_repo_impl.dart';
 import 'package:sharp_cut/data/home/chair/chair_repo_impl.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
+import 'package:sharp_cut/domain/expenses/expense_repo.dart';
 import 'package:sharp_cut/domain/home/service/service_repo.dart';
 import 'package:sharp_cut/domain/home/chair/chair_repo.dart';
 import 'package:sharp_cut/domain/password/service/password_repo.dart';
