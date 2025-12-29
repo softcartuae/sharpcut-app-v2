@@ -5,6 +5,10 @@ import 'package:sharp_cut/domain/auth/models/user_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/painting.dart';
+import 'package:image/image.dart' as img;
+import 'dart:typed_data';
 
 class PrintingRepoImp implements PrintingRepo {
   final FlutterThermalPrinter _printer = FlutterThermalPrinter.instance;
@@ -166,12 +170,10 @@ class PrintingRepoImp implements PrintingRepo {
       // Arabic Name (if available)
       if (item.service.nameArabic != null &&
           item.service.nameArabic!.isNotEmpty) {
-        bytes.addAll(
-          generator.text(
-            item.service.nameArabic!,
-            styles: const PosStyles(align: PosAlign.right, codeTable: 'CP864'),
-          ),
-        );
+        final arabicImage = await _textToImage(item.service.nameArabic!);
+        if (arabicImage != null) {
+          bytes.addAll(generator.image(arabicImage, align: PosAlign.right));
+        }
       }
     }
 
@@ -274,5 +276,59 @@ class PrintingRepoImp implements PrintingRepo {
     bytes.addAll(generator.cut());
 
     await _printer.printData(printer, bytes);
+  }
+
+  Future<img.Image?> _textToImage(String text) async {
+    try {
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      const fontSize = 22.0;
+      const double maxWidth = 380; // Approx width for 80mm printer
+
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: const TextStyle(
+            color: ui.Color(0xFF000000),
+            fontSize: fontSize,
+            fontFamily:
+                'Arial', // Use a font that supports Arabic if possible, or default
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        textDirection: TextDirection.rtl,
+        textAlign: TextAlign.right,
+      );
+
+      textPainter.layout(minWidth: 0, maxWidth: maxWidth);
+
+      // Add some padding
+      final width = textPainter.width.toInt() + 20; // +20 for padding
+      final height = textPainter.height.toInt();
+
+      // Draw white background (optional, but good for transparency handling)
+      final paint = Paint()..color = const ui.Color(0xFFFFFFFF);
+      canvas.drawRect(
+        ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+        paint,
+      );
+
+      textPainter.paint(canvas, const ui.Offset(10, 0)); // 10 padding
+
+      final picture = recorder.endRecording();
+      final ui.Image uiImage = await picture.toImage(width, height);
+
+      final ByteData? byteData = await uiImage.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+
+      if (byteData != null) {
+        final Uint8List pngBytes = byteData.buffer.asUint8List();
+        return img.decodePng(pngBytes);
+      }
+    } catch (e) {
+      print('Error converting text to image: $e');
+    }
+    return null;
   }
 }
