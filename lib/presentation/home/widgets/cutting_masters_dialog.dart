@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
@@ -16,6 +17,11 @@ class CuttingMastersDialog extends StatelessWidget {
       context: context,
       builder: (context) => const CuttingMastersDialog(),
     );
+  }
+
+  String formatDate(String isoDate) {
+    final dateTime = DateTime.parse(isoDate).toLocal();
+    return DateFormat('dd/MM/yyyy hh:mm a').format(dateTime);
   }
 
   @override
@@ -144,6 +150,27 @@ class CuttingMastersDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            Text(
+              chair.liveState == LiveState.occupied.name
+                  ? chair.transaction?.staff?.name ?? 'Unknown'
+                  : chair.name ?? 'Unknown',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (chair.liveState == LiveState.occupied.name)
+              Text(
+                formatDate(chair.transaction?.createdAt ?? 'Unknown'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 8),

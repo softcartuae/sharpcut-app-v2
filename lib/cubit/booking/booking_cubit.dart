@@ -56,13 +56,13 @@ class BookingCubit extends Cubit<BookingState> {
     // emit(BookingLoading());
     final result = await bookingRepo.saveBooking(request);
     result.fold(
-      (error){
+      (error) {
         emit(BookingError(message: error));
         ToastHelper.showError(error);
       },
-      (message){
+      (message) {
         emit(BookingInitial());
-        ToastHelper.showSuccess( message);
+        ToastHelper.showSuccess(message);
       },
     );
   }
@@ -97,5 +97,9 @@ class BookingCubit extends Cubit<BookingState> {
         ),
       ),
     );
+  }
+
+  void backToInitialState() {
+    emit(BookingInitial());
   }
 }

@@ -11,14 +11,14 @@ class PrintingCubit extends Cubit<PrintingState> {
 
   PrintingCubit(this._printingRepo) : super(PrintingState());
 
-  Future<void> startScan() async {
+  Future<void> startScan({ConnectionType type = ConnectionType.USB}) async {
     emit(state.copyWith(status: PrintingStatus.scanning));
     try {
       _printerSubscription?.cancel();
       _printerSubscription = _printingRepo.printersStream.listen((printers) {
         emit(state.copyWith(printers: printers));
       });
-      await _printingRepo.startScan();
+      await _printingRepo.startScan(connectionTypes: [type]);
     } catch (e) {
       emit(
         state.copyWith(
@@ -63,6 +63,15 @@ class PrintingCubit extends Cubit<PrintingState> {
           status: PrintingStatus.error,
           errorMessage: e.toString(),
         ),
+      );
+    }
+  }
+
+  Future<void> disconnect() async {
+    if (state.connectedPrinter != null) {
+      await _printingRepo.disconnect(state.connectedPrinter!);
+      emit(
+        state.copyWith(status: PrintingStatus.initial, connectedPrinter: null),
       );
     }
   }

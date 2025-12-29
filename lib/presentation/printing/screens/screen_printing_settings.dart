@@ -5,6 +5,9 @@ import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/data/printing/printing_repo_imp.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:flutter_thermal_printer/utils/printer.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 class ScreenPrintingSettings extends StatefulWidget {
   const ScreenPrintingSettings({super.key});
@@ -99,7 +102,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                           ),
                           const SizedBox(height: 24),
 
-                          // Scan Button
+                          // Scan Button (USB)
                           Card(
                             color: AppColors.violetLight,
                             elevation: 2,
@@ -115,7 +118,9 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                 if (state.status == PrintingStatus.scanning) {
                                   context.read<PrintingCubit>().stopScan();
                                 } else {
-                                  context.read<PrintingCubit>().startScan();
+                                  context.read<PrintingCubit>().startScan(
+                                    type: ConnectionType.USB,
+                                  );
                                 }
                               },
                               child: Padding(
@@ -136,7 +141,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                       )
                                     else
                                       const Icon(
-                                        Icons.refresh,
+                                        Icons.usb,
                                         color: AppColors.violetNormal,
                                       ),
                                     const SizedBox(width: 8),
@@ -155,11 +160,75 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 16),
+
+                          // Scan Button (Bluetooth)
+                          Card(
+                            color: AppColors.violetLight,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: const BorderSide(
+                                color: AppColors.violetLightActive,
+                              ),
+                            ),
+                            clipBehavior: Clip.hardEdge,
+                            child: InkWell(
+                              onTap: () async {
+                                if (state.status == PrintingStatus.scanning) {
+                                  context.read<PrintingCubit>().stopScan();
+                                } else {
+                                  bool granted =
+                                      await _requestBluetoothPermissions();
+                                  if (granted && context.mounted) {
+                                    context.read<PrintingCubit>().startScan(
+                                      type: ConnectionType.BLE,
+                                    );
+                                  }
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (state.status == PrintingStatus.scanning)
+                                      const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.violetNormal,
+                                        ),
+                                      )
+                                    else
+                                      const Icon(
+                                        Icons.bluetooth,
+                                        color: AppColors.violetNormal,
+                                      ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      state.status == PrintingStatus.scanning
+                                          ? "Stop Scanning"
+                                          : "Scan for Bluetooth Printers",
+                                      style: GoogleFonts.rajdhani(
+                                        color: AppColors.violetNormal,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 24),
 
                           // Discovered Printers Header
                           Text(
-                            "Discovered USB Printers",
+                            "Discovered Printers",
                             style: GoogleFonts.rajdhani(
                               color: Colors.black,
                               fontSize: 16,
@@ -177,7 +246,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                 child: Column(
                                   children: [
                                     Text(
-                                      "No USB printers found.",
+                                      "No printers found.",
                                       style: GoogleFonts.rajdhani(
                                         color: Colors.grey,
                                         fontSize: 14,
@@ -211,9 +280,23 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                     "Vendor ID: ${printer.vendorId} | Product ID: ${printer.productId}",
                                   ),
                                   trailing: isConnected
-                                      ? const Icon(
-                                          Icons.check_circle,
-                                          color: Colors.green,
+                                      ? TextButton.icon(
+                                          onPressed: () {
+                                            context
+                                                .read<PrintingCubit>()
+                                                .disconnect();
+                                          },
+                                          icon: const Icon(
+                                            Icons.close,
+                                            color: Colors.red,
+                                          ),
+                                          label: Text(
+                                            "Disconnect",
+                                            style: GoogleFonts.rajdhani(
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                         )
                                       : ElevatedButton(
                                           onPressed: () {
@@ -265,5 +348,53 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
       inactiveTrackColor: Colors.grey.shade300,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
     );
+  }
+
+  Future<bool> _requestBluetoothPermissions() async {
+    if (!Platform.isAndroid) return true;
+
+    // Check for Android 12+ permissions
+    if (await Permission.bluetoothScan.status.isDenied ||
+        await Permission.bluetoothConnect.status.isDenied) {
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+      ].request();
+
+      if (statuses[Permission.bluetoothScan]!.isDenied ||
+          statuses[Permission.bluetoothConnect]!.isDenied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Bluetooth permissions are required to scan."),
+            ),
+          );
+        }
+        return false;
+      }
+    }
+
+    // Check for Location permission (required for BLE on older Android)
+    if (await Permission.location.status.isDenied) {
+      final status = await Permission.location.request();
+      if (status.isDenied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Location permission is required for Bluetooth scanning.",
+              ),
+            ),
+          );
+        }
+        return false;
+      }
+    }
+
+    // Check if Bluetooth is actually on (optional but good UX)
+    // Note: permission_handler doesn't check if adapter is on, just permission.
+    // flutter_thermal_printer might handle the adapter check or throw error if off.
+
+    return true;
   }
 }

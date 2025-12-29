@@ -9,8 +9,10 @@ class PrintingRepoImp implements PrintingRepo {
   Stream<List<Printer>> get printersStream => _printer.devicesStream;
 
   @override
-  Future<void> startScan() async {
-    await _printer.getPrinters(connectionTypes: [ConnectionType.USB]);
+  Future<void> startScan({List<ConnectionType>? connectionTypes}) async {
+    await _printer.getPrinters(
+      connectionTypes: connectionTypes ?? [ConnectionType.USB],
+    );
   }
 
   @override
