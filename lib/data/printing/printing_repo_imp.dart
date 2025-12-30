@@ -27,7 +27,7 @@ class PrintingRepoImp implements PrintingRepo {
 
   @override
   Future<void> stopScan() async {
-    // No explicit stop scan needed for USB usually, but keeping interface consistent
+    await _printer.stopScan();
   }
 
   @override

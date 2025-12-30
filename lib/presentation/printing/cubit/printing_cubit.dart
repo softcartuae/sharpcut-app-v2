@@ -6,6 +6,7 @@ import 'package:sharp_cut/domain/auth/models/user_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 part 'printing_state.dart';
 
@@ -63,10 +64,11 @@ class PrintingCubit extends Cubit<PrintingState> {
         );
       }
     } catch (e) {
+      log(e.toString());
       emit(
         state.copyWith(
           status: PrintingStatus.error,
-          errorMessage: e.toString(),
+          errorMessage: "Failed to connect",
         ),
       );
     }
