@@ -41,14 +41,6 @@ class _ReportFilterItemState extends State<ReportFilterItem> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine if we should use dark style (based on original logic: Select, MAIN, or Date range)
-    // Note: Date range logic is a bit specific, but we'll keep the style consistent with the request.
-    // If the selected value is "Select" or "MAIN" or contains "AM" (date), use black background.
-    bool isDarkStyle =
-        _selectedValue == "Select" ||
-        _selectedValue == "MAIN" ||
-        _selectedValue.contains("AM");
-
     return Expanded(
       flex: widget.flex,
       child: Column(
@@ -69,7 +61,7 @@ class _ReportFilterItemState extends State<ReportFilterItem> {
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey[400]!),
               borderRadius: BorderRadius.circular(4),
-              color: isDarkStyle ? Colors.black : Colors.white,
+              color: Colors.black,
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -77,36 +69,27 @@ class _ReportFilterItemState extends State<ReportFilterItem> {
                     ? _selectedValue
                     : null,
                 isExpanded: true,
-                icon: Icon(
+                icon: const Icon(
                   Icons.keyboard_arrow_down,
-                  color: isDarkStyle ? Colors.white : Colors.black,
+                  color: Colors.white,
                   size: 18,
                 ),
-                dropdownColor: isDarkStyle ? Colors.black : Colors.white,
-                style: GoogleFonts.rajdhani(
-                  color: isDarkStyle ? Colors.white : Colors.black,
-                  fontSize: 14,
-                ),
+                dropdownColor: Colors.black,
+                style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 14),
                 items: widget.items.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Row(
                       children: [
                         if (widget.icon != null && value == _selectedValue) ...[
-                          Icon(
-                            widget.icon,
-                            color: isDarkStyle ? Colors.white : Colors.black,
-                            size: 16,
-                          ),
+                          Icon(widget.icon, color: Colors.white, size: 16),
                           const SizedBox(width: 8),
                         ],
                         Expanded(
                           child: Text(
                             value,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.rajdhani(
-                              color: isDarkStyle ? Colors.white : Colors.black,
-                            ),
+                            style: GoogleFonts.rajdhani(color: Colors.white),
                           ),
                         ),
                       ],

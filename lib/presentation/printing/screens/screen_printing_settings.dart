@@ -218,6 +218,64 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
+
+                        // Scan Button (Network)
+                        Card(
+                          color: AppColors.violetLight,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            side: const BorderSide(
+                              color: AppColors.violetLightActive,
+                            ),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: InkWell(
+                            onTap: () {
+                              if (state.status == PrintingStatus.scanning) {
+                                context.read<PrintingCubit>().stopScan();
+                              } else {
+                                context.read<PrintingCubit>().startScan(
+                                  type: ConnectionType.NETWORK,
+                                );
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (state.status == PrintingStatus.scanning)
+                                    const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.violetNormal,
+                                      ),
+                                    )
+                                  else
+                                    const Icon(
+                                      Icons.wifi,
+                                      color: AppColors.violetNormal,
+                                    ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    state.status == PrintingStatus.scanning
+                                        ? "Stop Scanning"
+                                        : "Scan for Network Printers",
+                                    style: GoogleFonts.rajdhani(
+                                      color: AppColors.violetNormal,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 24),
 
                         // Discovered Printers Header
@@ -271,7 +329,11 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                 leading: const Icon(Icons.print),
                                 title: Text(printer.name ?? "Unknown Printer"),
                                 subtitle: Text(
-                                  "Connection Type: ${printer.connectionType == ConnectionType.BLE ? "Bluetooth" : "Usb"} | Product ID: ${printer.productId ?? ""}",
+                                  "Connection Type: ${printer.connectionType == ConnectionType.BLE
+                                      ? "Bluetooth"
+                                      : printer.connectionType == ConnectionType.USB
+                                      ? "Usb"
+                                      : "Network"} | Product ID: ${printer.productId ?? ""}",
                                 ),
                                 trailing: isConnected
                                     ? (state.status ==

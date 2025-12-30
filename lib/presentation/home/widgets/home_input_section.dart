@@ -102,7 +102,6 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                   name: name,
                   number: number,
                 );
-                
               } else if (state is! BookingSuccess) {
                 _nameController.clear();
                 _numberController.clear();

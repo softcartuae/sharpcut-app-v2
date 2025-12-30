@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_cut/presentation/report/widgets/report_table_header.dart';
 import 'package:sharp_cut/presentation/report/widgets/report_table_row.dart';
-import 'package:sharp_cut/presentation/report/widgets/report_pagination.dart';
 
 class ReportDataTable extends StatelessWidget {
   const ReportDataTable({super.key});
@@ -24,7 +23,7 @@ class ReportDataTable extends StatelessWidget {
                       maxHeight: constraints.maxHeight,
                     ),
                     child: SizedBox(
-                      width: 1500, 
+                      width: 1500,
                       child: Column(
                         children: [
                           // Header Row
@@ -48,7 +47,7 @@ class ReportDataTable extends StatelessWidget {
           ),
         ),
         // Pagination
-        const ReportPagination(),
+        // const ReportPagination(),
       ],
     );
   }
