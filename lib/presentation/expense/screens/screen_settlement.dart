@@ -353,7 +353,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
       tax: widget.settlePayment.tax,
       subTotal: widget.settlePayment.subTotal,
       isTip: widget.settlePayment.isTip,
-
       collectedUserId:
           widget.settlePayment.collectedUserId != null &&
               widget.settlePayment.collectedUserId!.isNotEmpty

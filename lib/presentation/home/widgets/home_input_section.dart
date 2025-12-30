@@ -34,7 +34,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 100, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage("lib/utils/images/rectangle.png"),
@@ -83,16 +83,17 @@ class _HomeInputSectionState extends State<HomeInputSection> {
               }
             }
 
-            customerName = booking.customerName ?? "";
-            customerNumber = booking.customerNumber ?? "";
+            customerName = booking.customerName ?? "cash";
+            customerNumber = booking.customerNumber ?? "0000000000";
             staffName = booking.staff?.name ?? "Sales Man";
           }
 
           return BlocListener<BookingCubit, BookingState>(
             listener: (context, state) {
               if (state is BookingSuccess) {
-                final name = state.bookingResponse.customerName ?? "";
-                final number = state.bookingResponse.customerNumber ?? "";
+                final name = state.bookingResponse.customerName ?? "cash";
+                final number =
+                    state.bookingResponse.customerNumber ?? "0000000000";
 
                 _nameController.text = name;
                 _numberController.text = number;
@@ -101,6 +102,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                   name: name,
                   number: number,
                 );
+                
               } else if (state is! BookingSuccess) {
                 _nameController.clear();
                 _numberController.clear();

@@ -150,17 +150,18 @@ class CuttingMastersDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              chair.liveState == LiveState.occupied.name
-                  ? chair.transaction?.staff?.name ?? 'Unknown'
-                  : chair.name ?? 'Unknown',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+            if (chair.liveState == LiveState.occupied.name)
+              Text(
+                chair.liveState == LiveState.occupied.name
+                    ? chair.transaction?.staff?.name ?? 'Unknown'
+                    : 'Unknown',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
             if (chair.liveState == LiveState.occupied.name)
               Text(
                 formatDate(chair.transaction?.createdAt ?? 'Unknown'),

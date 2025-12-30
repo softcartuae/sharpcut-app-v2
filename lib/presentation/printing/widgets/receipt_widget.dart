@@ -323,7 +323,7 @@ class ReceiptWidget extends StatelessWidget {
                 ],
               ),
             );
-          }).toList(),
+          }),
 
           const SizedBox(height: 8),
           const DashedLine(),
@@ -409,7 +409,7 @@ class ReceiptWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Wrap(
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,7 +425,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         subLabel1,
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -450,7 +450,7 @@ class ReceiptWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Wrap(
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,7 +466,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         subLabel2,
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -500,7 +500,7 @@ class ReceiptWidget extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -508,7 +508,7 @@ class ReceiptWidget extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -543,6 +543,8 @@ class DashedLine extends StatelessWidget {
         final dashHeight = 1.0;
         final dashCount = (boxWidth / (2 * dashWidth)).floor();
         return Flex(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          direction: Axis.horizontal,
           children: List.generate(dashCount, (_) {
             return SizedBox(
               width: dashWidth,
@@ -550,8 +552,6 @@ class DashedLine extends StatelessWidget {
               child: DecoratedBox(decoration: BoxDecoration(color: color)),
             );
           }),
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          direction: Axis.horizontal,
         );
       },
     );

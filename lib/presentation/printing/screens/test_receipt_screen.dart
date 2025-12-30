@@ -82,9 +82,8 @@ class TestReceiptScreen extends StatelessWidget {
             request: dummyRequest,
             cartItems: dummyCartItems,
             bookingTime: "12:00 PM",
-            staffName: "ABBAS AL HUSSAIN",
+            staffName: "ABBAS",
             invoiceNumber: "INV-00001",
-            
           ),
         ),
       ),

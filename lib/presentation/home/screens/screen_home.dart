@@ -42,7 +42,7 @@ class _ScreenHomeState extends State<ScreenHome> {
               children: [
                 HomeAppBar(),
                 HomeInputSection(),
-                SizedBox(height: 20),
+                SizedBox(height: 15),
                 HomeServicesSection(),
               ],
             ),

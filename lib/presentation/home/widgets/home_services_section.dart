@@ -237,7 +237,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             // 1. Category Sidebar
             SingleChildScrollView(
               child: SizedBox(
-                width: 200,
+                width: 180,
                 child: BlocBuilder<ServiceCubit, ServiceState>(
                   builder: (context, state) {
                     List<Widget> categories = [];
@@ -367,7 +367,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 },
               ),
             ),
-            const SizedBox(width: 24),
+            const SizedBox(width: 15),
 
             // 3. Order Summary Panel
             Expanded(
@@ -487,7 +487,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 ),
               ),
             ),
-            const SizedBox(width: 24),
+            const SizedBox(width: 15),
 
             // 4. Action Buttons Sidebar
             SingleChildScrollView(
