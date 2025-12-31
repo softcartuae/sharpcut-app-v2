@@ -84,6 +84,10 @@ class _ReportFilterItemState extends State<ReportFilterItem> {
               ),
               dropdownColor: Colors.black,
               style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 14),
+              hint: Text(
+                _selectedValue,
+                style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 14),
+              ),
               items: widget.items.map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,

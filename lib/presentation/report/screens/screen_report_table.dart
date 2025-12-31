@@ -24,7 +24,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
 
   String get _dateLabel {
     if (_selectedRange == null) {
-      return "Select Date Range";
+      return "All";
     }
 
     String format(DateTime d) =>
@@ -33,6 +33,50 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
         "${d.year}";
 
     return "${format(_selectedRange!.start)} - ${format(_selectedRange!.end)}";
+  }
+
+  Future<void> _showDateSelectionOptions(BuildContext context) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: const Text('Select Date Option'),
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, 'All');
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text('All'),
+              ),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, 'Custom Date');
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text('Custom Date'),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == 'All') {
+      setState(() {
+        _selectedRange = null;
+      });
+      if (context.mounted) {
+        context.read<ReportCubit>().updateFilter('date_range', '');
+      }
+    } else if (result == 'Custom Date') {
+      if (context.mounted) {
+        _pickDateRange(context);
+      }
+    }
   }
 
   Future<void> _pickDateRange(BuildContext context) async {
@@ -108,14 +152,12 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                         Expanded(
                           flex: 4,
                           child: GestureDetector(
-                            onTap: () => _pickDateRange(context),
-                            child: AbsorbPointer(
-                              child: ReportFilterItem(
-                                label: "Filter By Date",
-                                initialValue: _dateLabel,
-                                items: const [],
-                                icon: Icons.calendar_today,
-                              ),
+                            onTap: () => _showDateSelectionOptions(context),
+                            child: ReportFilterItem(
+                              label: "Filter By Date",
+                              initialValue: _dateLabel,
+                              items: const [],
+                              icon: Icons.calendar_today,
                             ),
                           ),
                         ),
@@ -126,7 +168,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                           child: ReportFilterItem(
                             label: "Paid Status",
                             initialValue: "All",
-                            items: const ["All", "Paid", "Unpaid", "Partial"],
+                            items: const ["All", "Full", "Unpaid", "Partial"],
                             onChanged: (value) {
                               context.read<ReportCubit>().updateFilter(
                                 'paid_status',

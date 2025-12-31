@@ -12,6 +12,7 @@ class ReceiptWidget extends StatelessWidget {
   final String? staffName;
   final String? invoiceNumber;
   final String? bookingTime;
+  final double? width;
 
   const ReceiptWidget({
     super.key,
@@ -21,12 +22,14 @@ class ReceiptWidget extends StatelessWidget {
     required this.shopData,
     required this.request,
     required this.cartItems,
+    this.width,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 370, // Target width for 58mm printer (approx 384 dots max)
+      width:
+          width ?? 370, // Target width for 58mm printer (approx 384 dots max)
       color: Colors.white,
       padding: const EdgeInsets.all(8.0),
       child: Column(

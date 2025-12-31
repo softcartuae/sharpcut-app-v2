@@ -4,16 +4,25 @@ import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 
 class ReportTableRow extends StatelessWidget {
   final int index;
+  final VoidCallback viewFunction;
   final BookingResponseModel transaction;
+  final VoidCallback printTheInvoice;
+  final VoidCallback paymentSettleFunction;
 
   const ReportTableRow({
     super.key,
     required this.index,
     required this.transaction,
+    required this.viewFunction,
+    required this.printTheInvoice,
+    required this.paymentSettleFunction,
   });
 
   @override
   Widget build(BuildContext context) {
+    final balenceAmount =
+        (double.tryParse(transaction.finalTotal ?? "0") ?? 0) -
+        (double.tryParse(transaction.totalPayment?.toString() ?? "0") ?? 0);
     return Container(
       height: 60,
       decoration: BoxDecoration(
@@ -23,24 +32,34 @@ class ReportTableRow extends StatelessWidget {
       child: Row(
         children: [
           _buildDataCell("${index + 1}", width: 50),
-          _buildDataCell(transaction.transactionDate ?? "-", width: 100),
-          _buildDataCell(transaction.invoiceNo ?? "-", width: 80),
-          _buildDataCell(transaction.createdAt ?? "-", width: 100),
+          _buildDataCell(_formatDate(transaction.transactionDate), width: 100),
+          _buildDataCell(transaction.invoiceNo ?? "-", width: 120),
+          _buildDataCell(_formatDate(transaction.createdAt), width: 100),
           _buildDataCell(transaction.customerNumber ?? "-", width: 100),
           _buildDataCell(transaction.customerName ?? "-", width: 100),
-          _buildDataCell(transaction.paymentStatus ?? "-", width: 80),
-          _buildDataCell(transaction.grandTotal ?? "0.00", width: 80),
-          _buildDataCell(transaction.taxTotal ?? "0.00", width: 80),
           _buildDataCell(transaction.finalTotal ?? "0.00", width: 80),
+          _buildDataCell(
+            transaction.totalPayment?.toString() ?? "0.00",
+            width: 80,
+          ),
+          _buildDataCell(balenceAmount.toString(), width: 80),
           _buildDataCell(transaction.staff?.name ?? "-", width: 100),
-          _buildActionCell(Icons.payment, width: 60, onTap: () {}),
-          _buildActionCell(Icons.print, width: 60, onTap: () {}),
+          Visibility(
+            visible: transaction.status != "Settled",
+            replacement: const SizedBox(width: 60),
+            child: _buildActionCell(
+              Icons.payment,
+              width: 60,
+              onTap: paymentSettleFunction,
+            ),
+          ),
+          // _buildActionCell(Icons.print, width: 60, onTap: () {}),
           _buildActionCell(
             Icons.receipt_long_outlined,
             width: 60,
-            onTap: () {},
+            onTap: printTheInvoice,
           ),
-          _buildActionCell(Icons.visibility, width: 60, onTap: () {}),
+          _buildActionCell(Icons.visibility, width: 60, onTap: viewFunction),
         ],
       ),
     );
@@ -100,5 +119,15 @@ class ReportTableRow extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return "-";
+    try {
+      final DateTime date = DateTime.parse(dateStr);
+      return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
+    } catch (e) {
+      return dateStr;
+    }
   }
 }
