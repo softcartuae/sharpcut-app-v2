@@ -4,9 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
+import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/presentation/report/widgets/report_action_button.dart';
 import 'package:sharp_cut/presentation/report/widgets/report_filter_item.dart';
 import 'package:sharp_cut/presentation/report/widgets/report_data_table.dart';
+import 'package:sharp_cut/presentation/report/widgets/staff_filter_item.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class ScreenReportTable extends StatefulWidget {
@@ -18,6 +20,7 @@ class ScreenReportTable extends StatefulWidget {
 
 class _ScreenReportTableState extends State<ScreenReportTable> {
   DateTimeRange? _selectedRange;
+  final TextEditingController _searchController = TextEditingController();
 
   String get _dateLabel {
     if (_selectedRange == null) {
@@ -25,14 +28,14 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
     }
 
     String format(DateTime d) =>
-        "${d.day.toString().padLeft(2, '0')}-"
-        "${d.month.toString().padLeft(2, '0')}-"
+        "${d.day.toString().padLeft(2, '0')}/"
+        "${d.month.toString().padLeft(2, '0')}/"
         "${d.year}";
 
-    return "${format(_selectedRange!.start)}  To  ${format(_selectedRange!.end)}";
+    return "${format(_selectedRange!.start)} - ${format(_selectedRange!.end)}";
   }
 
-  Future<void> _pickDateRange() async {
+  Future<void> _pickDateRange(BuildContext context) async {
     final now = DateTime.now();
 
     final picked = await showDateRangePicker(
@@ -46,7 +49,16 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
       setState(() {
         _selectedRange = picked;
       });
+      if (context.mounted) {
+        context.read<ReportCubit>().updateFilter('date_range', _dateLabel);
+      }
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ReportCubit>().fetchTransactions();
   }
 
   @override
@@ -77,11 +89,18 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        ReportFilterItem(
-                          label: "Staff Name",
-                          initialValue: "Select",
-                          items: ["Select", ...staffList.map((e) => e.name)],
+                        Expanded(
                           flex: 2,
+                          child: StaffFilterItem(
+                            label: "Staff Name",
+                            items: staffList,
+                            onChanged: (int? staffId) {
+                              context.read<ReportCubit>().updateFilter(
+                                'user_id',
+                                staffId,
+                              );
+                            },
+                          ),
                         ),
                         const SizedBox(width: 16),
 
@@ -89,13 +108,12 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                         Expanded(
                           flex: 4,
                           child: GestureDetector(
-                            onTap: _pickDateRange,
+                            onTap: () => _pickDateRange(context),
                             child: AbsorbPointer(
                               child: ReportFilterItem(
                                 label: "Filter By Date",
                                 initialValue: _dateLabel,
                                 items: const [],
-                                flex: 4,
                                 icon: Icons.calendar_today,
                               ),
                             ),
@@ -103,18 +121,39 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                         ),
 
                         const SizedBox(width: 16),
-                        const ReportFilterItem(
-                          label: "Paid Status",
-                          initialValue: "All",
-                          items: ["All", "Paid", "Unpaid", "Partial"],
+                        Expanded(
                           flex: 2,
+                          child: ReportFilterItem(
+                            label: "Paid Status",
+                            initialValue: "All",
+                            items: const ["All", "Paid", "Unpaid", "Partial"],
+                            onChanged: (value) {
+                              context.read<ReportCubit>().updateFilter(
+                                'paid_status',
+                                value,
+                              );
+                            },
+                          ),
                         ),
                         const SizedBox(width: 16),
-                        const ReportFilterItem(
-                          label: "Order Status",
-                          initialValue: "All",
-                          items: ["All", "Completed", "Pending", "Cancelled"],
+                        Expanded(
                           flex: 2,
+                          child: ReportFilterItem(
+                            label: "Order Status",
+                            initialValue: "All",
+                            items: const [
+                              "All",
+                              "Completed",
+                              "Pending",
+                              "Cancelled",
+                            ],
+                            onChanged: (value) {
+                              context.read<ReportCubit>().updateFilter(
+                                'transaction_status',
+                                value,
+                              );
+                            },
+                          ),
                         ),
                         const SizedBox(width: 16),
 
@@ -133,6 +172,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                               ),
                               const SizedBox(height: 8),
                               TextField(
+                                controller: _searchController,
                                 style: const TextStyle(color: Colors.black),
                                 decoration: InputDecoration(
                                   hintText: "Search here..",
@@ -175,10 +215,20 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const ReportActionButton(
-                              label: "Search",
-                              bgColor: Colors.blue,
-                              textColor: Colors.white,
+                            GestureDetector(
+                              onTap: () {
+                                final cubit = context.read<ReportCubit>();
+                                cubit.updateFilter(
+                                  'search_query',
+                                  _searchController.text,
+                                );
+                                cubit.fetchTransactions();
+                              },
+                              child: const ReportActionButton(
+                                label: "Search",
+                                bgColor: Colors.blue,
+                                textColor: Colors.white,
+                              ),
                             ),
                           ],
                         ),

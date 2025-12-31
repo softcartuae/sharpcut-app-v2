@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 
 class ReportTableRow extends StatelessWidget {
   final int index;
+  final BookingResponseModel transaction;
 
-  const ReportTableRow({super.key, required this.index});
+  const ReportTableRow({
+    super.key,
+    required this.index,
+    required this.transaction,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,16 +23,16 @@ class ReportTableRow extends StatelessWidget {
       child: Row(
         children: [
           _buildDataCell("${index + 1}", width: 50),
-          _buildDataCell("07-Jun-24\n04:45PM", width: 100),
-          _buildDataCell("A10068", width: 80),
-          _buildDataCell("07-Jun-24\n04:45PM", width: 100),
-          _buildDataCell("0000000000", width: 100),
-          _buildDataCell("Name", width: 100),
-          _buildDataCell("-", width: 80),
-          _buildDataCell("0.00", width: 80),
-          _buildDataCell("0.00", width: 80),
-          _buildDataCell("0.00", width: 80),
-          _buildDataCell("ASHRAF", width: 100),
+          _buildDataCell(transaction.transactionDate ?? "-", width: 100),
+          _buildDataCell(transaction.invoiceNo ?? "-", width: 80),
+          _buildDataCell(transaction.createdAt ?? "-", width: 100),
+          _buildDataCell(transaction.customerNumber ?? "-", width: 100),
+          _buildDataCell(transaction.customerName ?? "-", width: 100),
+          _buildDataCell(transaction.paymentStatus ?? "-", width: 80),
+          _buildDataCell(transaction.grandTotal ?? "0.00", width: 80),
+          _buildDataCell(transaction.taxTotal ?? "0.00", width: 80),
+          _buildDataCell(transaction.finalTotal ?? "0.00", width: 80),
+          _buildDataCell(transaction.staff?.name ?? "-", width: 100),
           _buildActionCell(Icons.payment, width: 60, onTap: () {}),
           _buildActionCell(Icons.print, width: 60, onTap: () {}),
           _buildActionCell(

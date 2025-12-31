@@ -23,6 +23,11 @@ import 'package:sharp_cut/data/expenses/expense_repo_impl.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
 import 'package:sharp_cut/data/printing/printing_repo_imp.dart';
+import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
+import 'package:sharp_cut/domain/report/report_repo.dart';
+import 'package:sharp_cut/data/report/report_repo_imp.dart';
+import 'package:sharp_cut/data/report/service/report_service.dart';
+import 'package:sharp_cut/data/api_client.dart';
 
 final sl = GetIt.instance;
 
@@ -54,6 +59,8 @@ Future<void> init() async {
 
   sl.registerFactory<PrintingCubit>(() => PrintingCubit(sl<PrintingRepo>()));
 
+  sl.registerFactory<ReportCubit>(() => ReportCubit(sl<ReportRepo>()));
+
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
   sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
@@ -63,4 +70,7 @@ Future<void> init() async {
   sl.registerLazySingleton<BookingRepo>(() => BookingRepoImp());
   sl.registerLazySingleton<ExpenseRepo>(() => ExpenseRepoImpl());
   sl.registerLazySingleton<PrintingRepo>(() => PrintingRepoImp());
+  sl.registerLazySingleton<ReportRepo>(
+    () => ReportRepoImp(ReportService()),
+  );
 }

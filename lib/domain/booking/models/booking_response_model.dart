@@ -15,6 +15,12 @@ class BookingResponseModel {
   final String? createdAt;
   final StaffModel? staff;
   final List<BookingDetail>? details;
+  final String? grandTotal;
+  final String? taxTotal;
+  final String? finalTotal;
+  final String? paymentStatus;
+  final num? totalPayment;
+  final List<PaymentModel>? payments;
 
   BookingResponseModel({
     this.id,
@@ -30,6 +36,12 @@ class BookingResponseModel {
     this.createdAt,
     this.staff,
     this.details,
+    this.grandTotal,
+    this.taxTotal,
+    this.finalTotal,
+    this.paymentStatus,
+    this.totalPayment,
+    this.payments,
   });
 
   factory BookingResponseModel.fromJson(Map<String, dynamic> json) {
@@ -46,9 +58,19 @@ class BookingResponseModel {
       invoiceDate: json['invoice_date'],
       status: json['status'],
       createdAt: json['created_at'],
+      grandTotal: json['grand_total'],
+      taxTotal: json['tax_total'],
+      finalTotal: json['final_total'],
+      paymentStatus: json['payment_status'],
+      totalPayment: json['total_payment'],
       details: json['details'] != null
           ? (json['details'] as List)
                 .map((e) => BookingDetail.fromJson(e))
+                .toList()
+          : null,
+      payments: json['payments'] != null
+          ? (json['payments'] as List)
+                .map((e) => PaymentModel.fromJson(e))
                 .toList()
           : null,
     );
@@ -57,18 +79,46 @@ class BookingResponseModel {
 
 class BookingDetail {
   final int? id;
-
   final ServiceModel? service;
+  final int? quantity;
+  final String? rate;
+  final String? amountTotal;
 
-  BookingDetail({this.id, this.service});
+  BookingDetail({
+    this.id,
+    this.service,
+    this.quantity,
+    this.rate,
+    this.amountTotal,
+  });
 
   factory BookingDetail.fromJson(Map<String, dynamic> json) {
     return BookingDetail(
       id: json['id'],
-
+      quantity: json['quantity'],
+      rate: json['rate'],
+      amountTotal: json['amount_total'],
       service: json['service'] != null
           ? ServiceModel.fromJson(json['service'])
           : null,
+    );
+  }
+}
+
+class PaymentModel {
+  final int? id;
+  final String? mode;
+  final String? amount;
+  final String? date;
+
+  PaymentModel({this.id, this.mode, this.amount, this.date});
+
+  factory PaymentModel.fromJson(Map<String, dynamic> json) {
+    return PaymentModel(
+      id: json['id'],
+      mode: json['mode'],
+      amount: json['amount'],
+      date: json['date'],
     );
   }
 }

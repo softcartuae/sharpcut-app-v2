@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
+import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/presentation/report/screens/screen_report_table.dart';
 
 class ScreenSearch extends StatelessWidget {
@@ -129,6 +131,7 @@ class ScreenSearch extends StatelessWidget {
                               context,
                               'OK',
                               onTap: () {
+                                context.read<ReportCubit>().resetFilters();
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => ScreenReportTable(),
