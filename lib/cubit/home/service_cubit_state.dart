@@ -57,14 +57,14 @@ class ServiceStateSuccess extends ServiceState {
 
   double get subTotal {
     return cartItems.fold(0, (total, item) {
-      final price = double.tryParse(item.service.charge ?? "0") ?? 0;
+      final price = item.service.charge  ?? 0;
       return total + (price * item.quantity);
     });
   }
 
   double get vat {
     return cartItems.fold(0, (total, item) {
-      final unitTax = double.tryParse(item.service.unitTax ?? "0") ?? 0;
+      final unitTax = item.service.unitTax ?? 0;
       return total + (unitTax * item.quantity);
     });
   }

@@ -1,5 +1,6 @@
 import 'package:sharp_cut/domain/home/models/service_model.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
+import 'package:sharp_cut/utils/helpers/convertion.dart';
 
 class BookingResponseModel {
   final int? id;
@@ -15,11 +16,11 @@ class BookingResponseModel {
   final String? createdAt;
   final StaffModel? staff;
   final List<BookingDetail>? details;
-  final String? grandTotal;
-  final String? taxTotal;
-  final String? finalTotal;
+  final double? grandTotal;
+  final double? taxTotal;
+  final double? finalTotal;
   final String? paymentStatus;
-  final num? totalPayment;
+  final double? totalPayment;
   final List<PaymentModel>? payments;
 
   BookingResponseModel({
@@ -58,11 +59,11 @@ class BookingResponseModel {
       invoiceDate: json['invoice_date'],
       status: json['status'],
       createdAt: json['created_at'],
-      grandTotal: json['grand_total'],
-      taxTotal: json['tax_total'],
-      finalTotal: json['final_total'],
+      grandTotal: toDouble(json['grand_total']),
+      taxTotal: toDouble(json['tax_total']),
+      finalTotal: toDouble(json['final_total']),
       paymentStatus: json['payment_status'],
-      totalPayment: json['total_payment'],
+      totalPayment: toDouble(json['total_payment']),
       details: json['details'] != null
           ? (json['details'] as List)
                 .map((e) => BookingDetail.fromJson(e))
@@ -81,8 +82,8 @@ class BookingDetail {
   final int? id;
   final ServiceModel? service;
   final int? quantity;
-  final String? rate;
-  final String? amountTotal;
+  final double? rate;
+  final double? amountTotal;
 
   BookingDetail({
     this.id,
@@ -96,8 +97,8 @@ class BookingDetail {
     return BookingDetail(
       id: json['id'],
       quantity: json['quantity'],
-      rate: json['rate'],
-      amountTotal: json['amount_total'],
+      rate: toDouble(json['rate']),
+      amountTotal: toDouble(json['amount_total']),
       service: json['service'] != null
           ? ServiceModel.fromJson(json['service'])
           : null,
@@ -108,7 +109,7 @@ class BookingDetail {
 class PaymentModel {
   final int? id;
   final String? mode;
-  final String? amount;
+  final double? amount;
   final String? date;
 
   PaymentModel({this.id, this.mode, this.amount, this.date});
@@ -117,7 +118,7 @@ class PaymentModel {
     return PaymentModel(
       id: json['id'],
       mode: json['mode'],
-      amount: json['amount'],
+      amount: toDouble(json['amount']),
       date: json['date'],
     );
   }

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
+import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
@@ -24,7 +25,17 @@ abstract class BookingRepo {
     SettlePaymentRequestModel request,
   );
 
+
+  Future<Either<String, SettlePaymentResponseModel>> reSettlePayment(
+    ResettleModel request,
+  );
+
   Future<Either<String, SettlePaymentResponseModel>> quickPayment(
     SettlePaymentRequestModel request,
   );
+
+
+
+
+
 }

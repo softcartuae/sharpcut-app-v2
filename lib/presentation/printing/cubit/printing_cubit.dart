@@ -97,6 +97,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     required String? bookingTime,
   }) async {
     if (state.connectedPrinter == null) {
+      ToastHelper.showError("No printer connected");
       emit(
         state.copyWith(
           status: PrintingStatus.error,
@@ -128,7 +129,7 @@ class PrintingCubit extends Cubit<PrintingState> {
       );
     }
   }
-
+  
   @override
   Future<void> close() {
     _printerSubscription?.cancel();

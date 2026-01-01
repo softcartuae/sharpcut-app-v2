@@ -7,6 +7,7 @@ import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/presentation/expense/widgets/payment_mode_card.dart';
 import 'package:sharp_cut/presentation/expense/widgets/settlement_glass_container.dart';
@@ -25,12 +26,13 @@ Future<void> showResettmentScreen(
   required String? bookingTime,
   required String? invoiceNumber,
   required List<CartItemModel> cartItems,
+  required String? paidAmount,
 }) {
   return showDialog(
     context: context,
     barrierColor: Colors.black.withValues(alpha: 0.5),
-    builder: (context) => ResettlementScreen
-    (
+    builder: (context) => ResettlementScreen(
+      paidAmount: paidAmount,
       invoiceNumber: invoiceNumber,
       settlePayment: settlePayment,
       staffName: staffName,
@@ -40,30 +42,28 @@ Future<void> showResettmentScreen(
   );
 }
 
-class ResettlementScreen
- extends StatefulWidget {
+class ResettlementScreen extends StatefulWidget {
   final SettlePaymentRequestModel settlePayment;
   final String? staffName;
   final String? bookingTime;
   final String? invoiceNumber;
   final List<CartItemModel> cartItems;
-  const ResettlementScreen
-  ({
+  final String? paidAmount;
+  const ResettlementScreen({
     super.key,
     required this.settlePayment,
     required this.staffName,
     required this.bookingTime,
     required this.invoiceNumber,
     required this.cartItems,
+    required this.paidAmount,
   });
 
   @override
-  State<ResettlementScreen
-  > createState() => _SettlementDialogState();
+  State<ResettlementScreen> createState() => _SettlementDialogState();
 }
 
-class _SettlementDialogState extends State<ResettlementScreen
-> {
+class _SettlementDialogState extends State<ResettlementScreen> {
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
@@ -140,6 +140,7 @@ class _SettlementDialogState extends State<ResettlementScreen
     _staffNameController.text = widget.staffName ?? "";
     _vatController.text = widget.settlePayment.taxTotal.toString();
     _invoiceController.text = widget.invoiceNumber ?? "";
+    _paidController.text = widget.paidAmount ?? 0.0.toStringAsFixed(2);
     // Calculate total quantity
     int totalQty = 0;
     if (widget.settlePayment.quantity != null) {
@@ -240,21 +241,7 @@ class _SettlementDialogState extends State<ResettlementScreen
   }
 
   void _onSettle({required bool alsoPrint}) {
-    final double discount = double.tryParse(_discountController.text) ?? 0.0;
-    final double roundOff = double.tryParse(_roundOffController.text) ?? 0.0;
-
-    // Recalculate final total based on current inputs
-    // final_total = grand_total + tax_total - discount + round_off
-    // Note: widget.settlePayment.grandTotal might be the subtotal before tax?
-    // Let's assume the formula: Final = (GrandTotal or SubTotal) + Tax - Discount + RoundOff
-    // Based on populateData: _subTotalController <-- grandTotal. _vatController <-- taxTotal.
-    // So Final = SubTotal + VAT - Discount + RoundOff.
-
-    final double subTotal = widget.settlePayment.grandTotal ?? 0.0;
-    final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
-
     final double calculatedFinalTotal = _finalTotal;
-
     // Get amounts based on selection
     double cashAmount = 0.0;
     double cardAmount = 0.0;
@@ -340,24 +327,8 @@ class _SettlementDialogState extends State<ResettlementScreen
       }
     }
 
-    final request = SettlePaymentRequestModel(
+    final ResettleModel resettleModel = ResettleModel(
       transactionId: widget.settlePayment.transactionId,
-      customerName: _nameController.text,
-      customerNumber: _mobileController.text,
-      grandTotal: subTotal,
-      taxTotal: taxTotal,
-      discount: discount,
-      roundOff: roundOff,
-      finalTotal: calculatedFinalTotal,
-      serviceId: widget.settlePayment.serviceId,
-      quantity: widget.settlePayment.quantity,
-      rate: widget.settlePayment.rate,
-      taxAmount: widget.settlePayment.taxAmount,
-      currency: widget.settlePayment.currency,
-      amountTotal: widget.settlePayment.amountTotal,
-      tax: widget.settlePayment.tax,
-      subTotal: widget.settlePayment.subTotal,
-      isTip: widget.settlePayment.isTip,
       collectedUserId:
           widget.settlePayment.collectedUserId != null &&
               widget.settlePayment.collectedUserId!.isNotEmpty
@@ -366,30 +337,14 @@ class _SettlementDialogState extends State<ResettlementScreen
               widget.settlePayment.collectedUserId!.first,
             )
           : [],
-
       mode: modes,
       amount: amounts,
       tenderCash: tenders,
       change: changes,
     );
-    if (alsoPrint) {
-      final shopData = context.read<AuthCubit>().currentUser;
-      if (shopData != null) {
-        context.read<PrintingCubit>().printInvoice(
-          request: request,
-          shopData: shopData,
-          cartItems: widget.cartItems,
-          staffName: widget.staffName,
-          invoiceNumber: widget.invoiceNumber,
-          bookingTime: widget.bookingTime != null
-              ? DateFormat('HH:mm').format(DateTime.parse(widget.bookingTime!))
-              : "--:--",
-        );
-      }
-      context.read<BookingCubit>().settlePayment(request: request);
-    } else {
-      context.read<BookingCubit>().settlePayment(request: request);
-    }
+
+    context.read<BookingCubit>().reSettlePayment(resettleModel: resettleModel);
+
     Navigator.pop(context);
   }
 
@@ -968,28 +923,28 @@ class _SettlementDialogState extends State<ResettlementScreen
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        ElevatedButton(
-                          onPressed: () => _onSettle(alsoPrint: true),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.violetNormal,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                          ),
-                          child: Text(
-                            "SETTLE & PRINT",
-                            style: GoogleFonts.rajdhani(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
+                        // ElevatedButton(
+                        //   onPressed: () => _onSettle(alsoPrint: true),
+                        //   style: ElevatedButton.styleFrom(
+                        //     backgroundColor: AppColors.violetNormal,
+                        //     shape: RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(8),
+                        //     ),
+                        //     padding: const EdgeInsets.symmetric(
+                        //       horizontal: 24,
+                        //       vertical: 12,
+                        //     ),
+                        //   ),
+                        //   child: Text(
+                        //     "SETTLE & PRINT",
+                        //     style: GoogleFonts.rajdhani(
+                        //       color: Colors.white,
+                        //       fontSize: 18,
+                        //       fontWeight: FontWeight.bold,
+                        //     ),
+                        //   ),
+                        // ),
+                        // const SizedBox(width: 20),
                         ElevatedButton(
                           onPressed: () => _onSettle(alsoPrint: false),
                           style: ElevatedButton.styleFrom(

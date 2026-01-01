@@ -248,7 +248,7 @@ class ReceiptWidget extends StatelessWidget {
 
           // Items List
           ...cartItems.map((item) {
-            final price = double.tryParse(item.service.price ?? '0') ?? 0.0;
+            final price = item.service.price ?? 0.0;
             final total = price * item.quantity;
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),

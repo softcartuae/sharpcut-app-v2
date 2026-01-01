@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/domain/auth/models/user_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_re_settlement.dart';
+import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/presentation/report/widgets/report_table_header.dart';
@@ -14,8 +16,21 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:sharp_cut/presentation/report/widgets/receipt_dialog_helper.dart';
 
-class ReportDataTable extends StatelessWidget {
+class ReportDataTable extends StatefulWidget {
   const ReportDataTable({super.key});
+
+  @override
+  State<ReportDataTable> createState() => _ReportDataTableState();
+}
+
+class _ReportDataTableState extends State<ReportDataTable> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +44,11 @@ class ReportDataTable extends StatelessWidget {
                   return Stack(
                     children: [
                       Scrollbar(
+                        controller: _scrollController,
                         thumbVisibility: true,
                         trackVisibility: true,
                         child: SingleChildScrollView(
+                          controller: _scrollController,
                           scrollDirection: Axis.horizontal,
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
@@ -78,44 +95,76 @@ class ReportDataTable extends StatelessWidget {
                                                       .toList() ??
                                                   [];
 
-                                              final request =
-                                                  SettlePaymentRequestModel(
-                                                    transactionId: booking.id,
-                                                    grandTotal: double.tryParse(
-                                                      booking.grandTotal ?? '0',
-                                                    ),
-                                                    taxTotal: double.tryParse(
-                                                      booking.taxTotal ?? '0',
-                                                    ),
-                                                    finalTotal: double.tryParse(
-                                                      booking.finalTotal ?? '0',
-                                                    ),
-                                                    discount:
-                                                        0.0, // Assuming no discount available in response for now
-                                                    subTotal: [
-                                                      double.tryParse(
-                                                            booking.grandTotal ??
-                                                                '0',
-                                                          ) ??
+                                              SettlePaymentRequestModel
+                                              request = SettlePaymentRequestModel(
+                                                transactionId: booking.id,
+                                                customerName:
+                                                    booking.customerName,
+                                                customerNumber:
+                                                    booking.customerNumber,
+                                                grandTotal:
+                                                    booking.grandTotal ?? 0,
+                                                taxTotal: booking.taxTotal ?? 0,
+                                                discount: 0.0,
+                                                roundOff: 0.0,
+                                                finalTotal:
+                                                    booking.finalTotal ?? 0,
+                                                serviceId: [],
+                                                quantity: cartItems
+                                                    .map((e) => e.quantity)
+                                                    .toList(),
+                                                rate: cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          e.service.price ??
                                                           0.0,
-                                                    ],
-                                                    mode: booking.payments
-                                                        ?.map(
-                                                          (e) => e.mode ?? '',
-                                                        )
-                                                        .toList(),
-                                                    amount: booking.payments
-                                                        ?.map(
-                                                          (e) =>
-                                                              double.tryParse(
-                                                                e.amount ?? '0',
-                                                              ) ??
-                                                              0.0,
-                                                        )
-                                                        .toList(),
-                                                  );
+                                                    )
+                                                    .toList(),
+                                                taxAmount: cartItems
+                                                    .map((e) => 0.0)
+                                                    .toList(), // Placeholder
+                                                currency: cartItems
+                                                    .map((e) => "AED")
+                                                    .toList(),
+                                                amountTotal: cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          (e.service.price ??
+                                                              0.0) *
+                                                          e.quantity,
+                                                    )
+                                                    .toList(),
+                                                tax: cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          (e.service.unitTax ??
+                                                              0.0) *
+                                                          e.quantity,
+                                                    )
+                                                    .toList(), // Placeholder
+                                                subTotal: cartItems.map((e) {
+                                                  final price =
+                                                      e.service.price ?? 0.0;
+                                                  final tax =
+                                                      e.service.unitTax ?? 0.0;
+                                                  return (price + tax) *
+                                                      e.quantity;
+                                                }).toList(),
+                                                isTip: cartItems
+                                                    .map((e) => 0)
+                                                    .toList(),
+                                                collectedUserId: [
+                                                  booking.userId!,
+                                                ], // Placeholder
+                                                mode: [],
+                                                amount: [],
+                                                tenderCash: [0.0],
+                                                change: [0.0],
+                                              );
 
                                               showResettmentScreen(
+                                                paidAmount: booking.totalPayment
+                                                    ?.toString(),
                                                 context,
                                                 settlePayment: request,
                                                 staffName: booking.staff?.name,
@@ -125,7 +174,120 @@ class ReportDataTable extends StatelessWidget {
                                                 cartItems: cartItems,
                                               );
                                             },
-                                            printTheInvoice: () {},
+                                            printTheInvoice: () {
+                                              final ShopModel? shopData =
+                                                  context
+                                                      .read<AuthCubit>()
+                                                      .currentUser;
+
+                                              final booking =
+                                                  state.transactions[index];
+                                              // Map BookingResponseModel to List<CartItemModel>
+                                              final List<CartItemModel>
+                                              cartItems =
+                                                  booking.details
+                                                      ?.where(
+                                                        (detail) =>
+                                                            detail.service !=
+                                                            null,
+                                                      )
+                                                      .map(
+                                                        (
+                                                          detail,
+                                                        ) => CartItemModel(
+                                                          service:
+                                                              detail.service!,
+                                                          quantity:
+                                                              detail.quantity ??
+                                                              1,
+                                                        ),
+                                                      )
+                                                      .toList() ??
+                                                  [];
+                                              final String? staffName =
+                                                  booking.staff?.name;
+                                              final String? invoiceNumber =
+                                                  booking.invoiceNo;
+                                              final String? bookingTime =
+                                                  booking.createdAt;
+
+                                              SettlePaymentRequestModel
+                                              request = SettlePaymentRequestModel(
+                                                transactionId: booking.id,
+                                                customerName:
+                                                    booking.customerName,
+                                                customerNumber:
+                                                    booking.customerNumber,
+                                                grandTotal:
+                                                    booking.grandTotal ?? 0,
+                                                taxTotal: booking.taxTotal ?? 0,
+                                                discount: 0.0,
+                                                roundOff: 0.0,
+                                                finalTotal:
+                                                    booking.finalTotal ?? 0,
+                                                serviceId: [],
+                                                quantity: cartItems
+                                                    .map((e) => e.quantity)
+                                                    .toList(),
+                                                rate: cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          e.service.price ??
+                                                          0.0,
+                                                    )
+                                                    .toList(),
+                                                taxAmount: cartItems
+                                                    .map((e) => 0.0)
+                                                    .toList(), // Placeholder
+                                                currency: cartItems
+                                                    .map((e) => "AED")
+                                                    .toList(),
+                                                amountTotal: cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          (e.service.price ??
+                                                              0.0) *
+                                                          e.quantity,
+                                                    )
+                                                    .toList(),
+                                                tax: cartItems
+                                                    .map((e) => 0.0)
+                                                    .toList(), // Placeholder
+                                                subTotal: cartItems.map((e) {
+                                                  final price =
+                                                      e.service.price ?? 0.0;
+                                                  final tax =
+                                                      e.service.unitTax ?? 0.0;
+                                                  return (price + tax) *
+                                                      e.quantity;
+                                                }).toList(),
+
+                                                isTip: cartItems
+                                                    .map((e) => 0)
+                                                    .toList(),
+                                                collectedUserId: [
+                                                  booking.userId!,
+                                                ], // Placeholder
+                                                mode: [],
+                                                amount: [],
+                                                tenderCash: [0.0],
+                                                change: [0.0],
+                                              );
+
+                                              // if (shopData != null) {
+                                              //   context
+                                              //       .read<PrintingCubit>()
+                                              //       .printInvoice(
+                                              //         request: request,
+                                              //         shopData: shopData,
+                                              //         cartItems: cartItems,
+                                              //         staffName: staffName,
+                                              //         invoiceNumber:
+                                              //             invoiceNumber,
+                                              //         bookingTime: bookingTime,
+                                              //       );
+                                              // }
+                                            },
                                             viewFunction: () {
                                               final ShopModel? shopData =
                                                   context

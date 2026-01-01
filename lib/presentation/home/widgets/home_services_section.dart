@@ -68,27 +68,25 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       taxTotal: serviceState.vat,
       discount: 0.0,
       roundOff: 0.0,
-      finalTotal: serviceState.total,
+      finalTotal: (serviceState.total + serviceState.vat),
       serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
       quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
-      rate: serviceState.cartItems
-          .map((e) => double.tryParse(e.service.price ?? "0") ?? 0.0)
-          .toList(),
-      taxAmount: serviceState.cartItems.map((e) => 0.0).toList(), // Placeholder
+      rate: serviceState.cartItems.map((e) => e.service.price ?? 0.0).toList(),
+      taxAmount: serviceState.cartItems
+          .map((e) => e.service.unitTax ?? 0)
+          .toList(), // Placeholder
       currency: serviceState.cartItems.map((e) => "AED").toList(),
       amountTotal: serviceState.cartItems
-          .map(
-            (e) =>
-                (double.tryParse(e.service.price ?? "0") ?? 0.0) * e.quantity,
-          )
+          .map((e) => (e.service.price ?? 0.0) * e.quantity)
           .toList(),
-      tax: serviceState.cartItems.map((e) => 0.0).toList(), // Placeholder
-      subTotal: serviceState.cartItems
-          .map(
-            (e) =>
-                (double.tryParse(e.service.price ?? "0") ?? 0.0) * e.quantity,
-          )
-          .toList(),
+      tax: serviceState.cartItems
+          .map((e) => (e.service.unitTax ?? 0.0) * e.quantity)
+          .toList(), // Placeholder
+      subTotal: serviceState.cartItems.map((e) {
+        final price = e.service.price ?? 0.0;
+        final tax = e.service.unitTax ?? 0.0;
+        return (price + tax) * e.quantity;
+      }).toList(),
       isTip: serviceState.cartItems.map((e) => 0).toList(),
       collectedUserId: [userId!], // Placeholder
       mode: [paymentMode],
@@ -639,67 +637,76 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             return;
                                           }
 
-                                          final request = SaveBookingRequestModel(
-                                            transactionId: transactionId,
-                                            customerName:
-                                                bookingFormState.customerName,
-                                            customerNumber:
-                                                bookingFormState.customerNumber,
-                                            grandTotal: serviceState.total,
-                                            taxTotal: serviceState.vat,
-                                            discount: 0.0,
-                                            roundOff: 0.0,
-                                            finalTotal: serviceState.total,
-                                            serviceId: serviceState.cartItems
-                                                .map((e) => e.service.id!)
-                                                .toList(),
-                                            quantity: serviceState.cartItems
-                                                .map((e) => e.quantity)
-                                                .toList(),
-                                            rate: serviceState.cartItems
-                                                .map(
-                                                  (e) =>
-                                                      double.tryParse(
-                                                        e.service.price ?? "0",
-                                                      ) ??
-                                                      0.0,
-                                                )
-                                                .toList(),
-                                            taxAmount: serviceState.cartItems
-                                                .map((e) => 0.0) // Placeholder
-                                                .toList(),
-                                            currency: serviceState.cartItems
-                                                .map((e) => "AED")
-                                                .toList(),
-                                            amountTotal: serviceState.cartItems
-                                                .map(
-                                                  (e) =>
-                                                      (double.tryParse(
-                                                            e.service.price ??
-                                                                "0",
-                                                          ) ??
-                                                          0.0) *
-                                                      e.quantity,
-                                                )
-                                                .toList(),
-                                            tax: serviceState.cartItems
-                                                .map((e) => 0.0) // Placeholder
-                                                .toList(),
-                                            subTotal: serviceState.cartItems
-                                                .map(
-                                                  (e) =>
-                                                      (double.tryParse(
-                                                            e.service.price ??
-                                                                "0",
-                                                          ) ??
-                                                          0.0) *
-                                                      e.quantity,
-                                                )
-                                                .toList(),
-                                            isTip: serviceState.cartItems
-                                                .map((e) => 0)
-                                                .toList(),
-                                          );
+                                          final request =
+                                              SaveBookingRequestModel(
+                                                transactionId: transactionId,
+                                                customerName: bookingFormState
+                                                    .customerName,
+                                                customerNumber: bookingFormState
+                                                    .customerNumber,
+                                                grandTotal: serviceState.total,
+                                                taxTotal: serviceState.vat,
+                                                discount: 0.0,
+                                                roundOff: 0.0,
+                                                finalTotal: serviceState.total,
+                                                serviceId: serviceState
+                                                    .cartItems
+                                                    .map((e) => e.service.id!)
+                                                    .toList(),
+                                                quantity: serviceState.cartItems
+                                                    .map((e) => e.quantity)
+                                                    .toList(),
+                                                rate: serviceState.cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          e.service.price ??
+                                                          0.0,
+                                                    )
+                                                    .toList(),
+                                                taxAmount: serviceState
+                                                    .cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          e.service.unitTax ??
+                                                          0,
+                                                    ) // Placeholder
+                                                    .toList(),
+                                                currency: serviceState.cartItems
+                                                    .map((e) => "AED")
+                                                    .toList(),
+                                                amountTotal: serviceState
+                                                    .cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          (e.service.price ??
+                                                              0.0) *
+                                                          e.quantity,
+                                                    )
+                                                    .toList(),
+                                                tax: serviceState.cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          (e.service.unitTax ??
+                                                              0.0) *
+                                                          e.quantity,
+                                                    )
+                                                    .toList(),
+                                                subTotal: serviceState.cartItems
+                                                    .map((e) {
+                                                      final price =
+                                                          e.service.price ??
+                                                          0.0;
+                                                      final tax =
+                                                          e.service.unitTax ??
+                                                          0.0;
+                                                      return (price + tax) *
+                                                          e.quantity;
+                                                    })
+                                                    .toList(),
+                                                isTip: serviceState.cartItems
+                                                    .map((e) => 0)
+                                                    .toList(),
+                                              );
 
                                           context
                                               .read<BookingCubit>()
@@ -858,15 +865,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                 .toList(),
                                             rate: serviceState.cartItems
                                                 .map(
-                                                  (e) =>
-                                                      double.tryParse(
-                                                        e.service.price ?? "0",
-                                                      ) ??
-                                                      0.0,
+                                                  (e) => e.service.price ?? 0.0,
                                                 )
                                                 .toList(),
                                             taxAmount: serviceState.cartItems
-                                                .map((e) => 0.0)
+                                                .map(
+                                                  (e) => e.service.unitTax ?? 0,
+                                                )
                                                 .toList(), // Placeholder
                                             currency: serviceState.cartItems
                                                 .map((e) => "AED")
@@ -874,27 +879,27 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             amountTotal: serviceState.cartItems
                                                 .map(
                                                   (e) =>
-                                                      (double.tryParse(
-                                                            e.service.price ??
-                                                                "0",
-                                                          ) ??
-                                                          0.0) *
+                                                      (e.service.price ?? 0.0) *
                                                       e.quantity,
                                                 )
                                                 .toList(),
                                             tax: serviceState.cartItems
-                                                .map((e) => 0.0)
-                                                .toList(), // Placeholder
-                                            subTotal: serviceState.cartItems
                                                 .map(
                                                   (e) =>
-                                                      (double.tryParse(
-                                                            e.service.price ??
-                                                                "0",
-                                                          ) ??
+                                                      (e.service.unitTax ??
                                                           0.0) *
                                                       e.quantity,
                                                 )
+                                                .toList(),
+                                            subTotal: serviceState.cartItems
+                                                .map((e) {
+                                                  final price =
+                                                      e.service.price ?? 0.0;
+                                                  final tax =
+                                                      e.service.unitTax ?? 0.0;
+                                                  return (price + tax) *
+                                                      e.quantity;
+                                                })
                                                 .toList(),
                                             isTip: serviceState.cartItems
                                                 .map((e) => 0)

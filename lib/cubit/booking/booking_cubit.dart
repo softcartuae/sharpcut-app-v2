@@ -3,6 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
+import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
@@ -82,6 +83,34 @@ class BookingCubit extends Cubit<BookingState> {
       ),
     );
   }
+  
+
+Future<bool> reSettlePayment({
+  required ResettleModel resettleModel,
+}) async {
+  emit(BookingLoading());
+
+  final result = await bookingRepo.reSettlePayment(resettleModel);
+
+  return result.fold(
+    (error) {
+      emit(BookingError(message: error));
+      return false;
+    },
+    (response) {
+      emit(
+        BookingPaymentSettled(
+          message: response.message ?? 'Payment settled',
+          response: response,
+        ),
+      );
+      return true;
+    },
+  );
+}
+
+
+
 
   Future<void> settlePayment({
     required SettlePaymentRequestModel request,

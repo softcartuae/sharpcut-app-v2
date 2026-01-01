@@ -1,3 +1,5 @@
+import 'package:sharp_cut/utils/helpers/convertion.dart';
+
 class ServiceModel {
   final int? id;
   final int? categoryId;
@@ -5,12 +7,12 @@ class ServiceModel {
   final String? nameArabic;
   final String? description;
   final int? isTip;
-  final String? charge;
-  final String? beforeVat;
+  final double? charge;
+  final double? beforeVat;
   final String? taxOption;
   final String? currency;
-  final String? taxPercentage;
-  final String? unitTax;
+  final double? taxPercentage;
+  final double? unitTax;
   final int? status;
   final String? image;
   final int? position;
@@ -45,12 +47,12 @@ class ServiceModel {
       nameArabic: json['name_arabic'] as String?,
       description: json['description'] as String?,
       isTip: json['is_tip'] as int?,
-      charge: json['charge'] as String?,
-      beforeVat: json['before_vat'] as String?,
+      charge: toDouble(json['charge']),
+      beforeVat: toDouble(json['before_vat']),
       taxOption: json['tax_option'] as String?,
       currency: json['currency'] as String?,
-      taxPercentage: json['tax_percentage'] as String?,
-      unitTax: json['unit_tax'] as String?,
+      taxPercentage: toDouble(json['tax_percentage']),
+      unitTax: toDouble(json['unit_tax']),
       status: json['status'] as int?,
       image: json['image'] as String?,
       position: json['position'] as int?,
@@ -81,5 +83,5 @@ class ServiceModel {
     };
   }
 
-  String? get price => charge;
+  double? get price => charge;
 }

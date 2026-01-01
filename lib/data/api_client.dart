@@ -27,6 +27,7 @@ class ApiClient {
   static final saveBookingApi = "api/transactions/save-booking";
   static final settlePayment = "api/transactions/settle-payment";
   static final quickPayment = "api/transactions/quick-payment";
+  static final reSettlementPayment = "api/transactions/payment";
   // GET API ENDPOINTS
   static final userExpenseGETapi = "api/users/expenses";
   static final transactionsGETApi = "api/transactions";

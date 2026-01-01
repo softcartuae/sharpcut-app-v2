@@ -25,7 +25,7 @@ class TestReceiptScreen extends StatelessWidget {
         service: ServiceModel(
           name: 'Beard Shave',
           nameArabic: 'حلاقة اللحية',
-          charge: '21.00',
+          charge: 21.00,
         ),
         quantity: 1,
       ),
@@ -33,7 +33,7 @@ class TestReceiptScreen extends StatelessWidget {
         service: ServiceModel(
           name: 'Hair cut',
           nameArabic: 'قص الشعر',
-          charge: '21.00',
+          charge: 21.00,
         ),
         quantity: 1,
       ),
@@ -41,7 +41,7 @@ class TestReceiptScreen extends StatelessWidget {
         service: ServiceModel(
           name: 'Hair Oil Treatment',
           nameArabic: 'حمام زيت',
-          charge: '42.00',
+          charge: 42.00,
         ),
         quantity: 1,
       ),
@@ -49,7 +49,7 @@ class TestReceiptScreen extends StatelessWidget {
         service: ServiceModel(
           name: 'Face Cleaning',
           nameArabic: 'تنظيف الوجه',
-          charge: '21.00',
+          charge: 21.00,
         ),
         quantity: 1,
       ),

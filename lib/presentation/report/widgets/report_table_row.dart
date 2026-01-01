@@ -21,8 +21,7 @@ class ReportTableRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final balenceAmount =
-        (double.tryParse(transaction.finalTotal ?? "0") ?? 0) -
-        (double.tryParse(transaction.totalPayment?.toString() ?? "0") ?? 0);
+        (transaction.finalTotal ?? 0) - ((transaction.totalPayment ?? 0));
     return Container(
       height: 60,
       decoration: BoxDecoration(
@@ -32,26 +31,25 @@ class ReportTableRow extends StatelessWidget {
       child: Row(
         children: [
           _buildDataCell("${index + 1}", width: 50),
-          _buildDataCell(_formatDate(transaction.transactionDate), width: 100),
+          _buildDataCell(transaction.transactionDate ?? "-", width: 100),
           _buildDataCell(transaction.invoiceNo ?? "-", width: 120),
           _buildDataCell(_formatDate(transaction.createdAt), width: 100),
           _buildDataCell(transaction.customerNumber ?? "-", width: 100),
           _buildDataCell(transaction.customerName ?? "-", width: 100),
-          _buildDataCell(transaction.finalTotal ?? "0.00", width: 80),
+          _buildDataCell(
+            transaction.finalTotal?.toString() ?? "0.00",
+            width: 80,
+          ),
           _buildDataCell(
             transaction.totalPayment?.toString() ?? "0.00",
             width: 80,
           ),
           _buildDataCell(balenceAmount.toString(), width: 80),
           _buildDataCell(transaction.staff?.name ?? "-", width: 100),
-          Visibility(
-            visible: transaction.status != "Settled",
-            replacement: const SizedBox(width: 60),
-            child: _buildActionCell(
-              Icons.payment,
-              width: 60,
-              onTap: paymentSettleFunction,
-            ),
+          _buildActionCell(
+            Icons.payment,
+            width: 60,
+            onTap: paymentSettleFunction,
           ),
           // _buildActionCell(Icons.print, width: 60, onTap: () {}),
           _buildActionCell(

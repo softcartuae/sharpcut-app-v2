@@ -1,3 +1,5 @@
+import 'package:sharp_cut/utils/helpers/convertion.dart';
+
 class SettlePaymentResponseModel {
   final bool? success;
   final String? message;
@@ -19,8 +21,8 @@ class SettlePaymentResponseModel {
 class SettlePaymentData {
   final int? transactionId;
   final String? status;
-  final num? totalPaid;
-  final num? finalTotal;
+  final double? totalPaid;
+  final double? finalTotal;
 
   SettlePaymentData({
     this.transactionId,
@@ -33,8 +35,8 @@ class SettlePaymentData {
     return SettlePaymentData(
       transactionId: json['transaction_id'],
       status: json['status'],
-      totalPaid: json['total_paid'],
-      finalTotal: json['final_total'],
+      totalPaid: toDouble(json['total_paid']),
+      finalTotal: toDouble(json['final_total']),
     );
   }
 }
