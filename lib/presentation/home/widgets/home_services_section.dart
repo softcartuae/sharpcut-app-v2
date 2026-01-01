@@ -26,6 +26,7 @@ import 'package:sharp_cut/presentation/home/widgets/service_item.dart';
 import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings.dart';
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
+import 'package:sharp_cut/presentation/report/screens/screen_quick_report.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 import 'package:sharp_cut/utils/helpers/icon_helper.dart';
@@ -991,6 +992,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                     : () {
                                         _selectedButtonNotifier.value =
                                             "REPORT";
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ScreenQuickReport(),
+                                          ),
+                                        );
                                       },
                               ),
                             ),
