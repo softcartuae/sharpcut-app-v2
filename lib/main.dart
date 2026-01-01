@@ -2,6 +2,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
+import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
 import 'package:sharp_cut/presentation/splash/screens/splash_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
@@ -35,6 +36,7 @@ void main() async {
           BlocProvider(create: (_) => di.sl<BookingFormCubit>()),
           BlocProvider(create: (_) => di.sl<PrintingCubit>()),
           BlocProvider(create: (_) => di.sl<ReportCubit>()),
+          BlocProvider(create: (_) => di.sl<QuickReportCubit>()),
         ],
         child: MyApp(),
       ), // Wrap your app

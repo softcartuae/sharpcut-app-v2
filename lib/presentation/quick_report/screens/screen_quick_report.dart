@@ -3,6 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
+import 'package:intl/intl.dart';
+import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
+import 'package:sharp_cut/cubit/quick_report/quick_report_state.dart';
+import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
+
+import 'package:sharp_cut/presentation/quick_report/widgets/info_row.dart';
+import 'package:sharp_cut/presentation/quick_report/widgets/quick_report_table_row.dart';
+import 'package:sharp_cut/presentation/quick_report/widgets/summary_row.dart';
+import 'package:sharp_cut/presentation/quick_report/widgets/table_header.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class ScreenQuickReport extends StatefulWidget {
@@ -18,14 +27,49 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
 
   String get _dateLabel {
     if (_selectedRange == null) {
-      final now = DateTime.now();
-      return "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} - ${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      return "All";
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    if (_selectedRange!.start == today && _selectedRange!.end == today) {
+      return "Today";
+    }
+
+    if (_selectedRange!.start == yesterday &&
+        _selectedRange!.end == yesterday) {
+      return "Yesterday";
     }
 
     String format(DateTime d) =>
         "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
 
     return "${format(_selectedRange!.start)} - ${format(_selectedRange!.end)}";
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch initial report without parameters
+    context.read<QuickReportCubit>().fetchQuickReport();
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('MM/dd/yyyy').format(date);
+  }
+
+  void _fetchReport() {
+    String? dateRange;
+    if (_selectedRange != null) {
+      dateRange =
+          "${_formatDate(_selectedRange!.start)} - ${_formatDate(_selectedRange!.end)}";
+    }
+    context.read<QuickReportCubit>().fetchQuickReport(
+      dateRange: dateRange,
+      userId: _selectedStaffId,
+    );
   }
 
   Future<void> _pickDateRange(BuildContext context) async {
@@ -41,7 +85,72 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
       setState(() {
         _selectedRange = picked;
       });
+      _fetchReport();
     }
+  }
+
+  void _showDateFilterOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.calendar_view_day),
+                title: const Text('All'),
+                onTap: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    _selectedRange = null;
+                  });
+                  _fetchReport();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.today),
+                title: const Text('Today'),
+                onTap: () {
+                  Navigator.pop(context);
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  setState(() {
+                    _selectedRange = DateTimeRange(start: today, end: today);
+                  });
+                  _fetchReport();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.history),
+                title: const Text('Yesterday'),
+                onTap: () {
+                  Navigator.pop(context);
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  final yesterday = today.subtract(const Duration(days: 1));
+                  setState(() {
+                    _selectedRange = DateTimeRange(
+                      start: yesterday,
+                      end: yesterday,
+                    );
+                  });
+                  _fetchReport();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.date_range),
+                title: const Text('Custom Date'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickDateRange(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -169,6 +278,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                                 setState(() {
                                   _selectedStaffId = newValue;
                                 });
+                                _fetchReport();
                               },
                             ),
                           ),
@@ -179,7 +289,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
 
                     // Date Range Filter
                     GestureDetector(
-                      onTap: () => _pickDateRange(context),
+                      onTap: () => _showDateFilterOptions(context),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -215,9 +325,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                       child: SizedBox(
                         width: 150,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // TODO: Implement print functionality
-                          },
+                          onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(
                               0xFF4CAF50,
@@ -241,7 +349,25 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                     const SizedBox(height: 24),
 
                     // Report Preview Card
-                    _buildReportPreview(),
+                    BlocBuilder<QuickReportCubit, QuickReportState>(
+                      builder: (context, state) {
+                        if (state is QuickReportLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (state is QuickReportError) {
+                          return Center(
+                            child: Text(
+                              state.message,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          );
+                        } else if (state is QuickReportLoaded) {
+                          return _buildReportPreview(state.report);
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -252,7 +378,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
     );
   }
 
-  Widget _buildReportPreview() {
+  Widget _buildReportPreview(QuickReportModel report) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.blue.shade200),
@@ -263,7 +389,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
         children: [
           // Header
           Text(
-            "TAJ SHALEELA Salon test1",
+            report.salonName,
             style: GoogleFonts.rajdhani(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -272,24 +398,40 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          _buildInfoRow("Reports : Counter Cash"),
-          _buildInfoRow(
-            "Reports Date Range : 01-01-2026 to 02-01-2026 07:30 AM to 02:30 AM,",
-          ),
-          _buildInfoRow("Printing Date / Time: 01-01-2026 11:47 AM"),
-          _buildInfoRow("Branch : MAIN"),
-          _buildInfoRow("Counter Sale (Cash Received)"),
-          _buildInfoRow("Invoice Details - Delivered", isBold: true),
+          const InfoRow("Reports : Counter Cash"),
+          InfoRow("Reports Date Range : ${report.dateRange}"),
+          InfoRow("Printing Date / Time: ${report.printDatetime}"),
+          InfoRow("Branch : ${report.branch}"),
+          const InfoRow("Counter Sale (Cash Received)"),
+          const InfoRow("Invoice Details - Delivered", isBold: true),
           const SizedBox(height: 8),
           const Divider(color: Colors.black, thickness: 1.5),
 
           // Summary Section
-          _buildSummaryRow("Total Invoice", "0"),
-          _buildSummaryRow("Total Invoice Sales Amount", "0.00"),
-          _buildSummaryRow("Total Unpaid amount", "0.00"),
-          _buildSummaryRow("Gross Total Amount", "0.00"),
-          _buildSummaryRow("Total Discount", "0.00"),
-          _buildSummaryRow("Total Credit Amount", "0.00"),
+          SummaryRow(
+            label: "Total Invoice",
+            value: report.totalInvoice.toString(),
+          ),
+          SummaryRow(
+            label: "Total Invoice Sales Amount",
+            value: report.totalInvoiceSalesAmount.toStringAsFixed(2),
+          ),
+          SummaryRow(
+            label: "Total Unpaid amount",
+            value: report.totalUnpaidAmount.toStringAsFixed(2),
+          ),
+          SummaryRow(
+            label: "Gross Total Amount",
+            value: report.grossTotalAmount.toStringAsFixed(2),
+          ),
+          SummaryRow(
+            label: "Total Discount",
+            value: report.totalDiscount.toStringAsFixed(2),
+          ),
+          SummaryRow(
+            label: "Total Credit Amount",
+            value: report.totalCreditAmount.toStringAsFixed(2),
+          ),
           const SizedBox(height: 16),
 
           // Invoice Customer Details
@@ -302,10 +444,18 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
             ),
           ),
           const Divider(color: Colors.black, thickness: 1.5),
-          _buildTableHeader("Customer", "Invoice Count", "Amount"),
+          const TableHeader("Customer", "Invoice Count", "Amount"),
           const Divider(color: Colors.grey, thickness: 0.5),
-          _buildTableRow("Cash Customer", "0", "0.00"),
-          _buildTableRow("Card Customer", "0", "0.00"),
+          QuickReportTableRow(
+            "Cash Customer",
+            report.cashCustomerCount.toString(),
+            report.cashCustomerAmount,
+          ),
+          QuickReportTableRow(
+            "Card Customer",
+            report.cardCustomerCount.toString(),
+            report.cardCustomerAmount,
+          ),
           const SizedBox(height: 16),
           const Divider(color: Colors.grey, thickness: 0.5),
 
@@ -319,7 +469,13 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
             ),
           ),
           const Divider(color: Colors.grey, thickness: 0.5),
-          // Empty list in image, but we can add a placeholder or just the footer
+          ...report.salesmanWiseDetails.map((detail) {
+            return QuickReportTableRow(
+              detail.salesmanName,
+              detail.totalCashAmount,
+              detail.totalCardAmount,
+            );
+          }),
           const SizedBox(height: 16),
 
           // Footer
@@ -336,7 +492,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                 ),
               ),
               Text(
-                "0",
+                report.salesmanTotalCount.toString(),
                 style: GoogleFonts.rajdhani(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -344,7 +500,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                 ),
               ),
               Text(
-                "0.00",
+                report.salesmanTotalAmount.toStringAsFixed(2),
                 style: GoogleFonts.rajdhani(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -352,135 +508,6 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String text, {bool isBold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
-      child: Text(
-        text,
-        style: GoogleFonts.rajdhani(
-          fontSize: 12,
-          fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-          color: Colors.black,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.rajdhani(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade800,
-            ),
-          ),
-          Text(
-            value,
-            style: GoogleFonts.rajdhani(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTableHeader(String col1, String col2, String col3) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            col1,
-            style: GoogleFonts.rajdhani(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Text(
-            col2,
-            style: GoogleFonts.rajdhani(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Text(
-            col3,
-            style: GoogleFonts.rajdhani(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-            textAlign: TextAlign.end,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTableRow(String col1, String col2, String col3) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              col1,
-              style: GoogleFonts.rajdhani(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              col2,
-              style: GoogleFonts.rajdhani(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              col3,
-              style: GoogleFonts.rajdhani(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-              textAlign: TextAlign.end,
-            ),
           ),
         ],
       ),
