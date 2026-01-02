@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
@@ -9,6 +10,10 @@ class CustomTextField extends StatelessWidget {
   final String hint;
   final IconData icon;
   final TextEditingController? controller;
+  final bool readOnly;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final Function(String)? onChanged;
 
   const CustomTextField({
     super.key,
@@ -16,6 +21,10 @@ class CustomTextField extends StatelessWidget {
     required this.hint,
     required this.icon,
     this.controller,
+    this.readOnly = false,
+    this.onChanged,
+    this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -53,7 +62,11 @@ class CustomTextField extends StatelessWidget {
                 ),
               ),
               child: TextField(
+                onChanged: onChanged,
+                readOnly: readOnly,
                 controller: controller,
+                keyboardType: keyboardType,
+                inputFormatters: inputFormatters,
                 style: GoogleFonts.rajdhani(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: hint,

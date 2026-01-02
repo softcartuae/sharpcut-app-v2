@@ -7,20 +7,22 @@ class ActionButton extends StatelessWidget {
   final String label;
   final bool isPrimary;
   final VoidCallback? onTap;
+  final bool isLoading;
 
   const ActionButton({
     super.key,
     required this.label,
     this.isPrimary = false,
     this.onTap,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Container(
-        height: 50,
+        height: 43,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           gradient: isPrimary
@@ -47,14 +49,23 @@ class ActionButton extends StatelessWidget {
                 ),
         ),
         alignment: Alignment.center,
-        child: Text(
-          label,
-          style: GoogleFonts.rajdhani(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : Text(
+                label,
+                style: GoogleFonts.rajdhani(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
       ),
     );
   }

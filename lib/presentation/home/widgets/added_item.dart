@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,7 +7,18 @@ import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 
 class AddedItem extends StatelessWidget {
-  const AddedItem({super.key});
+  final CartItemModel item;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
+  final VoidCallback onRemove;
+
+  const AddedItem({
+    super.key,
+    required this.item,
+    required this.onIncrement,
+    required this.onDecrement,
+    required this.onRemove,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +47,7 @@ class AddedItem extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  "Hair Cut",
+                  item.service.name ?? "Service",
                   style: GoogleFonts.rajdhani(
                     color: Colors.white,
                     fontSize: 20,
@@ -46,7 +58,7 @@ class AddedItem extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    "1",
+                    "${item.quantity}",
                     style: GoogleFonts.rajdhani(
                       color: Colors.white,
                       fontSize: 20,
@@ -56,12 +68,22 @@ class AddedItem extends StatelessWidget {
                   const SizedBox(width: 4),
                   Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.arrow_drop_up, color: Colors.white, size: 16),
-                      Icon(
-                        Icons.arrow_drop_down,
-                        color: Colors.white,
-                        size: 16,
+                    children: [
+                      InkWell(
+                        onTap: onIncrement,
+                        child: const Icon(
+                          Icons.arrow_drop_up,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: onDecrement,
+                        child: const Icon(
+                          Icons.arrow_drop_down,
+                          color: Colors.white,
+                          size: 16,
+                        ),
                       ),
                     ],
                   ),
@@ -69,11 +91,18 @@ class AddedItem extends StatelessWidget {
               ),
               const SizedBox(width: 32),
               Text(
-                "\$681",
+                "\$${item.service.charge ?? "0"}",
                 style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 18),
               ),
               const SizedBox(width: 24),
-              const Icon(Icons.delete, color: Colors.white70, size: 20),
+              InkWell(
+                onTap: onRemove,
+                child: const Icon(
+                  Icons.delete,
+                  color: Colors.white70,
+                  size: 20,
+                ),
+              ),
             ],
           ),
         ),

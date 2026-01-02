@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
@@ -6,11 +7,17 @@ import 'package:sharp_cut/utils/app_colors.dart';
 class SettlementSimpleInput extends StatelessWidget {
   final TextEditingController controller;
   final bool isReadOnly;
+  final Function(String)? onChanged;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const SettlementSimpleInput({
     super.key,
     required this.controller,
     this.isReadOnly = false,
+    this.onChanged,
+    this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -41,6 +48,9 @@ class SettlementSimpleInput extends StatelessWidget {
           contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           isDense: true,
         ),
+        onChanged: onChanged,
+        keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
       ),
     );
   }
@@ -50,12 +60,18 @@ class SettlementLabelInput extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final bool isReadOnly;
+  final Function(String)? onChanged;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const SettlementLabelInput({
     super.key,
     required this.label,
     required this.controller,
     this.isReadOnly = false,
+    this.onChanged,
+    this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -68,7 +84,13 @@ class SettlementLabelInput extends StatelessWidget {
           style: GoogleFonts.rajdhani(color: Colors.white70, fontSize: 12),
         ),
         const SizedBox(height: 4),
-        SettlementSimpleInput(controller: controller, isReadOnly: isReadOnly),
+        SettlementSimpleInput(
+          controller: controller,
+          isReadOnly: isReadOnly,
+          onChanged: onChanged,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+        ),
       ],
     );
   }
@@ -78,12 +100,18 @@ class SettlementRowInput extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final bool isReadOnly;
+  final Function(String)? onChanged;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const SettlementRowInput({
     super.key,
     required this.label,
     required this.controller,
     this.isReadOnly = false,
+    this.onChanged,
+    this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -102,6 +130,9 @@ class SettlementRowInput extends StatelessWidget {
           child: SettlementSimpleInput(
             controller: controller,
             isReadOnly: isReadOnly,
+            onChanged: onChanged,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
           ),
         ),
       ],

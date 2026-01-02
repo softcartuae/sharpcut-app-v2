@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/domain/home/models/chair_model.dart';
+import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
+import 'package:sharp_cut/utils/comon/validate_password.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class CuttingMastersDialog extends StatelessWidget {
   const CuttingMastersDialog({super.key});
@@ -14,10 +19,15 @@ class CuttingMastersDialog extends StatelessWidget {
     );
   }
 
+  String formatDate(String isoDate) {
+    final dateTime = DateTime.parse(isoDate).toLocal();
+    return DateFormat('dd/MM/yyyy hh:mm a').format(dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40),
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Container(
@@ -77,7 +87,7 @@ class CuttingMastersDialog extends StatelessWidget {
             itemCount: state.chairs.length,
             separatorBuilder: (context, index) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
-              return _buildChairItem(state.chairs[index]);
+              return _buildChairItem(context, state.chairs[index]);
             },
           );
         }
@@ -86,42 +96,101 @@ class CuttingMastersDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildChairItem(ChairModel chair) {
-    return Container(
-      width: 120,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1B25), // Dark background from image
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const SizedBox(height: 16),
-          Expanded(
-            child: Image.asset(
-              'lib/utils/images/chair.png',
-              fit: BoxFit.contain,
-            ),
+  Widget _buildChairItem(BuildContext context, ChairModel chair) {
+    return GestureDetector(
+      onTap: () {
+        if (chair.liveState != LiveState.occupied.name) {
+          Navigator.of(context).pop();
+          showPasswordDialoge(context, chair);
+        } else {
+          if (chair.transaction != null) {
+            showPasswordForValidation(
+              context,
+              false,
+              preSelectedStaff: chair.transaction!.staff,
+              onSuccess: () {
+                context.read<BookingCubit>().restoreBooking(
+                  bookingResponse: chair.transaction!,
+                );
+                Navigator.of(context).pop();
+              },
+            );
+          } else {
+            Navigator.of(context).pop();
+            showPasswordForValidation(context, false);
+          }
+          //show Toes
+        }
+      },
+      child: Container(
+        width: 120,
+        decoration: BoxDecoration(
+          border: Border.all(
+            width: 2,
+            color: chair.liveState == LiveState.available.name
+                ? Colors.green
+                : chair.liveState == LiveState.occupied.name
+                ? Colors.red
+                : Colors.grey, // fallback
           ),
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: const BoxDecoration(
-              color: Color(0xFF252630), // Slightly lighter footer
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
-            ),
-            child: Text(
-              chair.name ?? 'Unknown',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+          color: const Color(0xFF1A1B25),
+          borderRadius: BorderRadius.circular(8),
+        ),
+
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const SizedBox(height: 16),
+            Expanded(
+              child: Image.asset(
+                chair.liveState == LiveState.occupied.name
+                    ? 'lib/utils/images/chair.png'
+                    : "lib/utils/images/chair-green.png",
+                fit: BoxFit.contain,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            if (chair.liveState == LiveState.occupied.name)
+              Text(
+                chair.liveState == LiveState.occupied.name
+                    ? chair.transaction?.staff?.name ?? 'Unknown'
+                    : 'Unknown',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            if (chair.liveState == LiveState.occupied.name)
+              Text(
+                formatDate(chair.transaction?.createdAt ?? 'Unknown'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: const BoxDecoration(
+                color: Color(0xFF252630), // Slightly lighter footer
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+              ),
+              child: Text(
+                chair.name ?? 'Unknown',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

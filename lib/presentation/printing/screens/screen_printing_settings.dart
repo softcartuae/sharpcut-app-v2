@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
+
 import 'package:sharp_cut/utils/app_colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sharp_cut/data/printing/printing_repo_imp.dart';
+import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:flutter_thermal_printer/utils/printer.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 class ScreenPrintingSettings extends StatefulWidget {
   const ScreenPrintingSettings({super.key});
@@ -34,127 +40,367 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
           ),
         ),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // Determine if we are on a wider screen (tablet)
-          bool isTablet = constraints.maxWidth > 600;
-          double contentWidth = isTablet ? 600 : constraints.maxWidth;
-
-          return Center(
-            child: SizedBox(
-              width: contentWidth,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Drawer Settings Card
-                    Card(
-                      color: AppColors.violetLight,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          children: [
-                            _buildSwitchTile(
-                              title: "Open Drawer (Cash)",
-                              value: _openDrawerCash,
-                              onChanged: (val) =>
-                                  setState(() => _openDrawerCash = val),
-                            ),
-                            _buildSwitchTile(
-                              title: "Open Drawer (Card)",
-                              value: _openDrawerCard,
-                              onChanged: (val) =>
-                                  setState(() => _openDrawerCard = val),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Scan Button
-                    Card(
-                      color: AppColors.violetLight,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        side: const BorderSide(
-                          color: AppColors.violetLightActive,
-                        ),
-                      ),
-                      clipBehavior: Clip.hardEdge,
-                      child: InkWell(
-                        onTap: () {
-                          PrintCountDialog.show(context);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.refresh,
-                                color: AppColors.violetNormal,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                "Scan for USB Printers",
-                                style: GoogleFonts.rajdhani(
-                                  color: AppColors.violetNormal,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Discovered Printers Header
-                    Text(
-                      "Discovered USB Printers",
-                      style: GoogleFonts.rajdhani(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Divider(height: 24, thickness: 1),
-
-                    // Empty State
-                    const SizedBox(height: 40),
-                    Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            "No USB printers found.",
-                            style: GoogleFonts.rajdhani(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Please connect a printer and press scan.",
-                            style: GoogleFonts.rajdhani(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+      body: BlocConsumer<PrintingCubit, PrintingState>(
+        listener: (context, state) {
+          if (state.status == PrintingStatus.error &&
+              state.errorMessage != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+          }
+          if (state.status == PrintingStatus.connected) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Connected to ${state.connectedPrinter?.name}"),
               ),
-            ),
+            );
+          }
+        },
+        builder: (context, state) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              // Determine if we are on a wider screen (tablet)
+              bool isTablet = constraints.maxWidth > 600;
+              double contentWidth = isTablet ? 600 : constraints.maxWidth;
+
+              return Center(
+                child: SizedBox(
+                  width: contentWidth,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Drawer Settings Card
+                        Card(
+                          color: AppColors.violetLight,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Column(
+                              children: [
+                                _buildSwitchTile(
+                                  title: "Open Drawer (Cash)",
+                                  value: _openDrawerCash,
+                                  onChanged: (val) =>
+                                      setState(() => _openDrawerCash = val),
+                                ),
+                                _buildSwitchTile(
+                                  title: "Open Drawer (Card)",
+                                  value: _openDrawerCard,
+                                  onChanged: (val) =>
+                                      setState(() => _openDrawerCard = val),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Scan Button (USB)
+                        Card(
+                          color: AppColors.violetLight,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            side: const BorderSide(
+                              color: AppColors.violetLightActive,
+                            ),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: InkWell(
+                            onTap: () {
+                              if (state.status == PrintingStatus.scanning) {
+                                context.read<PrintingCubit>().stopScan();
+                              } else {
+                                context.read<PrintingCubit>().startScan(
+                                  type: ConnectionType.USB,
+                                );
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (state.status == PrintingStatus.scanning)
+                                    const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.violetNormal,
+                                      ),
+                                    )
+                                  else
+                                    const Icon(
+                                      Icons.usb,
+                                      color: AppColors.violetNormal,
+                                    ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    state.status == PrintingStatus.scanning
+                                        ? "Stop Scanning"
+                                        : "Scan for USB Printers",
+                                    style: GoogleFonts.rajdhani(
+                                      color: AppColors.violetNormal,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Scan Button (Bluetooth)
+                        Card(
+                          color: AppColors.violetLight,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            side: const BorderSide(
+                              color: AppColors.violetLightActive,
+                            ),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: InkWell(
+                            onTap: () async {
+                              if (state.status == PrintingStatus.scanning) {
+                                context.read<PrintingCubit>().stopScan();
+                              } else {
+                                bool granted =
+                                    await _requestBluetoothPermissions();
+                                if (granted && context.mounted) {
+                                  context.read<PrintingCubit>().startScan(
+                                    type: ConnectionType.BLE,
+                                  );
+                                }
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (state.status == PrintingStatus.scanning)
+                                    const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.violetNormal,
+                                      ),
+                                    )
+                                  else
+                                    const Icon(
+                                      Icons.bluetooth,
+                                      color: AppColors.violetNormal,
+                                    ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    state.status == PrintingStatus.scanning
+                                        ? "Stop Scanning"
+                                        : "Scan for Bluetooth Printers",
+                                    style: GoogleFonts.rajdhani(
+                                      color: AppColors.violetNormal,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Scan Button (Network)
+                        Card(
+                          color: AppColors.violetLight,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            side: const BorderSide(
+                              color: AppColors.violetLightActive,
+                            ),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: InkWell(
+                            onTap: () {
+                              if (state.status == PrintingStatus.scanning) {
+                                context.read<PrintingCubit>().stopScan();
+                              } else {
+                                context.read<PrintingCubit>().startScan(
+                                  type: ConnectionType.NETWORK,
+                                );
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (state.status == PrintingStatus.scanning)
+                                    const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.violetNormal,
+                                      ),
+                                    )
+                                  else
+                                    const Icon(
+                                      Icons.wifi,
+                                      color: AppColors.violetNormal,
+                                    ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    state.status == PrintingStatus.scanning
+                                        ? "Stop Scanning"
+                                        : "Scan for Network Printers",
+                                    style: GoogleFonts.rajdhani(
+                                      color: AppColors.violetNormal,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Discovered Printers Header
+                        Text(
+                          "Discovered Printers",
+                          style: GoogleFonts.rajdhani(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Divider(height: 24, thickness: 1),
+
+                        // Printers List
+                        if (state.printers.isEmpty &&
+                            state.status != PrintingStatus.scanning)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 40),
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "No printers found.",
+                                    style: GoogleFonts.rajdhani(
+                                      color: Colors.grey,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "Please connect a printer and press scan.",
+                                    style: GoogleFonts.rajdhani(
+                                      color: Colors.grey,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          ...state.printers.map((printer) {
+                            final isConnected =
+                                state.connectedPrinter != null &&
+                                state.connectedPrinter!.name == printer.name &&
+                                state.status == PrintingStatus.connected;
+
+                            return Card(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: ListTile(
+                                leading: const Icon(Icons.print),
+                                title: Text(printer.name ?? "Unknown Printer"),
+                                subtitle: Text(
+                                  "Connection Type: ${printer.connectionType == ConnectionType.BLE
+                                      ? "Bluetooth"
+                                      : printer.connectionType == ConnectionType.USB
+                                      ? "Usb"
+                                      : "Network"} | Product ID: ${printer.productId ?? ""}",
+                                ),
+                                trailing: isConnected
+                                    ? (state.status ==
+                                              PrintingStatus.disconnecting
+                                          ? const SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.red,
+                                              ),
+                                            )
+                                          : TextButton.icon(
+                                              onPressed: () {
+                                                context
+                                                    .read<PrintingCubit>()
+                                                    .disconnect();
+                                              },
+                                              icon: const Icon(
+                                                Icons.close,
+                                                color: Colors.red,
+                                              ),
+                                              label: Text(
+                                                "Disconnect",
+                                                style: GoogleFonts.rajdhani(
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ))
+                                    : (state.status == PrintingStatus.connecting
+                                          ? const SizedBox(
+                                              width: 24,
+                                              height: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: AppColors.violetNormal,
+                                              ),
+                                            )
+                                          : ElevatedButton(
+                                              onPressed: () {
+                                                context
+                                                    .read<PrintingCubit>()
+                                                    .connect(printer);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    AppColors.violetNormal,
+                                              ),
+                                              child: Text(
+                                                "Connect",
+                                                style: GoogleFonts.rajdhani(
+                                                  color:
+                                                      AppColors.redLightActive,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            )),
+                              ),
+                            );
+                          }),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           );
         },
       ),
@@ -183,5 +429,53 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
       inactiveTrackColor: Colors.grey.shade300,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
     );
+  }
+
+  Future<bool> _requestBluetoothPermissions() async {
+    if (!Platform.isAndroid) return true;
+
+    // Check for Android 12+ permissions
+    if (await Permission.bluetoothScan.status.isDenied ||
+        await Permission.bluetoothConnect.status.isDenied) {
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+      ].request();
+
+      if (statuses[Permission.bluetoothScan]!.isDenied ||
+          statuses[Permission.bluetoothConnect]!.isDenied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Bluetooth permissions are required to scan."),
+            ),
+          );
+        }
+        return false;
+      }
+    }
+
+    // Check for Location permission (required for BLE on older Android)
+    if (await Permission.location.status.isDenied) {
+      final status = await Permission.location.request();
+      if (status.isDenied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Location permission is required for Bluetooth scanning.",
+              ),
+            ),
+          );
+        }
+        return false;
+      }
+    }
+
+    // Check if Bluetooth is actually on (optional but good UX)
+    // Note: permission_handler doesn't check if adapter is on, just permission.
+    // flutter_thermal_printer might handle the adapter check or throw error if off.
+
+    return true;
   }
 }

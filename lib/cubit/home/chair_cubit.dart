@@ -14,8 +14,8 @@ class ChairCubit extends Cubit<ChairState> {
 
   List<StaffModel> get staffs => _cachedStaffs ?? [];
 
-  Future<void> getChairsAndStaffs() async {
-    if (_cachedChairs != null && _cachedStaffs != null) {
+  Future<void> getChairsAndStaffs({bool forceRefresh = false}) async {
+    if (!forceRefresh && _cachedChairs != null && _cachedStaffs != null) {
       emit(ChairSuccess(chairs: _cachedChairs!, staffs: _cachedStaffs!));
       return;
     }

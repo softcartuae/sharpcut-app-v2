@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_input_section.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_services_section.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_state.dart';
 
 class ScreenHome extends StatefulWidget {
   const ScreenHome({super.key});
@@ -23,17 +26,26 @@ class _ScreenHomeState extends State<ScreenHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(39.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              HomeAppBar(),
-              HomeInputSection(),
-              SizedBox(height: 40),
-              HomeServicesSection(),
-            ],
+      body: BlocListener<BookingCubit, BookingState>(
+        listener: (context, state) {
+          if (state is BookingCancelled || state is BookingInitial) {
+            context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
+
+            context.read<ServiceCubit>().clearCart();
+          }
+        },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 39.0, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                HomeAppBar(),
+                HomeInputSection(),
+                SizedBox(height: 15),
+                HomeServicesSection(),
+              ],
+            ),
           ),
         ),
       ),

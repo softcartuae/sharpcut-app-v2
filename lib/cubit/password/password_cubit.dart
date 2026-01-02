@@ -10,10 +10,14 @@ class PasswordCubit extends Cubit<PasswordState> {
 
   PasswordCubit({required this.passwordRepo}) : super(PasswordInitial());
 
-  Future<void> resetUserPassword(PasswordModel passwordData) async {
+  Future<void> resetPassword(
+    PasswordModel passwordData, {
+    bool isAdmin = false,
+  }) async {
     emit(PasswordLoading());
-    final result = await passwordRepo.resetUserPassword(
+    final result = await passwordRepo.resetPassword(
       passwordData: passwordData,
+      isAdmin: isAdmin,
     );
     result.fold(
       (failure) => emit(PasswordFailure(failure)),
@@ -21,15 +25,20 @@ class PasswordCubit extends Cubit<PasswordState> {
     );
   }
 
-
-  Future<void> resetAdminPassword(PasswordModel passwordData) async {
-    emit(PasswordLoading());
-    final result = await passwordRepo.resetAdminPassword(
-      passwordData: passwordData,
+  Future<void> validatePassword({
+    required bool isAdmin,
+    required String password,
+    required int userId,
+  }) async {
+    emit(PasswordValidationLoading());
+    final result = await passwordRepo.validatePassword(
+      isAdmin: isAdmin,
+      password: password,
+      userId: userId,
     );
     result.fold(
-      (failure) => emit(PasswordFailure(failure)),
-      (success) => emit(PasswordSuccess(success)),
+      (failure) => emit(PasswordValidationFailure(failure)),
+      (success) => emit(PasswordValidationSuccess(success)),
     );
   }
 }

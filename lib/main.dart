@@ -1,11 +1,18 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
+import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
+import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
 import 'package:sharp_cut/presentation/splash/screens/splash_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
+import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
 import 'package:sharp_cut/utils/simple_bloc_observer.dart';
 
 import 'package:sharp_cut/utils/theme.dart';
@@ -25,6 +32,13 @@ void main() async {
           BlocProvider(create: (_) => di.sl<AuthCubit>()),
           BlocProvider(create: (_) => di.sl<ChairCubit>()),
           BlocProvider(create: (_) => di.sl<PasswordCubit>()),
+          BlocProvider(create: (_) => di.sl<BookingCubit>()),
+          BlocProvider(create: (_) => di.sl<ExpenseCubit>()),
+          BlocProvider(create: (_) => di.sl<BookingFormCubit>()),
+          BlocProvider(create: (_) => di.sl<PrintingCubit>()),
+          BlocProvider(create: (_) => di.sl<ReportCubit>()),
+          BlocProvider(create: (_) => di.sl<QuickReportCubit>()),
+          BlocProvider(create: (_) => di.sl<CashRegistoryCubit>()),
         ],
         child: MyApp(),
       ), // Wrap your app

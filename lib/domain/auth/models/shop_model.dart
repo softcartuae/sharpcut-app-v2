@@ -1,4 +1,4 @@
-class UserModel {
+class ShopModel {
   final int? id;
   final String? name;
   final String? description;
@@ -21,7 +21,7 @@ class UserModel {
   final String? createdAt;
   final String? updatedAt;
 
-  UserModel({
+  ShopModel({
     this.id,
     this.name,
     this.description,
@@ -45,8 +45,8 @@ class UserModel {
     this.updatedAt,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
+  factory ShopModel.fromJson(Map<String, dynamic> json) {
+    return ShopModel(
       id: json['id'],
       name: json['name'],
       description: json['description'],

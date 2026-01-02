@@ -21,6 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
         context.read<AuthCubit>().checkAuthStatus();
       }
     });
+    
   }
 
   @override

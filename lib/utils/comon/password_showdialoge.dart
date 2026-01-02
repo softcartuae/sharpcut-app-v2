@@ -1,179 +1,238 @@
 import 'package:flutter/material.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_state.dart';
+import 'package:sharp_cut/cubit/home/chair_cubit.dart';
+import 'package:sharp_cut/domain/home/models/chair_model.dart';
+import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 
-Future<void> showPasswordDialoge(BuildContext context) {
+Future<void> showPasswordDialoge(BuildContext context, ChairModel chair) {
   final TextEditingController passwordController = TextEditingController();
-  String? selectedStaff;
-  List<String> staffList = ["Staff 1", "Staff 2", "Staff 3"];
+  StaffModel? selectedStaff;
   bool obscurePassword = true;
+
+  // Fetch staffs from ChairCubit
+  final chairCubit = context.read<ChairCubit>();
+  List<StaffModel> staffListAll = List<StaffModel>.from(chairCubit.staffs);
+  List<StaffModel> staffList = staffListAll
+      .where((element) => element.role != Role.admin)
+      .toList();
 
   return showDialog(
     context: context,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          return Dialog(
-            backgroundColor: const Color(0xFF1E1E2C), // Dark background
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Container(
-              width: 400,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header
-                  Stack(
-                    alignment: Alignment.center,
+          return BlocConsumer<BookingCubit, BookingState>(
+            listener: (context, state) {
+              if (state is BookingInitial) {
+                Navigator.of(context).pop();
+                ToastHelper.showSuccess("Booking Success");
+              } else if (state is BookingError) {
+                ToastHelper.showError(state.message);
+              }
+            },
+            builder: (context, state) {
+              return Dialog(
+                backgroundColor: const Color(0xFF1E1E2C), // Dark background
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Container(
+                  width: 400,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Align(
+                      // Header
+                      Stack(
                         alignment: Alignment.center,
-                        child: Text(
-                          "Select Staff",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.rajdhani(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                        children: [
+                          Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Select Staff",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.rajdhani(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Staff Dropdown
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white.withAlpha(77)),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<StaffModel>(
+                            value: selectedStaff,
+                            dropdownColor: const Color(0xFF1E1E2C),
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.white,
+                            ),
+                            isExpanded: true,
+                            hint: Text(
+                              "Select Staff",
+                              style: GoogleFonts.rajdhani(
+                                color: Colors.white.withAlpha(179),
+                                fontSize: 16,
+                              ),
+                            ),
+                            style: GoogleFonts.rajdhani(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                            items: staffList.map((StaffModel staff) {
+                              return DropdownMenuItem<StaffModel>(
+                                value: staff,
+                                child: Text(staff.name),
+                              );
+                            }).toList(),
+                            onChanged: (StaffModel? newValue) {
+                              setState(() {
+                                selectedStaff = newValue;
+                              });
+                            },
                           ),
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white),
-                          onPressed: () => Navigator.of(context).pop(),
+                      const SizedBox(height: 16),
+
+                      // Password Field
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white.withAlpha(77)),
+                        ),
+                        child: TextField(
+                          controller: passwordController,
+                          obscureText: obscurePassword,
+                          style: GoogleFonts.rajdhani(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: "Enter Password",
+                            hintStyle: GoogleFonts.rajdhani(
+                              color: Colors.white.withAlpha(179),
+                              fontSize: 16,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: Colors.white.withAlpha(128),
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  obscurePassword = !obscurePassword;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Submit Button
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: const LinearGradient(
+                            colors: [
+                              AppColors.violetNormal,
+                              AppColors.redNormal,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: state is BookingLoading
+                              ? null
+                              : () {
+                                  if (selectedStaff == null) {
+                                    ToastHelper.showError(
+                                      "Please select a staff",
+                                    );
+                                    return;
+                                  }
+                                  if (passwordController.text.isEmpty) {
+                                    ToastHelper.showError(
+                                      "Please enter password",
+                                    );
+                                    return;
+                                  }
+
+                                  context.read<BookingCubit>().bookSlot(
+                                    chairId: chair.id ?? 0,
+                                    userId: selectedStaff!.id,
+                                    userPassword: passwordController.text,
+                                  );
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: state is BookingLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'Submit',
+                                  style: GoogleFonts.rajdhani(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
-
-                  // Staff Dropdown
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white.withAlpha(77)),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: selectedStaff,
-                        dropdownColor: const Color(0xFF1E1E2C),
-                        icon: const Icon(
-                          Icons.arrow_drop_down,
-                          color: Colors.white,
-                        ),
-                        isExpanded: true,
-                        hint: Text(
-                          "Select Staff",
-                          style: GoogleFonts.rajdhani(
-                            color: Colors.white.withAlpha(179),
-                            fontSize: 16,
-                          ),
-                        ),
-                        style: GoogleFonts.rajdhani(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                        items: staffList.map((String staff) {
-                          return DropdownMenuItem<String>(
-                            value: staff,
-                            child: Text(staff),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedStaff = newValue;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Password Field
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white.withAlpha(77)),
-                    ),
-                    child: TextField(
-                      controller: passwordController,
-                      obscureText: obscurePassword,
-                      style: GoogleFonts.rajdhani(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: "Enter Password",
-                        hintStyle: GoogleFonts.rajdhani(
-                          color: Colors.white.withAlpha(179),
-                          fontSize: 16,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            color: Colors.white.withAlpha(128),
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              obscurePassword = !obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Submit Button
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      gradient: const LinearGradient(
-                        colors: [AppColors.violetNormal, AppColors.redNormal],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Handle submit logic here
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'Submit',
-                        style: GoogleFonts.rajdhani(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       );
