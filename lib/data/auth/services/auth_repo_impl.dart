@@ -1,5 +1,5 @@
 import 'package:sharp_cut/data/api_client.dart';
-import 'package:sharp_cut/domain/auth/models/user_model.dart';
+import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
 
 class AuthRepoImpl implements AuthRepo {

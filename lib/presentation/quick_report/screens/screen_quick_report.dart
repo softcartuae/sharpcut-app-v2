@@ -468,46 +468,193 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
               color: Colors.black,
             ),
           ),
+          const Divider(color: Colors.black, thickness: 1.5),
+
+          // New 4-Column Header
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    "Staff",
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    "Cash",
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    "Card",
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    "Total",
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+          ),
           const Divider(color: Colors.grey, thickness: 0.5),
+
+          // Rows
           ...report.salesmanWiseDetails.map((detail) {
-            return QuickReportTableRow(
-              detail.salesmanName,
-              detail.totalCashAmount,
-              detail.totalCardAmount,
+            final double cash = double.tryParse(detail.totalCashAmount) ?? 0.0;
+            final double card = double.tryParse(detail.totalCardAmount) ?? 0.0;
+            final double total = cash + card;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      detail.salesmanName,
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      detail.totalCashAmount,
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      detail.totalCardAmount,
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      total.toStringAsFixed(2),
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                ],
+              ),
             );
           }),
           const SizedBox(height: 16),
 
           // Footer
           const Divider(color: Colors.grey, thickness: 0.5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Total",
-                style: GoogleFonts.rajdhani(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              Text(
-                report.salesmanTotalCount.toString(),
-                style: GoogleFonts.rajdhani(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              Text(
-                report.salesmanTotalAmount.toStringAsFixed(2),
-                style: GoogleFonts.rajdhani(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ],
+          Builder(
+            builder: (context) {
+              double totalCash = 0.0;
+              double totalCard = 0.0;
+
+              for (var detail in report.salesmanWiseDetails) {
+                totalCash += double.tryParse(detail.totalCashAmount) ?? 0.0;
+                totalCard += double.tryParse(detail.totalCardAmount) ?? 0.0;
+              }
+              final double grandTotal = totalCash + totalCard;
+
+              return Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Total :${report.salesmanWiseDetails.length}",
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      totalCash.toStringAsFixed(2),
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      totalCard.toStringAsFixed(2),
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      grandTotal.toStringAsFixed(2),
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

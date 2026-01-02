@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sharp_cut/domain/auth/models/user_model.dart';
+import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/home/models/service_model.dart';

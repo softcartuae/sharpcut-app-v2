@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
-import 'package:sharp_cut/domain/auth/models/user_model.dart';
+import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
 
 part 'auth_cubit_state.dart';

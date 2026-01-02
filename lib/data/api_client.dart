@@ -40,5 +40,8 @@ class ApiClient {
   static final serviceByCategorieId = "api/services";
   static final allUsers = "api/users";
   static final resetPasswordUsers = "api/reset-password/users";
-  static final quickReportapi =  '/api/transactions/report';
+  static final quickReportapi = '/api/transactions/report';
+  static final cashRegisterCheckApi = "api/cash-registers/check";
+  static final openCashRegisterApi = "api/cash-registers/open";
+  static final closeCashRegisterApi = "api/cash-registers/close";
 }

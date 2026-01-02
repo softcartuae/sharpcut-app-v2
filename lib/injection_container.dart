@@ -33,6 +33,10 @@ import 'package:sharp_cut/domain/quick_report/service/quick_report_repo.dart';
 import 'package:sharp_cut/data/quick_report/service/quick_report_repo_imp.dart';
 import 'package:sharp_cut/data/quick_report/service/quick_report_service.dart';
 
+import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
+import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
+import 'package:sharp_cut/data/cash_registory/service/cash_registory_repo_imp.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -69,6 +73,10 @@ Future<void> init() async {
     () => QuickReportCubit(sl<QuickReportRepo>()),
   );
 
+  sl.registerFactory<CashRegistoryCubit>(
+    () => CashRegistoryCubit(cashRegistoryRepo: sl<CashRegistoryRepo>()),
+  );
+
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
   sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
@@ -82,4 +90,5 @@ Future<void> init() async {
   sl.registerLazySingleton<QuickReportRepo>(
     () => QuickReportRepoImp(QuickReportService()),
   );
+  sl.registerLazySingleton<CashRegistoryRepo>(() => CashRegistoryRepoImp());
 }
