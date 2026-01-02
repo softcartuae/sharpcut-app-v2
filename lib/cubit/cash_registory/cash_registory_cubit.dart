@@ -32,11 +32,13 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
   Future<void> openCashRegister({
     required int userId,
     required double amount,
+    required String password,
   }) async {
     emit(CashRegistoryLoading());
     final result = await cashRegistoryRepo.openCashRegister(
       userId: userId,
       amount: amount,
+      password: password,
     );
     result.fold(
       (error) => emit(CashRegistoryAddError(error)),
@@ -44,9 +46,9 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
     );
   }
 
-  Future<void> closeCashRegister({required double amount}) async {
+  Future<void> closeCashRegister({required double amount,required int userId,required String password}) async {
     emit(CashRegistoryLoading());
-    final result = await cashRegistoryRepo.closeCashRegister(amount: amount);
+    final result = await cashRegistoryRepo.closeCashRegister(amount: amount,userId: userId,password: password);
     result.fold(
       (error) => emit(CashRegistoryAddError(error)),
       (message) => emit(CashRegistoryAddSuccess(message)),

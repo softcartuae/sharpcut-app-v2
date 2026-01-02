@@ -38,11 +38,12 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   Future<Either<String, String>> openCashRegister({
     required int userId,
     required double amount,
+    required String password,
   }) async {
     try {
       final response = await ApiClient.dio.post(
         ApiClient.openCashRegisterApi,
-        data: {"user_id": userId, "opening_amount": amount},
+        data: {"user_id": userId, "opening_amount": amount,"password": password},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -71,11 +72,13 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
   Future<Either<String, String>> closeCashRegister({
     required double amount,
+    required int userId,
+    required String password,
   }) async {
     try {
       final response = await ApiClient.dio.post(
         ApiClient.closeCashRegisterApi,
-        data: {"closing_amount": amount},
+        data: {"closing_amount": amount, "user_id": userId, "password": password},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

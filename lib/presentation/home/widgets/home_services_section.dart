@@ -11,7 +11,7 @@ import 'package:sharp_cut/cubit/home/service_cubit_state.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
-import 'package:sharp_cut/presentation/cash_registory/screens/admin_cash_registory_dialoge.dart';
+import 'package:sharp_cut/presentation/cash_registory/screens/open_cash_registory_dialoge.dart';
 import 'package:sharp_cut/presentation/cash_registory/screens/close_cash_register_dialog.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_expense.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_settlement.dart';
@@ -514,14 +514,17 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                       ? null
                                       : () async {
                                           showPasswordForValidation(
+                                            showAdminToo: true,
                                             context,
                                             false,
-                                            onSuccess: () {
+                                            onSuccessWithStaff: (staff) {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
-                                                      ScreenSearch(),
+                                                      ScreenSearch(
+                                                        staff: staff,
+                                                      ),
                                                 ),
                                               );
                                             },
@@ -1062,19 +1065,28 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               ),
                             const SizedBox(height: 12),
                             if (!isBooked)
-                              Opacity(
-                                opacity: isBooked ? 0.5 : 1.0,
-                                child: ActionButton(
-                                  label: "CLOSE REGISTOR",
-                                  isPrimary: selectedButton == "CLOSE REGISTOR",
-                                  onTap: isBooked
-                                      ? null
-                                      : () {
-                                          _selectedButtonNotifier.value =
-                                              "CLOSE REGISTOR";
-                                          CloseCashRegisterDialog.show(context);
-                                        },
-                                ),
+                              BlocConsumer<
+                                CashRegistoryCubit,
+                                CashRegistoryState
+                              >(
+                                listener: (context, state) {},
+                                builder: (context, state) {
+                                  return ActionButton(
+                                    label: "CLOSE REGISTER",
+                                    isPrimary:
+                                        selectedButton == "CLOSE REGISTER",
+                                    onTap: isBooked
+                                        ? null
+                                        : () {
+                                            _selectedButtonNotifier.value =
+                                                "CLOSE REGISTER";
+
+                                            CloseCashRegisterDialog.show(
+                                              context,
+                                            );
+                                          },
+                                  );
+                                },
                               ),
                           ],
                         );

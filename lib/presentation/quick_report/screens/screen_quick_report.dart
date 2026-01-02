@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
 import 'package:sharp_cut/cubit/quick_report/quick_report_state.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
+import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 
 import 'package:sharp_cut/presentation/quick_report/widgets/info_row.dart';
 import 'package:sharp_cut/presentation/quick_report/widgets/quick_report_table_row.dart';
@@ -321,30 +322,44 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                     const SizedBox(height: 24),
 
                     // Print Report Button
-                    Center(
-                      child: SizedBox(
-                        width: 150,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(
-                              0xFF4CAF50,
-                            ), // Green color
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                    BlocBuilder<QuickReportCubit, QuickReportState>(
+                      builder: (context, state) {
+                        return Center(
+                          child: SizedBox(
+                            width: 150,
+                            child: ElevatedButton(
+                              onPressed: state is QuickReportLoaded
+                                  ? () {
+                                      context
+                                          .read<PrintingCubit>()
+                                          .printQuickReport(
+                                            report: state.report,
+                                          );
+                                    }
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(
+                                  0xFF4CAF50,
+                                ), // Green color
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                              ),
+                              child: Text(
+                                "Print Report",
+                                style: GoogleFonts.rajdhani(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
-                          child: Text(
-                            "Print Report",
-                            style: GoogleFonts.rajdhani(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
 

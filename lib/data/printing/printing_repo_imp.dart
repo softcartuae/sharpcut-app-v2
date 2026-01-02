@@ -11,6 +11,8 @@ import 'package:image/image.dart' as img;
 import 'dart:typed_data';
 
 import '../../presentation/printing/widgets/receipt_widget.dart';
+import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
+import 'package:sharp_cut/presentation/quick_report/widgets/quick_report_print_widget.dart';
 
 class PrintingRepoImp implements PrintingRepo {
   final FlutterThermalPrinter _printer = FlutterThermalPrinter.instance;
@@ -46,11 +48,11 @@ class PrintingRepoImp implements PrintingRepo {
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
     required List<CartItemModel> cartItems,
-
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
   }) async {
+    
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
     List<int> bytes = [];
@@ -79,7 +81,6 @@ class PrintingRepoImp implements PrintingRepo {
         ),
       ),
     );
-
     // Calculate estimated height
     // Base height (Header + Footer) ~ 600
     // Per item ~ 60 (allowing for wrapping text)
@@ -102,6 +103,61 @@ class PrintingRepoImp implements PrintingRepo {
       // Resize to 384 (standard 58mm width, multiple of 8)
       final img.Image resizedImage = img.copyResize(image, width: 384);
 
+      bytes.addAll(generator.image(resizedImage));
+    }
+
+    bytes.addAll(generator.feed(2));
+    bytes.addAll(generator.cut());
+
+    await _printer.printData(printer, bytes);
+  }
+
+  @override
+  Future<void> printQuickReport({
+    required Printer printer,
+    required QuickReportModel report,
+  }) async {
+    final profile = await CapabilityProfile.load();
+    final generator = Generator(PaperSize.mm58, profile);
+    List<int> bytes = [];
+
+    // Create the widget
+    final widget = MediaQuery(
+      data: const MediaQueryData(),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: ThemeData(
+            useMaterial3: false,
+            scaffoldBackgroundColor: Colors.white,
+          ),
+          child: Material(
+            color: Colors.white,
+            child: QuickReportPrintWidget(report: report),
+          ),
+        ),
+      ),
+    );
+
+    // Calculate estimated height
+    // Base height ~ 600 + items
+    double estimatedHeight = 1000 + (report.salesmanWiseDetails.length * 40.0);
+
+    // Capture the widget as an image
+    final ScreenshotController screenshotController = ScreenshotController();
+    final Uint8List capturedImage = await screenshotController.captureFromWidget(
+      widget,
+      delay: const Duration(milliseconds: 100),
+      pixelRatio: 1.0,
+      targetSize: Size(370, estimatedHeight),
+    );
+
+    // Decode the image for the printer
+    final img.Image? image = img.decodePng(capturedImage);
+
+    if (image != null) {
+      // Resize to 384 (standard 58mm width)
+      final img.Image resizedImage = img.copyResize(image, width: 384);
       bytes.addAll(generator.image(resizedImage));
     }
 

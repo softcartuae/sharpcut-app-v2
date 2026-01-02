@@ -6,6 +6,7 @@ import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
+import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 part 'printing_state.dart';
@@ -129,7 +130,37 @@ class PrintingCubit extends Cubit<PrintingState> {
       );
     }
   }
-  
+
+  Future<void> printQuickReport({required QuickReportModel report}) async {
+    if (state.connectedPrinter == null) {
+      ToastHelper.showError("No printer connected");
+      emit(
+        state.copyWith(
+          status: PrintingStatus.error,
+          errorMessage: "No printer connected",
+        ),
+      );
+      return;
+    }
+
+    emit(state.copyWith(status: PrintingStatus.printing));
+    try {
+      await _printingRepo.printQuickReport(
+        printer: state.connectedPrinter!,
+        report: report,
+      );
+      emit(state.copyWith(status: PrintingStatus.printed));
+    } catch (e) {
+      log(e.toString());
+      emit(
+        state.copyWith(
+          status: PrintingStatus.error,
+          errorMessage: "Failed to print: ${e.toString()}",
+        ),
+      );
+    }
+  }
+
   @override
   Future<void> close() {
     _printerSubscription?.cancel();
