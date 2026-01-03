@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Spark Cut',
       theme: appTheme,
-      home: TestQuickReportScreen(),
+      home: SplashScreen(),
     );
   }
 }
