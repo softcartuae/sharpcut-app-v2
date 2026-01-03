@@ -29,11 +29,15 @@ class QuickReportPrintWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _buildInfoRow("Reports : Counter Cash"),
-          _buildInfoRow("Date Range : ${report.dateRange}"),
-          _buildInfoRow("Print Time: ${report.printDatetime}"),
-          _buildInfoRow("Branch : ${report.branch}"),
-          _buildInfoRow("Counter Sale (Cash Received)"),
+          Column(
+            children: [
+              _buildInfoRow("Reports : Counter Cash"),
+              _buildInfoRow("Date Range : ${report.dateRange}"),
+              _buildInfoRow("Print Time: ${report.printDatetime}"),
+              _buildInfoRow("Branch : ${report.branch}"),
+              _buildInfoRow("Counter Sale (Cash Received)"),
+            ],
+          ),
           const SizedBox(height: 4),
           const Text(
             "Invoice Details - Delivered",
@@ -46,27 +50,13 @@ class QuickReportPrintWidget extends StatelessWidget {
           const Divider(color: Colors.black, thickness: 1.5),
 
           // Summary Section
-          _buildSummaryRow("Total Invoice", report.totalInvoice.toString()),
-          _buildSummaryRow(
-            "Total Sales",
-            report.totalInvoiceSalesAmount.toStringAsFixed(2),
-          ),
-          _buildSummaryRow(
-            "Unpaid Amount",
-            report.totalUnpaidAmount.toStringAsFixed(2),
-          ),
-          _buildSummaryRow(
-            "Gross Total",
-            report.grossTotalAmount.toStringAsFixed(2),
-          ),
-          _buildSummaryRow(
-            "Total Discount",
-            report.totalDiscount.toStringAsFixed(2),
-          ),
-          _buildSummaryRow(
-            "Total Credit",
-            report.totalCreditAmount.toStringAsFixed(2),
-          ),
+          // Summary Section
+          ...report.invoiceDetails.entries.map((entry) {
+            return _buildSummaryRow(
+              _formatKey(entry.key),
+              entry.value.toString(),
+            );
+          }),
 
           const SizedBox(height: 16),
 
@@ -427,5 +417,16 @@ class QuickReportPrintWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatKey(String key) {
+    return key
+        .split('_')
+        .map(
+          (word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '',
+        )
+        .join(' ');
   }
 }

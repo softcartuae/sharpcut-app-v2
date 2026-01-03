@@ -423,30 +423,13 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
           const Divider(color: Colors.black, thickness: 1.5),
 
           // Summary Section
-          SummaryRow(
-            label: "Total Invoice",
-            value: report.totalInvoice.toString(),
-          ),
-          SummaryRow(
-            label: "Total Invoice Sales Amount",
-            value: report.totalInvoiceSalesAmount.toStringAsFixed(2),
-          ),
-          SummaryRow(
-            label: "Total Unpaid amount",
-            value: report.totalUnpaidAmount.toStringAsFixed(2),
-          ),
-          SummaryRow(
-            label: "Gross Total Amount",
-            value: report.grossTotalAmount.toStringAsFixed(2),
-          ),
-          SummaryRow(
-            label: "Total Discount",
-            value: report.totalDiscount.toStringAsFixed(2),
-          ),
-          SummaryRow(
-            label: "Total Credit Amount",
-            value: report.totalCreditAmount.toStringAsFixed(2),
-          ),
+          // Summary Section
+          ...report.invoiceDetails.entries.map((entry) {
+            return SummaryRow(
+              label: _formatKey(entry.key),
+              value: entry.value.toString(),
+            );
+          }),
           const SizedBox(height: 16),
 
           // Invoice Customer Details
@@ -674,5 +657,16 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
         ],
       ),
     );
+  }
+
+  String _formatKey(String key) {
+    return key
+        .split('_')
+        .map(
+          (word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '',
+        )
+        .join(' ');
   }
 }
