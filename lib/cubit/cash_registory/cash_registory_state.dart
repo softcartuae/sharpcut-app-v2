@@ -23,3 +23,8 @@ class CashRegistoryAddError extends CashRegistoryState {
   final String message;
   CashRegistoryAddError(this.message);
 }
+
+class CashRegistorySalesTotalLoaded extends CashRegistoryState {
+  final double totalSales;
+  CashRegistorySalesTotalLoaded(this.totalSales);
+}

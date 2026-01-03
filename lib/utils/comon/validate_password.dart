@@ -11,6 +11,7 @@ import 'package:sharp_cut/cubit/password/password_cubit.dart';
 Future<void> showPasswordForValidation(
   BuildContext context,
   bool isAdmin, {
+  bool showAdminToo = false,
   StaffModel? preSelectedStaff,
   VoidCallback? onSuccess,
   Function(StaffModel)? onSuccessWithStaff,
@@ -23,7 +24,9 @@ Future<void> showPasswordForValidation(
   final chairCubit = context.read<ChairCubit>();
   List<StaffModel> staffListAll = List<StaffModel>.from(chairCubit.staffs);
   List<StaffModel> staffList = staffListAll
-      .where((element) => element.role != Role.admin)
+      .where(
+        (element) => showAdminToo == true ? true : element.role != Role.admin,
+      )
       .toList();
 
   // If preSelectedStaff is provided, try to find it in the list to ensure object equality for Dropdown
@@ -77,7 +80,9 @@ Future<void> showPasswordForValidation(
                           Align(
                             alignment: Alignment.center,
                             child: Text(
-                              "Select Staff",
+                              showAdminToo == true
+                                  ? "Select User"
+                                  : "Select Staff",
                               textAlign: TextAlign.center,
                               style: GoogleFonts.rajdhani(
                                 color: Colors.white,
@@ -125,7 +130,9 @@ Future<void> showPasswordForValidation(
                                     });
                                   },
                             hint: Text(
-                              "Select Staff",
+                              showAdminToo == true
+                                  ? "Select User"
+                                  : "Select Staff",
                               style: GoogleFonts.rajdhani(
                                 color: Colors.white.withAlpha(179),
                                 fontSize: 16,
@@ -219,6 +226,13 @@ Future<void> showPasswordForValidation(
                                     );
                                     return;
                                   }
+                                  // if show admin too is true and selected staff is admin then set isAdmin to true
+                                  if (showAdminToo == true) {
+                                    if (selectedStaff?.role == Role.admin) {
+                                      isAdmin = true;
+                                    }
+                                  }
+
                                   context
                                       .read<PasswordCubit>()
                                       .validatePassword(

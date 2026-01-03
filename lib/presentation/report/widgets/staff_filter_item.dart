@@ -6,12 +6,16 @@ class StaffFilterItem extends StatefulWidget {
   final String label;
   final List<StaffModel> items;
   final ValueChanged<int?>? onChanged;
+  final int? initialValue;
+  final bool enabled;
 
   const StaffFilterItem({
     super.key,
     required this.label,
     required this.items,
     this.onChanged,
+    this.initialValue,
+    this.enabled = true,
   });
 
   @override
@@ -20,6 +24,12 @@ class StaffFilterItem extends StatefulWidget {
 
 class _StaffFilterItemState extends State<StaffFilterItem> {
   int? _selectedId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedId = widget.initialValue;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,14 +80,16 @@ class _StaffFilterItemState extends State<StaffFilterItem> {
                   );
                 }),
               ],
-              onChanged: (int? newValue) {
-                setState(() {
-                  _selectedId = newValue;
-                });
-                if (widget.onChanged != null) {
-                  widget.onChanged!(newValue);
-                }
-              },
+              onChanged: widget.enabled
+                  ? (int? newValue) {
+                      setState(() {
+                        _selectedId = newValue;
+                      });
+                      if (widget.onChanged != null) {
+                        widget.onChanged!(newValue);
+                      }
+                    }
+                  : null,
             ),
           ),
         ),

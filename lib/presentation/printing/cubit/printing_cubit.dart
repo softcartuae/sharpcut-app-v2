@@ -6,6 +6,7 @@ import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
+import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 part 'printing_state.dart';
@@ -17,7 +18,7 @@ class PrintingCubit extends Cubit<PrintingState> {
   PrintingCubit(this._printingRepo) : super(PrintingState());
 
   Future<void> startScan({ConnectionType type = ConnectionType.USB}) async {
-    emit(state.copyWith(status: PrintingStatus.scanning));
+    emit(state.copyWith(status: PrintingStatus.scanning, scanningType: type));
     try {
       _printerSubscription?.cancel();
       _printerSubscription = _printingRepo.printersStream.listen((printers) {
@@ -29,6 +30,7 @@ class PrintingCubit extends Cubit<PrintingState> {
         state.copyWith(
           status: PrintingStatus.error,
           errorMessage: e.toString(),
+          scanningType: null,
         ),
       );
     }
@@ -37,7 +39,7 @@ class PrintingCubit extends Cubit<PrintingState> {
   Future<void> stopScan() async {
     await _printingRepo.stopScan();
     _printerSubscription?.cancel();
-    emit(state.copyWith(status: PrintingStatus.initial));
+    emit(state.copyWith(status: PrintingStatus.initial, scanningType: null));
   }
 
   Future<void> connect(Printer printer) async {
@@ -92,6 +94,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
     required List<CartItemModel> cartItems,
+    required double balanceAmount,
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
@@ -113,6 +116,7 @@ class PrintingCubit extends Cubit<PrintingState> {
         printer: state.connectedPrinter!,
         request: request,
         shopData: shopData,
+        balanceAmount: balanceAmount,
         cartItems: cartItems,
         staffName: staffName,
         invoiceNumber: invoiceNumber,
@@ -129,7 +133,38 @@ class PrintingCubit extends Cubit<PrintingState> {
       );
     }
   }
-  
+
+  Future<void> printQuickReport({required QuickReportModel report}) async {
+    if (state.connectedPrinter == null) {
+      log("No printer connected");
+      ToastHelper.showError("No printer connected");
+      emit(
+        state.copyWith(
+          status: PrintingStatus.error,
+          errorMessage: "No printer connected",
+        ),
+      );
+      return;
+    }
+
+    emit(state.copyWith(status: PrintingStatus.printing));
+    try {
+      await _printingRepo.printQuickReport(
+        printer: state.connectedPrinter!,
+        report: report,
+      );
+      emit(state.copyWith(status: PrintingStatus.printed));
+    } catch (e) {
+      log(e.toString());
+      emit(
+        state.copyWith(
+          status: PrintingStatus.error,
+          errorMessage: "Failed to print: ${e.toString()}",
+        ),
+      );
+    }
+  }
+
   @override
   Future<void> close() {
     _printerSubscription?.cancel();

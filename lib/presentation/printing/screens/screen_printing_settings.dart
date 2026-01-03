@@ -112,21 +112,27 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                           ),
                           clipBehavior: Clip.hardEdge,
                           child: InkWell(
-                            onTap: () {
-                              if (state.status == PrintingStatus.scanning) {
-                                context.read<PrintingCubit>().stopScan();
-                              } else {
-                                context.read<PrintingCubit>().startScan(
-                                  type: ConnectionType.USB,
-                                );
-                              }
-                            },
+                            onTap:
+                                (state.status == PrintingStatus.scanning &&
+                                    state.scanningType != ConnectionType.USB)
+                                ? null
+                                : () {
+                                    if (state.status ==
+                                        PrintingStatus.scanning) {
+                                      context.read<PrintingCubit>().stopScan();
+                                    } else {
+                                      context.read<PrintingCubit>().startScan(
+                                        type: ConnectionType.USB,
+                                      );
+                                    }
+                                  },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  if (state.status == PrintingStatus.scanning)
+                                  if (state.status == PrintingStatus.scanning &&
+                                      state.scanningType == ConnectionType.USB)
                                     const SizedBox(
                                       width: 20,
                                       height: 20,
@@ -136,17 +142,31 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                       ),
                                     )
                                   else
-                                    const Icon(
+                                    Icon(
                                       Icons.usb,
-                                      color: AppColors.violetNormal,
+                                      color:
+                                          (state.status ==
+                                                  PrintingStatus.scanning &&
+                                              state.scanningType !=
+                                                  ConnectionType.USB)
+                                          ? Colors.grey
+                                          : AppColors.violetNormal,
                                     ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    state.status == PrintingStatus.scanning
+                                    state.status == PrintingStatus.scanning &&
+                                            state.scanningType ==
+                                                ConnectionType.USB
                                         ? "Stop Scanning"
                                         : "Scan for USB Printers",
                                     style: GoogleFonts.rajdhani(
-                                      color: AppColors.violetNormal,
+                                      color:
+                                          (state.status ==
+                                                  PrintingStatus.scanning &&
+                                              state.scanningType !=
+                                                  ConnectionType.USB)
+                                          ? Colors.grey
+                                          : AppColors.violetNormal,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -170,25 +190,31 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                           ),
                           clipBehavior: Clip.hardEdge,
                           child: InkWell(
-                            onTap: () async {
-                              if (state.status == PrintingStatus.scanning) {
-                                context.read<PrintingCubit>().stopScan();
-                              } else {
-                                bool granted =
-                                    await _requestBluetoothPermissions();
-                                if (granted && context.mounted) {
-                                  context.read<PrintingCubit>().startScan(
-                                    type: ConnectionType.BLE,
-                                  );
-                                }
-                              }
-                            },
+                            onTap:
+                                (state.status == PrintingStatus.scanning &&
+                                    state.scanningType != ConnectionType.BLE)
+                                ? null
+                                : () async {
+                                    if (state.status ==
+                                        PrintingStatus.scanning) {
+                                      context.read<PrintingCubit>().stopScan();
+                                    } else {
+                                      bool granted =
+                                          await _requestBluetoothPermissions();
+                                      if (granted && context.mounted) {
+                                        context.read<PrintingCubit>().startScan(
+                                          type: ConnectionType.BLE,
+                                        );
+                                      }
+                                    }
+                                  },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  if (state.status == PrintingStatus.scanning)
+                                  if (state.status == PrintingStatus.scanning &&
+                                      state.scanningType == ConnectionType.BLE)
                                     const SizedBox(
                                       width: 20,
                                       height: 20,
@@ -198,17 +224,31 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                       ),
                                     )
                                   else
-                                    const Icon(
+                                    Icon(
                                       Icons.bluetooth,
-                                      color: AppColors.violetNormal,
+                                      color:
+                                          (state.status ==
+                                                  PrintingStatus.scanning &&
+                                              state.scanningType !=
+                                                  ConnectionType.BLE)
+                                          ? Colors.grey
+                                          : AppColors.violetNormal,
                                     ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    state.status == PrintingStatus.scanning
+                                    state.status == PrintingStatus.scanning &&
+                                            state.scanningType ==
+                                                ConnectionType.BLE
                                         ? "Stop Scanning"
                                         : "Scan for Bluetooth Printers",
                                     style: GoogleFonts.rajdhani(
-                                      color: AppColors.violetNormal,
+                                      color:
+                                          (state.status ==
+                                                  PrintingStatus.scanning &&
+                                              state.scanningType !=
+                                                  ConnectionType.BLE)
+                                          ? Colors.grey
+                                          : AppColors.violetNormal,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -232,21 +272,29 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                           ),
                           clipBehavior: Clip.hardEdge,
                           child: InkWell(
-                            onTap: () {
-                              if (state.status == PrintingStatus.scanning) {
-                                context.read<PrintingCubit>().stopScan();
-                              } else {
-                                context.read<PrintingCubit>().startScan(
-                                  type: ConnectionType.NETWORK,
-                                );
-                              }
-                            },
+                            onTap:
+                                (state.status == PrintingStatus.scanning &&
+                                    state.scanningType !=
+                                        ConnectionType.NETWORK)
+                                ? null
+                                : () {
+                                    if (state.status ==
+                                        PrintingStatus.scanning) {
+                                      context.read<PrintingCubit>().stopScan();
+                                    } else {
+                                      context.read<PrintingCubit>().startScan(
+                                        type: ConnectionType.NETWORK,
+                                      );
+                                    }
+                                  },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  if (state.status == PrintingStatus.scanning)
+                                  if (state.status == PrintingStatus.scanning &&
+                                      state.scanningType ==
+                                          ConnectionType.NETWORK)
                                     const SizedBox(
                                       width: 20,
                                       height: 20,
@@ -256,17 +304,31 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                       ),
                                     )
                                   else
-                                    const Icon(
+                                    Icon(
                                       Icons.wifi,
-                                      color: AppColors.violetNormal,
+                                      color:
+                                          (state.status ==
+                                                  PrintingStatus.scanning &&
+                                              state.scanningType !=
+                                                  ConnectionType.NETWORK)
+                                          ? Colors.grey
+                                          : AppColors.violetNormal,
                                     ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    state.status == PrintingStatus.scanning
+                                    state.status == PrintingStatus.scanning &&
+                                            state.scanningType ==
+                                                ConnectionType.NETWORK
                                         ? "Stop Scanning"
                                         : "Scan for Network Printers",
                                     style: GoogleFonts.rajdhani(
-                                      color: AppColors.violetNormal,
+                                      color:
+                                          (state.status ==
+                                                  PrintingStatus.scanning &&
+                                              state.scanningType !=
+                                                  ConnectionType.NETWORK)
+                                          ? Colors.grey
+                                          : AppColors.violetNormal,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
                                     ),

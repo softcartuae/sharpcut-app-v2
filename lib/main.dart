@@ -1,6 +1,7 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:sharp_cut/presentation/printing/screens/test_quick_report_screen.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
@@ -55,7 +56,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Spark Cut',
       theme: appTheme,
-      home: SplashScreen(),
+      home: TestQuickReportScreen(),
     );
   }
 }

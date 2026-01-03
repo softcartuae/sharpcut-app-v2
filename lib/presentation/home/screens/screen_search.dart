@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
-import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/presentation/report/screens/screen_report_table.dart';
 
 class ScreenSearch extends StatelessWidget {
-  ScreenSearch({super.key});
+  ScreenSearch({super.key, required this.staff});
+
+  final StaffModel staff;
 
   final TextEditingController searchController = TextEditingController();
 
@@ -77,6 +78,7 @@ class ScreenSearch extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
                       TextField(
+                        style: GoogleFonts.rajdhani(color: Colors.black),
                         controller: searchController,
                         decoration: InputDecoration(
                           hintText: 'Search here..',
@@ -122,7 +124,18 @@ class ScreenSearch extends StatelessWidget {
                             child: _buildButton(
                               context,
                               'Order made today',
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => ScreenReportTable(
+                                      staff: staff,
+                                      initialSearchKeyword:
+                                          searchController.text,
+                                      filterByToday: true,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -131,10 +144,14 @@ class ScreenSearch extends StatelessWidget {
                               context,
                               'OK',
                               onTap: () {
-                                context.read<ReportCubit>().resetFilters();
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (context) => ScreenReportTable(),
+                                    builder: (context) => ScreenReportTable(
+                                      staff: staff,
+                                      initialSearchKeyword:
+                                          searchController.text,
+                                      filterByToday: false,
+                                    ),
                                   ),
                                 );
                               },

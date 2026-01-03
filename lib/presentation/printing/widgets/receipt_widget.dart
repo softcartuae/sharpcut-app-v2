@@ -13,6 +13,7 @@ class ReceiptWidget extends StatelessWidget {
   final String? invoiceNumber;
   final String? bookingTime;
   final double? width;
+  final double balanceAmount;
 
   const ReceiptWidget({
     super.key,
@@ -22,6 +23,7 @@ class ReceiptWidget extends StatelessWidget {
     required this.shopData,
     required this.request,
     required this.cartItems,
+    required this.balanceAmount,
     this.width,
   });
 
@@ -356,8 +358,11 @@ class ReceiptWidget extends StatelessWidget {
             'قيمة الضريبة - VAT Amount',
             (request.taxTotal ?? 0).toStringAsFixed(2),
           ),
-
-          const SizedBox(height: 8),
+          if (balanceAmount > 0)
+            _buildTotalRow(
+              'الباقي - Balance Amount',
+              (balanceAmount.toStringAsFixed(2)),
+            ),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -365,7 +370,7 @@ class ReceiptWidget extends StatelessWidget {
               const Text(
                 'المبلغ الصافي - Net Amount',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),

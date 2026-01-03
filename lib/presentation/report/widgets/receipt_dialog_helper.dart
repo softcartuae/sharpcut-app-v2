@@ -45,6 +45,7 @@ void showReceiptDialog(
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ReceiptWidget(
+                  balanceAmount: 0,
                   width: MediaQuery.of(context).size.width > 600 ? 500 : 370,
                   staffName: booking.staff?.name,
                   invoiceNumber: booking.invoiceNo,

@@ -12,7 +12,16 @@ import 'package:sharp_cut/presentation/report/widgets/staff_filter_item.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class ScreenReportTable extends StatefulWidget {
-  const ScreenReportTable({super.key});
+  const ScreenReportTable({
+    super.key,
+    this.staff,
+    this.initialSearchKeyword,
+    this.filterByToday = false,
+  });
+
+  final StaffModel? staff;
+  final String? initialSearchKeyword;
+  final bool filterByToday;
 
   @override
   State<ScreenReportTable> createState() => _ScreenReportTableState();
@@ -21,10 +30,34 @@ class ScreenReportTable extends StatefulWidget {
 class _ScreenReportTableState extends State<ScreenReportTable> {
   DateTimeRange? _selectedRange;
   final TextEditingController _searchController = TextEditingController();
+  Key _filterKey = UniqueKey();
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
 
   String get _dateLabel {
     if (_selectedRange == null) {
       return "All";
+    }
+
+    final now = DateTime.now();
+    if (_isSameDay(_selectedRange!.start, now) &&
+        _isSameDay(_selectedRange!.end, now)) {
+      return "Today";
+    }
+
+    String format(DateTime d) =>
+        "${d.day.toString().padLeft(2, '0')}/"
+        "${d.month.toString().padLeft(2, '0')}/"
+        "${d.year}";
+
+    return "${format(_selectedRange!.start)} - ${format(_selectedRange!.end)}";
+  }
+
+  String get _dateFilterValue {
+    if (_selectedRange == null) {
+      return "";
     }
 
     String format(DateTime d) =>
@@ -70,7 +103,10 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
         _selectedRange = null;
       });
       if (context.mounted) {
-        context.read<ReportCubit>().updateFilter('date_range', '');
+        context.read<ReportCubit>().updateFilter(
+          'date_range',
+          _dateFilterValue,
+        );
       }
     } else if (result == 'Custom Date') {
       if (context.mounted) {
@@ -94,7 +130,10 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
         _selectedRange = picked;
       });
       if (context.mounted) {
-        context.read<ReportCubit>().updateFilter('date_range', _dateLabel);
+        context.read<ReportCubit>().updateFilter(
+          'date_range',
+          _dateFilterValue,
+        );
       }
     }
   }
@@ -102,7 +141,29 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
   @override
   void initState() {
     super.initState();
-    context.read<ReportCubit>().fetchTransactions();
+    final cubit = context.read<ReportCubit>();
+
+    // Handle initial search keyword
+    if (widget.initialSearchKeyword != null &&
+        widget.initialSearchKeyword!.isNotEmpty) {
+      _searchController.text = widget.initialSearchKeyword!;
+      cubit.updateFilter('search_query', widget.initialSearchKeyword);
+      _searchController.text = widget.initialSearchKeyword!;
+    }
+
+    // Handle filter by today
+    if (widget.filterByToday) {
+      final now = DateTime.now();
+      _selectedRange = DateTimeRange(start: now, end: now);
+      cubit.updateFilter('date_range', _dateFilterValue);
+    }
+
+    // Handle staff filter
+    if (widget.staff != null && widget.staff!.role != Role.admin) {
+      cubit.updateFilter('user_id', widget.staff!.id);
+    }
+
+    cubit.fetchTransactions();
   }
 
   @override
@@ -114,6 +175,14 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
     List<StaffModel> staffList = staffListAll
         .where((element) => element.role != Role.admin)
         .toList();
+
+    bool isStaffFilterEnabled = true;
+    int? initialStaffId;
+
+    if (widget.staff != null && widget.staff!.role != Role.admin) {
+      isStaffFilterEnabled = false;
+      initialStaffId = widget.staff!.id;
+    }
 
     return Scaffold(
       body: Padding(
@@ -136,8 +205,11 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                         Expanded(
                           flex: 2,
                           child: StaffFilterItem(
+                            key: _filterKey,
                             label: "Staff Name",
                             items: staffList,
+                            initialValue: initialStaffId,
+                            enabled: isStaffFilterEnabled,
                             onChanged: (int? staffId) {
                               context.read<ReportCubit>().updateFilter(
                                 'user_id',
@@ -150,7 +222,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
 
                         /// DATE RANGE PICKER
                         Expanded(
-                          flex: 4,
+                          flex: 2,
                           child: GestureDetector(
                             onTap: () => _showDateSelectionOptions(context),
                             child: ReportFilterItem(
@@ -166,6 +238,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                         Expanded(
                           flex: 2,
                           child: ReportFilterItem(
+                            key: ValueKey('paid_$_filterKey'),
                             label: "Paid Status",
                             initialValue: "All",
                             items: const ["All", "Full", "Unpaid", "Partial"],
@@ -181,6 +254,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                         Expanded(
                           flex: 2,
                           child: ReportFilterItem(
+                            key: ValueKey('order_$_filterKey'),
                             label: "Order Status",
                             initialValue: "All",
                             items: const [
@@ -248,11 +322,42 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                         const SizedBox(width: 16),
                         Column(
                           children: [
+                            IconButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.black,
+                              ),
+                              style: IconButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: const BorderSide(color: Colors.grey),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
                             GestureDetector(
-                              onTap: () => Navigator.pop(context),
+                              onTap: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _selectedRange = null;
+                                  _filterKey =
+                                      UniqueKey(); // Force rebuild of filters
+                                });
+                                context.read<ReportCubit>().resetFilters();
+                                // Re-apply staff filter if not admin
+                                if (widget.staff != null &&
+                                    widget.staff!.role != Role.admin) {
+                                  context.read<ReportCubit>().updateFilter(
+                                    'user_id',
+                                    widget.staff!.id,
+                                  );
+                                }
+                              },
                               child: const ReportActionButton(
-                                label: "Back",
-                                bgColor: Colors.grey,
+                                label: "Reset",
+                                bgColor: Colors.red,
                                 textColor: Colors.white,
                               ),
                             ),
