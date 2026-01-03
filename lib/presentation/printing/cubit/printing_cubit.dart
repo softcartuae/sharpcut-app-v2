@@ -18,7 +18,7 @@ class PrintingCubit extends Cubit<PrintingState> {
   PrintingCubit(this._printingRepo) : super(PrintingState());
 
   Future<void> startScan({ConnectionType type = ConnectionType.USB}) async {
-    emit(state.copyWith(status: PrintingStatus.scanning));
+    emit(state.copyWith(status: PrintingStatus.scanning, scanningType: type));
     try {
       _printerSubscription?.cancel();
       _printerSubscription = _printingRepo.printersStream.listen((printers) {
@@ -30,6 +30,7 @@ class PrintingCubit extends Cubit<PrintingState> {
         state.copyWith(
           status: PrintingStatus.error,
           errorMessage: e.toString(),
+          scanningType: null,
         ),
       );
     }
@@ -38,7 +39,7 @@ class PrintingCubit extends Cubit<PrintingState> {
   Future<void> stopScan() async {
     await _printingRepo.stopScan();
     _printerSubscription?.cancel();
-    emit(state.copyWith(status: PrintingStatus.initial));
+    emit(state.copyWith(status: PrintingStatus.initial, scanningType: null));
   }
 
   Future<void> connect(Printer printer) async {
@@ -93,6 +94,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
     required List<CartItemModel> cartItems,
+    required double balanceAmount,
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
@@ -114,6 +116,7 @@ class PrintingCubit extends Cubit<PrintingState> {
         printer: state.connectedPrinter!,
         request: request,
         shopData: shopData,
+        balanceAmount: balanceAmount,
         cartItems: cartItems,
         staffName: staffName,
         invoiceNumber: invoiceNumber,
@@ -133,6 +136,7 @@ class PrintingCubit extends Cubit<PrintingState> {
 
   Future<void> printQuickReport({required QuickReportModel report}) async {
     if (state.connectedPrinter == null) {
+      log("No printer connected");
       ToastHelper.showError("No printer connected");
       emit(
         state.copyWith(

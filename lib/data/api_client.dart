@@ -44,4 +44,7 @@ class ApiClient {
   static final cashRegisterCheckApi = "api/cash-registers/check";
   static final openCashRegisterApi = "api/cash-registers/open";
   static final closeCashRegisterApi = "api/cash-registers/close";
+  static final getTotalSalesForCloseCashRegisterApi = "api/cash-registers/sales-total";
+
+  
 }

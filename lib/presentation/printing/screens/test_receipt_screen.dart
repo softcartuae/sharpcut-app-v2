@@ -78,6 +78,7 @@ class TestReceiptScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(10),
           child: ReceiptWidget(
+            balanceAmount: 100,
             shopData: dummyShop,
             request: dummyRequest,
             cartItems: dummyCartItems,

@@ -48,6 +48,7 @@ class PrintingRepoImp implements PrintingRepo {
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
     required List<CartItemModel> cartItems,
+    required double balanceAmount,
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
@@ -70,6 +71,7 @@ class PrintingRepoImp implements PrintingRepo {
           child: Material(
             color: Colors.white,
             child: ReceiptWidget(
+              balanceAmount: balanceAmount,
               staffName: staffName,
               invoiceNumber: invoiceNumber,
               bookingTime: bookingTime,

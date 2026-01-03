@@ -10,13 +10,14 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 
 class CloseCashRegisterDialog extends StatefulWidget {
-  const CloseCashRegisterDialog({super.key});
+  const CloseCashRegisterDialog({super.key, required this.totalSales});
+  final double? totalSales;
 
-  static void show(BuildContext context) {
+  static void show(BuildContext context, double? totalSales) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const CloseCashRegisterDialog(),
+      builder: (context) => CloseCashRegisterDialog(totalSales: totalSales),
     );
   }
 
@@ -86,6 +87,15 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                   ],
                 ),
                 const SizedBox(height: 24),
+                if (widget.totalSales != null)
+                  Text(
+                    "Total Sales: ${widget.totalSales.toString()}",
+                    style: GoogleFonts.rajdhani(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                if (widget.totalSales != null) const SizedBox(height: 16),
 
                 // Admin Selection
                 Container(
@@ -240,6 +250,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                           context.read<CashRegistoryCubit>().closeCashRegister(
                             amount: amount,
                             userId: _selectedStaff!.id,
+                            role: _selectedStaff!.role,
                             password: _passwordController.text,
                           );
                         },

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
@@ -37,13 +38,19 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
   Future<Either<String, String>> openCashRegister({
     required int userId,
+    required Role role,
     required double amount,
     required String password,
   }) async {
     try {
       final response = await ApiClient.dio.post(
         ApiClient.openCashRegisterApi,
-        data: {"user_id": userId, "opening_amount": amount,"password": password},
+        data: {
+          "user_id": userId,
+          "user_type": role.name,
+          "opening_amount": amount,
+          "password": password,
+        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -73,12 +80,18 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   Future<Either<String, String>> closeCashRegister({
     required double amount,
     required int userId,
+    required Role role,
     required String password,
   }) async {
     try {
       final response = await ApiClient.dio.post(
         ApiClient.closeCashRegisterApi,
-        data: {"closing_amount": amount, "user_id": userId, "password": password},
+        data: {
+          "closing_amount": amount,
+          "user_type": role.name,
+          "user_id": userId,
+          "password": password,
+        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -99,6 +112,46 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
         );
       } else {
         return Left('Failed to close cash register: ${e.message}');
+      }
+    } catch (e) {
+      return Left('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, double>> getSalesTotal() async {
+    try {
+      final response = await ApiClient.dio.get(
+        ApiClient.getTotalSalesForCloseCashRegisterApi,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true) {
+          final totalSales = data['data']['total_sales'];
+          // Handle both int and double types safely
+          if (totalSales is int) {
+            return Right(totalSales.toDouble());
+          } else if (totalSales is double) {
+            return Right(totalSales);
+          } else if (totalSales is String) {
+            return Right(double.tryParse(totalSales) ?? 0.0);
+          }
+          return const Right(0.0);
+        } else {
+          return Left(data['message'] ?? 'Failed to get sales total.');
+        }
+      } else {
+        return Left('Failed to get sales total: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return Left(
+          e.response?.data['message'] ??
+              'Failed to get sales total: ${e.message}',
+        );
+      } else {
+        return Left('Failed to get sales total: ${e.message}');
       }
     } catch (e) {
       return Left('An unexpected error occurred: $e');

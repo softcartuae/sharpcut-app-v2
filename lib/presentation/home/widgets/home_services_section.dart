@@ -1069,9 +1069,19 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 CashRegistoryCubit,
                                 CashRegistoryState
                               >(
-                                listener: (context, state) {},
+                                listener: (context, state) {
+                                  if (state is CashRegistorySalesTotalLoaded) {
+                                    CloseCashRegisterDialog.show(
+                                      context,
+                                      state.totalSales,
+                                    );
+                                  } else if (state is CashRegistoryAddError) {
+                                    ToastHelper.showError(state.message);
+                                  }
+                                },
                                 builder: (context, state) {
                                   return ActionButton(
+                                    isLoading: state is CashRegistoryLoading,
                                     label: "CLOSE REGISTER",
                                     isPrimary:
                                         selectedButton == "CLOSE REGISTER",
@@ -1080,10 +1090,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                         : () {
                                             _selectedButtonNotifier.value =
                                                 "CLOSE REGISTER";
-
-                                            CloseCashRegisterDialog.show(
-                                              context,
-                                            );
+                                            context
+                                                .read<CashRegistoryCubit>()
+                                                .getSalesTotal();
                                           },
                                   );
                                 },

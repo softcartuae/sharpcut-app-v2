@@ -6,11 +6,7 @@ class QuickReportPrintWidget extends StatelessWidget {
   final QuickReportModel report;
   final double? width;
 
-  const QuickReportPrintWidget({
-    super.key,
-    required this.report,
-    this.width,
-  });
+  const QuickReportPrintWidget({super.key, required this.report, this.width});
 
   @override
   Widget build(BuildContext context) {
@@ -51,12 +47,27 @@ class QuickReportPrintWidget extends StatelessWidget {
 
           // Summary Section
           _buildSummaryRow("Total Invoice", report.totalInvoice.toString()),
-          _buildSummaryRow("Total Sales", report.totalInvoiceSalesAmount.toStringAsFixed(2)),
-          _buildSummaryRow("Unpaid Amount", report.totalUnpaidAmount.toStringAsFixed(2)),
-          _buildSummaryRow("Gross Total", report.grossTotalAmount.toStringAsFixed(2)),
-          _buildSummaryRow("Total Discount", report.totalDiscount.toStringAsFixed(2)),
-          _buildSummaryRow("Total Credit", report.totalCreditAmount.toStringAsFixed(2)),
-          
+          _buildSummaryRow(
+            "Total Sales",
+            report.totalInvoiceSalesAmount.toStringAsFixed(2),
+          ),
+          _buildSummaryRow(
+            "Unpaid Amount",
+            report.totalUnpaidAmount.toStringAsFixed(2),
+          ),
+          _buildSummaryRow(
+            "Gross Total",
+            report.grossTotalAmount.toStringAsFixed(2),
+          ),
+          _buildSummaryRow(
+            "Total Discount",
+            report.totalDiscount.toStringAsFixed(2),
+          ),
+          _buildSummaryRow(
+            "Total Credit",
+            report.totalCreditAmount.toStringAsFixed(2),
+          ),
+
           const SizedBox(height: 16),
 
           // Invoice Customer Details
@@ -99,10 +110,53 @@ class QuickReportPrintWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: Row(
               children: const [
-                Expanded(flex: 2, child: Text("Staff", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                Expanded(flex: 1, child: Text("Cash", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                Expanded(flex: 1, child: Text("Card", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                Expanded(flex: 1, child: Text("Total", textAlign: TextAlign.end, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    "Staff",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    "Cash",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    "Card",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    "Total",
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -122,7 +176,11 @@ class QuickReportPrintWidget extends StatelessWidget {
                     flex: 2,
                     child: Text(
                       detail.salesmanName,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -130,7 +188,11 @@ class QuickReportPrintWidget extends StatelessWidget {
                     child: Text(
                       detail.totalCashAmount,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -138,7 +200,11 @@ class QuickReportPrintWidget extends StatelessWidget {
                     child: Text(
                       detail.totalCardAmount,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -146,19 +212,23 @@ class QuickReportPrintWidget extends StatelessWidget {
                     child: Text(
                       total.toStringAsFixed(2),
                       textAlign: TextAlign.end,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
               ),
             );
           }),
-          
+
           const SizedBox(height: 8),
           const Divider(color: Colors.black, thickness: 1),
-          
+
           // Footer Totals
-           Builder(
+          Builder(
             builder: (context) {
               double totalCash = 0.0;
               double totalCard = 0.0;
@@ -175,7 +245,11 @@ class QuickReportPrintWidget extends StatelessWidget {
                     flex: 2,
                     child: Text(
                       "Total :${report.salesmanWiseDetails.length}",
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -183,7 +257,11 @@ class QuickReportPrintWidget extends StatelessWidget {
                     child: Text(
                       totalCash.toStringAsFixed(2),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -191,7 +269,11 @@ class QuickReportPrintWidget extends StatelessWidget {
                     child: Text(
                       totalCard.toStringAsFixed(2),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -199,7 +281,11 @@ class QuickReportPrintWidget extends StatelessWidget {
                     child: Text(
                       grandTotal.toStringAsFixed(2),
                       textAlign: TextAlign.end,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -217,7 +303,11 @@ class QuickReportPrintWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 12, color: Colors.black),
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -230,11 +320,19 @@ class QuickReportPrintWidget extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
           Text(
             value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
         ],
       ),
@@ -246,9 +344,41 @@ class QuickReportPrintWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Expanded(flex: 2, child: Text(col1, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-          Expanded(flex: 1, child: Text(col2, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-          Expanded(flex: 1, child: Text(col3, textAlign: TextAlign.end, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+          Expanded(
+            flex: 2,
+            child: Text(
+              col1,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              col2,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              col3,
+              textAlign: TextAlign.end,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.black,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -259,9 +389,41 @@ class QuickReportPrintWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         children: [
-          Expanded(flex: 2, child: Text(col1, style: const TextStyle(fontSize: 12))),
-          Expanded(flex: 1, child: Text(col2, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12))),
-          Expanded(flex: 1, child: Text(col3, textAlign: TextAlign.end, style: const TextStyle(fontSize: 12))),
+          Expanded(
+            flex: 2,
+            child: Text(
+              col1,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              col2,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              col3,
+              textAlign: TextAlign.end,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
       ),
     );

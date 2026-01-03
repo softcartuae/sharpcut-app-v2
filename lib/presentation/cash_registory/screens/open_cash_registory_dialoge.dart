@@ -249,6 +249,7 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
                                         .read<CashRegistoryCubit>()
                                         .openCashRegister(
                                           userId: selectedStaff!.id,
+                                          role: selectedStaff!.role,
                                           amount: double.parse(
                                             cashController.text,
                                           ),

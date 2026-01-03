@@ -14,6 +14,7 @@ abstract class PrintingRepo {
     required Printer printer,
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
+    required double balanceAmount,
     required List<CartItemModel> cartItems,
     required String? staffName,
     required String? invoiceNumber,

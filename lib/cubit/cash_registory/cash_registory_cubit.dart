@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_state.dart';
 import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class CashRegistoryCubit extends Cubit<CashRegistoryState> {
   final CashRegistoryRepo cashRegistoryRepo;
@@ -31,6 +32,7 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
 
   Future<void> openCashRegister({
     required int userId,
+    required Role role,
     required double amount,
     required String password,
   }) async {
@@ -38,6 +40,7 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
     final result = await cashRegistoryRepo.openCashRegister(
       userId: userId,
       amount: amount,
+      role: role,
       password: password,
     );
     result.fold(
@@ -46,12 +49,31 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
     );
   }
 
-  Future<void> closeCashRegister({required double amount,required int userId,required String password}) async {
+  Future<void> closeCashRegister({
+    required double amount,
+    required int userId,
+    required Role role,
+    required String password,
+  }) async {
     emit(CashRegistoryLoading());
-    final result = await cashRegistoryRepo.closeCashRegister(amount: amount,userId: userId,password: password);
+    final result = await cashRegistoryRepo.closeCashRegister(
+      amount: amount,
+      userId: userId,
+      role: role,
+      password: password,
+    );
     result.fold(
       (error) => emit(CashRegistoryAddError(error)),
       (message) => emit(CashRegistoryAddSuccess(message)),
     );
+  }
+
+  Future<void> getSalesTotal() async {
+    emit(CashRegistoryLoading());
+    final result = await cashRegistoryRepo.getSalesTotal();
+    result.fold((error) {
+     
+      emit(CashRegistoryAddError(error));
+    }, (total) => emit(CashRegistorySalesTotalLoaded(total)));
   }
 }

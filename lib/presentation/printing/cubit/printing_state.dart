@@ -16,12 +16,14 @@ class PrintingState {
   final List<Printer> printers;
   final Printer? connectedPrinter;
   final String? errorMessage;
+  final ConnectionType? scanningType;
 
   PrintingState({
     this.status = PrintingStatus.initial,
     this.printers = const [],
     this.connectedPrinter,
     this.errorMessage,
+    this.scanningType,
   });
 
   PrintingState copyWith({
@@ -29,12 +31,14 @@ class PrintingState {
     List<Printer>? printers,
     Printer? connectedPrinter,
     String? errorMessage,
+    ConnectionType? scanningType,
   }) {
     return PrintingState(
       status: status ?? this.status,
       printers: printers ?? this.printers,
       connectedPrinter: connectedPrinter ?? this.connectedPrinter,
       errorMessage: errorMessage ?? this.errorMessage,
+      scanningType: scanningType ?? this.scanningType,
     );
   }
 }

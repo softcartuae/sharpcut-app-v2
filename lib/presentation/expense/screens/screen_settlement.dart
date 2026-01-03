@@ -371,6 +371,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
       final shopData = context.read<AuthCubit>().currentUser;
       if (shopData != null) {
         context.read<PrintingCubit>().printInvoice(
+          balanceAmount: double.tryParse(_balanceController.text) ?? 0.0,
           request: request,
           shopData: shopData,
           cartItems: widget.cartItems,
