@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,17 +8,16 @@ import 'package:sharp_cut/cubit/password/password_cubit.dart';
 import 'package:sharp_cut/domain/password/models/password_model.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class ResetPasswordDialog extends StatefulWidget {
   final String title;
-  final List<String> userTypes;
 
   final bool isAdmin;
 
   const ResetPasswordDialog({
     super.key,
     required this.title,
-    this.userTypes = const ['Main'],
     this.isAdmin = false,
   });
 
@@ -46,14 +46,11 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
   bool _obscureCurrent = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
-  String? _selectedUserType;
+  StaffModel? _selectedUserType;
 
   @override
   void initState() {
     super.initState();
-    if (widget.userTypes.isNotEmpty) {
-      _selectedUserType = widget.userTypes.first;
-    }
   }
 
   @override
@@ -173,8 +170,13 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                               return;
                             }
 
+                            if (_selectedUserType == null) {
+                              ToastHelper.showError("Please select a user");
+                              return;
+                            }
+
                             final passwordModel = PasswordModel(
-                              staffId: "5",
+                              staffId: _selectedUserType!.id.toString(),
                               currentPassword: currentPassword,
                               newPassword: newPassword,
                               confirmPassword: confirmPassword,
@@ -226,16 +228,24 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
   Widget _buildDropdown() {
     return BlocBuilder<ChairCubit, ChairState>(
       builder: (context, state) {
-        List<String> userTypes = widget.userTypes;
+        List<StaffModel> userTypes = [];
         if (state is ChairSuccess) {
-          userTypes = state.staffs.map((e) => e.name).toList();
+          userTypes = state.staffs
+              .where(
+                (element) => widget.isAdmin
+                    ? element.role == Role.admin
+                    : element.role == Role.staff,
+              )
+              .toList();
         }
 
         // Ensure selected value is in the list
         if (_selectedUserType != null &&
             !userTypes.contains(_selectedUserType)) {
-          _selectedUserType = userTypes.isNotEmpty ? userTypes.first : null;
-        } else if (_selectedUserType == null && userTypes.isNotEmpty) {
+          _selectedUserType = null;
+        }
+
+        if (_selectedUserType == null && userTypes.isNotEmpty) {
           _selectedUserType = userTypes.first;
         }
 
@@ -246,16 +256,16 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
             border: Border.all(color: Colors.white.withOpacity(0.3)),
           ),
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
+            child: DropdownButton<StaffModel>(
               value: _selectedUserType,
               dropdownColor: const Color(0xFF1E1E2C),
               icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
               isExpanded: true,
               style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 16),
-              items: userTypes.map((String value) {
-                return DropdownMenuItem<String>(
+              items: userTypes.map((StaffModel value) {
+                return DropdownMenuItem<StaffModel>(
                   value: value,
-                  child: Center(child: Text(value)),
+                  child: Center(child: Text(value.name)),
                 );
               }).toList(),
               onChanged: (newValue) {

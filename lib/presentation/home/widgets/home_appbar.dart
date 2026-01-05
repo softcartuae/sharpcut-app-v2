@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
@@ -35,10 +36,16 @@ class _HomeAppBarState extends State<HomeAppBar> {
         // Left Section: Logo & Shop Name
         Row(
           children: [
-            Image.asset(
-              "lib/utils/images/sharp_cut.png",
-              height: 80,
-              width: 80,
+            GestureDetector(
+              onTap: () async {
+                final token = await FirebaseMessaging.instance.getToken();
+                print("token: $token");
+              },
+              child: Image.asset(
+                "lib/utils/images/sharp_cut.png",
+                height: 80,
+                width: 80,
+              ),
             ),
             const SizedBox(width: 25),
             Image.asset(

@@ -52,6 +52,7 @@ class PrintingRepoImp implements PrintingRepo {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
+     int copies = 1,
   }) async {
     
     final profile = await CapabilityProfile.load();
@@ -112,12 +113,22 @@ class PrintingRepoImp implements PrintingRepo {
     bytes.addAll(generator.cut());
 
     await _printer.printData(printer, bytes);
+    // Loop 'copies' times
+// for (int i = 0; i < copies; i++) {
+//   await _printer.printData(printer, bytes);
+  
+//   // Optional: Add a small delay between copies to prevent printer buffer overflow
+//   if (i < copies - 1) {
+//     await Future.delayed(const Duration(milliseconds: 500)); 
+//   }
+// }
   }
 
   @override
   Future<void> printQuickReport({
     required Printer printer,
     required QuickReportModel report,
+    int copies = 1,
   }) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
@@ -167,5 +178,14 @@ class PrintingRepoImp implements PrintingRepo {
     bytes.addAll(generator.cut());
 
     await _printer.printData(printer, bytes);
+    // Loop 'copies' times
+// for (int i = 0; i < copies; i++) {
+//   await _printer.printData(printer, bytes);
+  
+//   // Optional: Add a small delay between copies to prevent printer buffer overflow
+//   if (i < copies - 1) {
+//     await Future.delayed(const Duration(milliseconds: 500)); 
+//   }
+// }
   }
 }

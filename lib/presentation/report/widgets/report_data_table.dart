@@ -274,19 +274,25 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 change: [0.0],
                                               );
 
-                                              // if (shopData != null) {
-                                              //   context
-                                              //       .read<PrintingCubit>()
-                                              //       .printInvoice(
-                                              //         request: request,
-                                              //         shopData: shopData,
-                                              //         cartItems: cartItems,
-                                              //         staffName: staffName,
-                                              //         invoiceNumber:
-                                              //             invoiceNumber,
-                                              //         bookingTime: bookingTime,
-                                              //       );
-                                              // }
+                                              if (shopData != null) {
+                                                final balenceAmount =
+                                                    (booking.finalTotal ?? 0) -
+                                                    ((booking.totalPayment ??
+                                                        0));
+                                                context
+                                                    .read<PrintingCubit>()
+                                                    .printInvoice(
+                                                      balanceAmount:
+                                                          balenceAmount,
+                                                      request: request,
+                                                      shopData: shopData,
+                                                      cartItems: cartItems,
+                                                      staffName: staffName,
+                                                      invoiceNumber:
+                                                          invoiceNumber,
+                                                      bookingTime: bookingTime,
+                                                    );
+                                              }
                                             },
                                             viewFunction: () {
                                               final ShopModel? shopData =

@@ -78,7 +78,9 @@ Future<void> init() async {
   );
 
   // Repositories
-  sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
+  sl.registerLazySingleton<AuthRepo>(
+    () => AuthRepoImpl(tokenStorage: sl<TokenStorage>()),
+  );
   sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
   sl.registerLazySingleton<ChairRepo>(() => ChairRepoImpl());
   sl.registerLazySingleton<PasswordRepo>(() => PasswordRepoImp());

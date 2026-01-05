@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/home/models/chair_model.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
@@ -24,6 +26,7 @@ class ChairRepoImpl implements ChairRepo {
   @override
   Future<({List<ChairModel> chairs, List<StaffModel> staffs})>
   getChairsAndStaffs() async {
+    log("getChairsAndStaffs caaled");
     try {
       final response = await ApiClient.dio.get(
         '${ApiClient.chairsApi}?users=true',

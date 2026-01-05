@@ -15,7 +15,6 @@ import 'package:sharp_cut/presentation/expense/widgets/settlement_text_fields.da
 import 'package:sharp_cut/presentation/expense/widgets/settlement_time_container.dart';
 import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
-import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 

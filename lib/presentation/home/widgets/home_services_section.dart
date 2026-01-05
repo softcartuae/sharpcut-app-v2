@@ -37,6 +37,7 @@ import 'package:sharp_cut/utils/helpers/icon_helper.dart';
 import 'package:sharp_cut/utils/comon/validate_password.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
+import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 
 class HomeServicesSection extends StatefulWidget {
   const HomeServicesSection({super.key});
@@ -150,6 +151,10 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           value: 4,
           child: MenuItem(icon: Icons.print, text: "Print Count"),
         ),
+        PopupMenuItem(
+          value: 5,
+          child: MenuItem(icon: Icons.logout, text: "Logout"),
+        ),
       ],
     );
 
@@ -179,6 +184,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           break;
         case 4:
           PrintCountDialog.show(context);
+          break;
+        case 5:
+          context.read<AuthCubit>().logout();
           break;
       }
     }
@@ -221,6 +229,11 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               // Optionally clear cart or reset state
             } else if (state is BookingError) {
               ToastHelper.showError(state.message);
+              if (state.message == "This chair is already booked") {
+                context.read<ChairCubit>().getChairsAndStaffs(
+                  forceRefresh: true,
+                );
+              }
             } else if (state is BookingPaymentSettled) {
               ToastHelper.showSuccess(state.message);
               context.read<ServiceCubit>().clearCart();

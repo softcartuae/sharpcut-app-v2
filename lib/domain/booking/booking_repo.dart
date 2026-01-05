@@ -6,7 +6,7 @@ import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dar
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
 
 abstract class BookingRepo {
-  Future<Either<String, BookingResponseModel>> bookSlot({
+  Future<Either<String, String>> bookSlot({
     required int chairId,
     required int userId,
     required String userPassword,
