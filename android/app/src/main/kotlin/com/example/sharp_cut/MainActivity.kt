@@ -5,12 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.hardware.usb.UsbConstants
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbDeviceConnection
-import android.hardware.usb.UsbEndpoint
-import android.hardware.usb.UsbInterface
-import android.hardware.usb.UsbManager
+import android.hardware.usb.*
 import android.os.Build
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
@@ -18,183 +13,216 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+
     private val CHANNEL = "com.example.sharp_cut/usb_printer"
     private val ACTION_USB_PERMISSION = "com.example.sharp_cut.USB_PERMISSION"
-    
-    private var usbManager: UsbManager? = null
+
+    private lateinit var usbManager: UsbManager
     private var usbConnection: UsbDeviceConnection? = null
     private var usbInterface: UsbInterface? = null
     private var usbEndpoint: UsbEndpoint? = null
+
     private var pendingPermissionResult: MethodChannel.Result? = null
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        
+
         usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            CHANNEL
+        ).setMethodCallHandler { call, result ->
             when (call.method) {
+
                 "getUsbDevices" -> {
-                    val devices = getUsbDevices()
-                    result.success(devices)
+                    result.success(getUsbDevices())
                 }
+
                 "connect" -> {
                     val vendorId = call.argument<Int>("vendorId")
                     val productId = call.argument<Int>("productId")
-                    if (vendorId != null && productId != null) {
-                        connectToDevice(vendorId, productId, result)
-                    } else {
-                        result.error("INVALID_ARGS", "VendorId or ProductId missing", null)
+
+                    if (vendorId == null || productId == null) {
+                        result.error("INVALID_ARGS", "vendorId or productId missing", null)
+                        return@setMethodCallHandler
                     }
+
+                    connectToDevice(vendorId, productId, result)
                 }
+
                 "print" -> {
                     val data = call.argument<ByteArray>("data")
-                    if (data != null) {
-                        val success = printData(data)
-                        result.success(success)
-                    } else {
-                        result.error("INVALID_ARGS", "Data missing", null)
+                    if (data == null) {
+                        result.error("INVALID_ARGS", "Print data missing", null)
+                        return@setMethodCallHandler
                     }
+
+                    result.success(printData(data))
                 }
+
                 "disconnect" -> {
                     disconnect()
                     result.success(null)
                 }
-                else -> {
-                    result.notImplemented()
-                }
+
+                else -> result.notImplemented()
             }
         }
-        
-        // Register BroadcastReceiver for USB permission
+
         val filter = IntentFilter(ACTION_USB_PERMISSION)
-        registerReceiver(usbReceiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(usbReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(usbReceiver, filter)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(usbReceiver)
+        try {
+            unregisterReceiver(usbReceiver)
+        } catch (_: Exception) {}
         disconnect()
     }
 
+    // -------------------------------------------------------------------------
+    // USB LOGIC
+    // -------------------------------------------------------------------------
+
     private fun getUsbDevices(): List<Map<String, Any>> {
-        val deviceList = ArrayList<Map<String, Any>>()
-        val devices = usbManager?.deviceList
-        devices?.values?.forEach { device ->
-            val deviceMap = HashMap<String, Any>()
-            deviceMap["name"] = device.productName ?: "Unknown Device"
-            deviceMap["vendorId"] = device.vendorId
-            deviceMap["productId"] = device.productId
-            deviceList.add(deviceMap)
+        val list = ArrayList<Map<String, Any>>()
+        usbManager.deviceList.values.forEach { device ->
+            list.add(
+                mapOf(
+                    "name" to (device.productName ?: "Unknown"),
+                    "vendorId" to device.vendorId,
+                    "productId" to device.productId
+                )
+            )
         }
-        return deviceList
+        return list
     }
 
-    private fun connectToDevice(vendorId: Int, productId: Int, result: MethodChannel.Result) {
-        val device = usbManager?.deviceList?.values?.find { 
-            it.vendorId == vendorId && it.productId == productId 
+    private fun connectToDevice(
+        vendorId: Int,
+        productId: Int,
+        result: MethodChannel.Result
+    ) {
+        val device = usbManager.deviceList.values.find {
+            it.vendorId == vendorId && it.productId == productId
         }
 
         if (device == null) {
-            result.error("DEVICE_NOT_FOUND", "Device not found", null)
+            result.error("DEVICE_NOT_FOUND", "USB device not found", null)
             return
         }
 
-        if (usbManager?.hasPermission(device) == true) {
+        if (usbManager.hasPermission(device)) {
             openDevice(device, result)
         } else {
             pendingPermissionResult = result
+
+            val intent = Intent(ACTION_USB_PERMISSION).apply {
+                setPackage(packageName) // explicit intent (important)
+            }
+
             val permissionIntent = PendingIntent.getBroadcast(
-                this, 0, Intent(ACTION_USB_PERMISSION), 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE
             )
-            usbManager?.requestPermission(device, permissionIntent)
+
+            usbManager.requestPermission(device, permissionIntent)
         }
     }
 
     private val usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (ACTION_USB_PERMISSION == intent.action) {
-                synchronized(this) {
-                    val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        device?.apply {
-                            pendingPermissionResult?.let { openDevice(this, it) }
-                        }
-                    } else {
-                        pendingPermissionResult?.error("PERMISSION_DENIED", "USB permission denied", null)
-                    }
-                    pendingPermissionResult = null
+            if (intent.action != ACTION_USB_PERMISSION) return
+
+            val device =
+                intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
+
+            val granted =
+                intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
+
+            if (granted && device != null) {
+                pendingPermissionResult?.let {
+                    openDevice(device, it)
                 }
+            } else {
+                pendingPermissionResult?.error(
+                    "PERMISSION_DENIED",
+                    "USB permission denied",
+                    null
+                )
             }
+
+            pendingPermissionResult = null
         }
     }
 
     private fun openDevice(device: UsbDevice, result: MethodChannel.Result) {
         try {
-            // Find the correct interface and endpoint
-            var intf: UsbInterface? = null
-            var ep: UsbEndpoint? = null
+            var foundInterface: UsbInterface? = null
+            var foundEndpoint: UsbEndpoint? = null
 
             for (i in 0 until device.interfaceCount) {
                 val iface = device.getInterface(i)
-                // Look for Printer class (7) or generic vendor specific
-                // Most thermal printers use class 7, but some might be vendor specific (255)
-                // We'll look for bulk endpoints
                 for (j in 0 until iface.endpointCount) {
-                    val endpoint = iface.getEndpoint(j)
-                    if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK &&
-                        endpoint.direction == UsbConstants.USB_DIR_OUT) {
-                        intf = iface
-                        ep = endpoint
+                    val ep = iface.getEndpoint(j)
+                    if (ep.type == UsbConstants.USB_ENDPOINT_XFER_BULK &&
+                        ep.direction == UsbConstants.USB_DIR_OUT
+                    ) {
+                        foundInterface = iface
+                        foundEndpoint = ep
                         break
                     }
                 }
-                if (intf != null) break
+                if (foundInterface != null) break
             }
 
-            if (intf == null || ep == null) {
-                result.error("NO_ENDPOINT", "No suitable printing endpoint found", null)
+            if (foundInterface == null || foundEndpoint == null) {
+                result.error("NO_ENDPOINT", "No BULK OUT endpoint found", null)
                 return
             }
 
-            val connection = usbManager?.openDevice(device)
+            val connection = usbManager.openDevice(device)
             if (connection == null) {
-                result.error("CONNECTION_FAILED", "Failed to open device connection", null)
+                result.error("CONNECTION_FAILED", "Unable to open USB device", null)
                 return
             }
 
-            if (connection.claimInterface(intf, true)) {
-                usbConnection = connection
-                usbInterface = intf
-                usbEndpoint = ep
-                result.success(true)
-            } else {
+            if (!connection.claimInterface(foundInterface, true)) {
                 connection.close()
-                result.error("CLAIM_FAILED", "Failed to claim interface", null)
+                result.error("CLAIM_FAILED", "Could not claim USB interface", null)
+                return
             }
+
+            usbConnection = connection
+            usbInterface = foundInterface
+            usbEndpoint = foundEndpoint
+
+            result.success(true)
+
         } catch (e: Exception) {
-            result.error("EXCEPTION", e.message, null)
+            result.error("USB_ERROR", e.message, null)
         }
     }
 
     private fun printData(data: ByteArray): Boolean {
         val conn = usbConnection ?: return false
         val ep = usbEndpoint ?: return false
-        
-        // Bulk transfer
-        // Timeout 5000ms
-        val bytesTransferred = conn.bulkTransfer(ep, data, data.size, 5000)
-        return bytesTransferred >= 0
+        return conn.bulkTransfer(ep, data, data.size, 5000) >= 0
     }
 
     private fun disconnect() {
         try {
             usbConnection?.releaseInterface(usbInterface)
             usbConnection?.close()
-        } catch (e: Exception) {
-            // Ignore errors on close
-        }
+        } catch (_: Exception) {}
         usbConnection = null
         usbInterface = null
         usbEndpoint = null

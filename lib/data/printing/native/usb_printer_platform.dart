@@ -11,7 +11,12 @@ class UsbPrinterPlatform {
   /// Each device is a Map with keys: "name", "vendorId", "productId".
   Future<List<Map<String, dynamic>>> getUsbDevices() async {
     final List<dynamic>? devices = await _channel.invokeMethod('getUsbDevices');
-    return devices?.cast<Map<String, dynamic>>() ?? [];
+    if (devices == null) return [];
+
+    return devices.map((device) {
+      final Map<Object?, Object?> map = device as Map<Object?, Object?>;
+      return map.map((key, value) => MapEntry(key.toString(), value));
+    }).toList();
   }
 
   /// Connects to a USB device by vendorId and productId.
