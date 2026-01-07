@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
@@ -27,6 +28,7 @@ import 'package:sharp_cut/presentation/home/widgets/features_bottons.dart';
 import 'package:sharp_cut/presentation/home/widgets/menu_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/search_and_menu.dart';
 import 'package:sharp_cut/presentation/home/widgets/service_item.dart';
+import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings.dart';
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
@@ -65,6 +67,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     ServiceStateSuccess serviceState,
     BookingFormState bookingFormState,
     String paymentMode,
+    String? invoiceNumber,
+    String? staffName,
+    String? bookingTime,
   ) {
     final request = SettlePaymentRequestModel(
       transactionId: transactionId,
@@ -100,6 +105,23 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       tenderCash: [0.0],
       change: [0.0],
     );
+
+    final shopData = context.read<AuthCubit>().currentUser;
+    if (shopData != null) {
+      final printCubit = context.read<PrintingCubit>();
+      printCubit.printInvoice(
+        printCount: printCubit.state.settings?.printCount.quickPayment.toInt(),
+        balanceAmount: 0.0,
+        request: request,
+        shopData: shopData,
+        cartItems: serviceState.cartItems,
+        staffName: staffName,
+        invoiceNumber: invoiceNumber,
+        bookingTime: bookingTime != null
+            ? DateFormat('HH:mm').format(DateTime.parse(bookingTime))
+            : "--:--",
+      );
+    }
 
     context.read<BookingCubit>().quickPayment(request: request);
   }
@@ -847,6 +869,16 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   serviceState,
                                                   bookingFormState,
                                                   "Cash",
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceNo,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .staff
+                                                      ?.name,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .createdAt,
                                                 );
                                               },
                                               () {
@@ -858,6 +890,16 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   serviceState,
                                                   bookingFormState,
                                                   "Card",
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceNo,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .staff
+                                                      ?.name,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .createdAt,
                                                 );
                                               },
                                             );
@@ -1003,7 +1045,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                         },
                                 ),
                               ),
-                            const SizedBox(height: 12),
+                            if (!isBooked) const SizedBox(height: 12),
                             if (!isBooked)
                               Opacity(
                                 opacity: isBooked ? 0.5 : 1.0,

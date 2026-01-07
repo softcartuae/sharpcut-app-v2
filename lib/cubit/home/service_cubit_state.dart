@@ -75,7 +75,7 @@ class ServiceStateSuccess extends ServiceState {
     // If exclusive, we might need to add VAT.
     // Based on JSON "before_vat" and "charge", it seems "charge" is the final price.
     // Let's assume charge is the price to pay for now.
-    return subTotal;
+    return subTotal + vat;
   }
 
   @override

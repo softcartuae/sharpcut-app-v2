@@ -28,7 +28,6 @@ class ApiClient {
   static final settlePayment = "api/transactions/settle-payment";
   static final quickPayment = "api/transactions/quick-payment";
   static final reSettlementPayment = "api/transactions/payment";
-  
 
   // GET API ENDPOINTS
   static final userExpenseGETapi = "api/users/expenses";
@@ -46,7 +45,7 @@ class ApiClient {
   static final cashRegisterCheckApi = "api/cash-registers/check";
   static final openCashRegisterApi = "api/cash-registers/open";
   static final closeCashRegisterApi = "api/cash-registers/close";
-  static final getTotalSalesForCloseCashRegisterApi = "api/cash-registers/sales-total";
-
-  
+  static final getTotalSalesForCloseCashRegisterApi =
+      "api/cash-registers/sales-total";
+  static final printerSettingsApi = "api/settings";
 }

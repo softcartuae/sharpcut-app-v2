@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sharp_cut/data/printing/printing_repo_imp.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:flutter_thermal_printer/utils/printer.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -17,9 +16,6 @@ class ScreenPrintingSettings extends StatefulWidget {
 }
 
 class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
-  bool _openDrawerCash = true;
-  bool _openDrawerCard = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,16 +80,73 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                               children: [
                                 _buildSwitchTile(
                                   title: "Open Drawer (Cash)",
-                                  value: _openDrawerCash,
-                                  onChanged: (val) =>
-                                      setState(() => _openDrawerCash = val),
+                                  value:
+                                      state.settings?.openDrawer.cash ?? false,
+                                  onChanged: (val) {
+                                    final currentSettings = state.settings;
+                                    if (currentSettings != null) {
+                                      context
+                                          .read<PrintingCubit>()
+                                          .updatePrinterSettings(
+                                            currentSettings.copyWith(
+                                              openDrawer: currentSettings
+                                                  .openDrawer
+                                                  .copyWith(cash: val),
+                                            ),
+                                          );
+                                    }
+                                  },
                                 ),
                                 _buildSwitchTile(
                                   title: "Open Drawer (Card)",
-                                  value: _openDrawerCard,
-                                  onChanged: (val) =>
-                                      setState(() => _openDrawerCard = val),
+                                  value:
+                                      state.settings?.openDrawer.card ?? false,
+                                  onChanged: (val) {
+                                    final currentSettings = state.settings;
+                                    if (currentSettings != null) {
+                                      context
+                                          .read<PrintingCubit>()
+                                          .updatePrinterSettings(
+                                            currentSettings.copyWith(
+                                              openDrawer: currentSettings
+                                                  .openDrawer
+                                                  .copyWith(card: val),
+                                            ),
+                                          );
+                                    }
+                                  },
                                 ),
+                                // if (state.connectedPrinter != null)
+                                //   Padding(
+                                //     padding: const EdgeInsets.symmetric(
+                                //       horizontal: 24,
+                                //       vertical: 8,
+                                //     ),
+                                //     child: SizedBox(
+                                //       width: double.infinity,
+                                //       child: OutlinedButton.icon(
+                                //         onPressed: () => context
+                                //             .read<PrintingCubit>()
+                                //             .openDrawer(),
+                                //         icon: const Icon(
+                                //           Icons.open_in_browser,
+                                //           color: AppColors.violetNormal,
+                                //         ),
+                                //         label: Text(
+                                //           "Open Drawer",
+                                //           style: GoogleFonts.rajdhani(
+                                //             color: AppColors.violetNormal,
+                                //             fontWeight: FontWeight.w600,
+                                //           ),
+                                //         ),
+                                //         style: OutlinedButton.styleFrom(
+                                //           side: const BorderSide(
+                                //             color: AppColors.violetNormal,
+                                //           ),
+                                //         ),
+                                //       ),
+                                //     ),
+                                //   ),
                               ],
                             ),
                           ),

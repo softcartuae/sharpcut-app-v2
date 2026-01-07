@@ -34,7 +34,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage("lib/utils/images/rectangle.png"),
@@ -139,7 +139,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(

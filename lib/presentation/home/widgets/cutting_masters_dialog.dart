@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +8,7 @@ import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/domain/home/models/chair_model.dart';
 import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
+import 'package:sharp_cut/utils/comon/staff_selection_dialog.dart';
 import 'package:sharp_cut/utils/comon/validate_password.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 
@@ -98,10 +101,10 @@ class CuttingMastersDialog extends StatelessWidget {
 
   Widget _buildChairItem(BuildContext context, ChairModel chair) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         if (chair.liveState != LiveState.occupied.name) {
           Navigator.of(context).pop();
-          showPasswordDialoge(context, chair);
+          showStaffSelectionDialog(context, chair);
         } else {
           if (chair.transaction != null) {
             showPasswordForValidation(

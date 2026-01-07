@@ -1,3 +1,7 @@
+import 'dart:developer';
+
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
@@ -14,8 +18,14 @@ import '../../presentation/printing/widgets/receipt_widget.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/presentation/quick_report/widgets/quick_report_print_widget.dart';
 
+import 'package:sharp_cut/data/printing/service/printing_service.dart';
+import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
+
 class PrintingRepoImp implements PrintingRepo {
   final FlutterThermalPrinter _printer = FlutterThermalPrinter.instance;
+  final PrintingService _printingService;
+
+  PrintingRepoImp(this._printingService);
 
   @override
   Stream<List<Printer>> get printersStream => _printer.devicesStream;
@@ -52,12 +62,16 @@ class PrintingRepoImp implements PrintingRepo {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
-     int copies = 1,
+    int copies = 1,
+    bool openDrawer = false,
   }) async {
-    
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
     List<int> bytes = [];
+
+    if (openDrawer) {
+      bytes.addAll(generator.drawer());
+    }
 
     // Create the receipt widget
     final receiptWidget = MediaQuery(
@@ -85,9 +99,9 @@ class PrintingRepoImp implements PrintingRepo {
       ),
     );
     // Calculate estimated height
-    // Base height (Header + Footer) ~ 600
-    // Per item ~ 60 (allowing for wrapping text)
-    double estimatedHeight = 600 + (cartItems.length * 60.0);
+    // Base height (Header + Footer) ~ 800
+    // Per item ~ 70 (allowing for wrapping text)
+    double estimatedHeight = 800 + (cartItems.length * 70.0);
 
     // Capture the widget as an image
     final ScreenshotController screenshotController = ScreenshotController();
@@ -112,16 +126,15 @@ class PrintingRepoImp implements PrintingRepo {
     bytes.addAll(generator.feed(2));
     bytes.addAll(generator.cut());
 
-    await _printer.printData(printer, bytes);
     // Loop 'copies' times
-// for (int i = 0; i < copies; i++) {
-//   await _printer.printData(printer, bytes);
-  
-//   // Optional: Add a small delay between copies to prevent printer buffer overflow
-//   if (i < copies - 1) {
-//     await Future.delayed(const Duration(milliseconds: 500)); 
-//   }
-// }
+    for (int i = 0; i < copies; i++) {
+      await _printer.printData(printer, bytes);
+
+      // Optional: Add a small delay between copies to prevent printer buffer overflow
+      if (i < copies - 1) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
   }
 
   @override
@@ -129,10 +142,19 @@ class PrintingRepoImp implements PrintingRepo {
     required Printer printer,
     required QuickReportModel report,
     int copies = 1,
+    bool openDrawer = false,
   }) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
     List<int> bytes = [];
+
+    try {
+      if (openDrawer) {
+        bytes.addAll(generator.drawer());
+      }
+    } catch (e) {
+      log(e.toString());
+    }
 
     // Create the widget
     final widget = MediaQuery(
@@ -153,17 +175,21 @@ class PrintingRepoImp implements PrintingRepo {
     );
 
     // Calculate estimated height
-    // Base height ~ 600 + items
-    double estimatedHeight = 1000 + (report.salesmanWiseDetails.length * 40.0);
+    // Base height ~ 1000 + items
+    double estimatedHeight =
+        1000 +
+        (report.salesmanWiseDetails.length * 40.0) +
+        (report.invoiceDetails.length * 40.0);
 
     // Capture the widget as an image
     final ScreenshotController screenshotController = ScreenshotController();
-    final Uint8List capturedImage = await screenshotController.captureFromWidget(
-      widget,
-      delay: const Duration(milliseconds: 100),
-      pixelRatio: 1.0,
-      targetSize: Size(370, estimatedHeight),
-    );
+    final Uint8List capturedImage = await screenshotController
+        .captureFromWidget(
+          widget,
+          delay: const Duration(milliseconds: 100),
+          pixelRatio: 1.0,
+          targetSize: Size(370, estimatedHeight),
+        );
 
     // Decode the image for the printer
     final img.Image? image = img.decodePng(capturedImage);
@@ -177,15 +203,52 @@ class PrintingRepoImp implements PrintingRepo {
     bytes.addAll(generator.feed(2));
     bytes.addAll(generator.cut());
 
+    for (int i = 0; i < copies; i++) {
+      await _printer.printData(printer, bytes);
+
+      if (i < copies - 1) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+  }
+
+  @override
+  Future<Either<String, PrinterSettingsModel>> getPrinterSettings() async {
+    try {
+      final response = await _printingService.getPrinterSettings();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return Right(PrinterSettingsModel.fromJson(response.data['data']));
+      } else {
+        return Left(response.data['message']);
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> updatePrinterSettings(
+    PrinterSettingsModel model,
+  ) async {
+    try {
+      final response = await _printingService.updatePrinterSettings(model);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        return Left(response.data['message']);
+      }
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(e.response?.data['message'] ?? "Failed To Update");
+    } catch (e) {
+      return Left("Failed To Update");
+    }
+  }
+
+  @override
+  Future<void> openDrawer(Printer printer) async {
+    final profile = await CapabilityProfile.load();
+    final generator = Generator(PaperSize.mm58, profile);
+    List<int> bytes = [];
+    bytes.addAll(generator.drawer());
     await _printer.printData(printer, bytes);
-    // Loop 'copies' times
-// for (int i = 0; i < copies; i++) {
-//   await _printer.printData(printer, bytes);
-  
-//   // Optional: Add a small delay between copies to prevent printer buffer overflow
-//   if (i < copies - 1) {
-//     await Future.delayed(const Duration(milliseconds: 500)); 
-//   }
-// }
   }
 }

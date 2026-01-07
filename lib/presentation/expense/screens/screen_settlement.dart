@@ -370,7 +370,10 @@ class _SettlementDialogState extends State<SettlementDialog> {
     if (alsoPrint) {
       final shopData = context.read<AuthCubit>().currentUser;
       if (shopData != null) {
-        context.read<PrintingCubit>().printInvoice(
+        final printCubit = context.read<PrintingCubit>();
+        printCubit.printInvoice(
+          printCount: printCubit.state.settings?.printCount.settlePayment
+              .toInt(),
           balanceAmount: double.tryParse(_balanceController.text) ?? 0.0,
           request: request,
           shopData: shopData,

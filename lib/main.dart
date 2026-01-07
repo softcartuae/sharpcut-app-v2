@@ -48,7 +48,9 @@ void main() async {
           BlocProvider(create: (_) => di.sl<BookingCubit>()),
           BlocProvider(create: (_) => di.sl<ExpenseCubit>()),
           BlocProvider(create: (_) => di.sl<BookingFormCubit>()),
-          BlocProvider(create: (_) => di.sl<PrintingCubit>()),
+          BlocProvider(
+            create: (context) => di.sl<PrintingCubit>()..loadPrinterSettings(),
+          ),
           BlocProvider(create: (_) => di.sl<ReportCubit>()),
           BlocProvider(create: (_) => di.sl<QuickReportCubit>()),
           BlocProvider(create: (_) => di.sl<CashRegistoryCubit>()),

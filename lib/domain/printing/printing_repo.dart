@@ -1,8 +1,10 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_thermal_printer/utils/printer.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
+import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
 
 abstract class PrintingRepo {
   Stream<List<Printer>> get printersStream;
@@ -19,10 +21,21 @@ abstract class PrintingRepo {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
+    int copies = 1,
+    bool openDrawer = false,
   });
 
   Future<void> printQuickReport({
     required Printer printer,
     required QuickReportModel report,
+    int copies = 1,
+    bool openDrawer = false,
   });
+
+  Future<void> openDrawer(Printer printer);
+
+  Future<Either<String, PrinterSettingsModel>> getPrinterSettings();
+  Future<Either<String, void>> updatePrinterSettings(
+    PrinterSettingsModel model,
+  );
 }

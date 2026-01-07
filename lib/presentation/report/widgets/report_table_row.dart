@@ -46,12 +46,13 @@ class ReportTableRow extends StatelessWidget {
           ),
           _buildDataCell(balenceAmount.toString(), width: 80),
           _buildDataCell(transaction.staff?.name ?? "-", width: 100),
-          _buildActionCell(
-            Icons.payment,
-            width: 60,
-            onTap: paymentSettleFunction,
-          ),
-          // _buildActionCell(Icons.print, width: 60, onTap: () {}),
+          balenceAmount > 0
+              ? _buildActionCell(
+                  Icons.payment,
+                  width: 60,
+                  onTap: paymentSettleFunction,
+                )
+              : const SizedBox(width: 60),
           _buildActionCell(
             Icons.receipt_long_outlined,
             width: 60,

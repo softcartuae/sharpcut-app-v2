@@ -15,16 +15,14 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
   debugPrint('Got a message whilst in the background!');
   debugPrint('Message data: ${message.data}');
 
-  final data = {"booking_id": "", "type": "booking_created"};
-  log("data: $data");
-
   try {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('background_notification_data', jsonEncode(data));
+    await prefs.setString('background_notification_data', jsonEncode(message.data));
     log('Saved background message data to SharedPreferences');
   } catch (e) {
     debugPrint('Error saving background message: $e');
   }
+  
 }
 
 class FirebaseApi {

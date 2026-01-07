@@ -330,11 +330,17 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                             child: ElevatedButton(
                               onPressed: state is QuickReportLoaded
                                   ? () {
-                                      context
-                                          .read<PrintingCubit>()
-                                          .printQuickReport(
-                                            report: state.report,
-                                          );
+                                      final printCubit = context
+                                          .read<PrintingCubit>();
+                                      printCubit.printQuickReport(
+                                        printCount: printCubit
+                                            .state
+                                            .settings
+                                            ?.printCount
+                                            .report
+                                            .toInt(),
+                                        report: state.report,
+                                      );
                                     }
                                   : null,
                               style: ElevatedButton.styleFrom(
