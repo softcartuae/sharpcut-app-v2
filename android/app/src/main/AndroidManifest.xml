@@ -12,7 +12,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     
     <!-- USB Permissions -->
-    <uses-feature android:name="android.hardware.usb.host" />
+    <uses-feature android:name="android.hardware.usb.host" android:required="false"/>
+    <uses-permission android:name="android.permission.USB_PERMISSION"/>
     <application
         android:label="sharp_cut"
         android:name="${applicationName}"
@@ -58,3 +59,5 @@
         </intent>
     </queries>
 </manifest>
+
+
