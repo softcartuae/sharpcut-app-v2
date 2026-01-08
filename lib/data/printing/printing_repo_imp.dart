@@ -187,9 +187,16 @@ class PrintingRepoImp implements PrintingRepo {
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
 
-    if (openDrawer) {
-      bytes.addAll(generator.drawer());
+    try {
+      if (openDrawer) {
+        bytes.addAll(generator.drawer());
+      }
+    } catch (e) {
+      log(e.toString());
     }
+
+    // Create the widget
+    final double targetWidth = paperSize.widthInPixels.toDouble();
 
     // Create the receipt widget
     final receiptWidget = MediaQuery(
@@ -211,6 +218,7 @@ class PrintingRepoImp implements PrintingRepo {
               shopData: shopData,
               request: request,
               cartItems: cartItems,
+              width: targetWidth,
             ),
           ),
         ),
@@ -228,7 +236,10 @@ class PrintingRepoImp implements PrintingRepo {
           receiptWidget,
           delay: const Duration(milliseconds: 100),
           pixelRatio: 1.0, // Reduced to avoid buffer overflow
-          targetSize: Size(370, estimatedHeight), // Ensure height is sufficient
+          targetSize: Size(
+            targetWidth,
+            estimatedHeight,
+          ), // Ensure height is sufficient
         );
 
     // Decode the image for the printer
@@ -269,6 +280,7 @@ class PrintingRepoImp implements PrintingRepo {
     final paperSize = await getPaperSize(printer);
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
+    log("called in quick report");
 
     try {
       if (openDrawer) {
@@ -279,6 +291,8 @@ class PrintingRepoImp implements PrintingRepo {
     }
 
     // Create the widget
+    final double targetWidth = paperSize.widthInPixels.toDouble();
+
     final widget = MediaQuery(
       data: const MediaQueryData(),
       child: Directionality(
@@ -290,7 +304,7 @@ class PrintingRepoImp implements PrintingRepo {
           ),
           child: Material(
             color: Colors.white,
-            child: QuickReportPrintWidget(report: report),
+            child: QuickReportPrintWidget(report: report, width: targetWidth),
           ),
         ),
       ),
@@ -303,6 +317,7 @@ class PrintingRepoImp implements PrintingRepo {
         (report.salesmanWiseDetails.length * 40.0) +
         (report.invoiceDetails.length * 40.0);
 
+    log("called in iamge procees $estimatedHeight width: $targetWidth");
     // Capture the widget as an image
     final ScreenshotController screenshotController = ScreenshotController();
     final Uint8List capturedImage = await screenshotController
@@ -310,11 +325,12 @@ class PrintingRepoImp implements PrintingRepo {
           widget,
           delay: const Duration(milliseconds: 100),
           pixelRatio: 1.0,
-          targetSize: Size(370, estimatedHeight),
+          targetSize: Size(targetWidth, estimatedHeight),
         );
 
     // Decode the image for the printer
     final img.Image? image = img.decodePng(capturedImage);
+    log("called in iamge procees $image");
 
     if (image != null) {
       // Resize to paper width
@@ -329,8 +345,13 @@ class PrintingRepoImp implements PrintingRepo {
     bytes.addAll(generator.cut());
 
     for (int i = 0; i < copies; i++) {
-      await _printBytes(printer, Uint8List.fromList(bytes));
-
+      log("called in loop");
+      try {
+        await _printBytes(printer, Uint8List.fromList(bytes));
+      } catch (e) {
+        log(e.toString());
+      }
+      log("called in loop end");
       if (i < copies - 1) {
         await Future.delayed(const Duration(milliseconds: 500));
       }
