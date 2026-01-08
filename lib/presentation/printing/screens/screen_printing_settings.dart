@@ -5,6 +5,8 @@ import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:flutter_thermal_printer/utils/printer.dart';
+import 'package:sharp_cut/presentation/printing/widgets/paper_width_selection_dialog.dart';
+import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
@@ -50,6 +52,20 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                 content: Text("Connected to ${state.connectedPrinter?.name}"),
               ),
             );
+          }
+          if (state.showPaperSizeDialog && state.connectedPrinter != null) {
+            showDialog<PrinterPaperSize>(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const PaperWidthSelectionDialog(),
+            ).then((size) {
+              if (size != null && context.mounted) {
+                context.read<PrintingCubit>().setPaperSize(
+                  state.connectedPrinter!,
+                  size,
+                );
+              }
+            });
           }
         },
         builder: (context, state) {

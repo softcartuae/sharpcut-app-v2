@@ -16,6 +16,8 @@ import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
+import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:sharp_cut/data/printing/service/printing_service.dart';
 import 'package:sharp_cut/data/printing/native/usb_printer_platform.dart';
@@ -181,7 +183,8 @@ class PrintingRepoImp implements PrintingRepo {
     bool openDrawer = false,
   }) async {
     final profile = await CapabilityProfile.load();
-    final generator = Generator(PaperSize.mm58, profile);
+    final paperSize = await getPaperSize(printer);
+    final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
 
     if (openDrawer) {
@@ -232,8 +235,11 @@ class PrintingRepoImp implements PrintingRepo {
     final img.Image? image = img.decodePng(capturedImage);
 
     if (image != null) {
-      // Resize to 384 (standard 58mm width, multiple of 8)
-      final img.Image resizedImage = img.copyResize(image, width: 384);
+      // Resize to paper width
+      final img.Image resizedImage = img.copyResize(
+        image,
+        width: paperSize.widthInPixels,
+      );
 
       bytes.addAll(generator.image(resizedImage));
     }
@@ -260,7 +266,8 @@ class PrintingRepoImp implements PrintingRepo {
     bool openDrawer = false,
   }) async {
     final profile = await CapabilityProfile.load();
-    final generator = Generator(PaperSize.mm58, profile);
+    final paperSize = await getPaperSize(printer);
+    final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
 
     try {
@@ -310,8 +317,11 @@ class PrintingRepoImp implements PrintingRepo {
     final img.Image? image = img.decodePng(capturedImage);
 
     if (image != null) {
-      // Resize to 384 (standard 58mm width)
-      final img.Image resizedImage = img.copyResize(image, width: 384);
+      // Resize to paper width
+      final img.Image resizedImage = img.copyResize(
+        image,
+        width: paperSize.widthInPixels,
+      );
       bytes.addAll(generator.image(resizedImage));
     }
 
@@ -376,5 +386,36 @@ class PrintingRepoImp implements PrintingRepo {
     bytes.addAll(generator.drawer());
 
     await _printBytes(printer, Uint8List.fromList(bytes));
+  }
+
+  @override
+  Future<void> savePaperSize(Printer printer, PrinterPaperSize size) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key =
+        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    await prefs.setString(key, size.name);
+  }
+
+  @override
+  Future<PrinterPaperSize> getPaperSize(Printer printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key =
+        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    final sizeName = prefs.getString(key);
+    if (sizeName != null) {
+      return PrinterPaperSize.values.firstWhere(
+        (e) => e.name == sizeName,
+        orElse: () => PrinterPaperSize.mm58,
+      );
+    }
+    return PrinterPaperSize.mm58; // Default
+  }
+
+  @override
+  Future<bool> hasPaperSize(Printer printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key =
+        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    return prefs.containsKey(key);
   }
 }

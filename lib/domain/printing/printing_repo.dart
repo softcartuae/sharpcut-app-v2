@@ -5,6 +5,7 @@ import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dar
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
+import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
 
 abstract class PrintingRepo {
   Stream<List<Printer>> get printersStream;
@@ -38,4 +39,8 @@ abstract class PrintingRepo {
   Future<Either<String, void>> updatePrinterSettings(
     PrinterSettingsModel model,
   );
+
+  Future<void> savePaperSize(Printer printer, PrinterPaperSize size);
+  Future<PrinterPaperSize> getPaperSize(Printer printer);
+  Future<bool> hasPaperSize(Printer printer);
 }

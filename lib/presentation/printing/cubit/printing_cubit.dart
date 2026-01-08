@@ -8,6 +8,7 @@ import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dar
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
+import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
@@ -55,10 +56,12 @@ class PrintingCubit extends Cubit<PrintingState> {
 
       final isConnected = await _printingRepo.connect(printer);
       if (isConnected) {
+        final hasPaperSize = await _printingRepo.hasPaperSize(printer);
         emit(
           state.copyWith(
             status: PrintingStatus.connected,
             connectedPrinter: printer,
+            showPaperSizeDialog: !hasPaperSize,
           ),
         );
       } else {
@@ -246,6 +249,11 @@ class PrintingCubit extends Cubit<PrintingState> {
       log(e.toString());
       ToastHelper.showError("Failed to open drawer");
     }
+  }
+
+  Future<void> setPaperSize(Printer printer, PrinterPaperSize size) async {
+    await _printingRepo.savePaperSize(printer, size);
+    emit(state.copyWith(showPaperSizeDialog: false));
   }
 
   @override
