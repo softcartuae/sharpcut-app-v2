@@ -58,11 +58,11 @@ class TestReceiptScreen extends StatelessWidget {
     // Dummy Request Data
     final dummyRequest = SettlePaymentRequestModel(
       transactionId: 36979,
-      grandTotal: 95.24, // Subtotal
+      subTotalValue: 95.24, // Subtotal
       taxTotal: 4.76, // VAT
       discount: 0.0,
       finalTotal: 100.00, // Net Amount
-      subTotal: [95.24], // Just for display logic if needed
+      subTotalList: [95.24], // Just for display logic if needed
       mode: ['Cash'],
       amount: [100.00],
     );

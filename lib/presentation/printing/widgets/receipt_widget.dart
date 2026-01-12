@@ -337,7 +337,7 @@ class ReceiptWidget extends StatelessWidget {
           // Totals
           _buildTotalRow(
             'المجموع قبل الضريبة - Before VAT',
-            (request.grandTotal ?? 0).toStringAsFixed(2),
+            (request.subTotalValue ?? 0).toStringAsFixed(2),
           ),
           _buildTotalRow(
             'المجموع شامل الضريبة - Incl VAT',
@@ -350,9 +350,8 @@ class ReceiptWidget extends StatelessWidget {
             ),
           _buildTotalRow(
             'المجموع الفرعي - Sub Total',
-            (request.subTotal?.fold(0.0, (p, c) => p + c) ?? 0).toStringAsFixed(
-              2,
-            ),
+            (request.subTotalList?.fold(0.0, (p, c) => p + c) ?? 0)
+                .toStringAsFixed(2),
           ), // Need to check logic
           _buildTotalRow(
             'قيمة الضريبة - VAT Amount',

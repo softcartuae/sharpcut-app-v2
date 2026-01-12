@@ -433,7 +433,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
           ...report.invoiceDetails.entries.map((entry) {
             return SummaryRow(
               label: _formatKey(entry.key),
-              value: entry.value.toString(),
+              value: entry.value.toStringAsFixed(2),
             );
           }),
           const SizedBox(height: 16),

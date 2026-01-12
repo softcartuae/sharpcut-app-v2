@@ -2,7 +2,7 @@ class SettlePaymentRequestModel {
   final int? transactionId;
   final String? customerName;
   final String? customerNumber;
-  final double? grandTotal;
+  final double? subTotalValue;
   final double? taxTotal;
   final double? discount;
   final double? roundOff;
@@ -14,7 +14,7 @@ class SettlePaymentRequestModel {
   final List<String>? currency;
   final List<double>? amountTotal;
   final List<double>? tax;
-  final List<double>? subTotal;
+  final List<double>? subTotalList;
   final List<int>? isTip;
   final List<int>? collectedUserId;
   final List<String>? mode;
@@ -26,7 +26,7 @@ class SettlePaymentRequestModel {
     this.transactionId,
     this.customerName,
     this.customerNumber,
-    this.grandTotal,
+    this.subTotalValue,
     this.taxTotal,
     this.discount,
     this.roundOff,
@@ -38,7 +38,7 @@ class SettlePaymentRequestModel {
     this.currency,
     this.amountTotal,
     this.tax,
-    this.subTotal,
+    this.subTotalList,
     this.isTip,
     this.collectedUserId,
     this.mode,
@@ -52,7 +52,7 @@ class SettlePaymentRequestModel {
       "transaction_id": transactionId,
       "customer_name": customerName,
       "customer_number": customerNumber,
-      "grand_total": grandTotal,
+      "grand_total": subTotalValue,
       "tax_total": taxTotal,
       "discount": discount,
       "round_off": roundOff,
@@ -64,7 +64,7 @@ class SettlePaymentRequestModel {
       "currency": currency,
       "amount_total": amountTotal,
       "tax": tax,
-      "sub_total": subTotal,
+      "sub_total": subTotalList,
       "is_tip": isTip,
       "collected_user_id": collectedUserId,
       "mode": mode,

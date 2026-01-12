@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,10 +6,11 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/domain/home/models/chair_model.dart';
-import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
 import 'package:sharp_cut/utils/comon/staff_selection_dialog.dart';
 import 'package:sharp_cut/utils/comon/validate_password.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
+import 'package:sharp_cut/presentation/home/widgets/cancellation_dialog.dart';
+import 'package:sharp_cut/presentation/home/widgets/services_or_cancel_dialog.dart';
 
 class CuttingMastersDialog extends StatelessWidget {
   const CuttingMastersDialog({super.key});
@@ -106,23 +106,33 @@ class CuttingMastersDialog extends StatelessWidget {
           Navigator.of(context).pop();
           showStaffSelectionDialog(context, chair);
         } else {
-          if (chair.transaction != null) {
-            showPasswordForValidation(
-              context,
-              false,
-              preSelectedStaff: chair.transaction!.staff,
-              onSuccess: () {
-                context.read<BookingCubit>().restoreBooking(
-                  bookingResponse: chair.transaction!,
-                );
-                Navigator.of(context).pop();
-              },
-            );
-          } else {
-            Navigator.of(context).pop();
-            showPasswordForValidation(context, false);
+          final result = await ServicesOrCancelDialog.show(context);
+          if (!context.mounted) return;
+
+          if (result == true) {
+            // Services selected
+            if (chair.transaction != null) {
+              showPasswordForValidation(
+                context,
+                false,
+                preSelectedStaff: chair.transaction!.staff,
+                onSuccess: () {
+                  context.read<BookingCubit>().restoreBooking(
+                    bookingResponse: chair.transaction!,
+                  );
+                  Navigator.of(context).pop();
+                },
+              );
+            } else {
+              Navigator.of(context).pop();
+              showPasswordForValidation(context, false);
+            }
+          } else if (result == false) {
+            // Cancel selected
+            if (chair.transaction != null) {
+              CancellationDialog.show(context, chair.transaction!.id!);
+            }
           }
-          //show Toes
         }
       },
       child: Container(

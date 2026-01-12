@@ -25,11 +25,11 @@ void showReceiptDialog(
 
   // Map BookingResponseModel to SettlePaymentRequestModel
   final request = SettlePaymentRequestModel(
-    grandTotal: booking.grandTotal,
+    subTotalValue: booking.subtotal,
     taxTotal: booking.taxTotal,
     finalTotal: (booking.finalTotal),
     discount: 0.0, // Assuming no discount available in response for now
-    subTotal: [booking.grandTotal ?? 0.0],
+    subTotalList: [booking.subtotal ?? 0.0],
     mode: booking.payments?.map((e) => e.mode ?? '').toList(),
     amount: booking.payments?.map((e) => e.amount ?? 0.0).toList(),
   );

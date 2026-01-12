@@ -102,8 +102,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                     booking.customerName,
                                                 customerNumber:
                                                     booking.customerNumber,
-                                                grandTotal:
-                                                    booking.grandTotal ?? 0,
+                                                subTotalValue:
+                                                    booking.subtotal ?? 0,
                                                 taxTotal: booking.taxTotal ?? 0,
                                                 discount: 0.0,
                                                 roundOff: 0.0,
@@ -142,7 +142,9 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                           e.quantity,
                                                     )
                                                     .toList(), // Placeholder
-                                                subTotal: cartItems.map((e) {
+                                                subTotalList: cartItems.map((
+                                                  e,
+                                                ) {
                                                   final price =
                                                       e.service.price ?? 0.0;
                                                   final tax =
@@ -162,7 +164,12 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 change: [0.0],
                                               );
 
+                                              final balenceAmount =
+                                                  (booking.finalTotal ?? 0) -
+                                                  ((booking.totalPayment ?? 0));
+
                                               showResettmentScreen(
+                                                balance: balenceAmount,
                                                 paidAmount: booking.totalPayment
                                                     ?.toString(),
                                                 context,
@@ -218,8 +225,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                     booking.customerName,
                                                 customerNumber:
                                                     booking.customerNumber,
-                                                grandTotal:
-                                                    booking.grandTotal ?? 0,
+                                                subTotalValue:
+                                                    booking.subtotal ?? 0,
                                                 taxTotal: booking.taxTotal ?? 0,
                                                 discount: 0.0,
                                                 roundOff: 0.0,
@@ -253,7 +260,9 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 tax: cartItems
                                                     .map((e) => 0.0)
                                                     .toList(), // Placeholder
-                                                subTotal: cartItems.map((e) {
+                                                subTotalList: cartItems.map((
+                                                  e,
+                                                ) {
                                                   final price =
                                                       e.service.price ?? 0.0;
                                                   final tax =

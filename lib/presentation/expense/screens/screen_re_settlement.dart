@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:intl/intl.dart';
-import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
@@ -26,6 +25,7 @@ Future<void> showResettmentScreen(
   required String? invoiceNumber,
   required List<CartItemModel> cartItems,
   required String? paidAmount,
+  required double balance,
 }) {
   return showDialog(
     context: context,
@@ -37,6 +37,7 @@ Future<void> showResettmentScreen(
       staffName: staffName,
       bookingTime: bookingTime,
       cartItems: cartItems,
+      balance: balance,
     ),
   );
 }
@@ -48,6 +49,8 @@ class ResettlementScreen extends StatefulWidget {
   final String? invoiceNumber;
   final List<CartItemModel> cartItems;
   final String? paidAmount;
+  final double balance;
+
   const ResettlementScreen({
     super.key,
     required this.settlePayment,
@@ -56,6 +59,7 @@ class ResettlementScreen extends StatefulWidget {
     required this.invoiceNumber,
     required this.cartItems,
     required this.paidAmount,
+    required this.balance,
   });
 
   @override
@@ -88,9 +92,6 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     text: "0.00",
   );
   final TextEditingController _discountController = TextEditingController(
-    text: "0.00",
-  );
-  final TextEditingController _roundOffController = TextEditingController(
     text: "0.00",
   );
 
@@ -149,20 +150,15 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     }
     _totalQtyController.text = totalQty.toString();
 
-    _subTotalController.text = (widget.settlePayment.grandTotal ?? 0.0)
+    _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0)
         .toStringAsFixed(2);
     _discountController.text = (widget.settlePayment.discount ?? 0.0)
         .toStringAsFixed(2);
-    _roundOffController.text = (widget.settlePayment.roundOff ?? 0.0)
-        .toStringAsFixed(2);
-
     // Amount to pay is usually the final total
-    _amountController.text = (widget.settlePayment.finalTotal ?? 0.0)
-        .toStringAsFixed(2);
+    _amountController.text = (widget.balance ?? 0.0).toStringAsFixed(2);
 
     // Initialize split controllers
-    _cashAmountController.text = (widget.settlePayment.finalTotal ?? 0.0)
-        .toStringAsFixed(2);
+    _cashAmountController.text = (widget.balance ?? 0.0).toStringAsFixed(2);
     _cardAmountController.text = "0.00";
 
     // Grand total display at the bottom usually matches final total
@@ -170,22 +166,17 @@ class _SettlementDialogState extends State<ResettlementScreen> {
   }
 
   void _calculateFinalTotal() {
-    final double subTotal = widget.settlePayment.grandTotal ?? 0.0;
+    final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
     final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
-    final double discount = double.tryParse(_discountController.text) ?? 0.0;
-    final double roundOff = double.tryParse(_roundOffController.text) ?? 0.0;
 
     // User requested: "like minus from grand total" for both discount and round off.
-    // Final = SubTotal + Tax - Discount - RoundOff
+    // Final = SubTotal + Tax
     setState(() {
-      _finalTotal = subTotal + taxTotal - discount - roundOff;
+      _finalTotal = subTotal + taxTotal;
 
-      // Also update split amounts if they haven't been manually edited?
-      // Or just let the user handle it?
-      // If split is OFF, we might want to sync the amount controller?
       if (!_splitPayment) {
-        _amountController.text = _finalTotal.toStringAsFixed(2);
-        _cashAmountController.text = _finalTotal.toStringAsFixed(2);
+        _amountController.text = widget.balance.toStringAsFixed(2);
+        _cashAmountController.text = widget.balance.toStringAsFixed(2);
       }
       _calculatePaymentAndBalance();
     });
@@ -212,7 +203,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     }
 
     final double curPayment = cashAmount + cardAmount;
-    final double balance = _finalTotal - curPayment;
+    final double balance = widget.balance;
 
     _curPaymentController.text = curPayment.toStringAsFixed(2);
     _balanceController.text = balance.toStringAsFixed(2);
@@ -230,7 +221,6 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     _totalQtyController.dispose();
     _subTotalController.dispose();
     _discountController.dispose();
-    _roundOffController.dispose();
     _paidController.dispose();
     _curPaymentController.dispose();
     _balanceController.dispose();
@@ -241,7 +231,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
   void _onSettle({required bool alsoPrint}) {
     final double calculatedFinalTotal = _finalTotal;
-    // Get amounts based on selection
+
     double cashAmount = 0.0;
     double cardAmount = 0.0;
 
@@ -253,11 +243,6 @@ class _SettlementDialogState extends State<ResettlementScreen> {
         cardAmount = double.tryParse(_cardAmountController.text) ?? 0.0;
       }
     } else {
-      // Split OFF: use the main amount controller for the selected mode
-      // Actually, to keep it simple, let's use the specific controllers if we expose them,
-      // OR map _amountController to the selected one.
-      // Current UI plan: If split OFF, show _amountController.
-      // So we read from _amountController and assign to selected mode.
       final double amount = double.tryParse(_amountController.text) ?? 0.0;
       if (_isCashSelected) {
         cashAmount = amount;
@@ -266,12 +251,16 @@ class _SettlementDialogState extends State<ResettlementScreen> {
       }
     }
 
+    final alreadyPaid = double.tryParse(_paidController.text) ?? 0.0;
+
     final double totalPaid = cashAmount + cardAmount;
+    // total going to paid
+    final double theAmountGoingToPayTotaly = totalPaid + alreadyPaid;
 
-    // Validation
-    if (totalPaid > calculatedFinalTotal) {
+    if (theAmountGoingToPayTotaly > calculatedFinalTotal) {
+      // if total going to paid is greater than final total
+      // need to prevent over payment
       ToastHelper.showError("Total amount cannot be greater than Final Total");
-
       return;
     }
 
@@ -294,14 +283,14 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     List<double> tenders = [];
     List<double> changes = [];
 
-    if (cashAmount > 0 || (_splitPayment && _isCashSelected)) {
+    if (cashAmount != 0 || (_splitPayment && _isCashSelected)) {
       modes.add("Cash");
       amounts.add(cashAmount);
       tenders.add(tenderCash);
       changes.add(change);
     }
 
-    if (cardAmount > 0 || (_splitPayment && _isCardSelected)) {
+    if (cardAmount != 0 || (_splitPayment && _isCardSelected)) {
       modes.add("Card");
       amounts.add(cardAmount);
       // For card, tender is usually same as amount, change is 0
@@ -412,7 +401,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
 
                     // Customer Details Section
                     Row(
@@ -462,9 +451,9 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     const Divider(color: Colors.white24),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
 
                     // Main Content: 3 Columns
                     Expanded(
@@ -506,7 +495,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                           : Colors.transparent,
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
+                                  const SizedBox(height: 8),
                                   // Credit Card
                                   GestureDetector(
                                     onTap: () {
@@ -617,7 +606,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                           ],
                                         ),
                                         const Divider(color: Colors.white24),
-                                        const SizedBox(height: 10),
+                                        const SizedBox(height: 8),
 
                                         // Dynamic Inputs based on selection
                                         if (_isCashSelected) ...[
@@ -650,7 +639,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(height: 10),
+                                          const SizedBox(height: 8),
                                           Row(
                                             children: [
                                               Expanded(
@@ -748,6 +737,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                     ),
                                     const SizedBox(height: 10),
                                     SettlementRowInput(
+                                      isReadOnly: true,
                                       label: "P. Discount",
                                       controller: _discountController,
                                       onChanged: (val) =>
@@ -763,22 +753,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                       ],
                                     ),
                                     const SizedBox(height: 10),
-                                    SettlementRowInput(
-                                      label: "Round Off",
-                                      controller: _roundOffController,
-                                      onChanged: (val) =>
-                                          _calculateFinalTotal(),
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                            decimal: true,
-                                          ),
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                          RegExp(r'^\d+\.?\d{0,2}'),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
+
                                     SettlementRowInput(
                                       label: "VAT",
                                       controller: _vatController,

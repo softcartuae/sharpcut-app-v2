@@ -37,22 +37,23 @@ class ReportTableRow extends StatelessWidget {
           _buildDataCell(transaction.customerNumber ?? "-", width: 100),
           _buildDataCell(transaction.customerName ?? "-", width: 100),
           _buildDataCell(
-            transaction.finalTotal?.toString() ?? "0.00",
+            transaction.finalTotal?.toStringAsFixed(2) ?? "0.00",
             width: 80,
           ),
           _buildDataCell(
-            transaction.totalPayment?.toString() ?? "0.00",
+            transaction.totalPayment?.toStringAsFixed(2) ?? "0.00",
             width: 80,
           ),
-          _buildDataCell(balenceAmount.toString(), width: 80),
+          _buildDataCell(balenceAmount.toStringAsFixed(2), width: 80),
           _buildDataCell(transaction.staff?.name ?? "-", width: 100),
-          balenceAmount > 0
+
+          balenceAmount != 0
               ? _buildActionCell(
                   Icons.payment,
                   width: 60,
                   onTap: paymentSettleFunction,
                 )
-              : const SizedBox(width: 60),
+              : SizedBox(width: 60),
           _buildActionCell(
             Icons.receipt_long_outlined,
             width: 60,

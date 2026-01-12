@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,7 +25,6 @@ import 'package:sharp_cut/presentation/home/widgets/cash_or_card.dart';
 import 'package:sharp_cut/presentation/home/widgets/category_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/common_container.dart';
 import 'package:sharp_cut/presentation/home/widgets/cutting_masters_dialog.dart';
-import 'package:sharp_cut/presentation/home/widgets/cancellation_dialog.dart';
 import 'package:sharp_cut/presentation/home/widgets/features_bottons.dart';
 import 'package:sharp_cut/presentation/home/widgets/menu_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/search_and_menu.dart';
@@ -70,16 +71,18 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     String? invoiceNumber,
     String? staffName,
     String? bookingTime,
+    double discount,
+    double finalTotal,
   ) {
     final request = SettlePaymentRequestModel(
       transactionId: transactionId,
       customerName: bookingFormState.customerName,
       customerNumber: bookingFormState.customerNumber,
-      grandTotal: serviceState.total,
+      subTotalValue: serviceState.subTotal,
       taxTotal: serviceState.vat,
-      discount: 0.0,
+      discount: discount,
       roundOff: 0.0,
-      finalTotal: (serviceState.total + serviceState.vat),
+      finalTotal: finalTotal,
       serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
       quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
       rate: serviceState.cartItems.map((e) => e.service.price ?? 0.0).toList(),
@@ -93,7 +96,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       tax: serviceState.cartItems
           .map((e) => (e.service.unitTax ?? 0.0) * e.quantity)
           .toList(), // Placeholder
-      subTotal: serviceState.cartItems.map((e) {
+      subTotalList: serviceState.cartItems.map((e) {
         final price = e.service.price ?? 0.0;
         final tax = e.service.unitTax ?? 0.0;
         return (price + tax) * e.quantity;
@@ -499,6 +502,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                           subTotal = state.subTotal;
                           vat = state.vat;
                           total = state.total;
+                          log("vat is $vat");
                         }
 
                         return Row(
@@ -617,37 +621,37 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                   );
                                 },
                               ),
-                            if (isBooked) const SizedBox(height: 12),
-                            if (isBooked)
-                              Opacity(
-                                opacity: isBooked ? 1.0 : 0.5,
-                                child: ActionButton(
-                                  label: "CANCEL",
-                                  isPrimary: selectedButton == "CANCEL",
-                                  onTap: !isBooked
-                                      ? null
-                                      : () {
-                                          _selectedButtonNotifier.value =
-                                              "CANCEL";
-                                          int? transactionId;
-                                          if (bookingState is BookingSuccess) {
-                                            transactionId =
-                                                bookingState.bookingResponse.id;
-                                          }
+                            // if (isBooked) const SizedBox(height: 12),
+                            // if (isBooked)
+                            //   Opacity(
+                            //     opacity: isBooked ? 1.0 : 0.5,
+                            //     child: ActionButton(
+                            //       label: "CANCEL",
+                            //       isPrimary: selectedButton == "CANCEL",
+                            //       onTap: !isBooked
+                            //           ? null
+                            //           : () {
+                            //               _selectedButtonNotifier.value =
+                            //                   "CANCEL";
+                            //               int? transactionId;
+                            //               if (bookingState is BookingSuccess) {
+                            //                 transactionId =
+                            //                     bookingState.bookingResponse.id;
+                            //               }
 
-                                          if (transactionId != null) {
-                                            CancellationDialog.show(
-                                              context,
-                                              transactionId,
-                                            );
-                                          } else {
-                                            ToastHelper.showError(
-                                              "Invalid booking details",
-                                            );
-                                          }
-                                        },
-                                ),
-                              ),
+                            //               if (transactionId != null) {
+                            //                 CancellationDialog.show(
+                            //                   context,
+                            //                   transactionId,
+                            //                 );
+                            //               } else {
+                            //                 ToastHelper.showError(
+                            //                   "Invalid booking details",
+                            //                 );
+                            //               }
+                            //             },
+                            //     ),
+                            //   ),
                             if (isBooked) const SizedBox(height: 12),
                             // SAVE BOOKING - Disabled if NOT booked
                             if (isBooked)
@@ -716,7 +720,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                       bookingFormState
                                                           .customerNumber,
                                                   grandTotal:
-                                                      serviceState.total,
+                                                      serviceState.subTotal,
                                                   taxTotal: serviceState.vat,
                                                   discount: 0.0,
                                                   roundOff: 0.0,
@@ -799,7 +803,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               Opacity(
                                 opacity: !isBooked ? 0.5 : 1.0,
                                 child: ActionButton(
-                                  key: quickPaymentKey,
                                   label: "QUICK PAYMENT",
                                   isPrimary:
                                       isBooked &&
@@ -860,7 +863,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
                                             showQuickPaymentPopup(
                                               context,
-                                              () {
+                                              (discount) {
                                                 // Cash Selected
                                                 _settlePayment(
                                                   context,
@@ -879,9 +882,11 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .createdAt,
+                                                  discount,
+                                                  serviceState.total,
                                                 );
                                               },
-                                              () {
+                                              (discount) {
                                                 // Card Selected
                                                 _settlePayment(
                                                   context,
@@ -900,8 +905,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .createdAt,
+                                                  discount,
+                                                  serviceState.total,
                                                 );
                                               },
+                                              total: serviceState.total,
+                                              discount: 0.0,
+                                              grandTotal: serviceState.subTotal,
                                             );
                                           }
                                         },
@@ -960,7 +970,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingFormState.customerName,
                                               customerNumber: bookingFormState
                                                   .customerNumber,
-                                              grandTotal: serviceState.total,
+                                              subTotalValue:
+                                                  serviceState.subTotal,
                                               taxTotal: serviceState.vat,
                                               discount: 0.0,
                                               roundOff: 0.0,
@@ -1003,7 +1014,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                         e.quantity,
                                                   )
                                                   .toList(),
-                                              subTotal: serviceState.cartItems
+                                              subTotalList: serviceState
+                                                  .cartItems
                                                   .map((e) {
                                                     final price =
                                                         e.service.price ?? 0.0;
