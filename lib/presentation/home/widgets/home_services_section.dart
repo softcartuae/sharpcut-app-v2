@@ -34,6 +34,7 @@ import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
 import 'package:sharp_cut/presentation/quick_report/screens/screen_quick_report.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 import 'package:sharp_cut/utils/helpers/icon_helper.dart';
@@ -74,6 +75,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     double discount,
     double finalTotal,
   ) {
+    double amount = serviceState.total;
+    // if user click unpaid then make the amount zero and the payment methord zero;
+    if (paymentMode == PaymentMode.Unpaid.name) {
+      paymentMode = PaymentMode.Cash.name;
+      amount = 0.0;
+    }
+
     final request = SettlePaymentRequestModel(
       transactionId: transactionId,
       customerName: bookingFormState.customerName,
@@ -104,7 +112,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       isTip: serviceState.cartItems.map((e) => 0).toList(),
       collectedUserId: [userId!], // Placeholder
       mode: [paymentMode],
-      amount: [serviceState.total],
+      amount: [amount],
       tenderCash: [0.0],
       change: [0.0],
     );
@@ -871,7 +879,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   userId,
                                                   serviceState,
                                                   bookingFormState,
-                                                  "Cash",
+                                                  PaymentMode.Cash.name,
                                                   bookingState
                                                       .bookingResponse
                                                       .invoiceNo,
@@ -894,7 +902,29 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   userId,
                                                   serviceState,
                                                   bookingFormState,
-                                                  "Card",
+                                                  PaymentMode.Card.name,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceNo,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .staff
+                                                      ?.name,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .createdAt,
+                                                  discount,
+                                                  serviceState.total,
+                                                );
+                                              },
+                                              (discount) {
+                                                _settlePayment(
+                                                  context,
+                                                  transactionId,
+                                                  userId,
+                                                  serviceState,
+                                                  bookingFormState,
+                                                  PaymentMode.Unpaid.name,
                                                   bookingState
                                                       .bookingResponse
                                                       .invoiceNo,

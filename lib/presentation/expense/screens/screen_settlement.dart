@@ -364,12 +364,12 @@ class _SettlementDialogState extends State<SettlementDialog> {
               widget.settlePayment.collectedUserId!.first,
             )
           : [],
-
       mode: modes,
       amount: amounts,
       tenderCash: tenders,
       change: changes,
     );
+    
     if (alsoPrint) {
       final shopData = context.read<AuthCubit>().currentUser;
       if (shopData != null) {

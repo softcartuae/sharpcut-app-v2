@@ -31,6 +31,21 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
   final TextEditingController _passwordController = TextEditingController();
   StaffModel? _selectedStaff;
   bool _obscurePassword = true;
+  double _balance = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _balance = widget.totalSales ?? 0.0;
+    _amountController.addListener(_updateBalance);
+  }
+
+  void _updateBalance() {
+    final enteredAmount = double.tryParse(_amountController.text) ?? 0.0;
+    setState(() {
+      _balance = (widget.totalSales ?? 0.0) - enteredAmount;
+    });
+  }
 
   @override
   void dispose() {
@@ -88,12 +103,25 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                 ),
                 const SizedBox(height: 24),
                 if (widget.totalSales != null)
-                  Text(
-                    "Total Sales: ${widget.totalSales.toString()}",
-                    style: GoogleFonts.rajdhani(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Total Sales: ${widget.totalSales.toString()}",
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        "Balance: ${_balance.toStringAsFixed(2)} ",
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white70,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 if (widget.totalSales != null) const SizedBox(height: 16),
 
@@ -216,6 +244,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 32),
                 BlocBuilder<CashRegistoryCubit, CashRegistoryState>(
                   builder: (context, state) {

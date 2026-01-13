@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 Future<void> showQuickPaymentPopup(
   BuildContext context,
   Function(double discount,) onCashSelected,
-  Function(double discount,) onCreditCardSelected, {
+  Function(double discount,) onCreditCardSelected,
+  Function(double discount) onUnPaid,
+   {
   required double total,
   required double discount,
   required double grandTotal,
@@ -17,6 +19,7 @@ Future<void> showQuickPaymentPopup(
         initialDiscount: discount,
         onCashSelected: onCashSelected,
         onCreditCardSelected: onCreditCardSelected,
+        onUnPaid: onUnPaid,
       );
     },
   );
@@ -27,6 +30,7 @@ class QuickPaymentDialog extends StatefulWidget {
   final double initialDiscount;
   final Function(double discount,) onCashSelected;
   final Function(double discount, ) onCreditCardSelected;
+  final Function(double discount,) onUnPaid;
 
   const QuickPaymentDialog({
     super.key,
@@ -34,6 +38,7 @@ class QuickPaymentDialog extends StatefulWidget {
     required this.initialDiscount,
     required this.onCashSelected,
     required this.onCreditCardSelected,
+    required this.onUnPaid,
   });
 
   @override
@@ -148,6 +153,34 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                     ),
                     child: Text(
                       "Card",
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      final discount =
+                          double.tryParse(_discountController.text) ?? 0.0;
+                      widget.onUnPaid(discount,);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black87,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      "Unpaid",
                       style: GoogleFonts.rajdhani(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,

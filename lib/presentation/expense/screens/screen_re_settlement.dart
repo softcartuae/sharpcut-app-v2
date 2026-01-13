@@ -267,6 +267,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     if (_nameController.text.isEmpty) {
       ToastHelper.showError("Please Enter Customer Name");
       return;
+      
     }
 
     // Also check if totalPaid is 0? Maybe allow 0 for partial?
