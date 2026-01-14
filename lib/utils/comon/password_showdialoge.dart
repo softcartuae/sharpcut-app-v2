@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:sharp_cut/utils/helpers/toast_helper.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/domain/home/models/chair_model.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 Future<void> showPasswordDialoge(
   BuildContext context,
@@ -14,18 +15,11 @@ Future<void> showPasswordDialoge(
   StaffModel staff,
 ) {
   final TextEditingController passwordController = TextEditingController();
-  // StaffModel? selectedStaff;
   bool obscurePassword = true;
-
-  // // Fetch staffs from ChairCubit
-  // final chairCubit = context.read<ChairCubit>();
-  // List<StaffModel> staffListAll = List<StaffModel>.from(chairCubit.staffs);
-  // List<StaffModel> staffList = staffListAll
-  //     .where((element) => element.role != Role.admin)
-  //     .toList();
 
   return showDialog(
     context: context,
+    barrierDismissible: false,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
@@ -42,7 +36,7 @@ Future<void> showPasswordDialoge(
             },
             builder: (context, state) {
               return Dialog(
-                backgroundColor: const Color(0xFF1E1E2C), // Dark background
+                backgroundColor: const Color(0xFF1E1E2C),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -52,20 +46,16 @@ Future<void> showPasswordDialoge(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Header
+                      /// HEADER
                       Stack(
                         alignment: Alignment.center,
                         children: [
-                          Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "Select Staff",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.rajdhani(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          Text(
+                            "Enter Password",
+                            style: GoogleFonts.rajdhani(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           Align(
@@ -80,52 +70,10 @@ Future<void> showPasswordDialoge(
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 32),
 
-                      // // Staff Dropdown
-                      // Container(
-                      //   padding: const EdgeInsets.symmetric(horizontal: 16),
-                      //   decoration: BoxDecoration(
-                      //     borderRadius: BorderRadius.circular(8),
-                      //     border: Border.all(color: Colors.white.withAlpha(77)),
-                      //   ),
-                      //   child: DropdownButtonHideUnderline(
-                      //     child: DropdownButton<StaffModel>(
-                      //       value: selectedStaff,
-                      //       dropdownColor: const Color(0xFF1E1E2C),
-                      //       icon: const Icon(
-                      //         Icons.arrow_drop_down,
-                      //         color: Colors.white,
-                      //       ),
-                      //       isExpanded: true,
-                      //       hint: Text(
-                      //         "Select Staff",
-                      //         style: GoogleFonts.rajdhani(
-                      //           color: Colors.white.withAlpha(179),
-                      //           fontSize: 16,
-                      //         ),
-                      //       ),
-                      //       style: GoogleFonts.rajdhani(
-                      //         color: Colors.white,
-                      //         fontSize: 16,
-                      //       ),
-                      //       items: staffList.map((StaffModel staff) {
-                      //         return DropdownMenuItem<StaffModel>(
-                      //           value: staff,
-                      //           child: Text(staff.name),
-                      //         );
-                      //       }).toList(),
-                      //       onChanged: (StaffModel? newValue) {
-                      //         setState(() {
-                      //           selectedStaff = newValue;
-                      //         });
-                      //       },
-                      //     ),
-                      //   ),
-                      // ),
-                      // const SizedBox(height: 16),
-
-                      // Password Field
+                      /// PASSWORD FIELD
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
@@ -155,7 +103,6 @@ Future<void> showPasswordDialoge(
                                     ? Icons.visibility_outlined
                                     : Icons.visibility_off_outlined,
                                 color: Colors.white.withAlpha(128),
-                                size: 20,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -166,9 +113,10 @@ Future<void> showPasswordDialoge(
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 32),
 
-                      // Submit Button
+                      /// SUBMIT BUTTON
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
@@ -186,12 +134,6 @@ Future<void> showPasswordDialoge(
                           onPressed: state is BookingLoading
                               ? null
                               : () {
-                                  // if (selectedStaff == null) {
-                                  //   ToastHelper.showError(
-                                  //     "Please select a staff",
-                                  //   );
-                                  //   return;
-                                  // }
                                   if (passwordController.text.isEmpty) {
                                     ToastHelper.showError(
                                       "Please enter password",

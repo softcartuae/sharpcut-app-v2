@@ -78,6 +78,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     double amount = serviceState.total;
     // if user click unpaid then make the amount zero and the payment methord zero;
     if (paymentMode == PaymentMode.Unpaid.name) {
+      log("unpaid is selected");
       paymentMode = PaymentMode.Cash.name;
       amount = 0.0;
     }
@@ -351,65 +352,67 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
                   return Opacity(
                     opacity: isBooked ? 1.0 : 0.5,
-                    child: CommonContainer(
-                      borderRadius: BorderRadius.circular(15),
-                      backgroundImageUrl: "lib/utils/images/Card.png",
-                      padding: const EdgeInsets.all(16),
-                      child: BlocBuilder<ServiceCubit, ServiceState>(
-                        builder: (context, state) {
-                          if (state is ServiceStateSuccess) {
-                            if (state.isLoadingServices) {
+                    child: RepaintBoundary(
+                      child: CommonContainer(
+                        borderRadius: BorderRadius.circular(15),
+                        backgroundImageUrl: "lib/utils/images/Card.png",
+                        padding: const EdgeInsets.all(16),
+                        child: BlocBuilder<ServiceCubit, ServiceState>(
+                          builder: (context, state) {
+                            if (state is ServiceStateSuccess) {
+                              if (state.isLoadingServices) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              return GridView.builder(
+                                padding: EdgeInsets.zero,
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 4,
+                                      childAspectRatio: 0.8,
+                                      crossAxisSpacing: 16,
+                                      mainAxisSpacing: 16,
+                                    ),
+                                itemCount: state.services.length,
+                                itemBuilder: (context, index) {
+                                  final service = state.services[index];
+                                  return InkWell(
+                                    onTap: () {
+                                      if (!isBooked) {
+                                        ToastHelper.showError(
+                                          "You have to book first",
+                                        );
+                                        return;
+                                      }
+                                      context.read<ServiceCubit>().addToCart(
+                                        service,
+                                      );
+                                    },
+                                    child: ServiceItem(
+                                      title: service.name ?? "Service",
+                                      imagePath:
+                                          service.image ??
+                                          "lib/utils/images/hair_cut.png", // Placeholder image
+                                    ),
+                                  );
+                                },
+                              );
+                            } else if (state is ServiceStateLoading) {
                               return const Center(
                                 child: CircularProgressIndicator(),
                               );
+                            } else if (state is ServiceStateError) {
+                              return Center(
+                                child: Text(
+                                  state.message,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              );
                             }
-                            return GridView.builder(
-                              padding: EdgeInsets.zero,
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 4,
-                                    childAspectRatio: 0.8,
-                                    crossAxisSpacing: 16,
-                                    mainAxisSpacing: 16,
-                                  ),
-                              itemCount: state.services.length,
-                              itemBuilder: (context, index) {
-                                final service = state.services[index];
-                                return InkWell(
-                                  onTap: () {
-                                    if (!isBooked) {
-                                      ToastHelper.showError(
-                                        "You have to book first",
-                                      );
-                                      return;
-                                    }
-                                    context.read<ServiceCubit>().addToCart(
-                                      service,
-                                    );
-                                  },
-                                  child: ServiceItem(
-                                    title: service.name ?? "Service",
-                                    imagePath:
-                                        service.image ??
-                                        "lib/utils/images/hair_cut.png", // Placeholder image
-                                  ),
-                                );
-                              },
-                            );
-                          } else if (state is ServiceStateLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (state is ServiceStateError) {
-                            return Center(
-                              child: Text(
-                                state.message,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            );
-                          }
-                          return const SizedBox();
-                        },
+                            return const SizedBox();
+                          },
+                        ),
                       ),
                     ),
                   );
@@ -615,7 +618,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                       isPrimary:
                                           !isBooked &&
                                           selectedButton == "BOOK A SLOT",
-                                      isLoading: state is CashRegistoryLoading,
+                                      isLoading:
+                                          state is CashRegistoryLoading &&
+                                          selectedButton == "BOOK A SLOT",
                                       onTap: isBooked
                                           ? null
                                           : () {
@@ -1170,7 +1175,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                   if (state is CashRegistorySalesTotalLoaded) {
                                     CloseCashRegisterDialog.show(
                                       context,
-                                      state.totalSales,
+                                      state.closeRegisterModel,
                                     );
                                   } else if (state is CashRegistoryAddError) {
                                     ToastHelper.showError(state.message);
@@ -1178,7 +1183,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 },
                                 builder: (context, state) {
                                   return ActionButton(
-                                    isLoading: state is CashRegistoryLoading,
+                                    isLoading:
+                                        state is CashRegistoryLoading &&
+                                        selectedButton == "CLOSE REGISTER",
                                     label: "CLOSE REGISTER",
                                     isPrimary:
                                         selectedButton == "CLOSE REGISTER",

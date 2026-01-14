@@ -25,6 +25,7 @@ class ServiceItem extends StatelessWidget {
               child: imagePath.startsWith('http')
                   ? CachedNetworkImage(
                       imageUrl: imagePath,
+                      memCacheWidth: 200,
                       fit: BoxFit.cover,
                       placeholder: (context, url) =>
                           const Center(child: CircularProgressIndicator()),

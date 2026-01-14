@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +17,7 @@ class CuttingMastersDialog extends StatelessWidget {
   static void show(BuildContext context) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => const CuttingMastersDialog(),
     );
   }

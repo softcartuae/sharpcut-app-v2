@@ -369,7 +369,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
       tenderCash: tenders,
       change: changes,
     );
-    
+
     if (alsoPrint) {
       final shopData = context.read<AuthCubit>().currentUser;
       if (shopData != null) {
@@ -432,7 +432,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
               // Content
               Padding(
-                padding: const EdgeInsets.all(18.0),
+                padding: const EdgeInsets.all(14.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -460,7 +460,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
 
                     // Customer Details Section
                     Row(
@@ -510,9 +510,9 @@ class _SettlementDialogState extends State<SettlementDialog> {
                       ],
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     const Divider(color: Colors.white24),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
 
                     // Main Content: 3 Columns
                     Expanded(
@@ -665,7 +665,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                           ],
                                         ),
                                         const Divider(color: Colors.white24),
-                                        const SizedBox(height: 10),
+                                        const SizedBox(height: 8),
 
                                         // Dynamic Inputs based on selection
                                         if (_isCashSelected) ...[
@@ -876,7 +876,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: 10),
 
                                     Row(
                                       children: [

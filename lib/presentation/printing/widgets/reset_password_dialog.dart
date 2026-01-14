@@ -111,110 +111,134 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
                 ),
                 const SizedBox(height: 32),
 
-                // Dropdown
-                _buildDropdown(),
-                const SizedBox(height: 16),
+                // Scrollable Content
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Dropdown
+                        _buildDropdown(),
+                        const SizedBox(height: 16),
 
-                // Password Fields
-                _buildPasswordField(
-                  'Current Password',
-                  _currentPasswordController,
-                  _obscureCurrent,
-                  () => setState(() => _obscureCurrent = !_obscureCurrent),
-                ),
-                const SizedBox(height: 16),
-                _buildPasswordField(
-                  'New Password',
-                  _newPasswordController,
-                  _obscureNew,
-                  () => setState(() => _obscureNew = !_obscureNew),
-                ),
-                const SizedBox(height: 16),
-                _buildPasswordField(
-                  'Confirm Password',
-                  _confirmPasswordController,
-                  _obscureConfirm,
-                  () => setState(() => _obscureConfirm = !_obscureConfirm),
-                ),
+                        // Password Fields
+                        _buildPasswordField(
+                          'Current Password',
+                          _currentPasswordController,
+                          _obscureCurrent,
+                          () => setState(
+                            () => _obscureCurrent = !_obscureCurrent,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildPasswordField(
+                          'New Password',
+                          _newPasswordController,
+                          _obscureNew,
+                          () => setState(() => _obscureNew = !_obscureNew),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildPasswordField(
+                          'Confirm Password',
+                          _confirmPasswordController,
+                          _obscureConfirm,
+                          () => setState(
+                            () => _obscureConfirm = !_obscureConfirm,
+                          ),
+                        ),
 
-                const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                // OK Button
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    gradient: const LinearGradient(
-                      colors: [AppColors.violetNormal, AppColors.redNormal],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: state is PasswordLoading
-                        ? null
-                        : () {
-                            final currentPassword =
-                                _currentPasswordController.text;
-                            final newPassword = _newPasswordController.text;
-                            final confirmPassword =
-                                _confirmPasswordController.text;
-
-                            if (newPassword != confirmPassword) {
-                              ToastHelper.showError("Passwords do not match");
-                              return;
-                            }
-
-                            if (currentPassword.isEmpty ||
-                                newPassword.isEmpty) {
-                              ToastHelper.showError("Please fill all fields");
-                              return;
-                            }
-
-                            if (_selectedUserType == null) {
-                              ToastHelper.showError("Please select a user");
-                              return;
-                            }
-
-                            final passwordModel = PasswordModel(
-                              staffId: _selectedUserType!.id.toString(),
-                              currentPassword: currentPassword,
-                              newPassword: newPassword,
-                              confirmPassword: confirmPassword,
-                            );
-
-                            context.read<PasswordCubit>().resetPassword(
-                              passwordModel,
-                              isAdmin: widget.isAdmin,
-                            );
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 48,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: state is PasswordLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            'OK',
-                            style: GoogleFonts.rajdhani(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                        // OK Button
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            gradient: const LinearGradient(
+                              colors: [
+                                AppColors.violetNormal,
+                                AppColors.redNormal,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
                           ),
+                          child: ElevatedButton(
+                            onPressed: state is PasswordLoading
+                                ? null
+                                : () {
+                                    final currentPassword =
+                                        _currentPasswordController.text;
+                                    final newPassword =
+                                        _newPasswordController.text;
+                                    final confirmPassword =
+                                        _confirmPasswordController.text;
+
+                                    if (newPassword != confirmPassword) {
+                                      ToastHelper.showError(
+                                        "Passwords do not match",
+                                      );
+                                      return;
+                                    }
+
+                                    if (currentPassword.isEmpty ||
+                                        newPassword.isEmpty) {
+                                      ToastHelper.showError(
+                                        "Please fill all fields",
+                                      );
+                                      return;
+                                    }
+
+                                    if (_selectedUserType == null) {
+                                      ToastHelper.showError(
+                                        "Please select a user",
+                                      );
+                                      return;
+                                    }
+
+                                    final passwordModel = PasswordModel(
+                                      staffId: _selectedUserType!.id.toString(),
+                                      currentPassword: currentPassword,
+                                      newPassword: newPassword,
+                                      confirmPassword: confirmPassword,
+                                    );
+
+                                    context.read<PasswordCubit>().resetPassword(
+                                      passwordModel,
+                                      isAdmin: widget.isAdmin,
+                                    );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 48,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: state is PasswordLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    'OK',
+                                    style: GoogleFonts.rajdhani(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

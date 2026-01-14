@@ -4,20 +4,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_state.dart';
+import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 
 class CloseCashRegisterDialog extends StatefulWidget {
-  const CloseCashRegisterDialog({super.key, required this.totalSales});
-  final double? totalSales;
+  const CloseCashRegisterDialog({
+    super.key,
+    required this.closeRegisterDetails,
+  });
+  final CloseRegisterModel closeRegisterDetails;
 
-  static void show(BuildContext context, double? totalSales) {
+  static void show(
+    BuildContext context,
+    CloseRegisterModel? closeRegisterDetails,
+  ) {
+    if (closeRegisterDetails == null) return;
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => CloseCashRegisterDialog(totalSales: totalSales),
+      builder: (context) =>
+          CloseCashRegisterDialog(closeRegisterDetails: closeRegisterDetails),
     );
   }
 
@@ -32,18 +41,21 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
   StaffModel? _selectedStaff;
   bool _obscurePassword = true;
   double _balance = 0.0;
+  bool _printReceipt = false;
 
   @override
   void initState() {
     super.initState();
-    _balance = widget.totalSales ?? 0.0;
+    _balance = widget.closeRegisterDetails.expectedClosingAmount.toDouble();
     _amountController.addListener(_updateBalance);
   }
 
   void _updateBalance() {
     final enteredAmount = double.tryParse(_amountController.text) ?? 0.0;
     setState(() {
-      _balance = (widget.totalSales ?? 0.0) - enteredAmount;
+      _balance =
+          widget.closeRegisterDetails.expectedClosingAmount.toDouble() -
+          enteredAmount;
     });
   }
 
@@ -60,10 +72,10 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
     List<StaffModel> staffList = List<StaffModel>.from(chairCubit.staffs);
     return BlocListener<CashRegistoryCubit, CashRegistoryState>(
       listener: (context, state) {
-        if (state is CashRegistoryAddSuccess) {
+        if (state is CashRegistoryCloseSuccess) {
           Navigator.pop(context);
-          ToastHelper.showSuccess(state.message);
-          // Refresh status or handle post-close logic if needed
+          ToastHelper.showSuccess(state.response.message);
+        
         } else if (state is CashRegistoryAddError) {
           ToastHelper.showError(state.message);
         }
@@ -102,28 +114,40 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                if (widget.totalSales != null)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Total Sales: ${widget.totalSales.toString()}",
-                        style: GoogleFonts.rajdhani(
-                          color: Colors.white,
-                          fontSize: 16,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Total Sales: ${widget.closeRegisterDetails.totalSales}",
+                          style: GoogleFonts.rajdhani(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                      Text(
-                        "Balance: ${_balance.toStringAsFixed(2)} ",
-                        style: GoogleFonts.rajdhani(
-                          color: Colors.white70,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        Text(
+                          "Opening Amount: ${widget.closeRegisterDetails.openingAmount}",
+                          style: GoogleFonts.rajdhani(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
                         ),
+                      ],
+                    ),
+                    Text(
+                      "Balance: ${_balance.toStringAsFixed(2)} ",
+                      style: GoogleFonts.rajdhani(
+                        color: Colors.white70,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
-                  ),
-                if (widget.totalSales != null) const SizedBox(height: 16),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
 
                 // Admin Selection
                 Container(
@@ -245,7 +269,30 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _printReceipt,
+                      onChanged: (value) {
+                        setState(() {
+                          _printReceipt = value ?? false;
+                        });
+                      },
+                      side: const BorderSide(color: Colors.white54),
+                      activeColor: Colors.white,
+                      checkColor: const Color(0xFF1E1E2C),
+                    ),
+                    Text(
+                      "Print Receipt",
+                      style: GoogleFonts.rajdhani(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
                 BlocBuilder<CashRegistoryCubit, CashRegistoryState>(
                   builder: (context, state) {
                     return SizedBox(
@@ -276,7 +323,9 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                             ToastHelper.showError("Invalid amount");
                             return;
                           }
+                          if (_printReceipt) {}
                           context.read<CashRegistoryCubit>().closeCashRegister(
+                            isPrint: _printReceipt,
                             amount: amount,
                             userId: _selectedStaff!.id,
                             role: _selectedStaff!.role,
