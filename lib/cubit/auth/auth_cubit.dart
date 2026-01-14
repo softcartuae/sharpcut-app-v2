@@ -15,7 +15,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
   AuthCubit({required this.authRepo, required this.tokenStorage})
     : super(AuthInitial());
 
-  Future<void> login(String licenseNo) async {
+  Future<void> login(String licenseNo,) async {
     emit(AuthLoading());
     try {
       final token = await authRepo.login(licenseNo);

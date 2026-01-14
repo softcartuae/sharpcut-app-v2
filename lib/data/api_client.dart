@@ -5,7 +5,8 @@ import 'package:sharp_cut/data/local_storage/token_storage.dart';
 
 class ApiClient {
   // static String baseUrl = "https://saloon-test2.greendomains.in/";
-  static String baseUrl = "http://165.232.178.223/saloon/";
+  static String baseUrl = "http://192.168.1.5/";
+  // "http://165.232.178.223/saloon/";
   static final dio = Dio(BaseOptions(baseUrl: baseUrl))
     ..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
 
