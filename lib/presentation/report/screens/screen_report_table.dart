@@ -354,6 +354,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                                     widget.staff!.id,
                                   );
                                 }
+                                context.read<ReportCubit>().fetchTransactions();
                               },
                               child: const ReportActionButton(
                                 label: "Reset",
@@ -382,7 +383,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const Expanded(child: ReportDataTable()),
+                    Expanded(child: ReportDataTable()),
                   ],
                 ),
               ),

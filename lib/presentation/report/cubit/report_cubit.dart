@@ -78,6 +78,6 @@ class ReportCubit extends Cubit<ReportState> {
       'transaction_status': 'All',
       'paid_status': 'All',
     };
-    fetchTransactions();
+    
   }
 }
