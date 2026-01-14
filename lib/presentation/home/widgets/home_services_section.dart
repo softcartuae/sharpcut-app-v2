@@ -285,9 +285,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 1. Category Sidebar
-            SingleChildScrollView(
-              child: SizedBox(
-                width: 180,
+            Expanded(
+              flex: 2,
+              child: SingleChildScrollView(
                 child: BlocBuilder<ServiceCubit, ServiceState>(
                   builder: (context, state) {
                     List<Widget> categories = [];
@@ -345,7 +345,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
             // 2. Services Grid
             Expanded(
-              flex: 3,
+              flex: 6,
               child: BlocBuilder<BookingCubit, BookingState>(
                 builder: (context, bookingState) {
                   final isBooked = bookingState is BookingSuccess;
@@ -423,7 +423,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
             // 3. Order Summary Panel
             Expanded(
-              flex: 3,
+              flex: 6,
               child: CommonContainer(
                 borderRadius: BorderRadius.circular(15),
                 backgroundImageUrl: "lib/utils/images/Card.png",
@@ -435,14 +435,14 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Item Name",
+                          "Name",
                           style: GoogleFonts.rajdhani(
                             color: Colors.white,
                             fontSize: 16,
                           ),
                         ),
                         Text(
-                          "Quantity",
+                          "Qty",
                           style: GoogleFonts.rajdhani(
                             color: Colors.white,
                             fontSize: 16,
@@ -543,9 +543,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             const SizedBox(width: 15),
 
             // 4. Action Buttons Sidebar
-            SingleChildScrollView(
-              child: SizedBox(
-                width: 200,
+            Expanded(
+              flex: 3,
+              child: SingleChildScrollView(
                 child: BlocBuilder<BookingCubit, BookingState>(
                   builder: (context, bookingState) {
                     final isBooked = bookingState is BookingSuccess;
