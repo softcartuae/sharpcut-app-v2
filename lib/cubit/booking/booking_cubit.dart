@@ -91,6 +91,7 @@ Future<bool> reSettlePayment({
   emit(BookingLoading());
 
   final result = await bookingRepo.reSettlePayment(resettleModel);
+  
 
   return result.fold(
     (error) {

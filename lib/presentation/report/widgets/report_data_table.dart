@@ -5,6 +5,7 @@ import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
+import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_re_settlement.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 
@@ -77,8 +78,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 context: context,
                                                 builder: (context) => PaymentDetailsDialog(
                                                   booking: booking,
-                                                  onEdit: () {
-                                                    // Map BookingResponseModel to List<CartItemModel>
+                                                  onEdit: ()  {
                                                     final List<CartItemModel>
                                                     cartItems =
                                                         booking.details
@@ -196,21 +196,24 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                                 .totalPayment ??
                                                             0));
 
-                                                    showResettmentScreen(
-                                                      balance: balenceAmount,
-                                                      paidAmount: booking
-                                                          .totalPayment
-                                                          ?.toString(),
-                                                      context,
-                                                      settlePayment: request,
-                                                      staffName:
-                                                          booking.staff?.name,
-                                                      bookingTime:
-                                                          booking.createdAt,
-                                                      invoiceNumber:
-                                                          booking.invoiceNo,
-                                                      cartItems: cartItems,
-                                                    );
+                                                     showResettmentScreen(
+                                                          balance:
+                                                              balenceAmount,
+                                                          paidAmount: booking
+                                                              .totalPayment
+                                                              ?.toString(),
+                                                          context,
+                                                          settlePayment:
+                                                              request,
+                                                          staffName: booking
+                                                              .staff
+                                                              ?.name,
+                                                          bookingTime:
+                                                              booking.createdAt,
+                                                          invoiceNumber:
+                                                              booking.invoiceNo,
+                                                          cartItems: cartItems,
+                                                        );
                                                   },
                                                 ),
                                               );

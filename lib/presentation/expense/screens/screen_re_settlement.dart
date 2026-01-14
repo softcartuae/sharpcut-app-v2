@@ -17,7 +17,7 @@ import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
-Future<void> showResettmentScreen(
+Future<bool?> showResettmentScreen(
   BuildContext context, {
   required SettlePaymentRequestModel settlePayment,
   required String? staffName,
@@ -155,10 +155,10 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     _discountController.text = (widget.settlePayment.discount ?? 0.0)
         .toStringAsFixed(2);
     // Amount to pay is usually the final total
-    _amountController.text = (widget.balance ?? 0.0).toStringAsFixed(2);
+    _amountController.text = (widget.balance).toStringAsFixed(2);
 
     // Initialize split controllers
-    _cashAmountController.text = (widget.balance ?? 0.0).toStringAsFixed(2);
+    _cashAmountController.text = (widget.balance).toStringAsFixed(2);
     _cardAmountController.text = "0.00";
 
     // Grand total display at the bottom usually matches final total
@@ -229,7 +229,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     super.dispose();
   }
 
-  void _onSettle({required bool alsoPrint}) {
+  void _onSettle({required bool alsoPrint}) async {
     final double calculatedFinalTotal = _finalTotal;
 
     double cashAmount = 0.0;
@@ -267,7 +267,6 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     if (_nameController.text.isEmpty) {
       ToastHelper.showError("Please Enter Customer Name");
       return;
-      
     }
 
     // Also check if totalPaid is 0? Maybe allow 0 for partial?
@@ -331,10 +330,8 @@ class _SettlementDialogState extends State<ResettlementScreen> {
       tenderCash: tenders,
       change: changes,
     );
-
     context.read<BookingCubit>().reSettlePayment(resettleModel: resettleModel);
-
-    Navigator.pop(context);
+    Navigator.pop(context, true);
   }
 
   @override
