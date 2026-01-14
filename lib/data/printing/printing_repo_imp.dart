@@ -24,8 +24,10 @@ import 'package:sharp_cut/data/printing/native/usb_printer_platform.dart';
 import 'package:sharp_cut/data/printing/native/bluetooth_printer_platform.dart';
 import 'package:sharp_cut/data/printing/native/network_printer_platform.dart';
 
-import '../../presentation/printing/widgets/receipt_widget.dart';
+import 'package:sharp_cut/presentation/printing/widgets/receipt_widget.dart';
 import 'package:sharp_cut/presentation/quick_report/widgets/quick_report_print_widget.dart';
+import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
+import 'package:sharp_cut/presentation/cash_registory/widgets/close_register_print_widget.dart';
 
 class PrintingRepoImp implements PrintingRepo {
   final PrintingService _printingService;
@@ -365,6 +367,93 @@ class PrintingRepoImp implements PrintingRepo {
       await _bluetoothPlatform.print(bytes);
     } else if (printer.connectionType == ConnectionType.NETWORK) {
       await _networkPlatform.print(bytes);
+    }
+  }
+
+  @override
+  Future<void> printCloseRegisterReport({
+    required Printer printer,
+    required CloseRegisterReportModel report,
+    required ShopModel shop,
+    int copies = 1,
+    bool openDrawer = false,
+  }) async {
+    final profile = await CapabilityProfile.load();
+    final paperSize = await getPaperSize(printer);
+    final generator = Generator(paperSize.generatorPaperSize, profile);
+    List<int> bytes = [];
+
+    try {
+      if (openDrawer) {
+        bytes.addAll(generator.drawer());
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+
+    // Create the widget
+    final double targetWidth = paperSize.widthInPixels.toDouble();
+
+    final widget = MediaQuery(
+      data: const MediaQueryData(),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: ThemeData(
+            useMaterial3: false,
+            scaffoldBackgroundColor: Colors.white,
+          ),
+          child: Material(
+            color: Colors.white,
+            child: CloseRegisterPrintWidget(report: report, shop: shop),
+          ),
+        ),
+      ),
+    );
+
+    // Calculate estimated height
+    // Base height ~ 1000 + items
+    double estimatedHeight = 1500;
+    if (report.transactions != null) {
+      estimatedHeight +=
+          (report.transactions!.salesmanWiseDetails.length * 40.0) +
+          (report.transactions!.invoiceDetails.length * 40.0);
+    }
+
+    // Capture the widget as an image
+    final ScreenshotController screenshotController = ScreenshotController();
+    final Uint8List capturedImage = await screenshotController
+        .captureFromWidget(
+          widget,
+          delay: const Duration(milliseconds: 100),
+          pixelRatio: 1.0,
+          targetSize: Size(targetWidth, estimatedHeight),
+        );
+
+    // Decode the image for the printer
+    final img.Image? image = img.decodePng(capturedImage);
+
+    if (image != null) {
+      // Resize to paper width
+      final img.Image resizedImage = img.copyResize(
+        image,
+        width: paperSize.widthInPixels,
+      );
+      bytes.addAll(generator.image(resizedImage));
+    }
+
+    bytes.addAll(generator.feed(2));
+    bytes.addAll(generator.cut());
+
+    for (int i = 0; i < copies; i++) {
+      try {
+        await _printBytes(printer, Uint8List.fromList(bytes));
+      } catch (e) {
+        log(e.toString());
+      }
+      if (i < copies - 1) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
     }
   }
 

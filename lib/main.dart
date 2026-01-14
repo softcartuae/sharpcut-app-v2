@@ -34,6 +34,13 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 🔒 Lock orientation to portrait only
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation
+        .landscapeRight, // optional, remove if you want only upright
+  ]);
+
   await di.init();
   await ApiClient.init();
   await Firebase.initializeApp();

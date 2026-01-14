@@ -65,7 +65,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
               ),
             ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           Text(
             "CLOSE REGISTER REPORT",
             style: GoogleFonts.rajdhani(
@@ -74,17 +74,17 @@ class CloseRegisterPrintWidget extends StatelessWidget {
               color: Colors.black,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           const Divider(color: Colors.black),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           _buildDetailRow("Register ID", report.cashRegisterId.toString()),
           _buildDetailRow("Opened By", report.openedBy),
           _buildDetailRow("Opened At", _formatDate(report.openedAt)),
           _buildDetailRow("Closed By", report.closedBy),
           _buildDetailRow("Closed At", _formatDate(report.closedAt)),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           const Divider(color: Colors.black),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           _buildDetailRow("Opening Amount", report.openingAmount),
           _buildDetailRow(
             "Total Sales Count",
@@ -94,21 +94,132 @@ class CloseRegisterPrintWidget extends StatelessWidget {
             "Total Sales Amount",
             report.totalSalesAmount.toString(),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           const Divider(color: Colors.black),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           _buildDetailRow(
             "Expected Closing",
             report.expectedClosingAmount.toString(),
           ),
           _buildDetailRow("Actual Closing", report.closingAmount.toString()),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           _buildDetailRow(
             "Discrepancy",
             report.discrepancy.toString(),
             isBold: true,
-            color: report.discrepancy != 0 ? Colors.red : Colors.black,
+            color: Colors.black,
           ),
+          if (report.transactions != null) ...[
+            const SizedBox(height: 2),
+            const Divider(color: Colors.black),
+            const SizedBox(height: 2),
+            Text(
+              "TRANSACTION DETAILS",
+              style: GoogleFonts.rajdhani(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 2),
+            _buildDetailRow(
+              "Total Invoices",
+              report.transactions!.invoiceDetails['total_invoice'].toString(),
+            ),
+            _buildDetailRow(
+              "Total Invoice Sales",
+              report.transactions!.invoiceDetails['total_invoice_sales_amount']
+                  .toString(),
+            ),
+            _buildDetailRow(
+              "Total Unpaid",
+              report.transactions!.invoiceDetails['total_unpaid_amount']
+                  .toString(),
+            ),
+            _buildDetailRow(
+              "Gross Total",
+              report.transactions!.invoiceDetails['gross_total_amount']
+                  .toString(),
+            ),
+            _buildDetailRow(
+              "Total Discount",
+              report.transactions!.invoiceDetails['total_discount'].toString(),
+            ),
+            _buildDetailRow(
+              "Total Credit",
+              report.transactions!.invoiceDetails['total_credit_amount']
+                  .toString(),
+            ),
+            const SizedBox(height: 2),
+            const Divider(color: Colors.black),
+            const SizedBox(height: 2),
+            Text(
+              "CUSTOMER TYPE DETAILS",
+              style: GoogleFonts.rajdhani(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            _buildDetailRow(
+              "Cash Customers",
+              "${report.transactions!.cashCustomerCount} (${report.transactions!.cashCustomerAmount})",
+            ),
+            _buildDetailRow(
+              "Card Customers",
+              "${report.transactions!.cardCustomerCount} (${report.transactions!.cardCustomerAmount})",
+            ),
+            const SizedBox(height: 2),
+            const Divider(color: Colors.black),
+            const SizedBox(height: 2),
+            Text(
+              "SALESMAN WISE DETAILS",
+              style: GoogleFonts.rajdhani(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            ...report.transactions!.salesmanWiseDetails.map((detail) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      detail.salesmanName,
+                      style: GoogleFonts.rajdhani(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 2.0),
+                      child: Column(
+                        children: [
+                          _buildDetailRow("Cash", detail.totalCashAmount),
+                          _buildDetailRow("Card", detail.totalCardAmount),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 2),
+            const Divider(color: Colors.black),
+            _buildDetailRow(
+              "Salesman Total Amount",
+              report.transactions!.salesmanTotalAmount.toString(),
+              isBold: true,
+            ),
+            _buildDetailRow(
+              "Salesman Total Count",
+              report.transactions!.salesmanTotalCount.toString(),
+              isBold: true,
+            ),
+          ],
           const SizedBox(height: 20),
           Text(
             "*** END OF REPORT ***",

@@ -341,7 +341,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
 
             // 2. Services Grid
             Expanded(
@@ -369,7 +369,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 padding: EdgeInsets.zero,
                                 gridDelegate:
                                     const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 4,
+                                      crossAxisCount: 3,
                                       childAspectRatio: 0.8,
                                       crossAxisSpacing: 16,
                                       mainAxisSpacing: 16,
@@ -419,7 +419,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 },
               ),
             ),
-            const SizedBox(width: 15),
+            const SizedBox(width: 10),
 
             // 3. Order Summary Panel
             Expanded(
@@ -540,7 +540,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 ),
               ),
             ),
-            const SizedBox(width: 15),
+            const SizedBox(width: 10),
 
             // 4. Action Buttons Sidebar
             Expanded(

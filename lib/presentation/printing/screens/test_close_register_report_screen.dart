@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 import 'package:sharp_cut/presentation/cash_registory/widgets/close_register_print_widget.dart';
+
+import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 
 class TestCloseRegisterReportScreen extends StatelessWidget {
   const TestCloseRegisterReportScreen({super.key});
@@ -18,19 +19,54 @@ class TestCloseRegisterReportScreen extends StatelessWidget {
       endTime: '22:00',
     );
 
+    // Dummy Transaction Report Data (QuickReportModel)
+    final dummyTransactionReport = QuickReportModel(
+      salonName: "TAJ SHALEELA Salon test1",
+      branch: "MAIN",
+      dateRange: "14/01/2026 - 14/01/2026",
+      printDatetime: "14/01/2026 02:02 PM",
+      invoiceDetails: {
+        "total_invoice": 3,
+        "total_invoice_sales_amount": 242,
+        "total_unpaid_amount": 71,
+        "gross_total_amount": 242,
+        "total_discount": 0,
+        "total_credit_amount": 0,
+      },
+      cashCustomerCount: 2,
+      cashCustomerAmount: "171.00",
+      cardCustomerCount: 1,
+      cardCustomerAmount: "96.00",
+      salesmanWiseDetails: [
+        SalesmanWiseDetail(
+          salesmanName: "Rashid",
+          totalCashAmount: "171.00",
+          totalCardAmount: "96.00",
+        ),
+        SalesmanWiseDetail(
+          salesmanName: "Ramzan",
+          totalCashAmount: "0",
+          totalCardAmount: "0",
+        ),
+      ],
+      salesmanTotalAmount: 267,
+      salesmanTotalCount: 2,
+    );
+
     // Dummy Close Register Report Data
     final dummyReport = CloseRegisterReportModel(
-      cashRegisterId: 6,
+      cashRegisterId: 3,
       openedBy: "Rashid",
       closedBy: "Ashique",
-      openingAmount: "200.00",
+      openingAmount: "300.00",
       closingAmount: 500,
-      openedAt: "2026-01-13 16:18:28",
-      closedAt: "2026-01-13T12:18:45.250580Z",
+      openedAt: "2026-01-14 13:52:02",
+      closedAt: "2026-01-14T10:02:57.988569Z",
       totalSalesAmount: 0,
       totalSalesCount: 0,
-      expectedClosingAmount: 200,
-      discrepancy: 300,
+      expectedClosingAmount: 300,
+      discrepancy: 200,
+      transactions: dummyTransactionReport,
     );
 
     return Scaffold(

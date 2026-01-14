@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_state.dart';
+import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
+import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
@@ -75,6 +78,13 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
         if (state is CashRegistoryCloseSuccess) {
           Navigator.pop(context);
           ToastHelper.showSuccess(state.response.message);
+          final report = state.response.report;
+          if(report != null){
+            final ShopModel? shop = context.read<AuthCubit>().currentUser;
+            if(shop != null){
+              context.read<PrintingCubit>().printCloseRegisterReport(report: report, shop: shop, printCount: 1);
+            }
+          }
         
         } else if (state is CashRegistoryAddError) {
           ToastHelper.showError(state.message);

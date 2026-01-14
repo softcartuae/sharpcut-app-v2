@@ -35,13 +35,10 @@ class _HomeAppBarState extends State<HomeAppBar> {
         // Left Section: Logo & Shop Name
         Row(
           children: [
-            GestureDetector(
-              onTap: () async {},
-              child: Image.asset(
-                "lib/utils/images/sharp_cut.png",
-                height: 80,
-                width: 80,
-              ),
+            Image.asset(
+              "lib/utils/images/sharp_cut.png",
+              height: 80,
+              width: 80,
             ),
             const SizedBox(width: 25),
             Image.asset(
@@ -71,14 +68,13 @@ class _HomeAppBarState extends State<HomeAppBar> {
               DateFormat('dd MMM yyyy').format(DateTime.now()),
               style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 21),
             ),
-      
+
             const SizedBox(width: 40),
             const CircleAvatar(
               radius: 18,
               backgroundImage: AssetImage("lib/utils/images/profile_pic.png"),
             ),
             const SizedBox(width: 12),
-       
           ],
         ),
       ],

@@ -1,3 +1,5 @@
+import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
+
 class CloseRegisterReportModel {
   final num totalSalesAmount;
   final num totalSalesCount;
@@ -10,6 +12,7 @@ class CloseRegisterReportModel {
   final num closingAmount;
   final String openedAt;
   final String openedBy;
+  final QuickReportModel? transactions;
 
   CloseRegisterReportModel({
     required this.totalSalesAmount,
@@ -23,21 +26,28 @@ class CloseRegisterReportModel {
     required this.closingAmount,
     required this.openedAt,
     required this.openedBy,
+    this.transactions,
   });
 
   factory CloseRegisterReportModel.fromJson(Map<String, dynamic> json) {
+    final cashRegister = json['cash_register'] ?? {};
+    final transactions = json['transactions'] != null
+        ? QuickReportModel.fromJson(json['transactions'])
+        : null;
+
     return CloseRegisterReportModel(
-      totalSalesAmount: json['total_sales_amount'] ?? 0,
-      totalSalesCount: json['total_sales_count'] ?? 0,
-      expectedClosingAmount: json['expected_closing_amount'] ?? 0,
-      discrepancy: json['discrepancy'] ?? 0,
-      closedAt: json['closed_at'] ?? '',
-      closedBy: json['closed_by'] ?? '',
-      cashRegisterId: json['cash_register_id'] ?? 0,
-      openingAmount: json['opening_amount'] ?? '',
-      closingAmount: json['closing_amount'] ?? 0,
-      openedAt: json['opened_at'] ?? '',
-      openedBy: json['opened_by'] ?? '',
+      totalSalesAmount: cashRegister['total_sales_amount'] ?? 0,
+      totalSalesCount: cashRegister['total_sales_count'] ?? 0,
+      expectedClosingAmount: cashRegister['expected_closing_amount'] ?? 0,
+      discrepancy: cashRegister['discrepancy'] ?? 0,
+      closedAt: cashRegister['closed_at'] ?? '',
+      closedBy: cashRegister['closed_by'] ?? '',
+      cashRegisterId: cashRegister['cash_register_id'] ?? 0,
+      openingAmount: cashRegister['opening_amount'] ?? '',
+      closingAmount: cashRegister['closing_amount'] ?? 0,
+      openedAt: cashRegister['opened_at'] ?? '',
+      openedBy: cashRegister['opened_by'] ?? '',
+      transactions: transactions,
     );
   }
 }

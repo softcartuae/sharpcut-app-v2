@@ -10,6 +10,7 @@ import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
 import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
+import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 part 'printing_state.dart';
@@ -164,6 +165,42 @@ class PrintingCubit extends Cubit<PrintingState> {
       await _printingRepo.printQuickReport(
         printer: state.connectedPrinter!,
         report: report,
+        copies: printCount ?? 1,
+      );
+      emit(state.copyWith(status: PrintingStatus.printed));
+    } catch (e) {
+      log(e.toString());
+      emit(
+        state.copyWith(
+          status: PrintingStatus.error,
+          errorMessage: "Failed to print: ${e.toString()}",
+        ),
+      );
+    }
+  }
+
+  Future<void> printCloseRegisterReport({
+    required CloseRegisterReportModel report,
+    required ShopModel shop,
+    required int? printCount,
+  }) async {
+    if (state.connectedPrinter == null) {
+      log("No printer connected");
+      emit(
+        state.copyWith(
+          status: PrintingStatus.error,
+          errorMessage: "No printer connected",
+        ),
+      );
+      return;
+    }
+
+    emit(state.copyWith(status: PrintingStatus.printing));
+    try {
+      await _printingRepo.printCloseRegisterReport(
+        printer: state.connectedPrinter!,
+        report: report,
+        shop: shop,
         copies: printCount ?? 1,
       );
       emit(state.copyWith(status: PrintingStatus.printed));

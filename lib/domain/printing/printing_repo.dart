@@ -6,6 +6,7 @@ import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
+import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 
 abstract class PrintingRepo {
   Stream<List<Printer>> get printersStream;
@@ -29,6 +30,14 @@ abstract class PrintingRepo {
   Future<void> printQuickReport({
     required Printer printer,
     required QuickReportModel report,
+    int copies = 1,
+    bool openDrawer = false,
+  });
+
+  Future<void> printCloseRegisterReport({
+    required Printer printer,
+    required CloseRegisterReportModel report,
+    required ShopModel shop,
     int copies = 1,
     bool openDrawer = false,
   });
