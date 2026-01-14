@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_home.dart';
+import 'package:sharp_cut/data/api_client.dart';
+import 'package:sharp_cut/data/local_storage/url_storage.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class ScreenLogin extends StatefulWidget {
   const ScreenLogin({super.key});
@@ -14,11 +19,33 @@ class ScreenLogin extends StatefulWidget {
 class _ScreenLoginState extends State<ScreenLogin> {
   bool _isPasswordVisible = false;
   final TextEditingController _licenseController = TextEditingController();
+  final TextEditingController _ipController = TextEditingController();
+  final TextEditingController _portController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConnectionDetails();
+  }
+
+  Future<void> _loadConnectionDetails() async {
+    final urlStorage = UrlStorage();
+    final details = await urlStorage.getConnectionDetails();
+    final ip = details['ip'];
+    final port = details['port'];
+
+    if (ip != null && ip.isNotEmpty && port != null && port.isNotEmpty) {
+      _ipController.text = ip;
+      _portController.text = port;
+    }
+  }
 
   @override
   void dispose() {
     _licenseController.dispose();
+    _ipController.dispose();
+    _portController.dispose();
     super.dispose();
   }
 
@@ -32,9 +59,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
               MaterialPageRoute(builder: (context) => const ScreenHome()),
             );
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+            ToastHelper.showError(state.message);
           }
         },
         builder: (context, state) {
@@ -115,6 +140,138 @@ class _ScreenLoginState extends State<ScreenLogin> {
                             ),
                           ),
                           const SizedBox(height: 32),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'IP Address',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                      controller: _ipController,
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                          RegExp(r'[0-9.]'),
+                                        ),
+                                      ],
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: '192.168.1.5',
+                                        hintStyle: TextStyle(
+                                          color: Colors.grey.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white.withValues(
+                                          alpha: 0.05,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          borderSide: BorderSide(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.violetNormal,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                flex: 1,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Port',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextFormField(
+                                      controller: _portController,
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: '8001',
+                                        hintStyle: TextStyle(
+                                          color: Colors.grey.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white.withValues(
+                                          alpha: 0.05,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          borderSide: BorderSide(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          borderSide: const BorderSide(
+                                            color: AppColors.violetNormal,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
                           const Text(
                             'Licence Key',
                             style: TextStyle(color: Colors.grey, fontSize: 14),
@@ -193,11 +350,34 @@ class _ScreenLoginState extends State<ScreenLogin> {
                             child: ElevatedButton(
                               onPressed: state is AuthLoading
                                   ? null
-                                  : () {
-                                      if (_formKey.currentState!.validate()) {
-                                        context.read<AuthCubit>().login(
-                                          _licenseController.text.trim(),
+                                  : () async {
+                                      final ip = _ipController.text.trim();
+                                      final port = _portController.text.trim();
+
+                                      // Validation: Either both empty or both filled
+                                      if ((ip.isEmpty && port.isNotEmpty) ||
+                                          (ip.isNotEmpty && port.isEmpty)) {
+                                        ToastHelper.showError(
+                                          "Please provide both IP and Port, or leave both empty to use default.",
                                         );
+                                        return;
+                                      }
+
+                                      if (_formKey.currentState!.validate()) {
+                                        if (ip.isNotEmpty && port.isNotEmpty) {
+                                          await ApiClient.setConnectionDetails(
+                                            ip,
+                                            port,
+                                          );
+                                        } else {
+                                          await ApiClient.resetToDefault();
+                                        }
+
+                                        if (context.mounted) {
+                                          context.read<AuthCubit>().login(
+                                            _licenseController.text.trim(),
+                                          );
+                                        }
                                       }
                                     },
                               style: ElevatedButton.styleFrom(

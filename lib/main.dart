@@ -4,6 +4,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:sharp_cut/data/firebase_api.dart';
+import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
@@ -32,10 +33,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
+  await ApiClient.init();
   await Firebase.initializeApp();
   await FirebaseApi().initNotifications();
   Bloc.observer = SimpleBlocObserver();
-  await di.init();
   runApp(
     DevicePreview(
       enabled: false,

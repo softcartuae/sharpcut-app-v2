@@ -2,13 +2,41 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sharp_cut/data/interceptors/auth_interceptor.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
+import 'package:sharp_cut/data/local_storage/url_storage.dart';
 
 class ApiClient {
-  // static String baseUrl = "https://saloon-test2.greendomains.in/";
-  static String baseUrl = "http://192.168.1.5/";
-  // "http://165.232.178.223/saloon/";
+  static String baseUrl = "http://165.232.178.223/saloon/";
+
   static final dio = Dio(BaseOptions(baseUrl: baseUrl))
     ..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
+
+  static Future<void> init() async {
+    final urlStorage = UrlStorage();
+    final details = await urlStorage.getConnectionDetails();
+    final ip = details['ip'];
+    final port = details['port'];
+
+    if (ip != null && ip.isNotEmpty && port != null && port.isNotEmpty) {
+      baseUrl = "http://$ip:$port/";
+    } else {
+      baseUrl = "http://165.232.178.223/saloon/";
+    }
+    dio.options.baseUrl = baseUrl;
+  }
+
+  static Future<void> setConnectionDetails(String ip, String port) async {
+    baseUrl = "http://$ip:$port/";
+    dio.options.baseUrl = baseUrl;
+    final urlStorage = UrlStorage();
+    await urlStorage.saveConnectionDetails(ip, port);
+  }
+
+  static Future<void> resetToDefault() async {
+    baseUrl = "http://165.232.178.223/saloon/";
+    dio.options.baseUrl = baseUrl;
+    final urlStorage = UrlStorage();
+    await urlStorage.clearConnectionDetails();
+  }
 
   //POST API ENDPOINTS
   static final loginApi = "api/login";

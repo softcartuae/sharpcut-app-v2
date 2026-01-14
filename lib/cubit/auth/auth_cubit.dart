@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
@@ -15,7 +16,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
   AuthCubit({required this.authRepo, required this.tokenStorage})
     : super(AuthInitial());
 
-  Future<void> login(String licenseNo,) async {
+  Future<void> login(String licenseNo) async {
     emit(AuthLoading());
     try {
       final token = await authRepo.login(licenseNo);
@@ -59,6 +60,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
 
   Future<void> logout() async {
     await authRepo.logout();
+    await ApiClient.resetToDefault();
     currentUser = null;
     emit(AuthUnauthenticated());
   }
