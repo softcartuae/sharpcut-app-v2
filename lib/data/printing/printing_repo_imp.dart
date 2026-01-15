@@ -405,7 +405,11 @@ class PrintingRepoImp implements PrintingRepo {
           ),
           child: Material(
             color: Colors.white,
-            child: CloseRegisterPrintWidget(report: report, shop: shop),
+            child: CloseRegisterPrintWidget(
+              report: report,
+              shop: shop,
+              width: targetWidth,
+            ),
           ),
         ),
       ),

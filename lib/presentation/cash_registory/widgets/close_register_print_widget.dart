@@ -7,17 +7,19 @@ import 'package:sharp_cut/domain/cash_registory/models/close_register_report_mod
 class CloseRegisterPrintWidget extends StatelessWidget {
   final CloseRegisterReportModel report;
   final ShopModel shop;
+  final double? width;
 
   const CloseRegisterPrintWidget({
     super.key,
     required this.report,
     required this.shop,
+    this.width,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 380, // Standard receipt width
+      width: width ?? 370, // Standard receipt width
       color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       child: Column(
@@ -237,7 +239,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
   Widget _buildDetailRow(
     String label,
     String value, {
-    bool isBold = false,
+    bool isBold = true,
     Color color = Colors.black,
   }) {
     return Padding(
@@ -248,8 +250,8 @@ class CloseRegisterPrintWidget extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.rajdhani(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),

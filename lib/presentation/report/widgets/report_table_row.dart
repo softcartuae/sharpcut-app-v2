@@ -44,7 +44,11 @@ class ReportTableRow extends StatelessWidget {
             transaction.totalPayment?.toStringAsFixed(2) ?? "0.00",
             width: 80,
           ),
-          _buildDataCell(balenceAmount.toStringAsFixed(2), width: 80),
+          _buildDataCell(
+            balenceAmount.toStringAsFixed(2),
+            width: 80,
+            isBalanceCell: balenceAmount > 0,
+          ),
           _buildDataCell(transaction.staff?.name ?? "-", width: 100),
 
           _buildActionCell(
@@ -68,6 +72,7 @@ class ReportTableRow extends StatelessWidget {
     required double width,
     bool isCheckbox = false,
     bool isChecked = false,
+    bool isBalanceCell = false,
   }) {
     return SizedBox(
       width: width,
@@ -94,7 +99,7 @@ class ReportTableRow extends StatelessWidget {
               child: Text(
                 text,
                 style: GoogleFonts.rajdhani(
-                  color: Colors.grey[800],
+                  color: isBalanceCell ? Colors.red : Colors.grey[800],
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),

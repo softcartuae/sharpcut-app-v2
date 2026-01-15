@@ -58,7 +58,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
   }
 
   String _formatDate(DateTime date) {
-    return DateFormat('MM/dd/yyyy').format(date);
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   void _fetchReport() {

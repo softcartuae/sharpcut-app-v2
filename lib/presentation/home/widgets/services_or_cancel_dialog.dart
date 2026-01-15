@@ -8,6 +8,7 @@ class ServicesOrCancelDialog extends StatelessWidget {
   static Future<bool?> show(BuildContext context) {
     return showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => const ServicesOrCancelDialog(),
     );
   }

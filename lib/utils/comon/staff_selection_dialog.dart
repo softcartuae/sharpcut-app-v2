@@ -7,7 +7,10 @@ import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 
-Future<StaffModel?> showStaffSelectionDialog(BuildContext context,ChairModel chair) {
+Future<StaffModel?> showStaffSelectionDialog(
+  BuildContext context,
+  ChairModel chair,
+) {
   // Fetch staffs from ChairCubit
   final chairCubit = context.read<ChairCubit>();
   List<StaffModel> staffListAll = List<StaffModel>.from(chairCubit.staffs);
@@ -17,6 +20,7 @@ Future<StaffModel?> showStaffSelectionDialog(BuildContext context,ChairModel cha
 
   return showDialog<StaffModel>(
     context: context,
+    barrierDismissible: false,
     builder: (context) {
       return Dialog(
         backgroundColor: const Color(0xFF1E1E2C), // Dark background

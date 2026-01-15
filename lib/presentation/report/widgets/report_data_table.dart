@@ -76,9 +76,10 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                   state.transactions[index];
                                               showDialog(
                                                 context: context,
+                                                barrierDismissible: true,
                                                 builder: (context) => PaymentDetailsDialog(
                                                   booking: booking,
-                                                  onEdit: ()  {
+                                                  onEdit: () {
                                                     final List<CartItemModel>
                                                     cartItems =
                                                         booking.details
@@ -196,24 +197,21 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                                 .totalPayment ??
                                                             0));
 
-                                                     showResettmentScreen(
-                                                          balance:
-                                                              balenceAmount,
-                                                          paidAmount: booking
-                                                              .totalPayment
-                                                              ?.toString(),
-                                                          context,
-                                                          settlePayment:
-                                                              request,
-                                                          staffName: booking
-                                                              .staff
-                                                              ?.name,
-                                                          bookingTime:
-                                                              booking.createdAt,
-                                                          invoiceNumber:
-                                                              booking.invoiceNo,
-                                                          cartItems: cartItems,
-                                                        );
+                                                    showResettmentScreen(
+                                                      balance: balenceAmount,
+                                                      paidAmount: booking
+                                                          .totalPayment
+                                                          ?.toString(),
+                                                      context,
+                                                      settlePayment: request,
+                                                      staffName:
+                                                          booking.staff?.name,
+                                                      bookingTime:
+                                                          booking.createdAt,
+                                                      invoiceNumber:
+                                                          booking.invoiceNo,
+                                                      cartItems: cartItems,
+                                                    );
                                                   },
                                                 ),
                                               );

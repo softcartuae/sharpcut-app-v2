@@ -71,6 +71,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
   Future<void> _showDateSelectionOptions(BuildContext context) async {
     final result = await showDialog<String>(
       context: context,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return SimpleDialog(
           title: const Text('Select Date Option'),

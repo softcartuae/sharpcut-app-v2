@@ -140,6 +140,67 @@ class _ScreenLoginState extends State<ScreenLogin> {
                             ),
                           ),
                           const SizedBox(height: 32),
+                          const Text(
+                            'Licence Key',
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          ),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _licenseController,
+                            obscureText: !_isPasswordVisible,
+                            style: const TextStyle(color: Colors.white),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'License key cannot be empty';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              hintText: '••••••••',
+                              hintStyle: TextStyle(
+                                color: Colors.grey.withValues(alpha: 0.5),
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.vpn_key_outlined,
+                                color: Colors.grey,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _isPasswordVisible
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isPasswordVisible = !_isPasswordVisible;
+                                  });
+                                },
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withValues(alpha: 0.05),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: AppColors.violetNormal,
+                                ),
+                              ),
+                              errorStyle: const TextStyle(
+                                color: AppColors.redNormal,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
@@ -270,67 +331,6 @@ class _ScreenLoginState extends State<ScreenLogin> {
                                 ),
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Licence Key',
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
-                          const SizedBox(height: 8),
-                          TextFormField(
-                            controller: _licenseController,
-                            obscureText: !_isPasswordVisible,
-                            style: const TextStyle(color: Colors.white),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'License key cannot be empty';
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                              hintText: '••••••••',
-                              hintStyle: TextStyle(
-                                color: Colors.grey.withValues(alpha: 0.5),
-                              ),
-                              prefixIcon: const Icon(
-                                Icons.vpn_key_outlined,
-                                color: Colors.grey,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _isPasswordVisible
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                  color: Colors.grey,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isPasswordVisible = !_isPasswordVisible;
-                                  });
-                                },
-                              ),
-                              filled: true,
-                              fillColor: Colors.white.withValues(alpha: 0.05),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.violetNormal,
-                                ),
-                              ),
-                              errorStyle: const TextStyle(
-                                color: AppColors.redNormal,
-                              ),
-                            ),
                           ),
                           const SizedBox(height: 32),
 

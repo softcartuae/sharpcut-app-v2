@@ -3,16 +3,16 @@ import 'package:google_fonts/google_fonts.dart';
 
 Future<void> showQuickPaymentPopup(
   BuildContext context,
-  Function(double discount,) onCashSelected,
-  Function(double discount,) onCreditCardSelected,
-  Function(double discount) onUnPaid,
-   {
+  Function(double discount) onCashSelected,
+  Function(double discount) onCreditCardSelected,
+  Function(double discount) onUnPaid, {
   required double total,
   required double discount,
   required double grandTotal,
 }) async {
   return showDialog(
     context: context,
+    barrierDismissible: false,
     builder: (context) {
       return QuickPaymentDialog(
         total: total,
@@ -28,9 +28,9 @@ Future<void> showQuickPaymentPopup(
 class QuickPaymentDialog extends StatefulWidget {
   final double total;
   final double initialDiscount;
-  final Function(double discount,) onCashSelected;
-  final Function(double discount, ) onCreditCardSelected;
-  final Function(double discount,) onUnPaid;
+  final Function(double discount) onCashSelected;
+  final Function(double discount) onCreditCardSelected;
+  final Function(double discount) onUnPaid;
 
   const QuickPaymentDialog({
     super.key,
@@ -56,10 +56,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
       text: widget.initialDiscount.toString(),
     );
     _grandTotal = widget.total - widget.initialDiscount;
-   
   }
-
-
 
   @override
   void dispose() {
@@ -113,7 +110,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                       Navigator.of(context).pop();
                       final discount =
                           double.tryParse(_discountController.text) ?? 0.0;
-                      widget.onCashSelected(discount,);
+                      widget.onCashSelected(discount);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
@@ -139,7 +136,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                       Navigator.of(context).pop();
                       final discount =
                           double.tryParse(_discountController.text) ?? 0.0;
-                      widget.onCreditCardSelected(discount,);
+                      widget.onCreditCardSelected(discount);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -167,7 +164,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                       Navigator.of(context).pop();
                       final discount =
                           double.tryParse(_discountController.text) ?? 0.0;
-                      widget.onUnPaid(discount,);
+                      widget.onUnPaid(discount);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

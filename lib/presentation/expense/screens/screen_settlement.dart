@@ -30,6 +30,7 @@ Future<void> showSettlementDialog(
 }) {
   return showDialog(
     context: context,
+    barrierDismissible: false,
     barrierColor: Colors.black.withValues(alpha: 0.5),
     builder: (context) => SettlementDialog(
       invoiceNumber: invoiceNumber,

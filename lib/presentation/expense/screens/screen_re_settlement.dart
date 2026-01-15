@@ -29,6 +29,7 @@ Future<bool?> showResettmentScreen(
 }) {
   return showDialog(
     context: context,
+    barrierDismissible: false,
     barrierColor: Colors.black.withValues(alpha: 0.5),
     builder: (context) => ResettlementScreen(
       paidAmount: paidAmount,

@@ -78,7 +78,11 @@ class TestCloseRegisterReportScreen extends StatelessWidget {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(10),
-          child: CloseRegisterPrintWidget(report: dummyReport, shop: dummyShop),
+          child: CloseRegisterPrintWidget(
+            report: dummyReport,
+            shop: dummyShop,
+            width: 370,
+          ),
         ),
       ),
     );

@@ -220,7 +220,27 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           PrintCountDialog.show(context);
           break;
         case 5:
-          context.read<AuthCubit>().logout();
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text("Logout"),
+              content: const Text("Are you sure you want to logout?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    context.read<AuthCubit>().logout();
+                  },
+                  child: const Text("Logout"),
+                ),
+              ],
+            ),
+          );
           break;
       }
     }

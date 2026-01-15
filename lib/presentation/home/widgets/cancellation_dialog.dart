@@ -26,6 +26,7 @@ class CancellationDialog extends StatefulWidget {
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => CancellationDialog(transactionId: transactionId),
     );
   }
@@ -267,7 +268,7 @@ class _CancellationDialogState extends State<CancellationDialog> {
                                       );
                                       return;
                                     }
-                                    
+
                                     if (_passwordController.text.isEmpty) {
                                       ToastHelper.showError(
                                         "Please enter password",
@@ -281,7 +282,7 @@ class _CancellationDialogState extends State<CancellationDialog> {
                                       );
                                       return;
                                     }
-                                    
+
                                     context.read<BookingCubit>().cancelBooking(
                                       transactionId: widget.transactionId,
                                       userId: selectedStaff!.id,

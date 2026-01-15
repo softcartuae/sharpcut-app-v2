@@ -28,6 +28,7 @@ class ResetPasswordDialog extends StatefulWidget {
   }) {
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => ResetPasswordDialog(title: title, isAdmin: isAdmin),
     );
   }

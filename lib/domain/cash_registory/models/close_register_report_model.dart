@@ -34,9 +34,11 @@ class CloseRegisterReportModel {
     final transactions = json['transactions'] != null
         ? QuickReportModel.fromJson(json['transactions'])
         : null;
-
+    final totalSalesAmount =
+        num.tryParse(cashRegister['total_sales_amount']?.toString() ?? '0') ??
+        0;
     return CloseRegisterReportModel(
-      totalSalesAmount: cashRegister['total_sales_amount'] ?? 0,
+      totalSalesAmount: totalSalesAmount,
       totalSalesCount: cashRegister['total_sales_count'] ?? 0,
       expectedClosingAmount: cashRegister['expected_closing_amount'] ?? 0,
       discrepancy: cashRegister['discrepancy'] ?? 0,
