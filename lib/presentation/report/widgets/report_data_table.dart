@@ -376,7 +376,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                       if (state is ReportLoading)
                         const Center(child: CircularProgressIndicator())
                       else if (state is ReportFailure)
-                        Center(child: Text(state.message))
+                        Center(child: Text('Something went wrong'))
                       else if (state is ReportSuccess &&
                           state.transactions.isEmpty)
                         Center(

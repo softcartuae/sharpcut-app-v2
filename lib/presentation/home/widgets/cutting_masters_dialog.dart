@@ -83,8 +83,16 @@ class CuttingMastersDialog extends StatelessWidget {
         if (state is ChairLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ChairError) {
-          return Center(child: Text('Error: ${state.message}'));
+          return Center(child: Text('Something went wrong'));
         } else if (state is ChairSuccess) {
+          if (state.chairs.isEmpty) {
+            return const Center(
+              child: Text(
+                'No chairs available',
+                style: TextStyle(fontSize: 18, color: Colors.black),
+              ),
+            );
+          }
           return ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: state.chairs.length,

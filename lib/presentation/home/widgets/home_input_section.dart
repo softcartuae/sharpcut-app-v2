@@ -149,6 +149,12 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                         label: "Customer Name",
                         hint: "Customer Name",
                         icon: Icons.person_outline,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z\s]'),
+                          ),
+                          LengthLimitingTextInputFormatter(15),
+                        ],
                         onChanged: (value) {
                           context.read<BookingFormCubit>().updateName(value);
                         },
@@ -165,6 +171,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(15),
                         ],
                         onChanged: (value) {
                           context.read<BookingFormCubit>().updateNumber(value);

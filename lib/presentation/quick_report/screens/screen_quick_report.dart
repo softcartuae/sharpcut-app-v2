@@ -53,8 +53,13 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
   @override
   void initState() {
     super.initState();
-    // Fetch initial report without parameters
-    context.read<QuickReportCubit>().fetchQuickReport();
+    // Set default range to Today
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    _selectedRange = DateTimeRange(start: today, end: today);
+
+    // Fetch initial report with default range
+    _fetchReport();
   }
 
   String _formatDate(DateTime date) {
@@ -98,17 +103,6 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.calendar_view_day),
-                title: const Text('All'),
-                onTap: () {
-                  Navigator.pop(context);
-                  setState(() {
-                    _selectedRange = null;
-                  });
-                  _fetchReport();
-                },
-              ),
               ListTile(
                 leading: const Icon(Icons.today),
                 title: const Text('Today'),
@@ -379,8 +373,8 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                         } else if (state is QuickReportError) {
                           return Center(
                             child: Text(
-                              state.message,
-                              style: const TextStyle(color: Colors.red),
+                              "Something went wrong",
+                              style: const TextStyle(color: Colors.black),
                             ),
                           );
                         } else if (state is QuickReportLoaded) {

@@ -48,6 +48,7 @@ class QuickPaymentDialog extends StatefulWidget {
 class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
   late TextEditingController _discountController;
   late double _grandTotal;
+  late double _uiGrandTotal;
 
   @override
   void initState() {
@@ -56,6 +57,15 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
       text: widget.initialDiscount.toString(),
     );
     _grandTotal = widget.total - widget.initialDiscount;
+    _uiGrandTotal = _grandTotal;
+    _discountController.addListener(_updateGrandTotal);
+  }
+
+  void _updateGrandTotal() {
+    final double discount = double.tryParse(_discountController.text) ?? 0.0;
+    setState(() {
+      _uiGrandTotal = widget.total - discount;
+    });
   }
 
   @override
@@ -99,7 +109,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
             const SizedBox(height: 10),
             _buildReadOnlyField(
               "Grand Total :",
-              _grandTotal.toStringAsFixed(2),
+              _uiGrandTotal.toStringAsFixed(2),
             ),
             const SizedBox(height: 30),
             Row(

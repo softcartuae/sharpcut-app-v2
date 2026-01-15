@@ -425,7 +425,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                             } else if (state is ServiceStateError) {
                               return Center(
                                 child: Text(
-                                  state.message,
+                                  "Something went wrong",
                                   style: const TextStyle(color: Colors.white),
                                 ),
                               );
@@ -654,37 +654,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                   );
                                 },
                               ),
-                            // if (isBooked) const SizedBox(height: 12),
-                            // if (isBooked)
-                            //   Opacity(
-                            //     opacity: isBooked ? 1.0 : 0.5,
-                            //     child: ActionButton(
-                            //       label: "CANCEL",
-                            //       isPrimary: selectedButton == "CANCEL",
-                            //       onTap: !isBooked
-                            //           ? null
-                            //           : () {
-                            //               _selectedButtonNotifier.value =
-                            //                   "CANCEL";
-                            //               int? transactionId;
-                            //               if (bookingState is BookingSuccess) {
-                            //                 transactionId =
-                            //                     bookingState.bookingResponse.id;
-                            //               }
-
-                            //               if (transactionId != null) {
-                            //                 CancellationDialog.show(
-                            //                   context,
-                            //                   transactionId,
-                            //                 );
-                            //               } else {
-                            //                 ToastHelper.showError(
-                            //                   "Invalid booking details",
-                            //                 );
-                            //               }
-                            //             },
-                            //     ),
-                            //   ),
+                         
                             if (isBooked) const SizedBox(height: 12),
                             // SAVE BOOKING - Disabled if NOT booked
                             if (isBooked)

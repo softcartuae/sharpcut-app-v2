@@ -89,9 +89,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
   final TextEditingController _discountController = TextEditingController(
     text: "0.00",
   );
-  final TextEditingController _roundOffController = TextEditingController(
-    text: "0.00",
-  );
 
   final TextEditingController _paidController = TextEditingController(
     text: "0.00",
@@ -125,6 +122,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
   bool _isCardSelected = false;
 
   double _finalTotal = 0.0;
+  double _uiGrandTotal = 0.0;
 
   @override
   void initState() {
@@ -152,8 +150,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
         .toStringAsFixed(2);
     _discountController.text = (widget.settlePayment.discount ?? 0.0)
         .toStringAsFixed(2);
-    _roundOffController.text = (widget.settlePayment.roundOff ?? 0.0)
-        .toStringAsFixed(2);
 
     // Amount to pay is usually the final total
     _amountController.text = (widget.settlePayment.finalTotal ?? 0.0)
@@ -176,6 +172,8 @@ class _SettlementDialogState extends State<SettlementDialog> {
     // Final = SubTotal + Tax
     setState(() {
       _finalTotal = (subTotal + taxTotal);
+      final double discount = double.tryParse(_discountController.text) ?? 0.0;
+      _uiGrandTotal = _finalTotal - discount;
 
       // Also update split amounts if they haven't been manually edited?
       // Or just let the user handle it?
@@ -227,7 +225,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
     _totalQtyController.dispose();
     _subTotalController.dispose();
     _discountController.dispose();
-    _roundOffController.dispose();
     _paidController.dispose();
     _curPaymentController.dispose();
     _balanceController.dispose();
@@ -238,7 +235,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
   void _onSettle({required bool alsoPrint}) {
     final double discount = double.tryParse(_discountController.text) ?? 0.0;
-    final double roundOff = double.tryParse(_roundOffController.text) ?? 0.0;
 
     final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
     final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
@@ -336,7 +332,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
     log("tax: $taxTotal");
     log("subtotal: $subTotal");
     log("discount : $discount");
-    log("roundOff : $roundOff");
     log("finalTotal : $finalTotal");
 
     final request = SettlePaymentRequestModel(
@@ -346,7 +341,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
       subTotalValue: subTotal,
       taxTotal: taxTotal,
       discount: discount,
-      roundOff: roundOff,
+      roundOff: 0,
       finalTotal: finalTotal,
       serviceId: widget.settlePayment.serviceId,
       quantity: widget.settlePayment.quantity,
@@ -812,22 +807,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                       ],
                                     ),
                                     const SizedBox(height: 10),
-                                    SettlementRowInput(
-                                      label: "Round Off",
-                                      controller: _roundOffController,
-                                      onChanged: (val) =>
-                                          _calculateFinalTotal(),
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                            decimal: true,
-                                          ),
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                          RegExp(r'^\d+\.?\d{0,2}'),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
+
                                     SettlementRowInput(
                                       label: "VAT",
                                       controller: _vatController,
@@ -867,7 +847,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                             ),
                                           ),
                                           Text(
-                                            _finalTotal.toStringAsFixed(2),
+                                            _uiGrandTotal.toStringAsFixed(2),
                                             style: GoogleFonts.rajdhani(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,

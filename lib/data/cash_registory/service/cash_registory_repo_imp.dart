@@ -137,6 +137,7 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
   Future<Either<String, CloseRegisterModel>> getSalesTotal() async {
     try {
+      
       final response = await ApiClient.dio.get(
         ApiClient.getTotalSalesForCloseCashRegisterApi,
       );
