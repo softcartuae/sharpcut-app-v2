@@ -49,7 +49,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
               shop.address!,
               textAlign: TextAlign.center,
               style: GoogleFonts.rajdhani(
-                fontSize: 16,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -61,7 +61,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
               'TRN: ${shop.vatNo}',
               textAlign: TextAlign.center,
               style: GoogleFonts.rajdhani(
-                fontSize: 16,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -71,7 +71,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
           Text(
             "CLOSE REGISTER REPORT",
             style: GoogleFonts.rajdhani(
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -118,7 +118,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
             Text(
               "TRANSACTION DETAILS",
               style: GoogleFonts.rajdhani(
-                fontSize: 18,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -158,7 +158,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
             Text(
               "CUSTOMER TYPE DETAILS",
               style: GoogleFonts.rajdhani(
-                fontSize: 16,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -177,49 +177,201 @@ class CloseRegisterPrintWidget extends StatelessWidget {
             Text(
               "SALESMAN WISE DETAILS",
               style: GoogleFonts.rajdhani(
-                fontSize: 16,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
             ),
-            ...report.transactions!.salesmanWiseDetails.map((detail) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      detail.salesmanName,
+            const Divider(color: Colors.black, thickness: 1.5),
+
+            // 4-Column Header
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Staff",
                       style: GoogleFonts.rajdhani(
-                        fontSize: 14,
                         fontWeight: FontWeight.bold,
+                        fontSize: 16,
                         color: Colors.black,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 2.0),
-                      child: Column(
-                        children: [
-                          _buildDetailRow("Cash", detail.totalCashAmount),
-                          _buildDetailRow("Card", detail.totalCardAmount),
-                        ],
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      "Cash",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.rajdhani(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      "Card",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.rajdhani(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      "Total",
+                      textAlign: TextAlign.end,
+                      style: GoogleFonts.rajdhani(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(color: Colors.grey, thickness: 0.5),
+
+            // Rows
+            ...report.transactions!.salesmanWiseDetails.map((detail) {
+              final double cash =
+                  double.tryParse(detail.totalCashAmount) ?? 0.0;
+              final double card =
+                  double.tryParse(detail.totalCardAmount) ?? 0.0;
+              final double total = cash + card;
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        detail.salesmanName,
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        detail.totalCashAmount,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        detail.totalCardAmount,
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.rajdhani(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        total.toStringAsFixed(2),
+                        textAlign: TextAlign.end,
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
                 ),
               );
             }),
-            const SizedBox(height: 2),
-            const Divider(color: Colors.black),
-            _buildDetailRow(
-              "Salesman Total Amount",
-              report.transactions!.salesmanTotalAmount.toString(),
-              isBold: true,
-            ),
-            _buildDetailRow(
-              "Salesman Total Count",
-              report.transactions!.salesmanTotalCount.toString(),
-              isBold: true,
+
+            const SizedBox(height: 8),
+            const Divider(color: Colors.black, thickness: 1),
+
+            // Footer Totals
+            Builder(
+              builder: (context) {
+                double totalCash = 0.0;
+                double totalCard = 0.0;
+
+                for (var detail in report.transactions!.salesmanWiseDetails) {
+                  totalCash += double.tryParse(detail.totalCashAmount) ?? 0.0;
+                  totalCard += double.tryParse(detail.totalCardAmount) ?? 0.0;
+                }
+                final double grandTotal = totalCash + totalCard;
+
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        "Total :${report.transactions!.salesmanWiseDetails.length}",
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        totalCash.toStringAsFixed(2),
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        totalCard.toStringAsFixed(2),
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        grandTotal.toStringAsFixed(2),
+                        textAlign: TextAlign.end,
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
           const SizedBox(height: 20),
@@ -250,7 +402,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.rajdhani(
-              fontSize: 15,
+              fontSize: 19,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
@@ -258,8 +410,8 @@ class CloseRegisterPrintWidget extends StatelessWidget {
           Text(
             value,
             style: GoogleFonts.rajdhani(
-              fontSize: 14,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
               color: color,
             ),
           ),

@@ -79,13 +79,16 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
           Navigator.pop(context);
           ToastHelper.showSuccess(state.response.message);
           final report = state.response.report;
-          if(report != null){
+          if (report != null) {
             final ShopModel? shop = context.read<AuthCubit>().currentUser;
-            if(shop != null){
-              context.read<PrintingCubit>().printCloseRegisterReport(report: report, shop: shop, printCount: 1);
+            if (shop != null) {
+              context.read<PrintingCubit>().printCloseRegisterReport(
+                report: report,
+                shop: shop,
+                printCount: 1,
+              );
             }
           }
-        
         } else if (state is CashRegistoryAddError) {
           ToastHelper.showError(state.message);
         }
@@ -294,7 +297,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                       checkColor: const Color(0xFF1E1E2C),
                     ),
                     Text(
-                      "Print Receipt",
+                      "Print Report",
                       style: GoogleFonts.rajdhani(
                         color: Colors.white,
                         fontSize: 16,

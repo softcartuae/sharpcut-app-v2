@@ -13,6 +13,7 @@ class BookingResponseModel {
   final String? invoiceNo;
   final String? invoiceDate;
   final String? status;
+  final double? discount;
   final String? createdAt;
   final StaffModel? staff;
   final List<BookingDetail>? details;
@@ -43,6 +44,7 @@ class BookingResponseModel {
     this.paymentStatus,
     this.totalPayment,
     this.payments,
+    this.discount
   });
 
   factory BookingResponseModel.fromJson(Map<String, dynamic> json) {
@@ -62,6 +64,7 @@ class BookingResponseModel {
       subtotal: toDouble(json['grand_total']),
       taxTotal: toDouble(json['tax_total']),
       finalTotal: toDouble(json['final_total']),
+      discount: toDouble(json['discount']),
       paymentStatus: json['payment_status'],
       totalPayment: toDouble(json['total_payment']),
       details: json['details'] != null

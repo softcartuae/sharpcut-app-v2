@@ -189,6 +189,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           value: 5,
           child: MenuItem(icon: Icons.logout, text: "Logout"),
         ),
+        PopupMenuItem(
+          value: 6,
+          child: MenuItem(
+            icon: Icons.receipt_long,
+            text: "Print Register Report",
+          ),
+        ),
       ],
     );
 
@@ -237,6 +244,33 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                     context.read<AuthCubit>().logout();
                   },
                   child: const Text("Logout"),
+                ),
+              ],
+            ),
+          );
+          break;
+        case 6:
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text("Print Last Report"),
+              content: const Text(
+                "Are you sure you want to print the last close register report?",
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    context
+                        .read<CashRegistoryCubit>()
+                        .getLastCloseRegisterReport();
+                  },
+                  child: const Text("Print"),
                 ),
               ],
             ),
@@ -295,6 +329,26 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               // Optionally clear cart or reset state
             } else if (state is BookingSuccess) {
               context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
+            }
+          },
+        ),
+        BlocListener<CashRegistoryCubit, CashRegistoryState>(
+          listener: (context, state) {
+            if (state is CashRegistoryReportLoaded) {
+              final shop = context.read<AuthCubit>().currentUser;
+              if (shop != null) {
+                final printCubit = context.read<PrintingCubit>();
+                printCubit.printCloseRegisterReport(
+                  report: state.report,
+                  shop: shop,
+                  printCount: printCubit.state.settings?.printCount.report
+                      .toInt(),
+                );
+              } else {
+                ToastHelper.showError("Shop data not found");
+              }
+            } else if (state is CashRegistoryAddError) {
+              ToastHelper.showError(state.message);
             }
           },
         ),
@@ -654,7 +708,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                   );
                                 },
                               ),
-                         
+
                             if (isBooked) const SizedBox(height: 12),
                             // SAVE BOOKING - Disabled if NOT booked
                             if (isBooked)

@@ -7,10 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:sharp_cut/data/firebase_api.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:sharp_cut/presentation/printing/screens/test_close_register_report_screen.dart';
+import 'package:sharp_cut/presentation/printing/screens/test_quick_report_screen.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
-import 'package:sharp_cut/presentation/splash/screens/splash_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
@@ -151,7 +152,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           child: child!,
         );
       },
-      home: SplashScreen(),
+      home: TestCloseRegisterReportScreen(),
     );
   }
 }

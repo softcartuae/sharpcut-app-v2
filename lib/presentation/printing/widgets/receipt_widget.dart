@@ -49,7 +49,7 @@ class ReceiptWidget extends StatelessWidget {
             shopData.name ?? 'Shop Name',
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 26,
+              fontSize: 30,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -61,7 +61,7 @@ class ReceiptWidget extends StatelessWidget {
               shopData.address!,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -73,7 +73,7 @@ class ReceiptWidget extends StatelessWidget {
               'TRN: ${shopData.vatNo}',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -84,7 +84,7 @@ class ReceiptWidget extends StatelessWidget {
             'TAX INVOICE - فاتورة ضريبية',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -127,7 +127,7 @@ class ReceiptWidget extends StatelessWidget {
               Text(
                 'Start time : ${_formatTime(shopData.startTime)}',
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -135,7 +135,7 @@ class ReceiptWidget extends StatelessWidget {
               Text(
                 'End time : ${_formatTime(shopData.endTime)}',
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -156,7 +156,7 @@ class ReceiptWidget extends StatelessWidget {
                     Text(
                       'اسم الصنف',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -164,7 +164,7 @@ class ReceiptWidget extends StatelessWidget {
                     Text(
                       'Item Name',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -180,7 +180,7 @@ class ReceiptWidget extends StatelessWidget {
                     Text(
                       'الكمية',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -188,7 +188,7 @@ class ReceiptWidget extends StatelessWidget {
                     Text(
                       'Qty',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -204,7 +204,7 @@ class ReceiptWidget extends StatelessWidget {
                     Text(
                       'السعر',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -212,7 +212,7 @@ class ReceiptWidget extends StatelessWidget {
                     Text(
                       'Price',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -228,7 +228,7 @@ class ReceiptWidget extends StatelessWidget {
                     Text(
                       'القيمة',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -236,7 +236,7 @@ class ReceiptWidget extends StatelessWidget {
                     Text(
                       'Total',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -268,7 +268,7 @@ class ReceiptWidget extends StatelessWidget {
                             Text(
                               item.service.name ?? '',
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
@@ -278,7 +278,7 @@ class ReceiptWidget extends StatelessWidget {
                               Text(
                                 item.service.nameArabic!,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -293,7 +293,7 @@ class ReceiptWidget extends StatelessWidget {
                           item.quantity.toString(),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -305,7 +305,7 @@ class ReceiptWidget extends StatelessWidget {
                           price.toStringAsFixed(2),
                           textAlign: TextAlign.right,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -317,7 +317,7 @@ class ReceiptWidget extends StatelessWidget {
                           total.toStringAsFixed(2),
                           textAlign: TextAlign.right,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
@@ -343,11 +343,11 @@ class ReceiptWidget extends StatelessWidget {
             'المجموع شامل الضريبة - Incl VAT',
             (request.finalTotal ?? 0).toStringAsFixed(2),
           ), // Assuming final total is incl VAT
-          if ((request.discount ?? 0) > 0)
-            _buildTotalRow(
-              'خصم - Discount',
-              (request.discount ?? 0).toStringAsFixed(2),
-            ),
+
+          _buildTotalRow(
+            'خصم - Discount',
+            (request.discount ?? 0).toStringAsFixed(2),
+          ),
           _buildTotalRow(
             'المجموع الفرعي - Sub Total',
             (request.subTotalList?.fold(0.0, (p, c) => p + c) ?? 0)
@@ -369,7 +369,7 @@ class ReceiptWidget extends StatelessWidget {
               const Text(
                 'المبلغ الصافي - Net Amount',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -424,7 +424,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         label1,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -432,7 +432,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         subLabel1,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -443,7 +443,7 @@ class ReceiptWidget extends StatelessWidget {
                   Text(
                     ': $value1',
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -465,7 +465,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         label2,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -473,7 +473,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         subLabel2,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -484,7 +484,7 @@ class ReceiptWidget extends StatelessWidget {
                   Text(
                     ': $value2',
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -507,7 +507,7 @@ class ReceiptWidget extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: 19,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -515,7 +515,7 @@ class ReceiptWidget extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: 19,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),

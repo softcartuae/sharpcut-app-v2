@@ -81,4 +81,12 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
           emit(CashRegistorySalesTotalLoaded(closeRegisterModel)),
     );
   }
+
+  Future<void> getLastCloseRegisterReport() async {
+    emit(CashRegistoryLoading());
+    final result = await cashRegistoryRepo.getLastCloseRegisterReport();
+    result.fold((error) {
+      emit(CashRegistoryAddError(error));
+    }, (report) => emit(CashRegistoryReportLoaded(report)));
+  }
 }

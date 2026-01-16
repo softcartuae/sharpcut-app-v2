@@ -29,27 +29,33 @@ class CloseRegisterReportModel {
     this.transactions,
   });
 
+  /// ✅ static so factory can use it
+  static num numPars(dynamic value) {
+    if (value == null) return 0;
+    return num.tryParse(value.toString()) ?? 0;
+  }
+
   factory CloseRegisterReportModel.fromJson(Map<String, dynamic> json) {
     final cashRegister = json['cash_register'] ?? {};
-    final transactions = json['transactions'] != null
-        ? QuickReportModel.fromJson(json['transactions'])
-        : null;
-    final totalSalesAmount =
-        num.tryParse(cashRegister['total_sales_amount']?.toString() ?? '0') ??
-        0;
+
     return CloseRegisterReportModel(
-      totalSalesAmount: totalSalesAmount,
-      totalSalesCount: cashRegister['total_sales_count'] ?? 0,
-      expectedClosingAmount: cashRegister['expected_closing_amount'] ?? 0,
-      discrepancy: cashRegister['discrepancy'] ?? 0,
+      totalSalesAmount: numPars(cashRegister['total_sales_amount']),
+      totalSalesCount: numPars(cashRegister['total_sales_count']),
+      expectedClosingAmount: numPars(cashRegister['expected_closing_amount']),
+      discrepancy: numPars(cashRegister['discrepancy']),
+      closingAmount: numPars(cashRegister['closing_amount']),
+      cashRegisterId: numPars(cashRegister['cash_register_id']).toInt(),
+
+      // Strings (keep as-is)
+      openingAmount: cashRegister['opening_amount']?.toString() ?? '',
       closedAt: cashRegister['closed_at'] ?? '',
       closedBy: cashRegister['closed_by'] ?? '',
-      cashRegisterId: cashRegister['cash_register_id'] ?? 0,
-      openingAmount: cashRegister['opening_amount'] ?? '',
-      closingAmount: cashRegister['closing_amount'] ?? 0,
       openedAt: cashRegister['opened_at'] ?? '',
       openedBy: cashRegister['opened_by'] ?? '',
-      transactions: transactions,
+
+      transactions: json['transactions'] != null
+          ? QuickReportModel.fromJson(json['transactions'])
+          : null,
     );
   }
 }

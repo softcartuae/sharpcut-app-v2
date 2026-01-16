@@ -183,6 +183,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
         _cashAmountController.text = _finalTotal.toStringAsFixed(2);
       }
       _calculatePaymentAndBalance();
+      _calculateChange();
     });
   }
 
@@ -211,6 +212,20 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
     _curPaymentController.text = curPayment.toStringAsFixed(2);
     _balanceController.text = balance.toStringAsFixed(2);
+  }
+
+  void _calculateChange() {
+    double tender = double.tryParse(_tenderCashController.text) ?? 0.0;
+    double amount = 0.0;
+    if (_splitPayment) {
+      amount = double.tryParse(_cashAmountController.text) ?? 0.0;
+    } else {
+      amount = double.tryParse(_amountController.text) ?? 0.0;
+    }
+
+    double change = tender - amount;
+    if (change < 0) change = 0;
+    _chargeController.text = change.toStringAsFixed(2);
   }
 
   @override
@@ -253,11 +268,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
         cardAmount = double.tryParse(_cardAmountController.text) ?? 0.0;
       }
     } else {
-      // Split OFF: use the main amount controller for the selected mode
-      // Actually, to keep it simple, let's use the specific controllers if we expose them,
-      // OR map _amountController to the selected one.
-      // Current UI plan: If split OFF, show _amountController.
-      // So we read from _amountController and assign to selected mode.
+   
       final double amount = double.tryParse(_amountController.text) ?? 0.0;
       if (_isCashSelected) {
         cashAmount = amount;
@@ -536,6 +547,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                           _isCardSelected = false;
                                         }
                                         _calculatePaymentAndBalance();
+                                        _calculateChange();
                                       });
                                     },
                                     child: PaymentModeCard(
@@ -567,6 +579,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                           _isCashSelected = false;
                                         }
                                         _calculatePaymentAndBalance();
+                                        _calculateChange();
                                       });
                                     },
                                     child: PaymentModeCard(
@@ -652,6 +665,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                                           "0.00";
                                                     }
                                                     _calculatePaymentAndBalance();
+                                                    _calculateChange();
                                                   }),
                                                   activeColor:
                                                       AppColors.violetNormal,
@@ -682,6 +696,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                                       val;
                                                 }
                                                 _calculatePaymentAndBalance();
+                                                _calculateChange();
                                               });
                                             },
                                             keyboardType:
@@ -702,6 +717,8 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                                   label: "Tender Cash",
                                                   controller:
                                                       _tenderCashController,
+                                                  onChanged: (val) =>
+                                                      _calculateChange(),
                                                   keyboardType:
                                                       const TextInputType.numberWithOptions(
                                                         decimal: true,
@@ -858,7 +875,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                       ),
                                     ),
                                     const SizedBox(height: 10),
-
                                     Row(
                                       children: [
                                         Expanded(

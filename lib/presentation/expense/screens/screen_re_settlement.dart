@@ -180,6 +180,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
         _cashAmountController.text = widget.balance.toStringAsFixed(2);
       }
       _calculatePaymentAndBalance();
+      _calculateChange();
     });
   }
 
@@ -208,6 +209,20 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
     _curPaymentController.text = curPayment.toStringAsFixed(2);
     _balanceController.text = balance.toStringAsFixed(2);
+  }
+
+  void _calculateChange() {
+    double tender = double.tryParse(_tenderCashController.text) ?? 0.0;
+    double amount = 0.0;
+    if (_splitPayment) {
+      amount = double.tryParse(_cashAmountController.text) ?? 0.0;
+    } else {
+      amount = double.tryParse(_amountController.text) ?? 0.0;
+    }
+
+    double change = tender - amount;
+    if (change < 0) change = 0;
+    _chargeController.text = change.toStringAsFixed(2);
   }
 
   @override
@@ -480,6 +495,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                           _isCardSelected = false;
                                         }
                                         _calculatePaymentAndBalance();
+                                        _calculateChange();
                                       });
                                     },
                                     child: PaymentModeCard(
@@ -511,6 +527,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                           _isCashSelected = false;
                                         }
                                         _calculatePaymentAndBalance();
+                                        _calculateChange();
                                       });
                                     },
                                     child: PaymentModeCard(
@@ -596,6 +613,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                                           "0.00";
                                                     }
                                                     _calculatePaymentAndBalance();
+                                                    _calculateChange();
                                                   }),
                                                   activeColor:
                                                       AppColors.violetNormal,
@@ -626,6 +644,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                                       val;
                                                 }
                                                 _calculatePaymentAndBalance();
+                                                _calculateChange();
                                               });
                                             },
                                             keyboardType:
@@ -646,6 +665,8 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                                   label: "Tender Cash",
                                                   controller:
                                                       _tenderCashController,
+                                                  onChanged: (val) =>
+                                                      _calculateChange(),
                                                   keyboardType:
                                                       const TextInputType.numberWithOptions(
                                                         decimal: true,

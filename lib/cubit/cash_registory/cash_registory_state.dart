@@ -1,5 +1,6 @@
 import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_response.dart';
+import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 
 abstract class CashRegistoryState {}
 
@@ -35,4 +36,9 @@ class CashRegistorySalesTotalLoaded extends CashRegistoryState {
 class CashRegistoryCloseSuccess extends CashRegistoryState {
   final CloseRegisterResponse response;
   CashRegistoryCloseSuccess(this.response);
+}
+
+class CashRegistoryReportLoaded extends CashRegistoryState {
+  final CloseRegisterReportModel report;
+  CashRegistoryReportLoaded(this.report);
 }

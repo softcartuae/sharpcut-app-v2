@@ -137,7 +137,6 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
   Future<Either<String, CloseRegisterModel>> getSalesTotal() async {
     try {
-      
       final response = await ApiClient.dio.get(
         ApiClient.getTotalSalesForCloseCashRegisterApi,
       );
@@ -161,6 +160,43 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
         );
       } else {
         return Left('Failed to get sales total: ${e.message}');
+      }
+    } catch (e) {
+      return Left('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, CloseRegisterReportModel>>
+  getLastCloseRegisterReport() async {
+    try {
+      final response = await ApiClient.dio.get(
+        ApiClient.cashRegisterLastSalesApi,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true) {
+          if (data['report'] != null) {
+            return Right(CloseRegisterReportModel.fromJson(data['report']));
+          } else {
+            return Left('Report data is missing.');
+          }
+        } else {
+          return Left(
+            data['message'] ?? 'Failed to get last close register report.',
+          );
+        }
+      } else {
+        return Left('Failed to get report');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return Left(
+          e.response?.data['message'] ?? 'Failed to get report: ${e.message}',
+        );
+      } else {
+        return Left('Failed to get report: ${e.message}');
       }
     } catch (e) {
       return Left('An unexpected error occurred: $e');
