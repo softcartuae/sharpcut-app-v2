@@ -4,6 +4,7 @@ import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 
 class HomeAppBar extends StatefulWidget {
   const HomeAppBar({super.key});
@@ -62,6 +63,22 @@ class _HomeAppBarState extends State<HomeAppBar> {
         // Right Section: User Profile
         Row(
           children: [
+            BlocBuilder<PrintingCubit, PrintingState>(
+              builder: (context, state) {
+                return Row(
+                  children: [
+                    Icon(
+                      Icons.print,
+                      color: state.connectedPrinter != null
+                          ? Colors.green
+                          : Colors.redAccent,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 15),
+                  ],
+                );
+              },
+            ),
             Image.asset("lib/utils/images/Calendar.png", width: 20, height: 20),
             const SizedBox(width: 8),
             Text(

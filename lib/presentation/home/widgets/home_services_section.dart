@@ -676,8 +676,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               >(
                                 listener: (context, state) {
                                   if (state is CashRegistorOpen) {
+                                    // context
+                                    //     .read<ChairCubit>()
+                                    //     .getChairsAndStaffs(forceRefresh: true);
                                     CuttingMastersDialog.show(context);
                                   }
+
                                   if (state is CashRegistorClosed) {
                                     showCashRegistoryDialoge(context);
                                   }

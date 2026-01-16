@@ -7,8 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:sharp_cut/data/firebase_api.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
-import 'package:sharp_cut/presentation/printing/screens/test_close_register_report_screen.dart';
-import 'package:sharp_cut/presentation/printing/screens/test_quick_report_screen.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
@@ -20,6 +18,7 @@ import 'package:sharp_cut/cubit/password/password_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
+import 'package:sharp_cut/presentation/splash/screens/splash_screen.dart';
 import 'package:sharp_cut/utils/simple_bloc_observer.dart';
 
 import 'package:sharp_cut/utils/theme.dart';
@@ -36,11 +35,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // 🔒 Lock orientation to portrait only
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation
-        .landscapeRight, // optional, remove if you want only upright
-  ]);
+  // await SystemChrome.setPreferredOrientations([
+  //   DeviceOrientation.landscapeLeft,
+  //   DeviceOrientation
+  //       .landscapeRight, // optional, remove if you want only upright
+  // ]);
 
   await di.init();
   await ApiClient.init();
@@ -152,7 +151,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           child: child!,
         );
       },
-      home: TestCloseRegisterReportScreen(),
+      home: SplashScreen(),
     );
   }
 }

@@ -16,6 +16,17 @@ class CloseRegisterPrintWidget extends StatelessWidget {
     this.width,
   });
 
+  String _formatKey(String key) {
+    return key
+        .split('_')
+        .map(
+          (word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '',
+        )
+        .join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -124,34 +135,13 @@ class CloseRegisterPrintWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            _buildDetailRow(
-              "Total Invoices",
-              report.transactions!.invoiceDetails['total_invoice'].toString(),
-            ),
-            _buildDetailRow(
-              "Total Invoice Sales",
-              report.transactions!.invoiceDetails['total_invoice_sales_amount']
-                  .toString(),
-            ),
-            _buildDetailRow(
-              "Total Unpaid",
-              report.transactions!.invoiceDetails['total_unpaid_amount']
-                  .toString(),
-            ),
-            _buildDetailRow(
-              "Gross Total",
-              report.transactions!.invoiceDetails['gross_total_amount']
-                  .toString(),
-            ),
-            _buildDetailRow(
-              "Total Discount",
-              report.transactions!.invoiceDetails['total_discount'].toString(),
-            ),
-            _buildDetailRow(
-              "Total Credit",
-              report.transactions!.invoiceDetails['total_credit_amount']
-                  .toString(),
-            ),
+            ...report.transactions!.invoiceDetails.entries.map((entry) {
+              return _buildDetailRow(
+                _formatKey(entry.key),
+                entry.value.toString(),
+              );
+            }),
+
             const SizedBox(height: 2),
             const Divider(color: Colors.black),
             const SizedBox(height: 2),

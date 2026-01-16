@@ -227,9 +227,9 @@ class PrintingRepoImp implements PrintingRepo {
       ),
     );
     // Calculate estimated height
-    // Base height (Header + Footer) ~ 800
-    // Per item ~ 70 (allowing for wrapping text)
-    double estimatedHeight = 800 + (cartItems.length * 70.0);
+    // Base height (Header + Footer) ~ 1000
+    // Per item ~ 100 (allowing for wrapping text)
+    double estimatedHeight = 1000 + (cartItems.length * 100.0);
 
     // Capture the widget as an image
     final ScreenshotController screenshotController = ScreenshotController();

@@ -4,6 +4,7 @@ class SettlePaymentRequestModel {
   final String? customerNumber;
   final double? subTotalValue;
   final double? taxTotal;
+  final String? paymentStatus;
   final double? discount;
   final double? roundOff;
   final double? finalTotal;
@@ -23,6 +24,7 @@ class SettlePaymentRequestModel {
   final List<double>? change;
 
   SettlePaymentRequestModel({
+    this.paymentStatus,
     this.transactionId,
     this.customerName,
     this.customerNumber,

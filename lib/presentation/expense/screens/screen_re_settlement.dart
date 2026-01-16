@@ -76,13 +76,13 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
   // Payment Section Controllers
   final TextEditingController _amountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _tenderCashController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _chargeController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
 
   // Totals Section Controllers
@@ -93,7 +93,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     text: "0.00",
   );
   final TextEditingController _discountController = TextEditingController(
-    text: "0.00",
+    text: "0.0",
   );
 
   final TextEditingController _paidController = TextEditingController(
@@ -116,10 +116,10 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
   // Split Payment Controllers
   final TextEditingController _cashAmountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _cardAmountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
 
   bool _splitPayment = false;
@@ -153,14 +153,19 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
     _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0)
         .toStringAsFixed(2);
-    _discountController.text = (widget.settlePayment.discount ?? 0.0)
-        .toStringAsFixed(2);
+    _discountController.text = (widget.settlePayment.discount ?? 0.0) == 0
+        ? ""
+        : (widget.settlePayment.discount ?? 0.0).toStringAsFixed(2);
     // Amount to pay is usually the final total
-    _amountController.text = (widget.balance).toStringAsFixed(2);
+    _amountController.text = widget.balance == 0
+        ? ""
+        : (widget.balance).toStringAsFixed(2);
 
     // Initialize split controllers
-    _cashAmountController.text = (widget.balance).toStringAsFixed(2);
-    _cardAmountController.text = "0.00";
+    _cashAmountController.text = widget.balance == 0
+        ? ""
+        : (widget.balance).toStringAsFixed(2);
+    _cardAmountController.text = "";
 
     // Grand total display at the bottom usually matches final total
     _calculateFinalTotal();
@@ -170,15 +175,8 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
     final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
 
-    // User requested: "like minus from grand total" for both discount and round off.
-    // Final = SubTotal + Tax
     setState(() {
       _finalTotal = subTotal + taxTotal;
-
-      if (!_splitPayment) {
-        _amountController.text = widget.balance.toStringAsFixed(2);
-        _cashAmountController.text = widget.balance.toStringAsFixed(2);
-      }
       _calculatePaymentAndBalance();
       _calculateChange();
     });
@@ -610,7 +608,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                                               .text;
                                                       _cardAmountController
                                                               .text =
-                                                          "0.00";
+                                                          "";
                                                     }
                                                     _calculatePaymentAndBalance();
                                                     _calculateChange();
@@ -681,6 +679,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                               const SizedBox(width: 10),
                                               Expanded(
                                                 child: SettlementLabelInput(
+                                                  isReadOnly: true,
                                                   label: "Change",
                                                   controller: _chargeController,
                                                   keyboardType:
@@ -840,6 +839,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                               ),
                                               const SizedBox(height: 4),
                                               SettlementSimpleInput(
+                                                isReadOnly: true,
                                                 controller:
                                                     _curPaymentController,
                                               ),

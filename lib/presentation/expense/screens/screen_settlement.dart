@@ -70,24 +70,24 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
   // Payment Section Controllers
   final TextEditingController _amountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _tenderCashController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _chargeController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
 
   // Totals Section Controllers
   final TextEditingController _totalQtyController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _subTotalController = TextEditingController(
     text: "0.00",
   );
   final TextEditingController _discountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
 
   final TextEditingController _paidController = TextEditingController(
@@ -110,10 +110,10 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
   // Split Payment Controllers
   final TextEditingController _cashAmountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _cardAmountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
 
   bool _splitPayment = false;
@@ -174,14 +174,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
       _finalTotal = (subTotal + taxTotal);
       final double discount = double.tryParse(_discountController.text) ?? 0.0;
       _uiGrandTotal = _finalTotal - discount;
-
-      // Also update split amounts if they haven't been manually edited?
-      // Or just let the user handle it?
-      // If split is OFF, we might want to sync the amount controller?
-      if (!_splitPayment) {
-        _amountController.text = _finalTotal.toStringAsFixed(2);
-        _cashAmountController.text = _finalTotal.toStringAsFixed(2);
-      }
       _calculatePaymentAndBalance();
       _calculateChange();
     });
@@ -208,7 +200,8 @@ class _SettlementDialogState extends State<SettlementDialog> {
     }
 
     final double curPayment = cashAmount + cardAmount;
-    final double balance = _finalTotal - curPayment;
+    final double discount = double.tryParse(_discountController.text) ?? 0.0;
+    final double balance = _finalTotal - curPayment - discount;
 
     _curPaymentController.text = curPayment.toStringAsFixed(2);
     _balanceController.text = balance.toStringAsFixed(2);
@@ -268,7 +261,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
         cardAmount = double.tryParse(_cardAmountController.text) ?? 0.0;
       }
     } else {
-   
       final double amount = double.tryParse(_amountController.text) ?? 0.0;
       if (_isCashSelected) {
         cashAmount = amount;

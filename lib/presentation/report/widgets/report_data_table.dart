@@ -106,6 +106,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                                     SettlePaymentRequestModel
                                                     request = SettlePaymentRequestModel(
+                                                      paymentStatus:
+                                                          booking.paymentStatus,
                                                       transactionId: booking.id,
                                                       customerName:
                                                           booking.customerName,
@@ -255,6 +257,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
+                                                paymentStatus:
+                                                    booking.paymentStatus,
                                                 transactionId: booking.id,
                                                 customerName:
                                                     booking.customerName,
@@ -263,7 +267,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 subTotalValue:
                                                     booking.subtotal ?? 0,
                                                 taxTotal: booking.taxTotal ?? 0,
-                                                discount: 0.0,
+                                                discount: booking.discount,
                                                 roundOff: 0.0,
                                                 finalTotal:
                                                     booking.finalTotal ?? 0,
