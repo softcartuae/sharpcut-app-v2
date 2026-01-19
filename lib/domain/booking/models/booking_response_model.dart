@@ -44,7 +44,7 @@ class BookingResponseModel {
     this.paymentStatus,
     this.totalPayment,
     this.payments,
-    this.discount
+    this.discount,
   });
 
   factory BookingResponseModel.fromJson(Map<String, dynamic> json) {

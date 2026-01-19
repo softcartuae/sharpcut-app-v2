@@ -37,6 +37,7 @@ import 'package:sharp_cut/data/quick_report/service/quick_report_service.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
 import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
 import 'package:sharp_cut/data/cash_registory/service/cash_registory_repo_imp.dart';
+import 'package:sharp_cut/core/database/database_helper.dart';
 
 final sl = GetIt.instance;
 
@@ -79,11 +80,17 @@ Future<void> init() async {
   );
 
   // Repositories
+  sl.registerLazySingleton<DatabaseHelper>(() => DatabaseHelper());
+
   sl.registerLazySingleton<AuthRepo>(
     () => AuthRepoImpl(tokenStorage: sl<TokenStorage>()),
   );
-  sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
-  sl.registerLazySingleton<ChairRepo>(() => ChairRepoImpl());
+  sl.registerLazySingleton<ServiceRepo>(
+    () => ServiceRepoImpl(dbHelper: sl<DatabaseHelper>()),
+  );
+  sl.registerLazySingleton<ChairRepo>(
+    () => ChairRepoImpl(dbHelper: sl<DatabaseHelper>()),
+  );
   sl.registerLazySingleton<PasswordRepo>(() => PasswordRepoImp());
   sl.registerLazySingleton<TokenStorage>(() => TokenStorage());
   sl.registerLazySingleton<BookingRepo>(() => BookingRepoImp());

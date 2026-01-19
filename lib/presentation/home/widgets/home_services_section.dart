@@ -460,8 +460,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                         );
                                         return;
                                       }
-                                      log(service.isTip.toString());
                                       if (service.isTip == 1) {
+                                        // if it tip then we need to find the before wat and unit tax ok 
+                                        
                                         showDialog(
                                           context: context,
                                           builder: (context) => TipDialog(
