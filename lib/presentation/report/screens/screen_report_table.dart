@@ -71,6 +71,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
   Future<void> _showDateSelectionOptions(BuildContext context) async {
     final result = await showDialog<String>(
       context: context,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return SimpleDialog(
           title: const Text('Select Date Option'),
@@ -354,6 +355,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                                     widget.staff!.id,
                                   );
                                 }
+                                context.read<ReportCubit>().fetchTransactions();
                               },
                               child: const ReportActionButton(
                                 label: "Reset",
@@ -382,7 +384,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    const Expanded(child: ReportDataTable()),
+                    Expanded(child: ReportDataTable()),
                   ],
                 ),
               ),

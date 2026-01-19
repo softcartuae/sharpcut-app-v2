@@ -1,45 +1,174 @@
-import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
+import 'dart:async';
+import 'dart:developer';
+import 'dart:typed_data';
+
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
 import 'package:flutter_thermal_printer/utils/printer.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:image/image.dart' as img;
+
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
-import 'package:image/image.dart' as img;
-import 'dart:typed_data';
-
-import '../../presentation/printing/widgets/receipt_widget.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
+import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
+import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:sharp_cut/data/printing/service/printing_service.dart';
+import 'package:sharp_cut/data/printing/native/usb_printer_platform.dart';
+import 'package:sharp_cut/data/printing/native/bluetooth_printer_platform.dart';
+import 'package:sharp_cut/data/printing/native/network_printer_platform.dart';
+
+import 'package:sharp_cut/presentation/printing/widgets/receipt_widget.dart';
 import 'package:sharp_cut/presentation/quick_report/widgets/quick_report_print_widget.dart';
+import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
+import 'package:sharp_cut/presentation/cash_registory/widgets/close_register_print_widget.dart';
 
 class PrintingRepoImp implements PrintingRepo {
-  final FlutterThermalPrinter _printer = FlutterThermalPrinter.instance;
+  final PrintingService _printingService;
+
+  final UsbPrinterPlatform _usbPlatform = UsbPrinterPlatform();
+  final BluetoothPrinterPlatform _bluetoothPlatform =
+      BluetoothPrinterPlatform();
+  final NetworkPrinterPlatform _networkPlatform = NetworkPrinterPlatform();
+
+  // Stream controller to merge/manage printers from both sources
+  final StreamController<List<Printer>> _printersController =
+      StreamController<List<Printer>>.broadcast();
+
+  PrintingRepoImp(this._printingService);
 
   @override
-  Stream<List<Printer>> get printersStream => _printer.devicesStream;
+  Stream<List<Printer>> get printersStream => _printersController.stream;
 
   @override
   Future<void> startScan({List<ConnectionType>? connectionTypes}) async {
-    await _printer.getPrinters(
-      connectionTypes: connectionTypes ?? [ConnectionType.USB],
-    );
+    // Clear previous results
+    _printersController.add([]);
+
+    final types =
+        connectionTypes ??
+        [ConnectionType.USB, ConnectionType.BLE, ConnectionType.NETWORK];
+    List<Printer> allPrinters = [];
+
+    // Native USB Scan
+    if (types.contains(ConnectionType.USB)) {
+      try {
+        final devices = await _usbPlatform.getUsbDevices();
+        final printers = devices.map((d) {
+          return Printer(
+            name: d['name'],
+            vendorId: d['vendorId'].toString(),
+            productId: d['productId'].toString(),
+            connectionType: ConnectionType.USB,
+          );
+        }).toList();
+        allPrinters.addAll(printers);
+      } catch (e) {
+        log("Native USB Scan Error: $e");
+      }
+    }
+
+    // Native Bluetooth Scan
+    if (types.contains(ConnectionType.BLE)) {
+      try {
+        final devices = await _bluetoothPlatform.getBluetoothDevices();
+        final printers = devices.map((d) {
+          return Printer(
+            name: d['name'],
+            address: d['address'],
+            connectionType: ConnectionType.BLE,
+          );
+        }).toList();
+        allPrinters.addAll(printers);
+      } catch (e) {
+        log("Native Bluetooth Scan Error: $e");
+      }
+    }
+
+    // Native Network Scan (or just manual entry support)
+    if (types.contains(ConnectionType.NETWORK)) {
+      // For network, we might not scan automatically or we might support it later.
+      // If we had a scan method, we'd call it here.
+      // For now, we can rely on user adding printer manually or simple subnet scan if implemented.
+      try {
+        final devices = await _networkPlatform.scan(
+          null,
+        ); // null for default subnet
+        final printers = devices.map((d) {
+          return Printer(
+            name: d['name'] ?? "Network Printer",
+            address: d['ipAddress'], // Assuming map has ipAddress
+            connectionType: ConnectionType.NETWORK,
+          );
+        }).toList();
+        allPrinters.addAll(printers);
+      } catch (e) {
+        log("Native Network Scan Error: $e");
+      }
+    }
+
+    _printersController.add(allPrinters);
   }
 
   @override
   Future<void> stopScan() async {
-    await _printer.stopScan();
+    // Native scans are usually one-shot or handled differently.
+    // We can just clear the stream or do nothing.
   }
 
   @override
   Future<bool> connect(Printer printer) async {
-    return await _printer.connect(printer);
+    if (printer.connectionType == ConnectionType.USB) {
+      try {
+        final int vendorId = int.parse(printer.vendorId!);
+        final int productId = int.parse(printer.productId!);
+        return await _usbPlatform.connect(vendorId, productId);
+      } catch (e) {
+        log("Native USB Connect Error: $e");
+        return false;
+      }
+    } else if (printer.connectionType == ConnectionType.BLE) {
+      try {
+        return await _bluetoothPlatform.connect(printer.address!);
+      } catch (e) {
+        log("Native Bluetooth Connect Error: $e");
+        return false;
+      }
+    } else if (printer.connectionType == ConnectionType.NETWORK) {
+      try {
+        // Assuming address is "IP:Port" or just "IP"
+        // If just IP, default port 9100
+        String ip = printer.address!;
+        int port = 9100;
+        if (ip.contains(':')) {
+          final parts = ip.split(':');
+          ip = parts[0];
+          port = int.tryParse(parts[1]) ?? 9100;
+        }
+        return await _networkPlatform.connect(ip, port);
+      } catch (e) {
+        log("Native Network Connect Error: $e");
+        return false;
+      }
+    }
+    return false;
   }
 
   @override
   Future<void> disconnect(Printer printer) async {
-    await _printer.disconnect(printer);
+    if (printer.connectionType == ConnectionType.USB) {
+      await _usbPlatform.disconnect();
+    } else if (printer.connectionType == ConnectionType.BLE) {
+      await _bluetoothPlatform.disconnect();
+    } else if (printer.connectionType == ConnectionType.NETWORK) {
+      await _networkPlatform.disconnect();
+    }
   }
 
   @override
@@ -52,11 +181,24 @@ class PrintingRepoImp implements PrintingRepo {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
+    int copies = 1,
+    bool openDrawer = false,
   }) async {
-    
     final profile = await CapabilityProfile.load();
-    final generator = Generator(PaperSize.mm58, profile);
+    final paperSize = await getPaperSize(printer);
+    final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
+
+    try {
+      if (openDrawer) {
+        bytes.addAll(generator.drawer());
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+
+    // Create the widget
+    final double targetWidth = paperSize.widthInPixels.toDouble();
 
     // Create the receipt widget
     final receiptWidget = MediaQuery(
@@ -78,15 +220,16 @@ class PrintingRepoImp implements PrintingRepo {
               shopData: shopData,
               request: request,
               cartItems: cartItems,
+              width: targetWidth,
             ),
           ),
         ),
       ),
     );
     // Calculate estimated height
-    // Base height (Header + Footer) ~ 600
-    // Per item ~ 60 (allowing for wrapping text)
-    double estimatedHeight = 600 + (cartItems.length * 60.0);
+    // Base height (Header + Footer) ~ 1000
+    // Per item ~ 100 (allowing for wrapping text)
+    double estimatedHeight = 1000 + (cartItems.length * 100.0);
 
     // Capture the widget as an image
     final ScreenshotController screenshotController = ScreenshotController();
@@ -95,15 +238,21 @@ class PrintingRepoImp implements PrintingRepo {
           receiptWidget,
           delay: const Duration(milliseconds: 100),
           pixelRatio: 1.0, // Reduced to avoid buffer overflow
-          targetSize: Size(370, estimatedHeight), // Ensure height is sufficient
+          targetSize: Size(
+            targetWidth,
+            estimatedHeight,
+          ), // Ensure height is sufficient
         );
 
     // Decode the image for the printer
     final img.Image? image = img.decodePng(capturedImage);
 
     if (image != null) {
-      // Resize to 384 (standard 58mm width, multiple of 8)
-      final img.Image resizedImage = img.copyResize(image, width: 384);
+      // Resize to paper width
+      final img.Image resizedImage = img.copyResize(
+        image,
+        width: paperSize.widthInPixels,
+      );
 
       bytes.addAll(generator.image(resizedImage));
     }
@@ -111,19 +260,41 @@ class PrintingRepoImp implements PrintingRepo {
     bytes.addAll(generator.feed(2));
     bytes.addAll(generator.cut());
 
-    await _printer.printData(printer, bytes);
+    // Loop 'copies' times
+    for (int i = 0; i < copies; i++) {
+      await _printBytes(printer, Uint8List.fromList(bytes));
+
+      // Optional: Add a small delay between copies to prevent printer buffer overflow
+      if (i < copies - 1) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
   }
 
   @override
   Future<void> printQuickReport({
     required Printer printer,
     required QuickReportModel report,
+    int copies = 1,
+    bool openDrawer = false,
   }) async {
     final profile = await CapabilityProfile.load();
-    final generator = Generator(PaperSize.mm58, profile);
+    final paperSize = await getPaperSize(printer);
+    final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
+    log("called in quick report");
+
+    try {
+      if (openDrawer) {
+        bytes.addAll(generator.drawer());
+      }
+    } catch (e) {
+      log(e.toString());
+    }
 
     // Create the widget
+    final double targetWidth = paperSize.widthInPixels.toDouble();
+
     final widget = MediaQuery(
       data: const MediaQueryData(),
       child: Directionality(
@@ -135,37 +306,249 @@ class PrintingRepoImp implements PrintingRepo {
           ),
           child: Material(
             color: Colors.white,
-            child: QuickReportPrintWidget(report: report),
+            child: QuickReportPrintWidget(report: report, width: targetWidth),
           ),
         ),
       ),
     );
 
     // Calculate estimated height
-    // Base height ~ 600 + items
-    double estimatedHeight = 1000 + (report.salesmanWiseDetails.length * 40.0);
+    // Base height ~ 1000 + items
+    double estimatedHeight =
+        1000 +
+        (report.salesmanWiseDetails.length * 40.0) +
+        (report.invoiceDetails.length * 40.0);
 
+    log("called in iamge procees $estimatedHeight width: $targetWidth");
     // Capture the widget as an image
     final ScreenshotController screenshotController = ScreenshotController();
-    final Uint8List capturedImage = await screenshotController.captureFromWidget(
-      widget,
-      delay: const Duration(milliseconds: 100),
-      pixelRatio: 1.0,
-      targetSize: Size(370, estimatedHeight),
-    );
+    final Uint8List capturedImage = await screenshotController
+        .captureFromWidget(
+          widget,
+          delay: const Duration(milliseconds: 100),
+          pixelRatio: 1.0,
+          targetSize: Size(targetWidth, estimatedHeight),
+        );
 
     // Decode the image for the printer
     final img.Image? image = img.decodePng(capturedImage);
+    log("called in iamge procees $image");
 
     if (image != null) {
-      // Resize to 384 (standard 58mm width)
-      final img.Image resizedImage = img.copyResize(image, width: 384);
+      // Resize to paper width
+      final img.Image resizedImage = img.copyResize(
+        image,
+        width: paperSize.widthInPixels,
+      );
       bytes.addAll(generator.image(resizedImage));
     }
 
     bytes.addAll(generator.feed(2));
     bytes.addAll(generator.cut());
 
-    await _printer.printData(printer, bytes);
+    for (int i = 0; i < copies; i++) {
+      log("called in loop");
+      try {
+        await _printBytes(printer, Uint8List.fromList(bytes));
+      } catch (e) {
+        log(e.toString());
+      }
+      log("called in loop end");
+      if (i < copies - 1) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+  }
+
+  Future<void> _printBytes(Printer printer, Uint8List bytes) async {
+    if (printer.connectionType == ConnectionType.USB) {
+      await _usbPlatform.print(bytes);
+    } else if (printer.connectionType == ConnectionType.BLE) {
+      await _bluetoothPlatform.print(bytes);
+    } else if (printer.connectionType == ConnectionType.NETWORK) {
+      await _networkPlatform.print(bytes);
+    }
+  }
+
+  @override
+  Future<void> printCloseRegisterReport({
+    required Printer printer,
+    required CloseRegisterReportModel report,
+    required ShopModel shop,
+    int copies = 1,
+    bool openDrawer = false,
+  }) async {
+    final profile = await CapabilityProfile.load();
+    final paperSize = await getPaperSize(printer);
+    final generator = Generator(paperSize.generatorPaperSize, profile);
+    List<int> bytes = [];
+
+    try {
+      if (openDrawer) {
+        bytes.addAll(generator.drawer());
+      }
+    } catch (e) {
+      log(e.toString());
+    }
+
+    // Create the widget
+    final double targetWidth = paperSize.widthInPixels.toDouble();
+
+    final widget = MediaQuery(
+      data: const MediaQueryData(),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: ThemeData(
+            useMaterial3: false,
+            scaffoldBackgroundColor: Colors.white,
+          ),
+          child: Material(
+            color: Colors.white,
+            child: CloseRegisterPrintWidget(
+              report: report,
+              shop: shop,
+              width: targetWidth,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Calculate estimated height
+    // Base height ~ 1000 + items
+    double estimatedHeight = 1500;
+    if (report.transactions != null) {
+      estimatedHeight +=
+          (report.transactions!.salesmanWiseDetails.length * 40.0) +
+          (report.transactions!.invoiceDetails.length * 40.0);
+    }
+
+    // Capture the widget as an image
+    final ScreenshotController screenshotController = ScreenshotController();
+    final Uint8List capturedImage = await screenshotController
+        .captureFromWidget(
+          widget,
+          delay: const Duration(milliseconds: 100),
+          pixelRatio: 1.0,
+          targetSize: Size(targetWidth, estimatedHeight),
+        );
+
+    // Decode the image for the printer
+    final img.Image? image = img.decodePng(capturedImage);
+
+    if (image != null) {
+      // Resize to paper width
+      final img.Image resizedImage = img.copyResize(
+        image,
+        width: paperSize.widthInPixels,
+      );
+      bytes.addAll(generator.image(resizedImage));
+    }
+
+    bytes.addAll(generator.feed(2));
+    bytes.addAll(generator.cut());
+
+    for (int i = 0; i < copies; i++) {
+      try {
+        await _printBytes(printer, Uint8List.fromList(bytes));
+      } catch (e) {
+        log(e.toString());
+      }
+      if (i < copies - 1) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
+  }
+
+  @override
+  Future<Either<String, PrinterSettingsModel>> getPrinterSettings() async {
+    try {
+      final response = await _printingService.getPrinterSettings();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return Right(PrinterSettingsModel.fromJson(response.data['data']));
+      } else {
+        return Left(response.data['message']);
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> updatePrinterSettings(
+    PrinterSettingsModel model,
+  ) async {
+    try {
+      final response = await _printingService.updatePrinterSettings(model);
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        return Left(response.data['message']);
+      }
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(e.response?.data['message'] ?? "Failed To Update");
+    } catch (e) {
+      return Left("Failed To Update");
+    }
+  }
+
+  @override
+  Future<void> openDrawer(Printer printer) async {
+    final profile = await CapabilityProfile.load();
+    final generator = Generator(PaperSize.mm58, profile);
+    List<int> bytes = [];
+    bytes.addAll(generator.drawer());
+
+    await _printBytes(printer, Uint8List.fromList(bytes));
+  }
+
+  @override
+  Future<void> testPrint(Printer printer) async {
+    final profile = await CapabilityProfile.load();
+    final paperSize = await getPaperSize(printer);
+    final generator = Generator(paperSize.generatorPaperSize, profile);
+    List<int> bytes = [];
+
+    bytes.addAll(
+      generator.text(
+        "printer connected successfull",
+        styles: const PosStyles(align: PosAlign.center, bold: true),
+      ),
+    );
+    bytes.addAll(generator.feed(2));
+    bytes.addAll(generator.cut());
+
+    await _printBytes(printer, Uint8List.fromList(bytes));
+  }
+
+  @override
+  Future<void> savePaperSize(Printer printer, PrinterPaperSize size) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key =
+        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    await prefs.setString(key, size.name);
+  }
+
+  @override
+  Future<PrinterPaperSize> getPaperSize(Printer printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key =
+        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    final sizeName = prefs.getString(key);
+    if (sizeName != null) {
+      return PrinterPaperSize.values.firstWhere(
+        (e) => e.name == sizeName,
+        orElse: () => PrinterPaperSize.mm58,
+      );
+    }
+    return PrinterPaperSize.mm58; // Default
+  }
+
+  @override
+  Future<bool> hasPaperSize(Printer printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key =
+        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    return prefs.containsKey(key);
   }
 }

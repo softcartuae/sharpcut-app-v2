@@ -22,3 +22,5 @@ IconData getIconForService(String? name) {
 
   return Icons.layers; // Default fallback
 }
+double round2(double v) => double.parse(v.toStringAsFixed(2));
+

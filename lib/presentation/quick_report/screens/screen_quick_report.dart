@@ -53,12 +53,17 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
   @override
   void initState() {
     super.initState();
-    // Fetch initial report without parameters
-    context.read<QuickReportCubit>().fetchQuickReport();
+    // Set default range to Today
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    _selectedRange = DateTimeRange(start: today, end: today);
+
+    // Fetch initial report with default range
+    _fetchReport();
   }
 
   String _formatDate(DateTime date) {
-    return DateFormat('MM/dd/yyyy').format(date);
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   void _fetchReport() {
@@ -98,17 +103,6 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.calendar_view_day),
-                title: const Text('All'),
-                onTap: () {
-                  Navigator.pop(context);
-                  setState(() {
-                    _selectedRange = null;
-                  });
-                  _fetchReport();
-                },
-              ),
               ListTile(
                 leading: const Icon(Icons.today),
                 title: const Text('Today'),
@@ -330,11 +324,17 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                             child: ElevatedButton(
                               onPressed: state is QuickReportLoaded
                                   ? () {
-                                      context
-                                          .read<PrintingCubit>()
-                                          .printQuickReport(
-                                            report: state.report,
-                                          );
+                                      final printCubit = context
+                                          .read<PrintingCubit>();
+                                      printCubit.printQuickReport(
+                                        printCount: printCubit
+                                            .state
+                                            .settings
+                                            ?.printCount
+                                            .report
+                                            .toInt(),
+                                        report: state.report,
+                                      );
                                     }
                                   : null,
                               style: ElevatedButton.styleFrom(
@@ -373,8 +373,8 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                         } else if (state is QuickReportError) {
                           return Center(
                             child: Text(
-                              state.message,
-                              style: const TextStyle(color: Colors.red),
+                              "Something went wrong",
+                              style: const TextStyle(color: Colors.black),
                             ),
                           );
                         } else if (state is QuickReportLoaded) {
@@ -427,7 +427,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
           ...report.invoiceDetails.entries.map((entry) {
             return SummaryRow(
               label: _formatKey(entry.key),
-              value: entry.value.toString(),
+              value: entry.value.toStringAsFixed(2),
             );
           }),
           const SizedBox(height: 16),

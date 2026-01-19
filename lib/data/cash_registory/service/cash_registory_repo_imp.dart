@@ -2,7 +2,12 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
+
 import 'package:sharp_cut/utils/helpers/enums.dart';
+
+import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart';
+import 'package:sharp_cut/domain/cash_registory/models/close_register_response.dart';
+import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 
 class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
@@ -77,16 +82,18 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   }
 
   @override
-  Future<Either<String, String>> closeCashRegister({
+  Future<Either<String, CloseRegisterResponse>> closeCashRegister({
     required double amount,
     required int userId,
     required Role role,
     required String password,
+    required bool isPrint,
   }) async {
     try {
       final response = await ApiClient.dio.post(
         ApiClient.closeCashRegisterApi,
         data: {
+          "is_print": isPrint,
           "closing_amount": amount,
           "user_type": role.name,
           "user_id": userId,
@@ -97,7 +104,16 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         if (data['success'] == true) {
-          return Right(data['message'] ?? 'Cash register closed successfully.');
+          CloseRegisterReportModel? report;
+          if (data['report'] != null) {
+            report = CloseRegisterReportModel.fromJson(data['report']);
+          }
+          return Right(
+            CloseRegisterResponse(
+              message: data['message'] ?? 'Cash register closed successfully.',
+              report: report,
+            ),
+          );
         } else {
           return Left(data['message'] ?? 'Failed to close cash register.');
         }
@@ -119,7 +135,7 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   }
 
   @override
-  Future<Either<String, double>> getSalesTotal() async {
+  Future<Either<String, CloseRegisterModel>> getSalesTotal() async {
     try {
       final response = await ApiClient.dio.get(
         ApiClient.getTotalSalesForCloseCashRegisterApi,
@@ -128,16 +144,8 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         if (data['success'] == true) {
-          final totalSales = data['data']['total_sales'];
-          // Handle both int and double types safely
-          if (totalSales is int) {
-            return Right(totalSales.toDouble());
-          } else if (totalSales is double) {
-            return Right(totalSales);
-          } else if (totalSales is String) {
-            return Right(double.tryParse(totalSales) ?? 0.0);
-          }
-          return const Right(0.0);
+          final closeRegisterData = data['data'];
+          return Right(CloseRegisterModel.fromJson(closeRegisterData));
         } else {
           return Left(data['message'] ?? 'Failed to get sales total.');
         }
@@ -152,6 +160,43 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
         );
       } else {
         return Left('Failed to get sales total: ${e.message}');
+      }
+    } catch (e) {
+      return Left('An unexpected error occurred: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, CloseRegisterReportModel>>
+  getLastCloseRegisterReport() async {
+    try {
+      final response = await ApiClient.dio.get(
+        ApiClient.cashRegisterLastSalesApi,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true) {
+          if (data['report'] != null) {
+            return Right(CloseRegisterReportModel.fromJson(data['report']));
+          } else {
+            return Left('Report data is missing.');
+          }
+        } else {
+          return Left(
+            data['message'] ?? 'Failed to get last close register report.',
+          );
+        }
+      } else {
+        return Left('Failed to get report');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return Left(
+          e.response?.data['message'] ?? 'Failed to get report: ${e.message}',
+        );
+      } else {
+        return Left('Failed to get report: ${e.message}');
       }
     } catch (e) {
       return Left('An unexpected error occurred: $e');

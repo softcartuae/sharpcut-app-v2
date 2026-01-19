@@ -23,6 +23,7 @@ import 'package:sharp_cut/data/expenses/expense_repo_impl.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/domain/printing/printing_repo.dart';
 import 'package:sharp_cut/data/printing/printing_repo_imp.dart';
+import 'package:sharp_cut/data/printing/service/printing_service.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/domain/report/report_repo.dart';
 import 'package:sharp_cut/data/report/report_repo_imp.dart';
@@ -78,14 +79,18 @@ Future<void> init() async {
   );
 
   // Repositories
-  sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
+  sl.registerLazySingleton<AuthRepo>(
+    () => AuthRepoImpl(tokenStorage: sl<TokenStorage>()),
+  );
   sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
   sl.registerLazySingleton<ChairRepo>(() => ChairRepoImpl());
   sl.registerLazySingleton<PasswordRepo>(() => PasswordRepoImp());
   sl.registerLazySingleton<TokenStorage>(() => TokenStorage());
   sl.registerLazySingleton<BookingRepo>(() => BookingRepoImp());
   sl.registerLazySingleton<ExpenseRepo>(() => ExpenseRepoImpl());
-  sl.registerLazySingleton<PrintingRepo>(() => PrintingRepoImp());
+  sl.registerLazySingleton<PrintingRepo>(
+    () => PrintingRepoImp(PrintingService()),
+  );
   sl.registerLazySingleton<ReportRepo>(() => ReportRepoImp(ReportService()));
   sl.registerLazySingleton<QuickReportRepo>(
     () => QuickReportRepoImp(QuickReportService()),

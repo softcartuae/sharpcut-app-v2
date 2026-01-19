@@ -54,6 +54,7 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
     required int userId,
     required Role role,
     required String password,
+    required bool isPrint,
   }) async {
     emit(CashRegistoryLoading());
     final result = await cashRegistoryRepo.closeCashRegister(
@@ -61,19 +62,31 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
       userId: userId,
       role: role,
       password: password,
+      isPrint: isPrint,
     );
     result.fold(
       (error) => emit(CashRegistoryAddError(error)),
-      (message) => emit(CashRegistoryAddSuccess(message)),
+      (response) => emit(CashRegistoryCloseSuccess(response)),
     );
   }
 
   Future<void> getSalesTotal() async {
     emit(CashRegistoryLoading());
     final result = await cashRegistoryRepo.getSalesTotal();
+    result.fold(
+      (error) {
+        emit(CashRegistoryAddError(error));
+      },
+      (closeRegisterModel) =>
+          emit(CashRegistorySalesTotalLoaded(closeRegisterModel)),
+    );
+  }
+
+  Future<void> getLastCloseRegisterReport() async {
+    emit(CashRegistoryLoading());
+    final result = await cashRegistoryRepo.getLastCloseRegisterReport();
     result.fold((error) {
-     
       emit(CashRegistoryAddError(error));
-    }, (total) => emit(CashRegistorySalesTotalLoaded(total)));
+    }, (report) => emit(CashRegistoryReportLoaded(report)));
   }
 }

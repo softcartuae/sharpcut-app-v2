@@ -36,6 +36,7 @@ class _ScreenAddExpenseState extends State<ScreenAddExpense> {
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return Dialog(
           backgroundColor: const Color(0xFF1E1E2C),

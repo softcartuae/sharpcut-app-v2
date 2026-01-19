@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,32 +11,23 @@ import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class CancellationDialog extends StatefulWidget {
   final int transactionId;
-  final StaffModel adminStaff;
 
-  const CancellationDialog({
-    super.key,
-    required this.transactionId,
-    required this.adminStaff,
-  });
+  const CancellationDialog({super.key, required this.transactionId});
 
   static void show(BuildContext context, int transactionId) {
     final chairCubit = context.read<ChairCubit>();
     final staffList = chairCubit.staffs;
 
-    final adminStaff = staffList.firstWhereOrNull(
-      (staff) => staff.role == Role.admin,
-    );
-    if (adminStaff == null) {
+    final hasAdmin = staffList.any((staff) => staff.role == Role.admin);
+    if (!hasAdmin) {
       ToastHelper.showError("Admin staff not found");
       return;
     }
 
     showDialog(
       context: context,
-      builder: (context) => CancellationDialog(
-        transactionId: transactionId,
-        adminStaff: adminStaff,
-      ),
+      barrierDismissible: false,
+      builder: (context) => CancellationDialog(transactionId: transactionId),
     );
   }
 
@@ -49,6 +39,20 @@ class _CancellationDialogState extends State<CancellationDialog> {
   final TextEditingController _reasonController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  StaffModel? selectedStaff;
+  List<StaffModel> adminStaffList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    final chairCubit = context.read<ChairCubit>();
+    adminStaffList = chairCubit.staffs
+        .where((staff) => staff.role == Role.admin)
+        .toList();
+    if (adminStaffList.isNotEmpty) {
+      selectedStaff = adminStaffList.first;
+    }
+  }
 
   @override
   void dispose() {
@@ -103,6 +107,48 @@ class _CancellationDialogState extends State<CancellationDialog> {
                 ],
               ),
               const SizedBox(height: 32),
+
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.white.withAlpha(77)),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<StaffModel>(
+                    value: selectedStaff,
+                    dropdownColor: const Color(0xFF1E1E2C),
+                    icon: const Icon(
+                      Icons.arrow_drop_down,
+                      color: Colors.white,
+                    ),
+                    isExpanded: true,
+                    hint: Text(
+                      "Select Admin",
+                      style: GoogleFonts.rajdhani(
+                        color: Colors.white.withAlpha(179),
+                        fontSize: 16,
+                      ),
+                    ),
+                    style: GoogleFonts.rajdhani(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                    items: adminStaffList.map((StaffModel staff) {
+                      return DropdownMenuItem<StaffModel>(
+                        value: staff,
+                        child: Text(staff.name),
+                      );
+                    }).toList(),
+                    onChanged: (StaffModel? newValue) {
+                      setState(() {
+                        selectedStaff = newValue;
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // Reason Field
               Container(
@@ -222,15 +268,24 @@ class _CancellationDialogState extends State<CancellationDialog> {
                                       );
                                       return;
                                     }
+
                                     if (_passwordController.text.isEmpty) {
                                       ToastHelper.showError(
                                         "Please enter password",
                                       );
                                       return;
                                     }
+
+                                    if (selectedStaff == null) {
+                                      ToastHelper.showError(
+                                        "Please select an admin",
+                                      );
+                                      return;
+                                    }
+
                                     context.read<BookingCubit>().cancelBooking(
                                       transactionId: widget.transactionId,
-                                      userId: widget.adminStaff.id,
+                                      userId: selectedStaff!.id,
                                       userPassword: _passwordController.text,
                                       reason: _reasonController.text,
                                     );

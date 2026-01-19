@@ -34,7 +34,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage("lib/utils/images/rectangle.png"),
@@ -139,7 +139,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
@@ -149,6 +149,12 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                         label: "Customer Name",
                         hint: "Customer Name",
                         icon: Icons.person_outline,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z\s]'),
+                          ),
+                          LengthLimitingTextInputFormatter(15),
+                        ],
                         onChanged: (value) {
                           context.read<BookingFormCubit>().updateName(value);
                         },
@@ -165,6 +171,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(15),
                         ],
                         onChanged: (value) {
                           context.read<BookingFormCubit>().updateNumber(value);

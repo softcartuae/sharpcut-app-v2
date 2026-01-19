@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "758621203820",
+    "project_id": "sharpcut-notification",
+    "storage_bucket": "sharpcut-notification.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758621203820:android:53f294611d3a1054b5d749",
+        "android_client_info": {
+          "package_name": "com.example.sharp_cut"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKuMm7TfaTy-ZpvawjuM_vX2JHevsiBDg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

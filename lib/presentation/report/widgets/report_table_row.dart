@@ -33,25 +33,32 @@ class ReportTableRow extends StatelessWidget {
           _buildDataCell("${index + 1}", width: 50),
           _buildDataCell(transaction.transactionDate ?? "-", width: 100),
           _buildDataCell(transaction.invoiceNo ?? "-", width: 120),
-          _buildDataCell(_formatDate(transaction.createdAt), width: 100),
           _buildDataCell(transaction.customerNumber ?? "-", width: 100),
           _buildDataCell(transaction.customerName ?? "-", width: 100),
           _buildDataCell(
-            transaction.finalTotal?.toString() ?? "0.00",
+            transaction.finalTotal?.toStringAsFixed(2) ?? "0.00",
             width: 80,
           ),
           _buildDataCell(
-            transaction.totalPayment?.toString() ?? "0.00",
+            transaction.totalPayment?.toStringAsFixed(2) ?? "0.00",
             width: 80,
           ),
-          _buildDataCell(balenceAmount.toString(), width: 80),
+          _buildDataCell(
+            balenceAmount.toStringAsFixed(2),
+            width: 80,
+            isBalanceCell: balenceAmount > 0,
+          ),
+          _buildDataCell(
+            transaction.discount?.toStringAsFixed(2) ?? "0.00",
+            width: 80,
+          ),
           _buildDataCell(transaction.staff?.name ?? "-", width: 100),
+
           _buildActionCell(
             Icons.payment,
             width: 60,
             onTap: paymentSettleFunction,
           ),
-          // _buildActionCell(Icons.print, width: 60, onTap: () {}),
           _buildActionCell(
             Icons.receipt_long_outlined,
             width: 60,
@@ -68,6 +75,7 @@ class ReportTableRow extends StatelessWidget {
     required double width,
     bool isCheckbox = false,
     bool isChecked = false,
+    bool isBalanceCell = false,
   }) {
     return SizedBox(
       width: width,
@@ -94,7 +102,7 @@ class ReportTableRow extends StatelessWidget {
               child: Text(
                 text,
                 style: GoogleFonts.rajdhani(
-                  color: Colors.grey[800],
+                  color: isBalanceCell ? Colors.red : Colors.grey[800],
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),

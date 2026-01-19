@@ -43,6 +43,7 @@ Future<void> showPasswordForValidation(
 
   return showDialog(
     context: context,
+    barrierDismissible: false,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
@@ -105,162 +106,184 @@ Future<void> showPasswordForValidation(
                       ),
                       const SizedBox(height: 32),
 
-                      // Staff Dropdown
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white.withAlpha(77)),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<StaffModel>(
-                            value: selectedStaff,
-                            dropdownColor: const Color(0xFF1E1E2C),
-                            icon: const Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.white,
-                            ),
-                            isExpanded: true,
-                            // Disable dropdown if staff is pre-selected
-                            onChanged: preSelectedStaff != null
-                                ? null
-                                : (StaffModel? newValue) {
-                                    setState(() {
-                                      selectedStaff = newValue;
-                                    });
-                                  },
-                            hint: Text(
-                              showAdminToo == true
-                                  ? "Select User"
-                                  : "Select Staff",
-                              style: GoogleFonts.rajdhani(
-                                color: Colors.white.withAlpha(179),
-                                fontSize: 16,
-                              ),
-                            ),
-                            style: GoogleFonts.rajdhani(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                            items: staffList.map((StaffModel staff) {
-                              return DropdownMenuItem<StaffModel>(
-                                value: staff,
-                                child: Text(staff.name),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Password Field
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white.withAlpha(77)),
-                        ),
-                        child: TextField(
-                          controller: passwordController,
-                          obscureText: obscurePassword,
-                          style: GoogleFonts.rajdhani(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: "Enter Password",
-                            hintStyle: GoogleFonts.rajdhani(
-                              color: Colors.white.withAlpha(179),
-                              fontSize: 16,
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                color: Colors.white.withAlpha(128),
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  obscurePassword = !obscurePassword;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Submit Button
-                      state is PasswordValidationLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    AppColors.violetNormal,
-                                    AppColors.redNormal,
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                      // Scrollable Content
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Staff Dropdown
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
                                 ),
-                              ),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  if (selectedStaff == null) {
-                                    ToastHelper.showError(
-                                      "Please select a staff",
-                                    );
-                                    return;
-                                  }
-                                  if (passwordController.text.isEmpty) {
-                                    ToastHelper.showError(
-                                      "Please enter password",
-                                    );
-                                    return;
-                                  }
-                                  // if show admin too is true and selected staff is admin then set isAdmin to true
-                                  if (showAdminToo == true) {
-                                    if (selectedStaff?.role == Role.admin) {
-                                      isAdmin = true;
-                                    }
-                                  }
-
-                                  context
-                                      .read<PasswordCubit>()
-                                      .validatePassword(
-                                        isAdmin: isAdmin,
-                                        password: passwordController.text,
-                                        userId: selectedStaff!.id,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.white.withAlpha(77),
+                                  ),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<StaffModel>(
+                                    value: selectedStaff,
+                                    dropdownColor: const Color(0xFF1E1E2C),
+                                    icon: const Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Colors.white,
+                                    ),
+                                    isExpanded: true,
+                                    // Disable dropdown if staff is pre-selected
+                                    onChanged: preSelectedStaff != null
+                                        ? null
+                                        : (StaffModel? newValue) {
+                                            setState(() {
+                                              selectedStaff = newValue;
+                                            });
+                                          },
+                                    hint: Text(
+                                      showAdminToo == true
+                                          ? "Select User"
+                                          : "Select Staff",
+                                      style: GoogleFonts.rajdhani(
+                                        color: Colors.white.withAlpha(179),
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    style: GoogleFonts.rajdhani(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                    items: staffList.map((StaffModel staff) {
+                                      return DropdownMenuItem<StaffModel>(
+                                        value: staff,
+                                        child: Text(staff.name),
                                       );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    }).toList(),
                                   ),
                                 ),
-                                child: Text(
-                                  'Submit',
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Password Field
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.white.withAlpha(77),
+                                  ),
+                                ),
+                                child: TextField(
+                                  controller: passwordController,
+                                  obscureText: obscurePassword,
                                   style: GoogleFonts.rajdhani(
                                     color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: "Enter Password",
+                                    hintStyle: GoogleFonts.rajdhani(
+                                      color: Colors.white.withAlpha(179),
+                                      fontSize: 16,
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        obscurePassword
+                                            ? Icons.visibility_outlined
+                                            : Icons.visibility_off_outlined,
+                                        color: Colors.white.withAlpha(128),
+                                        size: 20,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          obscurePassword = !obscurePassword;
+                                        });
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 32),
+
+                              // Submit Button
+                              state is PasswordValidationLoading
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            AppColors.violetNormal,
+                                            AppColors.redNormal,
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          if (selectedStaff == null) {
+                                            ToastHelper.showError(
+                                              "Please select a staff",
+                                            );
+                                            return;
+                                          }
+                                          if (passwordController.text.isEmpty) {
+                                            ToastHelper.showError(
+                                              "Please enter password",
+                                            );
+                                            return;
+                                          }
+                                          // if show admin too is true and selected staff is admin then set isAdmin to true
+                                          if (showAdminToo == true) {
+                                            if (selectedStaff?.role ==
+                                                Role.admin) {
+                                              isAdmin = true;
+                                            }
+                                          }
+
+                                          context
+                                              .read<PasswordCubit>()
+                                              .validatePassword(
+                                                isAdmin: isAdmin,
+                                                password:
+                                                    passwordController.text,
+                                                userId: selectedStaff!.id,
+                                              );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Submit',
+                                          style: GoogleFonts.rajdhani(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

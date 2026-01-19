@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/data/api_client.dart';
-import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
@@ -10,11 +9,12 @@ import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.da
 
 class BookingRepoImp implements BookingRepo {
   @override
-  Future<Either<String, BookingResponseModel>> bookSlot({
+  Future<Either<String, String>> bookSlot({
     required int chairId,
     required int userId,
     required String userPassword,
   }) async {
+
     final body = {
       "chair_id": chairId,
       "user_id": userId,
@@ -28,16 +28,23 @@ class BookingRepoImp implements BookingRepo {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        
         final data = response.data;
         if (data['success'] == true) {
-          return Right(BookingResponseModel.fromJson(data['data']));
+          return Right("Booking successful");
         } else {
           return Left(data['message'] ?? 'Booking failed');
         }
+
       } else {
         return Left('Failed to book slot: ${response.statusCode}');
       }
     } on DioException catch (e) {
+      
+      if(e.response?.statusCode == 409) {
+        return Left("This chair is already booked");
+      }
+
       if (e.response != null && e.response!.data != null) {
         final data = e.response!.data;
         if (data is Map<String, dynamic> && data.containsKey('message')) {

@@ -24,6 +24,7 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
 
   return showDialog(
     context: context,
+    barrierDismissible: false,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {

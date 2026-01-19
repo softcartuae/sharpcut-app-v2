@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
+import 'package:sharp_cut/utils/helpers/icon_helper.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 Future<void> showSettlementDialog(
@@ -28,6 +30,7 @@ Future<void> showSettlementDialog(
 }) {
   return showDialog(
     context: context,
+    barrierDismissible: false,
     barrierColor: Colors.black.withValues(alpha: 0.5),
     builder: (context) => SettlementDialog(
       invoiceNumber: invoiceNumber,
@@ -67,27 +70,24 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
   // Payment Section Controllers
   final TextEditingController _amountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _tenderCashController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _chargeController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
 
   // Totals Section Controllers
   final TextEditingController _totalQtyController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _subTotalController = TextEditingController(
     text: "0.00",
   );
   final TextEditingController _discountController = TextEditingController(
-    text: "0.00",
-  );
-  final TextEditingController _roundOffController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
 
   final TextEditingController _paidController = TextEditingController(
@@ -110,10 +110,10 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
   // Split Payment Controllers
   final TextEditingController _cashAmountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
   final TextEditingController _cardAmountController = TextEditingController(
-    text: "0.00",
+    text: "",
   );
 
   bool _splitPayment = false;
@@ -122,6 +122,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
   bool _isCardSelected = false;
 
   double _finalTotal = 0.0;
+  double _uiGrandTotal = 0.0;
 
   @override
   void initState() {
@@ -133,7 +134,8 @@ class _SettlementDialogState extends State<SettlementDialog> {
     _mobileController.text = widget.settlePayment.customerNumber ?? '';
     _nameController.text = widget.settlePayment.customerName ?? '';
     _staffNameController.text = widget.staffName ?? "";
-    _vatController.text = widget.settlePayment.taxTotal.toString();
+    _vatController.text = (widget.settlePayment.taxTotal ?? 0.0)
+        .toStringAsFixed(2);
     _invoiceController.text = widget.invoiceNumber ?? "";
     // Calculate total quantity
     int totalQty = 0;
@@ -144,12 +146,14 @@ class _SettlementDialogState extends State<SettlementDialog> {
     }
     _totalQtyController.text = totalQty.toString();
 
-    _subTotalController.text = (widget.settlePayment.grandTotal ?? 0.0)
+    _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0)
         .toStringAsFixed(2);
-    _discountController.text = (widget.settlePayment.discount ?? 0.0)
-        .toStringAsFixed(2);
-    _roundOffController.text = (widget.settlePayment.roundOff ?? 0.0)
-        .toStringAsFixed(2);
+        
+    _discountController.text =
+        widget.settlePayment.discount == null ||
+            widget.settlePayment.discount == 0
+        ? ''
+        : widget.settlePayment.discount!.toStringAsFixed(2);
 
     // Amount to pay is usually the final total
     _amountController.text = (widget.settlePayment.finalTotal ?? 0.0)
@@ -158,31 +162,24 @@ class _SettlementDialogState extends State<SettlementDialog> {
     // Initialize split controllers
     _cashAmountController.text = (widget.settlePayment.finalTotal ?? 0.0)
         .toStringAsFixed(2);
-    _cardAmountController.text = "0.00";
+    _cardAmountController.text = "";
 
     // Grand total display at the bottom usually matches final total
     _calculateFinalTotal();
   }
 
   void _calculateFinalTotal() {
-    final double subTotal = widget.settlePayment.grandTotal ?? 0.0;
+    final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
     final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
-    final double discount = double.tryParse(_discountController.text) ?? 0.0;
-    final double roundOff = double.tryParse(_roundOffController.text) ?? 0.0;
 
     // User requested: "like minus from grand total" for both discount and round off.
-    // Final = SubTotal + Tax - Discount - RoundOff
+    // Final = SubTotal + Tax
     setState(() {
-      _finalTotal = subTotal + taxTotal - discount - roundOff;
-
-      // Also update split amounts if they haven't been manually edited?
-      // Or just let the user handle it?
-      // If split is OFF, we might want to sync the amount controller?
-      if (!_splitPayment) {
-        _amountController.text = _finalTotal.toStringAsFixed(2);
-        _cashAmountController.text = _finalTotal.toStringAsFixed(2);
-      }
+      _finalTotal = (subTotal + taxTotal);
+      final double discount = double.tryParse(_discountController.text) ?? 0.0;
+      _uiGrandTotal = _finalTotal - discount;
       _calculatePaymentAndBalance();
+      _calculateChange();
     });
   }
 
@@ -207,10 +204,25 @@ class _SettlementDialogState extends State<SettlementDialog> {
     }
 
     final double curPayment = cashAmount + cardAmount;
-    final double balance = _finalTotal - curPayment;
+    final double discount = double.tryParse(_discountController.text) ?? 0.0;
+    final double balance = _finalTotal - curPayment - discount;
 
     _curPaymentController.text = curPayment.toStringAsFixed(2);
     _balanceController.text = balance.toStringAsFixed(2);
+  }
+
+  void _calculateChange() {
+    double tender = double.tryParse(_tenderCashController.text) ?? 0.0;
+    double amount = 0.0;
+    if (_splitPayment) {
+      amount = double.tryParse(_cashAmountController.text) ?? 0.0;
+    } else {
+      amount = double.tryParse(_amountController.text) ?? 0.0;
+    }
+
+    double change = tender - amount;
+    if (change < 0) change = 0;
+    _chargeController.text = change.toStringAsFixed(2);
   }
 
   @override
@@ -225,7 +237,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
     _totalQtyController.dispose();
     _subTotalController.dispose();
     _discountController.dispose();
-    _roundOffController.dispose();
     _paidController.dispose();
     _curPaymentController.dispose();
     _balanceController.dispose();
@@ -236,16 +247,8 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
   void _onSettle({required bool alsoPrint}) {
     final double discount = double.tryParse(_discountController.text) ?? 0.0;
-    final double roundOff = double.tryParse(_roundOffController.text) ?? 0.0;
 
-    // Recalculate final total based on current inputs
-    // final_total = grand_total + tax_total - discount + round_off
-    // Note: widget.settlePayment.grandTotal might be the subtotal before tax?
-    // Let's assume the formula: Final = (GrandTotal or SubTotal) + Tax - Discount + RoundOff
-    // Based on populateData: _subTotalController <-- grandTotal. _vatController <-- taxTotal.
-    // So Final = SubTotal + VAT - Discount + RoundOff.
-
-    final double subTotal = widget.settlePayment.grandTotal ?? 0.0;
+    final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
     final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
 
     final double calculatedFinalTotal = _finalTotal;
@@ -262,11 +265,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
         cardAmount = double.tryParse(_cardAmountController.text) ?? 0.0;
       }
     } else {
-      // Split OFF: use the main amount controller for the selected mode
-      // Actually, to keep it simple, let's use the specific controllers if we expose them,
-      // OR map _amountController to the selected one.
-      // Current UI plan: If split OFF, show _amountController.
-      // So we read from _amountController and assign to selected mode.
       final double amount = double.tryParse(_amountController.text) ?? 0.0;
       if (_isCashSelected) {
         cashAmount = amount;
@@ -276,11 +274,15 @@ class _SettlementDialogState extends State<SettlementDialog> {
     }
 
     final double totalPaid = cashAmount + cardAmount;
+    log("cash amount $cashAmount and cardamount $cardAmount");
 
-    // Validation
-    if (totalPaid > calculatedFinalTotal) {
+    final paid = round2(totalPaid);
+    final finalTotal = round2(calculatedFinalTotal);
+
+    log("paid $paid and finalTotal $finalTotal");
+
+    if (paid > finalTotal) {
       ToastHelper.showError("Total amount cannot be greater than Final Total");
-
       return;
     }
 
@@ -288,7 +290,6 @@ class _SettlementDialogState extends State<SettlementDialog> {
       ToastHelper.showError("Please Enter Customer Name");
       return;
     }
-
     // Also check if totalPaid is 0? Maybe allow 0 for partial?
     // User said "settlement is like can be partially gaven".
     // So < finalTotal is allowed. > finalTotal is NOT allowed.
@@ -335,15 +336,20 @@ class _SettlementDialogState extends State<SettlementDialog> {
       }
     }
 
+    log("tax: $taxTotal");
+    log("subtotal: $subTotal");
+    log("discount : $discount");
+    log("finalTotal : $finalTotal");
+
     final request = SettlePaymentRequestModel(
       transactionId: widget.settlePayment.transactionId,
       customerName: _nameController.text,
       customerNumber: _mobileController.text,
-      grandTotal: subTotal,
+      subTotalValue: subTotal,
       taxTotal: taxTotal,
       discount: discount,
-      roundOff: roundOff,
-      finalTotal: calculatedFinalTotal,
+      roundOff: 0,
+      finalTotal: finalTotal,
       serviceId: widget.settlePayment.serviceId,
       quantity: widget.settlePayment.quantity,
       rate: widget.settlePayment.rate,
@@ -351,7 +357,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
       currency: widget.settlePayment.currency,
       amountTotal: widget.settlePayment.amountTotal,
       tax: widget.settlePayment.tax,
-      subTotal: widget.settlePayment.subTotal,
+      subTotalList: widget.settlePayment.subTotalList,
       isTip: widget.settlePayment.isTip,
       collectedUserId:
           widget.settlePayment.collectedUserId != null &&
@@ -361,16 +367,19 @@ class _SettlementDialogState extends State<SettlementDialog> {
               widget.settlePayment.collectedUserId!.first,
             )
           : [],
-
       mode: modes,
       amount: amounts,
       tenderCash: tenders,
       change: changes,
     );
+
     if (alsoPrint) {
       final shopData = context.read<AuthCubit>().currentUser;
       if (shopData != null) {
-        context.read<PrintingCubit>().printInvoice(
+        final printCubit = context.read<PrintingCubit>();
+        printCubit.printInvoice(
+          printCount: printCubit.state.settings?.printCount.settlePayment
+              .toInt(),
           balanceAmount: double.tryParse(_balanceController.text) ?? 0.0,
           request: request,
           shopData: shopData,
@@ -426,7 +435,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
               // Content
               Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(14.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -454,7 +463,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 6),
 
                     // Customer Details Section
                     Row(
@@ -504,9 +513,9 @@ class _SettlementDialogState extends State<SettlementDialog> {
                       ],
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     const Divider(color: Colors.white24),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
 
                     // Main Content: 3 Columns
                     Expanded(
@@ -534,6 +543,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                           _isCardSelected = false;
                                         }
                                         _calculatePaymentAndBalance();
+                                        _calculateChange();
                                       });
                                     },
                                     child: PaymentModeCard(
@@ -565,6 +575,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                           _isCashSelected = false;
                                         }
                                         _calculatePaymentAndBalance();
+                                        _calculateChange();
                                       });
                                     },
                                     child: PaymentModeCard(
@@ -650,6 +661,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                                           "0.00";
                                                     }
                                                     _calculatePaymentAndBalance();
+                                                    _calculateChange();
                                                   }),
                                                   activeColor:
                                                       AppColors.violetNormal,
@@ -659,7 +671,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                           ],
                                         ),
                                         const Divider(color: Colors.white24),
-                                        const SizedBox(height: 10),
+                                        const SizedBox(height: 8),
 
                                         // Dynamic Inputs based on selection
                                         if (_isCashSelected) ...[
@@ -680,6 +692,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                                       val;
                                                 }
                                                 _calculatePaymentAndBalance();
+                                                _calculateChange();
                                               });
                                             },
                                             keyboardType:
@@ -700,6 +713,8 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                                   label: "Tender Cash",
                                                   controller:
                                                       _tenderCashController,
+                                                  onChanged: (val) =>
+                                                      _calculateChange(),
                                                   keyboardType:
                                                       const TextInputType.numberWithOptions(
                                                         decimal: true,
@@ -805,22 +820,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                       ],
                                     ),
                                     const SizedBox(height: 10),
-                                    SettlementRowInput(
-                                      label: "Round Off",
-                                      controller: _roundOffController,
-                                      onChanged: (val) =>
-                                          _calculateFinalTotal(),
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                            decimal: true,
-                                          ),
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                          RegExp(r'^\d+\.?\d{0,2}'),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
+
                                     SettlementRowInput(
                                       label: "VAT",
                                       controller: _vatController,
@@ -832,7 +832,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                       label: "Paid",
                                       controller: _paidController,
                                     ),
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 15),
 
                                     // Grand Total
                                     Container(
@@ -856,22 +856,21 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                             style: GoogleFonts.rajdhani(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 16,
+                                              fontSize: 14,
                                             ),
                                           ),
                                           Text(
-                                            _finalTotal.toStringAsFixed(2),
+                                            _uiGrandTotal.toStringAsFixed(2),
                                             style: GoogleFonts.rajdhani(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 22,
+                                              fontSize: 18,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(height: 20),
-
+                                    const SizedBox(height: 10),
                                     Row(
                                       children: [
                                         Expanded(

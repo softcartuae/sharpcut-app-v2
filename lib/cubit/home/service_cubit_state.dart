@@ -57,7 +57,7 @@ class ServiceStateSuccess extends ServiceState {
 
   double get subTotal {
     return cartItems.fold(0, (total, item) {
-      final price = item.service.charge  ?? 0;
+      final price = item.service.beforeVat ?? 0;
       return total + (price * item.quantity);
     });
   }
@@ -75,7 +75,7 @@ class ServiceStateSuccess extends ServiceState {
     // If exclusive, we might need to add VAT.
     // Based on JSON "before_vat" and "charge", it seems "charge" is the final price.
     // Let's assume charge is the price to pay for now.
-    return subTotal;
+    return subTotal + vat;
   }
 
   @override
