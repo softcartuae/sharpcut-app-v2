@@ -34,6 +34,7 @@ import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
 import 'package:sharp_cut/presentation/quick_report/screens/screen_quick_report.dart';
+import 'package:sharp_cut/presentation/home/widgets/tip_dialoge.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
@@ -110,7 +111,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         final tax = e.service.unitTax ?? 0.0;
         return (price + tax) * e.quantity;
       }).toList(),
-      isTip: serviceState.cartItems.map((e) => 0).toList(),
+      isTip: serviceState.cartItems.map((e) => e.service.isTip ?? 0).toList(),
       collectedUserId: [userId!], // Placeholder
       mode: [paymentMode],
       amount: [amount],
@@ -443,7 +444,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 padding: EdgeInsets.zero,
                                 gridDelegate:
                                     const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 3,
+                                      crossAxisCount: 4,
                                       childAspectRatio: 0.8,
                                       crossAxisSpacing: 16,
                                       mainAxisSpacing: 16,
@@ -459,9 +460,44 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                         );
                                         return;
                                       }
-                                      context.read<ServiceCubit>().addToCart(
-                                        service,
-                                      );
+                                      log(service.isTip.toString());
+                                      if (service.isTip == 1) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => TipDialog(
+                                            onTipSelected: (amount) {
+                                              final taxPercentage =
+                                                  service.taxPercentage ?? 0;
+
+                                              final beforeTax = double.parse(
+                                                (amount *
+                                                        100 /
+                                                        (100 + taxPercentage))
+                                                    .toStringAsFixed(2),
+                                              );
+
+                                              final taxAmount = double.parse(
+                                                (amount - beforeTax)
+                                                    .toStringAsFixed(2),
+                                              );
+
+                                              context
+                                                  .read<ServiceCubit>()
+                                                  .addToCart(
+                                                    service.copyWith(
+                                                      unitTax: taxAmount,
+                                                      charge: amount,
+                                                      beforeVat: beforeTax,
+                                                    ),
+                                                  );
+                                            },
+                                          ),
+                                        );
+                                      } else {
+                                        context.read<ServiceCubit>().addToCart(
+                                          service,
+                                        );
+                                      }
                                     },
                                     child: ServiceItem(
                                       title: service.name ?? "Service",
@@ -676,9 +712,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               >(
                                 listener: (context, state) {
                                   if (state is CashRegistorOpen) {
-                                    // context
-                                    //     .read<ChairCubit>()
-                                    //     .getChairsAndStaffs(forceRefresh: true);
+                                    context
+                                        .read<ChairCubit>()
+                                        .getChairsAndStaffs(forceRefresh: true);
                                     CuttingMastersDialog.show(context);
                                   }
 
@@ -1110,7 +1146,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   })
                                                   .toList(),
                                               isTip: serviceState.cartItems
-                                                  .map((e) => 0)
+                                                  .map(
+                                                    (e) => e.service.isTip ?? 0,
+                                                  )
                                                   .toList(),
                                               collectedUserId: [
                                                 userId!,

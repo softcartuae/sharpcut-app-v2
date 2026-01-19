@@ -65,7 +65,6 @@ class ServiceStateSuccess extends ServiceState {
   double get vat {
     return cartItems.fold(0, (total, item) {
       final unitTax = item.service.unitTax ?? 0;
-
       return total + (unitTax * item.quantity);
     });
   }

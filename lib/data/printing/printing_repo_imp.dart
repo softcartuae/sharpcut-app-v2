@@ -503,6 +503,25 @@ class PrintingRepoImp implements PrintingRepo {
   }
 
   @override
+  Future<void> testPrint(Printer printer) async {
+    final profile = await CapabilityProfile.load();
+    final paperSize = await getPaperSize(printer);
+    final generator = Generator(paperSize.generatorPaperSize, profile);
+    List<int> bytes = [];
+
+    bytes.addAll(
+      generator.text(
+        "printer connected successfull",
+        styles: const PosStyles(align: PosAlign.center, bold: true),
+      ),
+    );
+    bytes.addAll(generator.feed(2));
+    bytes.addAll(generator.cut());
+
+    await _printBytes(printer, Uint8List.fromList(bytes));
+  }
+
+  @override
   Future<void> savePaperSize(Printer printer, PrinterPaperSize size) async {
     final prefs = await SharedPreferences.getInstance();
     final key =

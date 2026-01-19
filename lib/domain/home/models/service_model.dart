@@ -84,4 +84,45 @@ class ServiceModel {
   }
 
   double? get price => charge;
+
+  ServiceModel copyWith({
+    int? id,
+    int? categoryId,
+    String? name,
+    String? nameArabic,
+    String? description,
+    int? isTip,
+    double? charge,
+    double? beforeVat,
+    String? taxOption,
+    String? currency,
+    double? taxPercentage,
+    double? unitTax,
+    int? status,
+    String? image,
+    int? position,
+    String? createdAt,
+    String? updatedAt,
+    bool? tipAmount,
+  }) {
+    return ServiceModel(
+      id: id ?? this.id,
+      categoryId: categoryId ?? this.categoryId,
+      name: name ?? this.name,
+      nameArabic: nameArabic ?? this.nameArabic,
+      description: description ?? this.description,
+      isTip: isTip ?? this.isTip,
+      charge: charge ?? this.charge,
+      beforeVat: beforeVat ?? this.beforeVat,
+      taxOption: taxOption ?? this.taxOption,
+      currency: currency ?? this.currency,
+      taxPercentage: taxPercentage ?? this.taxPercentage,
+      unitTax: unitTax ?? this.unitTax,
+      status: status ?? this.status,
+      image: image ?? this.image,
+      position: position ?? this.position,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }

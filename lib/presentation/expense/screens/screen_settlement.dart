@@ -148,8 +148,12 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
     _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0)
         .toStringAsFixed(2);
-    _discountController.text = (widget.settlePayment.discount ?? 0.0)
-        .toStringAsFixed(2);
+        
+    _discountController.text =
+        widget.settlePayment.discount == null ||
+            widget.settlePayment.discount == 0
+        ? ''
+        : widget.settlePayment.discount!.toStringAsFixed(2);
 
     // Amount to pay is usually the final total
     _amountController.text = (widget.settlePayment.finalTotal ?? 0.0)
@@ -158,7 +162,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     // Initialize split controllers
     _cashAmountController.text = (widget.settlePayment.finalTotal ?? 0.0)
         .toStringAsFixed(2);
-    _cardAmountController.text = "0.00";
+    _cardAmountController.text = "";
 
     // Grand total display at the bottom usually matches final total
     _calculateFinalTotal();

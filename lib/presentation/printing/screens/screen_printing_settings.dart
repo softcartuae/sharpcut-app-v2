@@ -132,37 +132,38 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                     }
                                   },
                                 ),
-                                // if (state.connectedPrinter != null)
-                                //   Padding(
-                                //     padding: const EdgeInsets.symmetric(
-                                //       horizontal: 24,
-                                //       vertical: 8,
-                                //     ),
-                                //     child: SizedBox(
-                                //       width: double.infinity,
-                                //       child: OutlinedButton.icon(
-                                //         onPressed: () => context
-                                //             .read<PrintingCubit>()
-                                //             .openDrawer(),
-                                //         icon: const Icon(
-                                //           Icons.open_in_browser,
-                                //           color: AppColors.violetNormal,
-                                //         ),
-                                //         label: Text(
-                                //           "Open Drawer",
-                                //           style: GoogleFonts.rajdhani(
-                                //             color: AppColors.violetNormal,
-                                //             fontWeight: FontWeight.w600,
-                                //           ),
-                                //         ),
-                                //         style: OutlinedButton.styleFrom(
-                                //           side: const BorderSide(
-                                //             color: AppColors.violetNormal,
-                                //           ),
-                                //         ),
-                                //       ),
-                                //     ),
-                                //   ),
+                                if (state.connectedPrinter != null &&
+                                    state.status == PrintingStatus.connected)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 8,
+                                    ),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: OutlinedButton.icon(
+                                        onPressed: () => context
+                                            .read<PrintingCubit>()
+                                            .testPrint(),
+                                        icon: const Icon(
+                                          Icons.print,
+                                          color: AppColors.violetNormal,
+                                        ),
+                                        label: Text(
+                                          "Test Print",
+                                          style: GoogleFonts.rajdhani(
+                                            color: AppColors.violetNormal,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          side: const BorderSide(
+                                            color: AppColors.violetNormal,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),

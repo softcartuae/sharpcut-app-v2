@@ -289,6 +289,20 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
   }
 
+  Future<void> testPrint() async {
+    if (state.connectedPrinter == null) {
+      ToastHelper.showError("No printer connected");
+      return;
+    }
+    try {
+      await _printingRepo.testPrint(state.connectedPrinter!);
+      ToastHelper.showSuccess("Test print sent");
+    } catch (e) {
+      log(e.toString());
+      ToastHelper.showError("Failed to test print");
+    }
+  }
+
   Future<void> setPaperSize(Printer printer, PrinterPaperSize size) async {
     await _printingRepo.savePaperSize(printer, size);
     emit(state.copyWith(showPaperSizeDialog: false));

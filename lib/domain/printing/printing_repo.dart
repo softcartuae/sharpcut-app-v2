@@ -43,6 +43,7 @@ abstract class PrintingRepo {
   });
 
   Future<void> openDrawer(Printer printer);
+  Future<void> testPrint(Printer printer);
 
   Future<Either<String, PrinterSettingsModel>> getPrinterSettings();
   Future<Either<String, void>> updatePrinterSettings(

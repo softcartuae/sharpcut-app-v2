@@ -181,7 +181,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                           })
                                                           .toList(),
                                                       isTip: cartItems
-                                                          .map((e) => 0)
+                                                          .map((e) => e.service.isTip?? 0)
                                                           .toList(),
                                                       collectedUserId: [
                                                         booking.userId!,
@@ -311,7 +311,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 }).toList(),
 
                                                 isTip: cartItems
-                                                    .map((e) => 0)
+                                                    .map((e) => e.service.isTip ?? 0)
                                                     .toList(),
                                                 collectedUserId: [
                                                   booking.userId!,
