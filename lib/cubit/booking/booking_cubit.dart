@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';

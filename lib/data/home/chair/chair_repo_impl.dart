@@ -44,7 +44,13 @@ class ChairRepoImpl implements ChairRepo {
         final List<dynamic> adminJson = data['admins'];
 
         // Cache data locally
-        await dbHelper.insertChairs(chairsJson.cast<Map<String, dynamic>>());
+        final chairsToInsert = chairsJson.map((chair) {
+          final chairMap = Map<String, dynamic>.from(chair as Map);
+          chairMap.remove('transaction');
+          return chairMap;
+        }).toList();
+
+        await dbHelper.insertChairs(chairsToInsert);
 
         // Combine users and admins for caching
         // We might need to ensure is_admin is set correctly if the API doesn't provide it explicitly in the object

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -19,6 +21,7 @@ class DatabaseHelper {
 
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'sharp_cut_offline.db');
+    log("path: $path");
     return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
@@ -28,15 +31,7 @@ class DatabaseHelper {
       CREATE TABLE users (
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        email_verified_at TEXT,
-        password TEXT NOT NULL,
-        remember_token TEXT,
-        created_at TEXT,
-        updated_at TEXT,
-        status INTEGER DEFAULT 1,
-        position INTEGER,
-        is_admin INTEGER,
+        password TEXT,
         role TEXT
       )
     ''');
@@ -78,13 +73,13 @@ class DatabaseHelper {
         name_arabic TEXT,
         description TEXT,
         is_tip INTEGER DEFAULT 0,
-        charge REAL NOT NULL,
+        charge REAL,
         before_vat REAL DEFAULT 0.00,
-        tax_option TEXT NOT NULL,
-        currency TEXT NOT NULL,
+        tax_option TEXT,
+        currency TEXT,
         tax_percentage REAL DEFAULT 0.00,
-        unit_tax REAL NOT NULL,
-        status INTEGER NOT NULL,
+        unit_tax REAL,
+        status INTEGER,
         image TEXT,
         position INTEGER,
         created_at TEXT,
@@ -149,85 +144,38 @@ class DatabaseHelper {
         status TEXT NOT NULL,
         cancellation_reason TEXT,
         is_updated INTEGER DEFAULT 0,
+        created_at TEXT,
+        updated_at TEXT,
+        payment_status TEXT,
+        total_payment REAL,
         is_synced INTEGER DEFAULT 0,
-        created_at TEXT,
-        updated_at TEXT
       )
     ''');
-
-    // Transaction Details Table
-    await db.execute('''
-      CREATE TABLE transaction_details (
-        id INTEGER PRIMARY KEY,
-        detail_id TEXT NOT NULL,
-        transaction_id INTEGER NOT NULL,
-        service_id INTEGER NOT NULL,
-        is_tip INTEGER DEFAULT 0,
-        quantity INTEGER NOT NULL,
-        rate REAL NOT NULL,
-        tax_amount REAL NOT NULL,
-        currency TEXT NOT NULL,
-        amount_total REAL NOT NULL,
-        tax REAL NOT NULL,
-        sub_total REAL NOT NULL,
-        created_at TEXT,
-        updated_at TEXT,
-        deleted_at TEXT,
-        FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE ON UPDATE CASCADE
-      )
-    ''');
-
-    // Transaction Payments Table
-    await db.execute('''
-      CREATE TABLE transaction_payments (
-        id INTEGER PRIMARY KEY,
-        payment_id TEXT NOT NULL,
-        transaction_id INTEGER NOT NULL,
-        collected_user_id INTEGER,
-        mode TEXT NOT NULL,
-        amount REAL NOT NULL,
-        tender_cash REAL,
-        change REAL,
-        date TEXT NOT NULL,
-        created_at TEXT,
-        updated_at TEXT,
-        FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE ON UPDATE CASCADE
-      )
-    ''');
-
-    // User Expenses Table
-    // await db.execute('''
-    //   CREATE TABLE user_expenses (
-    //     id INTEGER PRIMARY KEY,
-    //     app_id TEXT NOT NULL,
-    //     user_id INTEGER NOT NULL,
-    //     item_name TEXT NOT NULL,
-    //     price REAL NOT NULL,
-    //     purchase_date TEXT NOT NULL,
-    //     created_at TEXT,
-    //     updated_at TEXT,
-    //     is_synced INTEGER DEFAULT 0
-    //   )
-    // ''');
   }
 
   // --- Users ---
   Future<void> insertUsers(List<Map<String, dynamic>> users) async {
+    log("Inserting ${users.length} users into database");
     final db = await database;
     Batch batch = db.batch();
     for (var user in users) {
       batch.insert('users', user, conflictAlgorithm: ConflictAlgorithm.replace);
     }
     await batch.commit(noResult: true);
+    log("Users insertion completed");
   }
 
   Future<List<Map<String, dynamic>>> getUsers() async {
+    log("Fetching users from database");
     final db = await database;
-    return await db.query('users');
+    final result = await db.query('users');
+    log("Fetched ${result.length} users");
+    return result;
   }
 
   // --- Chairs ---
   Future<void> insertChairs(List<Map<String, dynamic>> chairs) async {
+    log("Inserting ${chairs.length} chairs into database");
     final db = await database;
     Batch batch = db.batch();
     for (var chair in chairs) {
@@ -238,17 +186,22 @@ class DatabaseHelper {
       );
     }
     await batch.commit(noResult: true);
+    log("Chairs insertion completed");
   }
 
   Future<List<Map<String, dynamic>>> getChairs() async {
+    log("Fetching chairs from database");
     final db = await database;
-    return await db.query('chairs');
+    final result = await db.query('chairs');
+    log("Fetched ${result.length} chairs");
+    return result;
   }
 
   // --- Service Categories ---
   Future<void> insertServiceCategories(
     List<Map<String, dynamic>> categories,
   ) async {
+    log("Inserting ${categories.length} service categories into database");
     final db = await database;
     Batch batch = db.batch();
     for (var category in categories) {
@@ -259,15 +212,20 @@ class DatabaseHelper {
       );
     }
     await batch.commit(noResult: true);
+    log("Service categories insertion completed");
   }
 
   Future<List<Map<String, dynamic>>> getServiceCategories() async {
+    log("Fetching service categories from database");
     final db = await database;
-    return await db.query('service_categories');
+    final result = await db.query('service_categories');
+    log("Fetched ${result.length} service categories");
+    return result;
   }
 
   // --- Services ---
   Future<void> insertServices(List<Map<String, dynamic>> services) async {
+    log("Inserting ${services.length} services into database");
     final db = await database;
     Batch batch = db.batch();
     for (var service in services) {
@@ -278,17 +236,57 @@ class DatabaseHelper {
       );
     }
     await batch.commit(noResult: true);
+    log("Services insertion completed");
   }
 
   Future<List<Map<String, dynamic>>> getServices({int? categoryId}) async {
+    log(
+      "Fetching services from database${categoryId != null ? " for category $categoryId" : ""}",
+    );
     final db = await database;
     if (categoryId != null) {
-      return await db.query(
+      final result = await db.query(
         'services',
         where: 'category_id = ?',
         whereArgs: [categoryId],
       );
+      log("Fetched ${result.length} services for category $categoryId");
+      return result;
     }
-    return await db.query('services');
+    final result = await db.query('services');
+    log("Fetched ${result.length} services");
+    return result;
+  }
+
+  // --- Generic Helper Methods for Viewer ---
+  Future<List<String>> getTables() async {
+    log("Fetching all table names");
+    final db = await database;
+    final result = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';",
+    );
+    final tables = result.map((row) => row['name'] as String).toList();
+    log("Fetched ${tables.length} tables: $tables");
+    return tables;
+  }
+
+  Future<List<Map<String, dynamic>>> getTableData(String tableName) async {
+    log("Fetching data from table: $tableName");
+    final db = await database;
+    final result = await db.query(tableName);
+    log("Fetched ${result.length} rows from $tableName");
+    return result;
+  }
+
+  Future<void> updateUserPassword(int id, String newPassword) async {
+    log("Updating password for user $id");
+    final db = await database;
+    await db.update(
+      'users',
+      {'password': newPassword},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    log("Password updated for user $id");
   }
 }
