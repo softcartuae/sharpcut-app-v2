@@ -359,6 +359,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                   staffName: staffName,
                                                   invoiceNumber: invoiceNumber,
                                                   bookingTime: bookingTime,
+                                                  invoiceDate:
+                                                      booking.invoiceDate,
                                                 );
                                               }
                                             },

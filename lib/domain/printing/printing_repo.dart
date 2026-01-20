@@ -10,7 +10,7 @@ import 'package:sharp_cut/domain/cash_registory/models/close_register_report_mod
 
 abstract class PrintingRepo {
   Stream<List<Printer>> get printersStream;
-   Stream<Map<String, dynamic>> get statusStream;
+  Stream<Map<String, dynamic>> get statusStream;
   Future<void> startScan({List<ConnectionType>? connectionTypes});
   Future<void> stopScan();
   Future<bool> connect(Printer printer);
@@ -24,6 +24,7 @@ abstract class PrintingRepo {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
+    required String? invoiceDate,
     int copies = 1,
     bool openDrawer = false,
   });

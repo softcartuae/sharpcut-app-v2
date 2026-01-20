@@ -52,6 +52,7 @@ void showReceiptDialog(
                   staffName: booking.staff?.name,
                   invoiceNumber: booking.invoiceNo,
                   bookingTime: booking.transactionDate,
+                  invoiceDate: booking.invoiceDate,
                   shopData: shopData,
                   request: request,
                   cartItems: cartItems,

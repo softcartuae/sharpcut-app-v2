@@ -127,6 +127,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
+    required String? invoiceDate,
     required int? printCount,
   }) async {
     if (state.connectedPrinter == null) {
@@ -152,6 +153,7 @@ class PrintingCubit extends Cubit<PrintingState> {
         staffName: staffName,
         invoiceNumber: invoiceNumber,
         bookingTime: bookingTime,
+        invoiceDate: invoiceDate,
         copies: printCount ?? 1,
         openDrawer: openDrawer,
       );

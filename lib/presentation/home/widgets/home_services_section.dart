@@ -73,10 +73,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     String? invoiceNumber,
     String? staffName,
     String? bookingTime,
+    String? invoiceDate,
     double discount,
     double finalTotal,
   ) {
     double amount = serviceState.total;
+
     // if user click unpaid then make the amount zero and the payment methord zero;
     if (paymentMode == PaymentMode.Unpaid.name) {
       log("unpaid is selected");
@@ -84,6 +86,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     }
 
     final request = SettlePaymentRequestModel(
+      paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : null,
       transactionId: transactionId,
       customerName: bookingFormState.customerName,
       customerNumber: bookingFormState.customerNumber,
@@ -132,9 +135,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         bookingTime: bookingTime != null
             ? DateFormat('HH:mm').format(DateTime.parse(bookingTime))
             : "--:--",
+        invoiceDate: invoiceDate,
       );
     }
-
     context.read<BookingCubit>().quickPayment(request: request);
   }
 
@@ -979,6 +982,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .createdAt,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
                                                 );
@@ -1002,6 +1008,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .createdAt,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
                                                 );
@@ -1024,6 +1033,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .createdAt,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
                                                 );
@@ -1172,6 +1184,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                               invoiceNumber: bookingState
                                                   .bookingResponse
                                                   .invoiceNo,
+                                              invoiceDate: bookingState
+                                                  .bookingResponse
+                                                  .invoiceDate,
                                               cartItems: serviceState.cartItems,
                                             );
                                           }

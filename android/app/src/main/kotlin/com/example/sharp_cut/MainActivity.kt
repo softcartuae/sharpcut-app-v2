@@ -299,7 +299,29 @@ class MainActivity : FlutterActivity() {
     private fun printUsbData(data: ByteArray): Boolean {
         val conn = usbConnection ?: return false
         val ep = usbEndpoint ?: return false
-        return conn.bulkTransfer(ep, data, data.size, 5000) >= 0
+
+        val chunkSize = 16384 // 16KB chunks
+        var offset = 0
+
+        while (offset < data.size) {
+            val length = Math.min(chunkSize, data.size - offset)
+            val chunk = ByteArray(length)
+            System.arraycopy(data, offset, chunk, 0, length)
+
+            val result = conn.bulkTransfer(ep, chunk, length, 5000)
+            if (result < 0) {
+                return false // Transfer failed
+            }
+            
+            try {
+                Thread.sleep(5) // Small delay for safety
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+            
+            offset += length
+        }
+        return true
     }
 
     private fun disconnectUsb() {

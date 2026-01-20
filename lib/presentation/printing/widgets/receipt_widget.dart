@@ -15,6 +15,7 @@ class ReceiptWidget extends StatelessWidget {
   final String? bookingTime;
   final double? width;
   final double balanceAmount;
+  final String? invoiceDate;
 
   const ReceiptWidget({
     super.key,
@@ -25,6 +26,7 @@ class ReceiptWidget extends StatelessWidget {
     required this.request,
     required this.cartItems,
     required this.balanceAmount,
+    required this.invoiceDate,
     this.width,
   });
 
@@ -43,7 +45,7 @@ class ReceiptWidget extends StatelessWidget {
           children: [
             // Logo
             const Center(
-              child: Icon(Icons.content_cut, size: 50, color: Colors.black),
+              child: Icon(Icons.content_cut, size: 65, color: Colors.black),
             ),
             const SizedBox(height: 8),
 
@@ -52,7 +54,7 @@ class ReceiptWidget extends StatelessWidget {
               shopData.name ?? 'Shop Name',
               textAlign: TextAlign.center,
               style: GoogleFonts.marcellus(
-                fontSize: 30,
+                fontSize: 35,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -75,7 +77,7 @@ class ReceiptWidget extends StatelessWidget {
               Text(
                 'TRN: ${shopData.vatNo}',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.marcellus(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -101,7 +103,7 @@ class ReceiptWidget extends StatelessWidget {
               label1: 'Bill Date:',
               subLabel1: 'تاريخ الفاتورة',
               value1:
-                  bookingTime ??
+                  invoiceDate ??
                   'Unknown', // Assuming current date for bill date
               label2: 'Invoice No:',
               subLabel2: 'رقم الفاتورة',
@@ -118,8 +120,8 @@ class ReceiptWidget extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             _buildDetailRow(
-              label1: 'Table No',
-              subLabel1: 'رقم الطاولة',
+              label1: 'Chair No',
+              subLabel1: 'رقم الكرسي',
               value1: '', // Placeholder or from request
               label2: 'Staff',
               subLabel2: 'النادل',
@@ -129,17 +131,36 @@ class ReceiptWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Start time : ${_formatTime(shopData.startTime)}',
-                  style: GoogleFonts.marcellus(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                Builder(
+                  builder: (context) {
+                    if (bookingTime == null) {
+                      return Text(
+                        'Start time : Unknown',
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      );
+                    }
+                    final dateTime = DateFormat(
+                      'dd/MM/yyyy hh:mm a',
+                    ).parse(bookingTime!);
+
+                    return Text(
+                      'Start time : ${DateFormat('hh:mm a').format(dateTime)}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    );
+                  },
                 ),
+
                 Text(
-                  'End time : ${_formatTime(shopData.endTime)}',
-                  style: GoogleFonts.marcellus(
+                  'End time : ${DateFormat('hh:mm a').format(DateTime.now())}',
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -306,7 +327,7 @@ class ReceiptWidget extends StatelessWidget {
                           child: Text(
                             item.quantity.toString(),
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.marcellus(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
@@ -318,7 +339,7 @@ class ReceiptWidget extends StatelessWidget {
                           child: Text(
                             price.toStringAsFixed(2),
                             textAlign: TextAlign.right,
-                            style: GoogleFonts.marcellus(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
@@ -330,7 +351,7 @@ class ReceiptWidget extends StatelessWidget {
                           child: Text(
                             total.toStringAsFixed(2),
                             textAlign: TextAlign.right,
-                            style: GoogleFonts.marcellus(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
@@ -455,7 +476,7 @@ class ReceiptWidget extends StatelessWidget {
 
                   Text(
                     ': $value1',
-                    style: GoogleFonts.marcellus(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -496,7 +517,7 @@ class ReceiptWidget extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(
                     ': $value2',
-                    style: GoogleFonts.marcellus(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
@@ -538,7 +559,7 @@ class ReceiptWidget extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: GoogleFonts.marcellus(
+              style: TextStyle(
                 fontSize: increesFontSize ? 25 : 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
@@ -553,12 +574,6 @@ class ReceiptWidget extends StatelessWidget {
   String _formatDate(DateTime? date) {
     if (date == null) return '';
     return DateFormat('dd-MM-yyyy').format(date);
-  }
-
-  String _formatTime(String? time) {
-    if (time == null) return '';
-    // Assuming time string is HH:mm:ss or similar
-    return time;
   }
 }
 

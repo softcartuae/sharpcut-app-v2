@@ -22,7 +22,16 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'sharp_cut_offline.db');
     log("path: $path");
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    return await openDatabase(
+      path,
+      version: 1,
+      onConfigure: _onConfigure,
+      onCreate: _onCreate,
+    );
+  }
+
+  Future<void> _onConfigure(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -149,6 +158,39 @@ class DatabaseHelper {
         payment_status TEXT,
         total_payment REAL,
         is_synced INTEGER DEFAULT 0,
+        FOREIGN KEY (chair_id) REFERENCES chairs (id) ON DELETE CASCADE ON UPDATE CASCADE
+      )
+    ''');
+
+    // Transaction Services Table
+    await db.execute('''
+      CREATE TABLE transaction_services (
+        id INTEGER PRIMARY KEY,
+        transaction_id INTEGER NOT NULL,
+        service_id INTEGER,
+        quantity INTEGER NOT NULL,
+        rate REAL NOT NULL,
+        tax REAL DEFAULT 0.0,
+        tax_amount REAL DEFAULT 0.0,
+        sub_total REAL NOT NULL,
+        amount_total REAL NOT NULL,
+        is_tip INTEGER DEFAULT 0,
+        FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE ON UPDATE CASCADE
+      )
+    ''');
+
+    // Transaction Payments Table
+    await db.execute('''
+      CREATE TABLE transaction_payments (
+        id INTEGER PRIMARY KEY,
+        transaction_id INTEGER NOT NULL,
+        collected_user_id INTEGER,
+        mode TEXT NOT NULL,
+        amount REAL NOT NULL,
+        tender_cash REAL DEFAULT 0.0,
+        change REAL DEFAULT 0.0,
+        date TEXT NOT NULL,
+        FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE ON UPDATE CASCADE
       )
     ''');
   }
@@ -256,6 +298,185 @@ class DatabaseHelper {
     final result = await db.query('services');
     log("Fetched ${result.length} services");
     return result;
+  }
+
+  // --- Transaction & Booking Flows ---
+
+  /// Create a new booking (transaction + services)
+  Future<int> createBooking(
+    Map<String, dynamic> transactionData,
+    List<Map<String, dynamic>> services,
+  ) async {
+    log("Creating booking for chair ${transactionData['chair_id']}");
+    final db = await database;
+    return await db.transaction((txn) async {
+      // 1. Insert Transaction
+      int transactionId = await txn.insert('transactions', transactionData);
+      log("Inserted transaction ID: $transactionId");
+
+      // 2. Insert Services
+      Batch batch = txn.batch();
+      for (var service in services) {
+        // Ensure transaction_id is set
+        var serviceData = Map<String, dynamic>.from(service);
+        serviceData['transaction_id'] = transactionId;
+        batch.insert('transaction_services', serviceData);
+      }
+      await batch.commit(noResult: true);
+      log(
+        "Inserted ${services.length} services for transaction $transactionId",
+      );
+
+      return transactionId;
+    });
+  }
+
+  /// Add services to an existing booking
+  Future<void> addServicesToBooking(
+    int transactionId,
+    List<Map<String, dynamic>> services,
+  ) async {
+    log("Adding ${services.length} services to transaction $transactionId");
+    final db = await database;
+    Batch batch = db.batch();
+    for (var service in services) {
+      var serviceData = Map<String, dynamic>.from(service);
+      serviceData['transaction_id'] = transactionId;
+      batch.insert('transaction_services', serviceData);
+    }
+    await batch.commit(noResult: true);
+    log("Services added successfully");
+  }
+
+  /// Settle payment for a booking
+  Future<void> settlePayment(
+    int transactionId,
+    Map<String, dynamic> updateData,
+    List<Map<String, dynamic>> payments,
+  ) async {
+    log("Settling payment for transaction $transactionId");
+    final db = await database;
+    await db.transaction((txn) async {
+      // 1. Update Transaction Status & Totals
+      await txn.update(
+        'transactions',
+        updateData,
+        where: 'id = ?',
+        whereArgs: [transactionId],
+      );
+      log("Updated transaction $transactionId status");
+
+      // 2. Insert Payments
+      Batch batch = txn.batch();
+      for (var payment in payments) {
+        var paymentData = Map<String, dynamic>.from(payment);
+        paymentData['transaction_id'] = transactionId;
+        batch.insert('transaction_payments', paymentData);
+      }
+      await batch.commit(noResult: true);
+      log(
+        "Inserted ${payments.length} payments for transaction $transactionId",
+      );
+    });
+  }
+
+  /// Fetch Chair with its active transaction (status = 'ongoing')
+  Future<Map<String, dynamic>?> getChairWithActiveTransaction(
+    int chairId,
+  ) async {
+    log("Fetching chair $chairId with active transaction");
+    final db = await database;
+
+    // 1. Fetch Chair
+    final chairResult = await db.query(
+      'chairs',
+      where: 'id = ?',
+      whereArgs: [chairId],
+    );
+
+    if (chairResult.isEmpty) return null;
+
+    Map<String, dynamic> chairData = Map<String, dynamic>.from(
+      chairResult.first,
+    );
+
+    // 2. Fetch Active Transaction
+    final transactionResult = await db.query(
+      'transactions',
+      where: 'chair_id = ? AND status = ?',
+      whereArgs: [chairId, 'ongoing'],
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+
+    if (transactionResult.isNotEmpty) {
+      Map<String, dynamic> transactionData = Map<String, dynamic>.from(
+        transactionResult.first,
+      );
+      int transactionId = transactionData['id'] as int;
+
+      // 3. Fetch Services for this transaction
+      final servicesResult = await db.query(
+        'transaction_services',
+        where: 'transaction_id = ?',
+        whereArgs: [transactionId],
+      );
+
+      // 4. Fetch Payments for this transaction
+      final paymentsResult = await db.query(
+        'transaction_payments',
+        where: 'transaction_id = ?',
+        whereArgs: [transactionId],
+      );
+
+      // Construct BookingResponseModel-like map
+      // Note: The caller is responsible for mapping this Map to the actual Model
+      transactionData['details'] = servicesResult;
+      transactionData['payments'] = paymentsResult;
+
+      chairData['transaction'] = transactionData;
+    } else {
+      chairData['transaction'] = null;
+    }
+
+    return chairData;
+  }
+
+  /// Fetch full booking details by transaction ID
+  Future<Map<String, dynamic>?> getBookingDetails(int transactionId) async {
+    log("Fetching booking details for transaction $transactionId");
+    final db = await database;
+
+    final transactionResult = await db.query(
+      'transactions',
+      where: 'id = ?',
+      whereArgs: [transactionId],
+    );
+
+    if (transactionResult.isEmpty) return null;
+
+    Map<String, dynamic> transactionData = Map<String, dynamic>.from(
+      transactionResult.first,
+    );
+
+    // Fetch Services
+    final servicesResult = await db.query(
+      'transaction_services',
+      where: 'transaction_id = ?',
+      whereArgs: [transactionId],
+    );
+
+    // Fetch Payments
+    final paymentsResult = await db.query(
+      'transaction_payments',
+      where: 'transaction_id = ?',
+      whereArgs: [transactionId],
+    );
+
+    transactionData['details'] = servicesResult;
+    transactionData['payments'] = paymentsResult;
+
+    return transactionData;
   }
 
   // --- Generic Helper Methods for Viewer ---

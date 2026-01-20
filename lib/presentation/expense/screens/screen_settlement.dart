@@ -26,6 +26,7 @@ Future<void> showSettlementDialog(
   required String? staffName,
   required String? bookingTime,
   required String? invoiceNumber,
+  required String? invoiceDate,
   required List<CartItemModel> cartItems,
 }) {
   return showDialog(
@@ -33,6 +34,7 @@ Future<void> showSettlementDialog(
     barrierDismissible: false,
     barrierColor: Colors.black.withValues(alpha: 0.5),
     builder: (context) => SettlementDialog(
+      invoiceDate: invoiceDate,
       invoiceNumber: invoiceNumber,
       settlePayment: settlePayment,
       staffName: staffName,
@@ -48,6 +50,7 @@ class SettlementDialog extends StatefulWidget {
   final String? bookingTime;
   final String? invoiceNumber;
   final List<CartItemModel> cartItems;
+  final String? invoiceDate;
   const SettlementDialog({
     super.key,
     required this.settlePayment,
@@ -55,6 +58,7 @@ class SettlementDialog extends StatefulWidget {
     required this.bookingTime,
     required this.invoiceNumber,
     required this.cartItems,
+    required this.invoiceDate,
   });
 
   @override
@@ -148,7 +152,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
     _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0)
         .toStringAsFixed(2);
-        
+
     _discountController.text =
         widget.settlePayment.discount == null ||
             widget.settlePayment.discount == 0
@@ -342,7 +346,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     log("finalTotal : $finalTotal");
 
     final request = SettlePaymentRequestModel(
-       paymentStatus: totalPaid == 0 ? "unpaid" : null,
+      paymentStatus: totalPaid == 0 ? "unpaid" : null,
       transactionId: widget.settlePayment.transactionId,
       customerName: _nameController.text,
       customerNumber: _mobileController.text,
@@ -390,6 +394,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
           bookingTime: widget.bookingTime != null
               ? DateFormat('HH:mm').format(DateTime.parse(widget.bookingTime!))
               : "--:--",
+          invoiceDate: widget.invoiceDate,
         );
       }
       context.read<BookingCubit>().settlePayment(request: request);
