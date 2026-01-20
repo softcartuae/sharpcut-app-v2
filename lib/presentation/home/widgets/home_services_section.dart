@@ -80,7 +80,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     // if user click unpaid then make the amount zero and the payment methord zero;
     if (paymentMode == PaymentMode.Unpaid.name) {
       log("unpaid is selected");
-      paymentMode = PaymentMode.Cash.name;
       amount = 0.0;
     }
 
@@ -113,7 +112,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       }).toList(),
       isTip: serviceState.cartItems.map((e) => e.service.isTip ?? 0).toList(),
       collectedUserId: [userId!], // Placeholder
-      mode: [paymentMode],
+      mode: [paymentMode == PaymentMode.Unpaid.name ? "Cash" : paymentMode],
       amount: [amount],
       tenderCash: [0.0],
       change: [0.0],
@@ -361,7 +360,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           children: [
             // 1. Category Sidebar
             Expanded(
-              flex: 2,
+              flex: 3,
               child: SingleChildScrollView(
                 child: BlocBuilder<ServiceCubit, ServiceState>(
                   builder: (context, state) {
@@ -461,8 +460,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                         return;
                                       }
                                       if (service.isTip == 1) {
-                                        // if it tip then we need to find the before wat and unit tax ok 
-                                        
+                                        // if it tip then we need to find the before wat and unit tax ok
+
                                         showDialog(
                                           context: context,
                                           builder: (context) => TipDialog(

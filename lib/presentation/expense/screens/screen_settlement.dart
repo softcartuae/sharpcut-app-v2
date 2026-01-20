@@ -342,6 +342,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     log("finalTotal : $finalTotal");
 
     final request = SettlePaymentRequestModel(
+       paymentStatus: totalPaid == 0 ? "unpaid" : null,
       transactionId: widget.settlePayment.transactionId,
       customerName: _nameController.text,
       customerNumber: _mobileController.text,

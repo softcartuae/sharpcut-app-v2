@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_thermal_printer/flutter_thermal_printer.dart';
 import 'package:flutter_thermal_printer/utils/printer.dart';
 import 'package:screenshot/screenshot.dart';
@@ -41,10 +42,19 @@ class PrintingRepoImp implements PrintingRepo {
   final StreamController<List<Printer>> _printersController =
       StreamController<List<Printer>>.broadcast();
 
+  static const EventChannel _eventChannel = EventChannel(
+    'com.example.sharp_cut/printer_status',
+  );
+
   PrintingRepoImp(this._printingService);
 
   @override
   Stream<List<Printer>> get printersStream => _printersController.stream;
+
+  @override
+  Stream<Map<String, dynamic>> get statusStream => _eventChannel
+      .receiveBroadcastStream()
+      .map((event) => Map<String, dynamic>.from(event));
 
   @override
   Future<void> startScan({List<ConnectionType>? connectionTypes}) async {
@@ -229,7 +239,7 @@ class PrintingRepoImp implements PrintingRepo {
     // Calculate estimated height
     // Base height (Header + Footer) ~ 1000
     // Per item ~ 100 (allowing for wrapping text)
-    double estimatedHeight = 1000 + (cartItems.length * 100.0);
+    double estimatedHeight = 1300 + (cartItems.length * 100.0);
 
     // Capture the widget as an image
     final ScreenshotController screenshotController = ScreenshotController();

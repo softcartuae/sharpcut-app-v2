@@ -181,7 +181,13 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                           })
                                                           .toList(),
                                                       isTip: cartItems
-                                                          .map((e) => e.service.isTip?? 0)
+                                                          .map(
+                                                            (e) =>
+                                                                e
+                                                                    .service
+                                                                    .isTip ??
+                                                                0,
+                                                          )
                                                           .toList(),
                                                       collectedUserId: [
                                                         booking.userId!,
@@ -311,13 +317,22 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 }).toList(),
 
                                                 isTip: cartItems
-                                                    .map((e) => e.service.isTip ?? 0)
+                                                    .map(
+                                                      (e) =>
+                                                          e.service.isTip ?? 0,
+                                                    )
                                                     .toList(),
                                                 collectedUserId: [
                                                   booking.userId!,
                                                 ], // Placeholder
-                                                mode: [],
-                                                amount: [],
+                                                mode: booking.payments
+                                                    ?.map((e) => e.mode ?? '')
+                                                    .toList(),
+                                                amount: booking.payments
+                                                    ?.map(
+                                                      (e) => e.amount ?? 0.0,
+                                                    )
+                                                    .toList(),
                                                 tenderCash: [0.0],
                                                 change: [0.0],
                                               );
