@@ -31,14 +31,28 @@ Future<StaffModel?> showStaffSelectionDialog(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Select Staff",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.rajdhani(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    ),
+                  ),
+                  Text(
+                    "Select Staff",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.rajdhani(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 32),
               Wrap(

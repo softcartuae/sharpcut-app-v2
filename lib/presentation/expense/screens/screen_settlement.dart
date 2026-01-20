@@ -148,7 +148,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
     _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0)
         .toStringAsFixed(2);
-        
+
     _discountController.text =
         widget.settlePayment.discount == null ||
             widget.settlePayment.discount == 0
@@ -342,6 +342,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     log("finalTotal : $finalTotal");
 
     final request = SettlePaymentRequestModel(
+      paymentStatus: totalPaid == 0 ? "unpaid" : null,
       transactionId: widget.settlePayment.transactionId,
       customerName: _nameController.text,
       customerNumber: _mobileController.text,

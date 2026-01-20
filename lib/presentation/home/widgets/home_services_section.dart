@@ -32,6 +32,7 @@ import 'package:sharp_cut/presentation/home/widgets/service_item.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings.dart';
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
+import 'package:sharp_cut/presentation/printing/widgets/receipt_widget.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
 import 'package:sharp_cut/presentation/quick_report/screens/screen_quick_report.dart';
 import 'package:sharp_cut/presentation/home/widgets/tip_dialoge.dart';
@@ -77,14 +78,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     double finalTotal,
   ) {
     double amount = serviceState.total;
+
     // if user click unpaid then make the amount zero and the payment methord zero;
     if (paymentMode == PaymentMode.Unpaid.name) {
       log("unpaid is selected");
-      paymentMode = PaymentMode.Cash.name;
       amount = 0.0;
     }
 
     final request = SettlePaymentRequestModel(
+      paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : null,
       transactionId: transactionId,
       customerName: bookingFormState.customerName,
       customerNumber: bookingFormState.customerNumber,
@@ -113,7 +115,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       }).toList(),
       isTip: serviceState.cartItems.map((e) => e.service.isTip ?? 0).toList(),
       collectedUserId: [userId!], // Placeholder
-      mode: [paymentMode],
+      mode: [paymentMode == PaymentMode.Unpaid.name ? "Cash" : paymentMode],
       amount: [amount],
       tenderCash: [0.0],
       change: [0.0],
@@ -135,7 +137,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             : "--:--",
       );
     }
-
     context.read<BookingCubit>().quickPayment(request: request);
   }
 
@@ -361,7 +362,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           children: [
             // 1. Category Sidebar
             Expanded(
-              flex: 2,
+              flex: 3,
               child: SingleChildScrollView(
                 child: BlocBuilder<ServiceCubit, ServiceState>(
                   builder: (context, state) {
@@ -460,8 +461,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                         );
                                         return;
                                       }
-                                      log(service.isTip.toString());
                                       if (service.isTip == 1) {
+                                        // if it tip then we need to find the before wat and unit tax ok
+
                                         showDialog(
                                           context: context,
                                           builder: (context) => TipDialog(

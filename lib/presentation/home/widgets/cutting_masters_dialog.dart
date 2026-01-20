@@ -111,7 +111,6 @@ class CuttingMastersDialog extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         if (chair.liveState != LiveState.occupied.name) {
-          Navigator.of(context).pop();
           showStaffSelectionDialog(context, chair);
         } else {
           final result = await ServicesOrCancelDialog.show(context);
