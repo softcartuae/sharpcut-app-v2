@@ -33,7 +33,7 @@ class ReceiptWidget extends StatelessWidget {
     bool isNotPaid = request.paymentStatus == 'unpaid';
     return Container(
       width:
-          width ?? 576, // Target width for 58mm printer (approx 384 dots max)
+          width ?? 384, // Target width for 58mm printer (approx 384 dots max)
       color: Colors.white,
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
@@ -64,7 +64,7 @@ class ReceiptWidget extends StatelessWidget {
                 shopData.address!,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.marcellus(
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -76,7 +76,7 @@ class ReceiptWidget extends StatelessWidget {
                 'TRN: ${shopData.vatNo}',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.marcellus(
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -132,7 +132,7 @@ class ReceiptWidget extends StatelessWidget {
                 Text(
                   'Start time : ${_formatTime(shopData.startTime)}',
                   style: GoogleFonts.marcellus(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -140,7 +140,7 @@ class ReceiptWidget extends StatelessWidget {
                 Text(
                   'End time : ${_formatTime(shopData.endTime)}',
                   style: GoogleFonts.marcellus(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -165,7 +165,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         'اسم الصنف',
                         style: GoogleFonts.marcellus(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -173,7 +173,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         'Item Name',
                         style: GoogleFonts.marcellus(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -189,7 +189,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         'الكمية',
                         style: GoogleFonts.marcellus(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -197,7 +197,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         'Qty',
                         style: GoogleFonts.marcellus(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -213,7 +213,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         'السعر',
                         style: GoogleFonts.marcellus(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -221,7 +221,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         'Price',
                         style: GoogleFonts.marcellus(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -237,7 +237,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         'القيمة',
                         style: GoogleFonts.marcellus(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -245,7 +245,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         'Total',
                         style: GoogleFonts.marcellus(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -255,7 +255,7 @@ class ReceiptWidget extends StatelessWidget {
                 ),
               ],
             ),
-
+            SizedBox(height: 5),
             const DashedLine(),
             const DashedLine(),
             const DashedLine(),
@@ -282,7 +282,7 @@ class ReceiptWidget extends StatelessWidget {
                               Text(
                                 item.service.name ?? '',
                                 style: GoogleFonts.marcellus(
-                                  fontSize: 18,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -292,7 +292,7 @@ class ReceiptWidget extends StatelessWidget {
                                 Text(
                                   item.service.nameArabic!,
                                   style: GoogleFonts.marcellus(
-                                    fontSize: 18,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
                                   ),
@@ -307,7 +307,7 @@ class ReceiptWidget extends StatelessWidget {
                             item.quantity.toString(),
                             textAlign: TextAlign.center,
                             style: GoogleFonts.marcellus(
-                              fontSize: 18,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -319,7 +319,7 @@ class ReceiptWidget extends StatelessWidget {
                             price.toStringAsFixed(2),
                             textAlign: TextAlign.right,
                             style: GoogleFonts.marcellus(
-                              fontSize: 18,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -331,7 +331,7 @@ class ReceiptWidget extends StatelessWidget {
                             total.toStringAsFixed(2),
                             textAlign: TextAlign.right,
                             style: GoogleFonts.marcellus(
-                              fontSize: 18,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -375,12 +375,9 @@ class ReceiptWidget extends StatelessWidget {
               'VAT Amount - قيمة الضريبة',
               (request.taxTotal ?? 0).toStringAsFixed(2),
             ),
-            _buildTotalRow(
-              'Balance Amount - الباقي',
-              (balanceAmount.toStringAsFixed(2)),
-            ),
 
             _buildTotalRow(
+              increesFontSize: true,
               'Net Amount - المبلغ الصافي',
               (request.finalTotal ?? 0).toStringAsFixed(2),
             ),
@@ -389,19 +386,24 @@ class ReceiptWidget extends StatelessWidget {
             if (request.mode != null)
               ...List.generate(request.mode!.length, (index) {
                 return _buildTotalRow(
+                  increesFontSize: true,
                   '${request.mode![index]} - نقدي',
                   (request.amount?[index] ?? 0).toStringAsFixed(2),
                 );
               }),
-
+            _buildTotalRow(
+              'Balance Amount - الباقي',
+              (balanceAmount.toStringAsFixed(2)),
+            ),
             const SizedBox(height: 8),
+            const DashedLine(),
             const DashedLine(),
             if (isNotPaid)
               Text(
                 'UNPAID',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.marcellus(
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -435,7 +437,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         label1,
                         style: GoogleFonts.marcellus(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -443,7 +445,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         subLabel1,
                         style: GoogleFonts.marcellus(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -454,7 +456,7 @@ class ReceiptWidget extends StatelessWidget {
                   Text(
                     ': $value1',
                     style: GoogleFonts.marcellus(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -476,7 +478,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         label2,
                         style: GoogleFonts.marcellus(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -484,7 +486,7 @@ class ReceiptWidget extends StatelessWidget {
                       Text(
                         subLabel2,
                         style: GoogleFonts.marcellus(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -495,7 +497,7 @@ class ReceiptWidget extends StatelessWidget {
                   Text(
                     ': $value2',
                     style: GoogleFonts.marcellus(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -509,7 +511,11 @@ class ReceiptWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalRow(String label, String value) {
+  Widget _buildTotalRow(
+    String label,
+    String value, {
+    bool increesFontSize = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
@@ -520,7 +526,7 @@ class ReceiptWidget extends StatelessWidget {
               label,
               textAlign: TextAlign.right,
               style: GoogleFonts.marcellus(
-                fontSize: 19,
+                fontSize: increesFontSize ? 25 : 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -533,7 +539,7 @@ class ReceiptWidget extends StatelessWidget {
               value,
               textAlign: TextAlign.right,
               style: GoogleFonts.marcellus(
-                fontSize: 19,
+                fontSize: increesFontSize ? 25 : 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
