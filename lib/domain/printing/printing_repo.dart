@@ -24,6 +24,8 @@ abstract class PrintingRepo {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
+    required String? invoiceDate,
+    required int? chairId,
     int copies = 1,
     bool openDrawer = false,
   });

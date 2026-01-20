@@ -191,93 +191,101 @@ class PrintingRepoImp implements PrintingRepo {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
+    required String? invoiceDate,
+    required int? chairId,
     int copies = 1,
     bool openDrawer = false,
   }) async {
-    final profile = await CapabilityProfile.load();
-    final paperSize = await getPaperSize(printer);
-    final generator = Generator(paperSize.generatorPaperSize, profile);
-    List<int> bytes = [];
-
     try {
-      if (openDrawer) {
-        bytes.addAll(generator.drawer());
+      final profile = await CapabilityProfile.load();
+      final paperSize = await getPaperSize(printer);
+      final generator = Generator(paperSize.generatorPaperSize, profile);
+      List<int> bytes = [];
+
+      try {
+        if (openDrawer) {
+          bytes.addAll(generator.drawer());
+        }
+      } catch (e) {
+        log(e.toString());
       }
-    } catch (e) {
-      log(e.toString());
-    }
 
-    // Create the widget
-    final double targetWidth = paperSize.widthInPixels.toDouble();
+      // Create the widget
+      final double targetWidth = paperSize.widthInPixels.toDouble();
 
-    // Create the receipt widget
-    final receiptWidget = MediaQuery(
-      data: const MediaQueryData(),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Theme(
-          data: ThemeData(
-            useMaterial3: false,
-            scaffoldBackgroundColor: Colors.white,
-          ),
-          child: Material(
-            color: Colors.white,
-            child: ReceiptWidget(
-              balanceAmount: balanceAmount,
-              staffName: staffName,
-              invoiceNumber: invoiceNumber,
-              bookingTime: bookingTime,
-              shopData: shopData,
-              request: request,
-              cartItems: cartItems,
-              width: targetWidth,
+      // Create the receipt widget
+      final receiptWidget = MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Theme(
+            data: ThemeData(
+              useMaterial3: false,
+              scaffoldBackgroundColor: Colors.white,
+            ),
+            child: Material(
+              color: Colors.white,
+              child: ReceiptWidget(
+                chairId: chairId,
+                balanceAmount: balanceAmount,
+                staffName: staffName,
+                invoiceNumber: invoiceNumber,
+                bookingTime: bookingTime,
+                shopData: shopData,
+                request: request,
+                cartItems: cartItems,
+                width: targetWidth,
+                invoiceDate: invoiceDate,
+              ),
             ),
           ),
         ),
-      ),
-    );
-    // Calculate estimated height
-    // Base height (Header + Footer) ~ 1000
-    // Per item ~ 100 (allowing for wrapping text)
-    double estimatedHeight = 1300 + (cartItems.length * 100.0);
+      );
+      // Calculate estimated height
+      // Base height (Header + Footer) ~ 1000
+      // Per item ~ 100 (allowing for wrapping text)
+      double estimatedHeight = 1300 + (cartItems.length * 100.0);
 
-    // Capture the widget as an image
-    final ScreenshotController screenshotController = ScreenshotController();
-    final Uint8List capturedImage = await screenshotController
-        .captureFromWidget(
-          receiptWidget,
-          delay: const Duration(milliseconds: 100),
-          pixelRatio: 1.0, // Reduced to avoid buffer overflow
-          targetSize: Size(
-            targetWidth,
-            estimatedHeight,
-          ), // Ensure height is sufficient
+      // Capture the widget as an image
+      final ScreenshotController screenshotController = ScreenshotController();
+      final Uint8List capturedImage = await screenshotController
+          .captureFromWidget(
+            receiptWidget,
+            delay: const Duration(milliseconds: 100),
+            pixelRatio: 1.0, // Reduced to avoid buffer overflow
+            targetSize: Size(
+              targetWidth,
+              estimatedHeight,
+            ), // Ensure height is sufficient
+          );
+
+      // Decode the image for the printer
+      final img.Image? image = img.decodePng(capturedImage);
+
+      if (image != null) {
+        // Resize to paper width
+        final img.Image resizedImage = img.copyResize(
+          image,
+          width: paperSize.widthInPixels,
         );
 
-    // Decode the image for the printer
-    final img.Image? image = img.decodePng(capturedImage);
-
-    if (image != null) {
-      // Resize to paper width
-      final img.Image resizedImage = img.copyResize(
-        image,
-        width: paperSize.widthInPixels,
-      );
-
-      bytes.addAll(generator.image(resizedImage));
-    }
-
-    bytes.addAll(generator.feed(2));
-    bytes.addAll(generator.cut());
-
-    // Loop 'copies' times
-    for (int i = 0; i < copies; i++) {
-      await _printBytes(printer, Uint8List.fromList(bytes));
-
-      // Optional: Add a small delay between copies to prevent printer buffer overflow
-      if (i < copies - 1) {
-        await Future.delayed(const Duration(milliseconds: 500));
+        bytes.addAll(generator.image(resizedImage));
       }
+
+      bytes.addAll(generator.feed(2));
+      bytes.addAll(generator.cut());
+
+      // Loop 'copies' times
+      for (int i = 0; i < copies; i++) {
+        await _printBytes(printer, Uint8List.fromList(bytes));
+
+        // Optional: Add a small delay between copies to prevent printer buffer overflow
+        if (i < copies - 1) {
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+      }
+    } catch (e) {
+      log(e.toString());
     }
   }
 

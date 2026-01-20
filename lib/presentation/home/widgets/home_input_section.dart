@@ -65,9 +65,11 @@ class _HomeInputSectionState extends State<HomeInputSection> {
             final booking = state.bookingResponse;
             invoiceNo = booking.invoiceNo ?? "N/A";
             // Format created_at date
-            if (booking.createdAt != null) {
+            if (booking.transactionDate != null) {
               try {
-                final DateTime parsedDate = DateTime.parse(booking.createdAt!);
+                final DateTime parsedDate = DateTime.parse(
+                  booking.transactionDate!,
+                );
                 // Format date as DD-MM-YYYY
                 date =
                     "${parsedDate.day.toString().padLeft(2, '0')}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.year}";

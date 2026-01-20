@@ -214,8 +214,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                       settlePayment: request,
                                                       staffName:
                                                           booking.staff?.name,
-                                                      bookingTime:
-                                                          booking.createdAt,
+                                                      bookingTime: booking
+                                                          .transactionDate,
                                                       invoiceNumber:
                                                           booking.invoiceNo,
                                                       cartItems: cartItems,
@@ -259,7 +259,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                               final String? invoiceNumber =
                                                   booking.invoiceNo;
                                               final String? bookingTime =
-                                                  booking.createdAt;
+                                                  booking.transactionDate;
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
@@ -346,6 +346,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 final printCubit = context
                                                     .read<PrintingCubit>();
                                                 printCubit.printInvoice(
+                                                  chairId: booking.chairId,
                                                   printCount: printCubit
                                                       .state
                                                       .settings
@@ -359,6 +360,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                   staffName: staffName,
                                                   invoiceNumber: invoiceNumber,
                                                   bookingTime: bookingTime,
+                                                  invoiceDate:
+                                                      booking.invoiceDate,
                                                 );
                                               }
                                             },

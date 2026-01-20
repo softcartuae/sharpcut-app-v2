@@ -32,7 +32,6 @@ import 'package:sharp_cut/presentation/home/widgets/service_item.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings.dart';
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
-import 'package:sharp_cut/presentation/printing/widgets/receipt_widget.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
 import 'package:sharp_cut/presentation/quick_report/screens/screen_quick_report.dart';
 import 'package:sharp_cut/presentation/home/widgets/tip_dialoge.dart';
@@ -74,8 +73,10 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     String? invoiceNumber,
     String? staffName,
     String? bookingTime,
+    String? invoiceDate,
     double discount,
     double finalTotal,
+    int? chairId,
   ) {
     double amount = serviceState.total;
 
@@ -125,6 +126,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     if (shopData != null) {
       final printCubit = context.read<PrintingCubit>();
       printCubit.printInvoice(
+        chairId: chairId,
         printCount: printCubit.state.settings?.printCount.quickPayment.toInt(),
         balanceAmount: 0.0,
         request: request,
@@ -135,6 +137,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         bookingTime: bookingTime != null
             ? DateFormat('HH:mm').format(DateTime.parse(bookingTime))
             : "--:--",
+        invoiceDate: invoiceDate,
       );
     }
     context.read<BookingCubit>().quickPayment(request: request);
@@ -980,9 +983,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                       ?.name,
                                                   bookingState
                                                       .bookingResponse
-                                                      .createdAt,
+                                                      .transactionDate,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .chairId,
                                                 );
                                               },
                                               (discount) {
@@ -1003,9 +1012,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                       ?.name,
                                                   bookingState
                                                       .bookingResponse
-                                                      .createdAt,
+                                                      .transactionDate,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .chairId,
                                                 );
                                               },
                                               (discount) {
@@ -1025,9 +1040,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                       ?.name,
                                                   bookingState
                                                       .bookingResponse
-                                                      .createdAt,
+                                                      .transactionDate,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .chairId,
                                                 );
                                               },
                                               total: serviceState.total,
@@ -1170,11 +1191,17 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   ?.name,
                                               bookingTime: bookingState
                                                   .bookingResponse
-                                                  .createdAt,
+                                                  .transactionDate,
                                               invoiceNumber: bookingState
                                                   .bookingResponse
                                                   .invoiceNo,
+                                              invoiceDate: bookingState
+                                                  .bookingResponse
+                                                  .invoiceDate,
                                               cartItems: serviceState.cartItems,
+                                              chairId: bookingState
+                                                  .bookingResponse
+                                                  .chairId,
                                             );
                                           }
                                         },

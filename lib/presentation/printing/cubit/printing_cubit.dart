@@ -127,7 +127,9 @@ class PrintingCubit extends Cubit<PrintingState> {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
+    required String? invoiceDate,
     required int? printCount,
+    required int? chairId,
   }) async {
     if (state.connectedPrinter == null) {
       ToastHelper.showError("No printer connected");
@@ -144,6 +146,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     try {
       final bool openDrawer = _shouldOpenDrawer(request);
       await _printingRepo.printInvoice(
+        chairId: chairId,
         printer: state.connectedPrinter!,
         request: request,
         shopData: shopData,
@@ -152,6 +155,7 @@ class PrintingCubit extends Cubit<PrintingState> {
         staffName: staffName,
         invoiceNumber: invoiceNumber,
         bookingTime: bookingTime,
+        invoiceDate: invoiceDate,
         copies: printCount ?? 1,
         openDrawer: openDrawer,
       );

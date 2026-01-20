@@ -26,7 +26,9 @@ Future<void> showSettlementDialog(
   required String? staffName,
   required String? bookingTime,
   required String? invoiceNumber,
+  required String? invoiceDate,
   required List<CartItemModel> cartItems,
+  required int? chairId,
 }) {
   return showDialog(
     context: context,
@@ -37,7 +39,9 @@ Future<void> showSettlementDialog(
       settlePayment: settlePayment,
       staffName: staffName,
       bookingTime: bookingTime,
+      invoiceDate: invoiceDate,
       cartItems: cartItems,
+      chairId: chairId,
     ),
   );
 }
@@ -47,14 +51,18 @@ class SettlementDialog extends StatefulWidget {
   final String? staffName;
   final String? bookingTime;
   final String? invoiceNumber;
+  final String? invoiceDate;
   final List<CartItemModel> cartItems;
+  final int? chairId;
   const SettlementDialog({
     super.key,
     required this.settlePayment,
     required this.staffName,
     required this.bookingTime,
     required this.invoiceNumber,
+    required this.invoiceDate,
     required this.cartItems,
+    required this.chairId,
   });
 
   @override
@@ -379,6 +387,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
       if (shopData != null) {
         final printCubit = context.read<PrintingCubit>();
         printCubit.printInvoice(
+          chairId: widget.chairId,
           printCount: printCubit.state.settings?.printCount.settlePayment
               .toInt(),
           balanceAmount: double.tryParse(_balanceController.text) ?? 0.0,
@@ -390,6 +399,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
           bookingTime: widget.bookingTime != null
               ? DateFormat('HH:mm').format(DateTime.parse(widget.bookingTime!))
               : "--:--",
+          invoiceDate: widget.invoiceDate,
         );
       }
       context.read<BookingCubit>().settlePayment(request: request);
