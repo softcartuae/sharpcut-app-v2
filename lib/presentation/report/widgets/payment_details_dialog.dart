@@ -4,7 +4,7 @@ import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 
 class PaymentDetailsDialog extends StatelessWidget {
   final BookingResponseModel booking;
-  final VoidCallback onEdit;
+  final Function(PaymentModel) onEdit;
 
   const PaymentDetailsDialog({
     super.key,
@@ -90,7 +90,7 @@ class PaymentDetailsDialog extends StatelessWidget {
                                   child: InkWell(
                                     onTap: () {
                                       Navigator.pop(context);
-                                      onEdit();
+                                      onEdit(payment);
                                     },
                                     child: const Icon(
                                       Icons.edit,

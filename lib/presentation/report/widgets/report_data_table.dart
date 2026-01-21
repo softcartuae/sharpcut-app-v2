@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
-import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_re_settlement.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 
@@ -17,6 +17,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:sharp_cut/presentation/report/widgets/receipt_dialog_helper.dart';
 import 'package:sharp_cut/presentation/report/widgets/payment_details_dialog.dart';
+import 'package:sharp_cut/presentation/report/widgets/paymentedit_dialoge.dart';
 
 class ReportDataTable extends StatefulWidget {
   const ReportDataTable({super.key});
@@ -79,149 +80,161 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 barrierDismissible: true,
                                                 builder: (context) => PaymentDetailsDialog(
                                                   booking: booking,
-                                                  onEdit: () {
-                                                    final List<CartItemModel>
-                                                    cartItems =
-                                                        booking.details
-                                                            ?.where(
-                                                              (detail) =>
-                                                                  detail
-                                                                      .service !=
-                                                                  null,
-                                                            )
-                                                            .map(
-                                                              (
-                                                                detail,
-                                                              ) => CartItemModel(
-                                                                service: detail
-                                                                    .service!,
-                                                                quantity:
-                                                                    detail
-                                                                        .quantity ??
-                                                                    1,
-                                                              ),
-                                                            )
-                                                            .toList() ??
-                                                        [];
-
-                                                    SettlePaymentRequestModel
-                                                    request = SettlePaymentRequestModel(
-                                                      paymentStatus:
-                                                          booking.paymentStatus,
-                                                      transactionId: booking.id,
-                                                      customerName:
-                                                          booking.customerName,
-                                                      customerNumber: booking
-                                                          .customerNumber,
-                                                      subTotalValue:
-                                                          booking.subtotal ?? 0,
-                                                      taxTotal:
-                                                          booking.taxTotal ?? 0,
-                                                      discount: 0.0,
-                                                      roundOff: 0.0,
-                                                      finalTotal:
-                                                          booking.finalTotal ??
-                                                          0,
-                                                      serviceId: [],
-                                                      quantity: cartItems
-                                                          .map(
-                                                            (e) => e.quantity,
-                                                          )
-                                                          .toList(),
-                                                      rate: cartItems
-                                                          .map(
-                                                            (e) =>
-                                                                e
-                                                                    .service
-                                                                    .price ??
+                                                  onEdit: (payment) {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (context) =>
+                                                          PaymentEditDialog(
+                                                            invoiceNo:
+                                                                booking
+                                                                    .invoiceNo ??
+                                                                "",
+                                                            invoiceAmount:
+                                                                booking
+                                                                    .finalTotal ??
                                                                 0.0,
-                                                          )
-                                                          .toList(),
-                                                      taxAmount: cartItems
-                                                          .map((e) => 0.0)
-                                                          .toList(), // Placeholder
-                                                      currency: cartItems
-                                                          .map((e) => "AED")
-                                                          .toList(),
-                                                      amountTotal: cartItems
-                                                          .map(
-                                                            (e) =>
-                                                                (e
-                                                                        .service
-                                                                        .price ??
-                                                                    0.0) *
-                                                                e.quantity,
-                                                          )
-                                                          .toList(),
-                                                      tax: cartItems
-                                                          .map(
-                                                            (e) =>
-                                                                (e
-                                                                        .service
-                                                                        .unitTax ??
-                                                                    0.0) *
-                                                                e.quantity,
-                                                          )
-                                                          .toList(), // Placeholder
-                                                      subTotalList: cartItems
-                                                          .map((e) {
-                                                            final price =
-                                                                e
-                                                                    .service
-                                                                    .price ??
-                                                                0.0;
-                                                            final tax =
-                                                                e
-                                                                    .service
-                                                                    .unitTax ??
-                                                                0.0;
-                                                            return (price +
-                                                                    tax) *
-                                                                e.quantity;
-                                                          })
-                                                          .toList(),
-                                                      isTip: cartItems
-                                                          .map(
-                                                            (e) =>
-                                                                e
-                                                                    .service
-                                                                    .isTip ??
-                                                                0,
-                                                          )
-                                                          .toList(),
-                                                      collectedUserId: [
-                                                        booking.userId!,
-                                                      ], // Placeholder
-                                                      mode: [],
-                                                      amount: [],
-                                                      tenderCash: [0.0],
-                                                      change: [0.0],
-                                                    );
-
-                                                    final balenceAmount =
-                                                        (booking.finalTotal ??
-                                                            0) -
-                                                        ((booking
-                                                                .totalPayment ??
-                                                            0));
-
-                                                    showResettmentScreen(
-                                                      balance: balenceAmount,
-                                                      paidAmount: booking
-                                                          .totalPayment
-                                                          ?.toString(),
-                                                      context,
-                                                      settlePayment: request,
-                                                      staffName:
-                                                          booking.staff?.name,
-                                                      bookingTime:
-                                                          booking.createdAt,
-                                                      invoiceNumber:
-                                                          booking.invoiceNo,
-                                                      cartItems: cartItems,
+                                                            currentMode:
+                                                                payment.mode ??
+                                                                "Cash",
+                                                            currentAmount:
+                                                                payment
+                                                                    .amount ??
+                                                                0.0,
+                                                            onUpdate: (mode, amount) {
+                                                              context
+                                                                  .read<
+                                                                    BookingCubit
+                                                                  >()
+                                                                  .updatePaymentMode(
+                                                                    paymentId:
+                                                                        payment
+                                                                            .id!,
+                                                                    mode: mode,
+                                                                    amount:
+                                                                        amount,
+                                                                  );
+                                                            },
+                                                          ),
                                                     );
                                                   },
                                                 ),
+                                              );
+                                            },
+                                            onBalanceTap: () {
+                                              final booking =
+                                                  state.transactions[index];
+                                              final List<CartItemModel>
+                                              cartItems =
+                                                  booking.details
+                                                      ?.where(
+                                                        (detail) =>
+                                                            detail.service !=
+                                                            null,
+                                                      )
+                                                      .map(
+                                                        (
+                                                          detail,
+                                                        ) => CartItemModel(
+                                                          service:
+                                                              detail.service!,
+                                                          quantity:
+                                                              detail.quantity ??
+                                                              1,
+                                                        ),
+                                                      )
+                                                      .toList() ??
+                                                  [];
+
+                                              SettlePaymentRequestModel
+                                              request = SettlePaymentRequestModel(
+                                                paymentStatus:
+                                                    booking.paymentStatus,
+                                                transactionId: booking.id,
+                                                customerName:
+                                                    booking.customerName,
+                                                customerNumber:
+                                                    booking.customerNumber,
+                                                subTotalValue:
+                                                    booking.subtotal ?? 0,
+                                                taxTotal: booking.taxTotal ?? 0,
+                                                discount: 0.0,
+                                                roundOff: 0.0,
+                                                finalTotal:
+                                                    booking.finalTotal ?? 0,
+                                                serviceId: [],
+                                                quantity: cartItems
+                                                    .map((e) => e.quantity)
+                                                    .toList(),
+                                                rate: cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          e.service.price ??
+                                                          0.0,
+                                                    )
+                                                    .toList(),
+                                                taxAmount: cartItems
+                                                    .map((e) => 0.0)
+                                                    .toList(), // Placeholder
+                                                currency: cartItems
+                                                    .map((e) => "AED")
+                                                    .toList(),
+                                                amountTotal: cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          (e.service.price ??
+                                                              0.0) *
+                                                          e.quantity,
+                                                    )
+                                                    .toList(),
+                                                tax: cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          (e.service.unitTax ??
+                                                              0.0) *
+                                                          e.quantity,
+                                                    )
+                                                    .toList(), // Placeholder
+                                                subTotalList: cartItems.map((
+                                                  e,
+                                                ) {
+                                                  final price =
+                                                      e.service.price ?? 0.0;
+                                                  final tax =
+                                                      e.service.unitTax ?? 0.0;
+                                                  return (price + tax) *
+                                                      e.quantity;
+                                                }).toList(),
+                                                isTip: cartItems
+                                                    .map(
+                                                      (e) =>
+                                                          e.service.isTip ?? 0,
+                                                    )
+                                                    .toList(),
+                                                collectedUserId: [
+                                                  booking.userId!,
+                                                ], // Placeholder
+                                                mode: [],
+                                                amount: [],
+                                                tenderCash: [0.0],
+                                                change: [0.0],
+                                              );
+
+                                              final balenceAmount =
+                                                  (booking.finalTotal ?? 0) -
+                                                  ((booking.totalPayment ?? 0));
+
+                                              showResettmentScreen(
+                                                balance: balenceAmount,
+                                                paidAmount: booking.totalPayment
+                                                    ?.toString(),
+                                                context,
+                                                settlePayment: request,
+                                                staffName: booking.staff?.name,
+                                                bookingTime:
+                                                    booking.transactionDate,
+                                                invoiceNumber:
+                                                    booking.invoiceNo,
+                                                cartItems: cartItems,
                                               );
                                             },
                                             printTheInvoice: () {
@@ -259,7 +272,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                               final String? invoiceNumber =
                                                   booking.invoiceNo;
                                               final String? bookingTime =
-                                                  booking.createdAt;
+                                                  booking.transactionDate;
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
@@ -346,6 +359,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 final printCubit = context
                                                     .read<PrintingCubit>();
                                                 printCubit.printInvoice(
+                                                  chairId: booking.chairId,
                                                   printCount: printCubit
                                                       .state
                                                       .settings
@@ -361,6 +375,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                   bookingTime: bookingTime,
                                                   invoiceDate:
                                                       booking.invoiceDate,
+                                                  endTime: booking.endTime,
                                                 );
                                               }
                                             },

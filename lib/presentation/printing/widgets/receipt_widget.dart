@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +18,8 @@ class ReceiptWidget extends StatelessWidget {
   final double? width;
   final double balanceAmount;
   final String? invoiceDate;
+  final int? chairId;
+  final String? endTime;
 
   const ReceiptWidget({
     super.key,
@@ -27,6 +31,8 @@ class ReceiptWidget extends StatelessWidget {
     required this.cartItems,
     required this.balanceAmount,
     required this.invoiceDate,
+    required this.chairId,
+    this.endTime,
     this.width,
   });
 
@@ -100,29 +106,26 @@ class ReceiptWidget extends StatelessWidget {
 
             // Bill Details
             _buildDetailRow(
-              label1: 'Bill Date:',
+              label1: 'Bill Date',
               subLabel1: 'تاريخ الفاتورة',
               value1:
                   invoiceDate ??
                   'Unknown', // Assuming current date for bill date
-              label2: 'Invoice No:',
+              label2: 'Invoice No',
               subLabel2: 'رقم الفاتورة',
               value2: invoiceNumber ?? 'Unknown',
             ),
             const SizedBox(height: 4),
             _buildDetailRow(
-              label1: 'Print Date:',
+              label1: 'Print Date',
               subLabel1: 'تاريخ الطباعة',
               value1: _formatDate(DateTime.now()),
-              label2: 'Order No',
-              subLabel2: 'رقم الطلب',
-              value2: '', // Placeholder
             ),
             const SizedBox(height: 4),
             _buildDetailRow(
               label1: 'Chair No',
               subLabel1: 'رقم الكرسي',
-              value1: '', // Placeholder or from request
+              value1: chairId?.toString() ?? '', // Placeholder or from request
               label2: 'Staff',
               subLabel2: 'النادل',
               value2: staffName ?? 'Unknown', // Placeholder or from request
@@ -143,12 +146,23 @@ class ReceiptWidget extends StatelessWidget {
                         ),
                       );
                     }
-                    final dateTime = DateFormat(
-                      'dd/MM/yyyy hh:mm a',
-                    ).parse(bookingTime!);
+
+                    DateTime? dateTime;
+                    try {
+                      dateTime = DateFormat(
+                        'dd/MM/yyyy hh:mm a',
+                      ).parse(bookingTime!);
+                    } catch (e) {
+                      log("issue in parsing booking time");
+                      dateTime = DateTime.tryParse(bookingTime!);
+                    }
+
+                    final timeString = dateTime != null
+                        ? DateFormat('hh:mm a').format(dateTime)
+                        : bookingTime!;
 
                     return Text(
-                      'Start time : ${DateFormat('hh:mm a').format(dateTime)}',
+                      'Start time : $timeString',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -159,7 +173,7 @@ class ReceiptWidget extends StatelessWidget {
                 ),
 
                 Text(
-                  'End time : ${DateFormat('hh:mm a').format(DateTime.now())}',
+                  'End time : ${endTime ?? DateFormat('hh:mm a').format(DateTime.now())}',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -389,9 +403,8 @@ class ReceiptWidget extends StatelessWidget {
             ),
             _buildTotalRow(
               'Sub Total - المجموع الفرعي',
-              (request.subTotalList?.fold(0.0, (p, c) => p + c) ?? 0)
-                  .toStringAsFixed(2),
-            ), // Need to check logic
+              (request.subTotalValue ?? 0).toStringAsFixed(2),
+            ),
             _buildTotalRow(
               'VAT Amount - قيمة الضريبة',
               (request.taxTotal ?? 0).toStringAsFixed(2),
@@ -419,16 +432,15 @@ class ReceiptWidget extends StatelessWidget {
             const SizedBox(height: 8),
             const DashedLine(),
             const DashedLine(),
-            if (isNotPaid)
-              Text(
-                'UNPAID',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.marcellus(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+            Text(
+              isNotPaid ? 'UNPAID' : 'PAID',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.marcellus(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
+            ),
           ],
         ),
       ),
@@ -439,9 +451,9 @@ class ReceiptWidget extends StatelessWidget {
     required String label1,
     required String subLabel1,
     required String value1,
-    required String label2,
-    required String subLabel2,
-    required String value2,
+    String? label2,
+    String? subLabel2,
+    String? value2,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -487,47 +499,50 @@ class ReceiptWidget extends StatelessWidget {
             ],
           ),
         ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Wrap(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        label2,
-                        style: GoogleFonts.marcellus(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+        if (label2 != null)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label2,
+                          style: GoogleFonts.marcellus(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                      Text(
-                        subLabel2,
-                        style: GoogleFonts.marcellus(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                        Text(
+                          subLabel2 ?? '',
+                          style: GoogleFonts.marcellus(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    ': $value2',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+                    const SizedBox(width: 4),
+                    Text(
+                      ': ${value2 ?? ''}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        else
+          const Spacer(),
       ],
     );
   }
@@ -573,7 +588,7 @@ class ReceiptWidget extends StatelessWidget {
 
   String _formatDate(DateTime? date) {
     if (date == null) return '';
-    return DateFormat('dd-MM-yyyy').format(date);
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 }
 

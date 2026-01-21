@@ -184,7 +184,7 @@ class CuttingMastersDialog extends StatelessWidget {
               ),
             if (chair.liveState == LiveState.occupied.name)
               Text(
-                formatDate(chair.transaction?.createdAt ?? 'Unknown'),
+                chair.transaction?.transactionDate ?? 'Unknown',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,

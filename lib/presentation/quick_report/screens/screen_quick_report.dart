@@ -57,6 +57,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     _selectedRange = DateTimeRange(start: today, end: today);
+    
 
     // Fetch initial report with default range
     _fetchReport();

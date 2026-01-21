@@ -8,6 +8,7 @@ class ReportTableRow extends StatelessWidget {
   final BookingResponseModel transaction;
   final VoidCallback printTheInvoice;
   final VoidCallback paymentSettleFunction;
+  final VoidCallback onBalanceTap;
 
   const ReportTableRow({
     super.key,
@@ -16,6 +17,7 @@ class ReportTableRow extends StatelessWidget {
     required this.viewFunction,
     required this.printTheInvoice,
     required this.paymentSettleFunction,
+    required this.onBalanceTap,
   });
 
   @override
@@ -47,6 +49,7 @@ class ReportTableRow extends StatelessWidget {
             balenceAmount.toStringAsFixed(2),
             width: 80,
             isBalanceCell: balenceAmount > 0,
+            onTap: balenceAmount > 0 ? onBalanceTap : null,
           ),
           _buildDataCell(
             transaction.discount?.toStringAsFixed(2) ?? "0.00",
@@ -76,6 +79,7 @@ class ReportTableRow extends StatelessWidget {
     bool isCheckbox = false,
     bool isChecked = false,
     bool isBalanceCell = false,
+    VoidCallback? onTap,
   }) {
     return SizedBox(
       width: width,
@@ -97,14 +101,23 @@ class ReportTableRow extends StatelessWidget {
                     : null,
               ),
             )
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                text,
-                style: GoogleFonts.rajdhani(
-                  color: isBalanceCell ? Colors.red : Colors.grey[800],
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
+          : InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    text,
+                    style: GoogleFonts.rajdhani(
+                      color: isBalanceCell ? Colors.red : Colors.grey[800],
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      decoration: onTap != null
+                          ? TextDecoration.underline
+                          : TextDecoration.none,
+                    ),
+                  ),
                 ),
               ),
             ),
