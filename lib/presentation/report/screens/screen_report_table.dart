@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
@@ -190,7 +192,14 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            const HomeAppBar(),
+            BlocListener<BookingCubit, BookingState>(
+              listener: (context, state) {
+                if (state is BookingPaymentSettled) {
+                  context.read<ReportCubit>().fetchTransactions();
+                }
+              },
+              child: const HomeAppBar(),
+            ),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(

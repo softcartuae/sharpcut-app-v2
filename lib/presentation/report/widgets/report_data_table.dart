@@ -362,6 +362,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                   bookingTime: bookingTime,
                                                   invoiceDate:
                                                       booking.invoiceDate,
+                                                  endTime: booking.endTime,
                                                 );
                                               }
                                             },

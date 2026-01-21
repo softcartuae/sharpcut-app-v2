@@ -19,6 +19,7 @@ class ReceiptWidget extends StatelessWidget {
   final double balanceAmount;
   final String? invoiceDate;
   final int? chairId;
+  final String? endTime;
 
   const ReceiptWidget({
     super.key,
@@ -31,6 +32,7 @@ class ReceiptWidget extends StatelessWidget {
     required this.balanceAmount,
     required this.invoiceDate,
     required this.chairId,
+    this.endTime,
     this.width,
   });
 
@@ -171,7 +173,7 @@ class ReceiptWidget extends StatelessWidget {
                 ),
 
                 Text(
-                  'End time : ${DateFormat('hh:mm a').format(DateTime.now())}',
+                  'End time : ${endTime ?? DateFormat('hh:mm a').format(DateTime.now())}',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -401,9 +403,8 @@ class ReceiptWidget extends StatelessWidget {
             ),
             _buildTotalRow(
               'Sub Total - المجموع الفرعي',
-              (request.subTotalList?.fold(0.0, (p, c) => p + c) ?? 0)
-                  .toStringAsFixed(2),
-            ), // Need to check logic
+              (request.subTotalValue ?? 0).toStringAsFixed(2),
+            ),
             _buildTotalRow(
               'VAT Amount - قيمة الضريبة',
               (request.taxTotal ?? 0).toStringAsFixed(2),
@@ -587,7 +588,7 @@ class ReceiptWidget extends StatelessWidget {
 
   String _formatDate(DateTime? date) {
     if (date == null) return '';
-    return DateFormat('dd-MM-yyyy').format(date);
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 }
 

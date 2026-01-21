@@ -397,7 +397,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
           staffName: widget.staffName,
           invoiceNumber: widget.invoiceNumber,
           bookingTime: widget.bookingTime != null
-              ? DateFormat('HH:mm').format(DateTime.parse(widget.bookingTime!))
+              ? widget.bookingTime!
               : "--:--",
           invoiceDate: widget.invoiceDate,
         );
@@ -457,9 +457,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                         SettlementTimeContainer(
                           label: "Time Starts",
                           time: widget.bookingTime != null
-                              ? DateFormat(
-                                  'HH:mm',
-                                ).format(DateTime.parse(widget.bookingTime!))
+                              ? (widget.bookingTime!)
                               : "--:--",
                         ),
                         const Spacer(),

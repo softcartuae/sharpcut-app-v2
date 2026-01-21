@@ -79,10 +79,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     int? chairId,
   ) {
     double amount = serviceState.total;
+    double balanceAmount = 0.0;
 
     // if user click unpaid then make the amount zero and the payment methord zero;
     if (paymentMode == PaymentMode.Unpaid.name) {
       log("unpaid is selected");
+      balanceAmount = serviceState.total;
       amount = 0.0;
     }
 
@@ -121,6 +123,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       tenderCash: [0.0],
       change: [0.0],
     );
+    
+
+
 
     final shopData = context.read<AuthCubit>().currentUser;
     if (shopData != null) {
@@ -128,15 +133,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       printCubit.printInvoice(
         chairId: chairId,
         printCount: printCubit.state.settings?.printCount.quickPayment.toInt(),
-        balanceAmount: 0.0,
+        balanceAmount: balanceAmount,
         request: request,
         shopData: shopData,
         cartItems: serviceState.cartItems,
         staffName: staffName,
         invoiceNumber: invoiceNumber,
-        bookingTime: bookingTime != null
-            ? DateFormat('HH:mm').format(DateTime.parse(bookingTime))
-            : "--:--",
+        bookingTime: bookingTime ?? "--:--",
         invoiceDate: invoiceDate,
       );
     }

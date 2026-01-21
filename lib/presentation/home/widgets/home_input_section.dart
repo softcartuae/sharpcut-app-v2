@@ -66,23 +66,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
             invoiceNo = booking.invoiceNo ?? "N/A";
             // Format created_at date
             if (booking.transactionDate != null) {
-              try {
-                final DateTime parsedDate = DateTime.parse(
-                  booking.transactionDate!,
-                );
-                // Format date as DD-MM-YYYY
-                date =
-                    "${parsedDate.day.toString().padLeft(2, '0')}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.year}";
-                // Format time as HH:MM AM/PM
-                final hour = parsedDate.hour > 12
-                    ? parsedDate.hour - 12
-                    : parsedDate.hour;
-                final period = parsedDate.hour >= 12 ? "PM" : "AM";
-                bookingTime =
-                    "${hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')} $period";
-              } catch (e) {
-                // Fallback if parsing fails
-              }
+              bookingTime = booking.transactionDate!;
             }
 
             customerName = booking.customerName ?? "cash";

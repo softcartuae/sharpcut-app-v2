@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
@@ -36,6 +38,11 @@ void showReceiptDialog(
     amount: booking.payments?.map((e) => e.amount ?? 0.0).toList(),
   );
 
+  final balenceAmount =
+      (booking.finalTotal ?? 0) - ((booking.totalPayment ?? 0));
+
+  log(balenceAmount.toString(), name: "Balance Amount");
+
   showDialog(
     context: context,
     builder: (context) {
@@ -47,9 +54,8 @@ void showReceiptDialog(
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ReceiptWidget(
-                  
                   chairId: booking.chairId,
-                  balanceAmount: 0,
+                  balanceAmount: balenceAmount,
                   width: MediaQuery.of(context).size.width > 600 ? 500 : 370,
                   staffName: booking.staff?.name,
                   invoiceNumber: booking.invoiceNo,
@@ -58,6 +64,7 @@ void showReceiptDialog(
                   request: request,
                   cartItems: cartItems,
                   invoiceDate: booking.invoiceDate,
+                  endTime: booking.endTime,
                 ),
               ),
               Padding(

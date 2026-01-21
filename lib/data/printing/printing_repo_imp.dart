@@ -193,6 +193,7 @@ class PrintingRepoImp implements PrintingRepo {
     required String? bookingTime,
     required String? invoiceDate,
     required int? chairId,
+    String? endTime,
     int copies = 1,
     bool openDrawer = false,
   }) async {
@@ -236,6 +237,7 @@ class PrintingRepoImp implements PrintingRepo {
                 cartItems: cartItems,
                 width: targetWidth,
                 invoiceDate: invoiceDate,
+                endTime: endTime,
               ),
             ),
           ),
