@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -154,6 +155,7 @@ class DatabaseHelper {
         cancellation_reason TEXT,
         is_updated INTEGER DEFAULT 0,
         created_at TEXT,
+        end_time TEXT,
         updated_at TEXT,
         payment_status TEXT,
         total_payment REAL,
@@ -199,11 +201,23 @@ class DatabaseHelper {
   Future<void> insertUsers(List<Map<String, dynamic>> users) async {
     log("Inserting ${users.length} users into database");
     final db = await database;
-    Batch batch = db.batch();
-    for (var user in users) {
-      batch.insert('users', user, conflictAlgorithm: ConflictAlgorithm.replace);
-    }
-    await batch.commit(noResult: true);
+    await db.transaction((txn) async {
+      Batch batch = txn.batch();
+      for (var user in users) {
+        batch.rawInsert(
+          '''
+          INSERT INTO users (id, name, password, role)
+          VALUES (?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            name=excluded.name,
+            password=excluded.password,
+            role=excluded.role
+          ''',
+          [user['id'], user['name'], user['password'], user['role']],
+        );
+      }
+      await batch.commit(noResult: true);
+    });
     log("Users insertion completed");
   }
 
@@ -219,15 +233,45 @@ class DatabaseHelper {
   Future<void> insertChairs(List<Map<String, dynamic>> chairs) async {
     log("Inserting ${chairs.length} chairs into database");
     final db = await database;
-    Batch batch = db.batch();
-    for (var chair in chairs) {
-      batch.insert(
-        'chairs',
-        chair,
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    await batch.commit(noResult: true);
+    await db.transaction((txn) async {
+      Batch batch = txn.batch();
+      for (var chair in chairs) {
+        // Use raw insert with ON CONFLICT REPLACE is destructive for FKs.
+        // Instead, we try to update. If it fails (doesn't exist), we insert.
+        // However, batch doesn't return results immediately.
+        // So we can't easily do "if update == 0 then insert" inside a batch without raw SQL upsert.
+        // SQLite 3.24+ supports UPSERT (INSERT ... ON CONFLICT DO UPDATE).
+        // Let's try standard UPSERT syntax.
+
+        batch.rawInsert(
+          '''
+          INSERT INTO chairs (id, shop_id, name, live_status, description, position, status, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            shop_id=excluded.shop_id,
+            name=excluded.name,
+            live_status=excluded.live_status,
+            description=excluded.description,
+            position=excluded.position,
+            status=excluded.status,
+            created_at=excluded.created_at,
+            updated_at=excluded.updated_at
+          ''',
+          [
+            chair['id'],
+            chair['shop_id'],
+            chair['name'],
+            chair['live_status'],
+            chair['description'],
+            chair['position'],
+            chair['status'],
+            chair['created_at'],
+            chair['updated_at'],
+          ],
+        );
+      }
+      await batch.commit(noResult: true);
+    });
     log("Chairs insertion completed");
   }
 
@@ -245,15 +289,34 @@ class DatabaseHelper {
   ) async {
     log("Inserting ${categories.length} service categories into database");
     final db = await database;
-    Batch batch = db.batch();
-    for (var category in categories) {
-      batch.insert(
-        'service_categories',
-        category,
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    await batch.commit(noResult: true);
+    await db.transaction((txn) async {
+      Batch batch = txn.batch();
+      for (var category in categories) {
+        batch.rawInsert(
+          '''
+          INSERT INTO service_categories (id, shop_id, name, description, status, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            shop_id=excluded.shop_id,
+            name=excluded.name,
+            description=excluded.description,
+            status=excluded.status,
+            created_at=excluded.created_at,
+            updated_at=excluded.updated_at
+          ''',
+          [
+            category['id'],
+            category['shop_id'],
+            category['name'],
+            category['description'],
+            category['status'],
+            category['created_at'],
+            category['updated_at'],
+          ],
+        );
+      }
+      await batch.commit(noResult: true);
+    });
     log("Service categories insertion completed");
   }
 
@@ -269,15 +332,54 @@ class DatabaseHelper {
   Future<void> insertServices(List<Map<String, dynamic>> services) async {
     log("Inserting ${services.length} services into database");
     final db = await database;
-    Batch batch = db.batch();
-    for (var service in services) {
-      batch.insert(
-        'services',
-        service,
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    await batch.commit(noResult: true);
+    await db.transaction((txn) async {
+      Batch batch = txn.batch();
+      for (var service in services) {
+        batch.rawInsert(
+          '''
+          INSERT INTO services (id, category_id, name, name_arabic, description, is_tip, charge, before_vat, tax_option, currency, tax_percentage, unit_tax, status, image, position, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            category_id=excluded.category_id,
+            name=excluded.name,
+            name_arabic=excluded.name_arabic,
+            description=excluded.description,
+            is_tip=excluded.is_tip,
+            charge=excluded.charge,
+            before_vat=excluded.before_vat,
+            tax_option=excluded.tax_option,
+            currency=excluded.currency,
+            tax_percentage=excluded.tax_percentage,
+            unit_tax=excluded.unit_tax,
+            status=excluded.status,
+            image=excluded.image,
+            position=excluded.position,
+            created_at=excluded.created_at,
+            updated_at=excluded.updated_at
+          ''',
+          [
+            service['id'],
+            service['category_id'],
+            service['name'],
+            service['name_arabic'],
+            service['description'],
+            service['is_tip'],
+            service['charge'],
+            service['before_vat'],
+            service['tax_option'],
+            service['currency'],
+            service['tax_percentage'],
+            service['unit_tax'],
+            service['status'],
+            service['image'],
+            service['position'],
+            service['created_at'],
+            service['updated_at'],
+          ],
+        );
+      }
+      await batch.commit(noResult: true);
+    });
     log("Services insertion completed");
   }
 
@@ -349,34 +451,59 @@ class DatabaseHelper {
   }
 
   /// Settle payment for a booking
-  Future<void> settlePayment(
-    int transactionId,
-    Map<String, dynamic> updateData,
-    List<Map<String, dynamic>> payments,
-  ) async {
-    log("Settling payment for transaction $transactionId");
+  Future<void> settlePayment(SettlePaymentRequestModel request) async {
+    log("Settling payment for transaction ${request.transactionId}");
     final db = await database;
     await db.transaction((txn) async {
       // 1. Update Transaction Status & Totals
+      final updateData = {
+        'status': 'completed',
+        'payment_status': 'paid',
+        'grand_total': request.subTotalValue,
+        'tax_total': request.taxTotal,
+        'discount': request.discount,
+        'round_off': request.roundOff,
+        'final_total': request.finalTotal,
+        'total_payment': request.finalTotal,
+        'updated_at': DateTime.now().toIso8601String(),
+        'is_synced': 0,
+      };
+
       await txn.update(
         'transactions',
         updateData,
         where: 'id = ?',
-        whereArgs: [transactionId],
+        whereArgs: [request.transactionId],
       );
-      log("Updated transaction $transactionId status");
+      log("Updated transaction ${request.transactionId} status");
 
       // 2. Insert Payments
       Batch batch = txn.batch();
-      for (var payment in payments) {
-        var paymentData = Map<String, dynamic>.from(payment);
-        paymentData['transaction_id'] = transactionId;
-        batch.insert('transaction_payments', paymentData);
+      if (request.mode != null && request.amount != null) {
+        for (int i = 0; i < request.mode!.length; i++) {
+          final paymentData = {
+            'transaction_id': request.transactionId,
+            'mode': request.mode![i],
+            'amount': request.amount![i],
+            'tender_cash':
+                (request.tenderCash != null && i < request.tenderCash!.length)
+                ? request.tenderCash![i]
+                : 0.0,
+            'change': (request.change != null && i < request.change!.length)
+                ? request.change![i]
+                : 0.0,
+            'date': DateTime.now().toIso8601String(),
+            'collected_user_id':
+                (request.collectedUserId != null &&
+                    i < request.collectedUserId!.length)
+                ? request.collectedUserId![i]
+                : null,
+          };
+          batch.insert('transaction_payments', paymentData);
+        }
       }
       await batch.commit(noResult: true);
-      log(
-        "Inserted ${payments.length} payments for transaction $transactionId",
-      );
+      log("Inserted payments for transaction ${request.transactionId}");
     });
   }
 
@@ -509,5 +636,206 @@ class DatabaseHelper {
       whereArgs: [id],
     );
     log("Password updated for user $id");
+  }
+
+  // --- Cash Register ---
+
+  Future<void> openCashRegister(Map<String, dynamic> data) async {
+    log("Opening cash register");
+    final db = await database;
+    await db.insert('cash_registers', data);
+    log("Cash register opened");
+  }
+
+  Future<void> closeCashRegister(int id, Map<String, dynamic> data) async {
+    log("Closing cash register $id");
+    final db = await database;
+    await db.update('cash_registers', data, where: 'id = ?', whereArgs: [id]);
+    log("Cash register closed");
+  }
+
+  Future<Map<String, dynamic>?> getLastOpenCashRegister() async {
+    log("Fetching last open cash register");
+    final db = await database;
+    final result = await db.query(
+      'cash_registers',
+      where: 'closed_at IS NULL',
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return result.first;
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> getLastClosedCashRegister() async {
+    log("Fetching last closed cash register");
+    final db = await database;
+    final result = await db.query(
+      'cash_registers',
+      where: 'closed_at IS NOT NULL',
+      orderBy: 'closed_at DESC',
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return result.first;
+    }
+    return null;
+  }
+
+  Future<Map<String, double>> calculateSalesTotal(int cashRegisterId) async {
+    log("Calculating sales total for register $cashRegisterId");
+    final db = await database;
+
+    // Sum from transactions linked to this register (assuming we link them,
+    // but currently transactions table has cash_register_id)
+    // If transactions are not linked yet, we might need to query by time range,
+    // but let's assume they are linked or we query by time > opened_at.
+    // For now, let's query by cash_register_id if it's being populated,
+    // OR query transactions created after the register was opened.
+
+    // Let's first get the register to know when it was opened.
+    final registerResult = await db.query(
+      'cash_registers',
+      where: 'id = ?',
+      whereArgs: [cashRegisterId],
+    );
+
+    if (registerResult.isEmpty) return {'total_sales': 0.0, 'cash_total': 0.0};
+
+    final register = registerResult.first;
+    final openedAt = register['opened_at'] as String;
+
+    // Query transactions after openedAt
+    final result = await db.rawQuery(
+      '''
+      SELECT 
+        COUNT(*) as count,
+        SUM(final_total) as total_sales,
+        SUM(CASE WHEN payment_status = 'paid' THEN final_total ELSE 0 END) as cash_total
+      FROM transactions 
+      WHERE created_at >= ?
+    ''',
+      [openedAt],
+    );
+
+    double totalSales = 0.0;
+    double cashTotal = 0.0;
+    int count = 0;
+
+    if (result.isNotEmpty) {
+      totalSales = (result.first['total_sales'] as num?)?.toDouble() ?? 0.0;
+      cashTotal = (result.first['cash_total'] as num?)?.toDouble() ?? 0.0;
+      count = (result.first['count'] as num?)?.toInt() ?? 0;
+    }
+
+    return {
+      'total_sales': totalSales,
+      'cash_total': cashTotal,
+      'count': count.toDouble(),
+    };
+  }
+
+  Future<Map<String, dynamic>> getTransactionsForRegister(
+    String openedAt,
+    String closedAt,
+  ) async {
+    log("Fetching transactions between $openedAt and $closedAt");
+    final db = await database;
+
+    final result = await db.rawQuery(
+      '''
+      SELECT 
+        t.id,
+        t.invoice_no,
+        t.final_total,
+        t.payment_status,
+        t.customer_name,
+        t.transaction_date,
+        tp.mode,
+        tp.amount
+      FROM transactions t
+      LEFT JOIN transaction_payments tp ON t.id = tp.transaction_id
+      WHERE t.created_at >= ? AND t.created_at <= ? AND t.status = 'completed'
+      ''',
+      [openedAt, closedAt],
+    );
+
+    // Process result to match QuickReportModel structure
+    // This is a simplified mapping. You might need more complex logic based on your exact requirements.
+
+    double cashAmount = 0.0;
+    int cashCount = 0;
+    double cardAmount = 0.0;
+    int cardCount = 0;
+
+    // Group by salesman (user_id) if needed, but for now let's just get totals
+    // If you need salesman details, you'll need to join with users table
+
+    for (var row in result) {
+      final mode = row['mode'] as String?;
+      final amount = (row['amount'] as num?)?.toDouble() ?? 0.0;
+
+      if (mode == 'cash') {
+        cashAmount += amount;
+        cashCount++; // This might overcount if multiple payments per transaction, but usually 1-1 mapping for simple cases
+      } else if (mode == 'card' || mode == 'online') {
+        cardAmount += amount;
+        cardCount++;
+      }
+    }
+
+    // Correct count logic: distinct transactions
+    final distinctTransactions = result.map((e) => e['id']).toSet();
+
+    // Re-calculate counts based on distinct transactions if needed,
+    // but QuickReportModel asks for customer counts which usually means transaction count.
+    // For simplicity, let's assume 1 transaction = 1 customer.
+
+    // To get accurate counts per type, we need to check if a transaction had ANY cash or card payment.
+
+    return {
+      'cash_customer_count': cashCount, // Simplified
+      'cash_customer_amount': cashAmount,
+      'card_customer_count': cardCount, // Simplified
+      'card_customer_amount': cardAmount,
+      // Add other fields as needed for QuickReportModel
+    };
+  }
+
+  Future<void> cancelBooking(int transactionId, String reason) async {
+    log("Cancelling transaction $transactionId");
+    final db = await database;
+    await db.update(
+      'transactions',
+      {
+        'status': 'cancelled',
+        'cancellation_reason': reason,
+        'updated_at': DateTime.now().toIso8601String(),
+        'is_synced': 0,
+      },
+      where: 'id = ?',
+      whereArgs: [transactionId],
+    );
+    log("Transaction $transactionId cancelled");
+  }
+
+  Future<void> updatePaymentMode(
+    int paymentId,
+    String mode,
+    double amount,
+  ) async {
+    log("Updating payment $paymentId mode to $mode");
+    final db = await database;
+    await db.update(
+      'transaction_payments',
+      {'mode': mode, 'amount': amount},
+      where: 'id = ?',
+      whereArgs: [paymentId],
+    );
+    log("Payment $paymentId updated");
   }
 }

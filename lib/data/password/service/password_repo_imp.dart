@@ -59,26 +59,30 @@ class PasswordRepoImp extends PasswordRepo {
     required bool isAdmin,
   }) async {
     try {
-      final response = await ApiClient.dio.post(
-        isAdmin
-            ? ApiClient.validatePasswordAdminUser
-            : ApiClient.validatePassword,
-        data: {'password': password, 'user_id': userId},
+      // Offline-only implementation
+      final users = await DatabaseHelper().getUsers();
+      final userMap = users.firstWhere(
+        (u) => u['id'] == userId,
+        orElse: () => {},
       );
 
-      return Right(
-        response.data['message'] ?? "Password validated successfully",
-      );
-    } on DioException catch (e) {
-      if (e.response != null) {
-        // API responded with 400 / 401 / 500 etc
-        return Left(e.response?.data['message'] ?? "Something went wrong");
+      if (userMap.isEmpty) {
+        return const Left("RESET_REQUIRED");
+      }
+
+      final storedPassword = userMap['password'];
+
+      if (storedPassword == null || storedPassword.toString().isEmpty) {
+        return const Left("RESET_REQUIRED");
+      }
+
+      if (storedPassword == password) {
+        return const Right("Password validated successfully");
       } else {
-        // No response (timeout, no internet)
-        return Left("Network error. Please try again.");
+        return const Left("Invalid password");
       }
     } catch (e) {
-      return Left(e.toString());
+      return Left('Error validating password: $e');
     }
   }
 }

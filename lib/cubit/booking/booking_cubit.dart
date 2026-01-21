@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
@@ -18,6 +20,7 @@ class BookingCubit extends Cubit<BookingState> {
     required int userId,
     required String userPassword,
   }) async {
+    log("Booking slot for chair $chairId");
     emit(BookingLoading());
     final result = await bookingRepo.bookSlot(
       chairId: chairId,

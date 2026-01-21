@@ -1,10 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
-
+import 'package:sharp_cut/core/database/database_helper.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
-
 import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_response.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
@@ -13,28 +10,8 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
   Future<Either<String, bool>> checkCashRegisterStatus() async {
     try {
-      final response = await ApiClient.dio.get(ApiClient.cashRegisterCheckApi);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true && data['status'] == 'open') {
-          return const Right(true);
-        } else if (data['success'] == true && data['status'] == 'closed') {
-          return const Right(false);
-        } else {
-          return Left('Failed to check register status');
-        }
-      } else {
-        return Left('Failed to check register status');
-      }
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error checking register status: ${e.message}');
+      final lastOpen = await DatabaseHelper().getLastOpenCashRegister();
+      return Right(lastOpen != null);
     } catch (e) {
       return Left('Error checking register status: $e');
     }
@@ -48,34 +25,25 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
     required String password,
   }) async {
     try {
-      final response = await ApiClient.dio.post(
-        ApiClient.openCashRegisterApi,
-        data: {
-          "user_id": userId,
-          "user_type": role.name,
-          "opening_amount": amount,
-          "password": password,
-        },
-      );
+     
+      final lastOpen = await DatabaseHelper().getLastOpenCashRegister();
+      if (lastOpen != null) {
+        return const Left(
+          "A cash register is already open. Please close it first.",
+        );
+      }
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          return Right(data['message'] ?? 'Cash register opened successfully.');
-        } else {
-          return Left(data['message'] ?? 'Failed to open cash register.');
-        }
-      } else {
-        return Left('Failed to open cash register: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error opening cash register: ${e.message}');
+      final data = {
+        'opened_by': userId,
+        'opened_by_type': role.name,
+        'opening_amount': amount,
+        'opened_at': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
+        'is_synced': 0,
+      };
+
+      await DatabaseHelper().openCashRegister(data);
+      return const Right("Cash register opened successfully.");
     } catch (e) {
       return Left('Error opening cash register: $e');
     }
@@ -90,79 +58,88 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
     required bool isPrint,
   }) async {
     try {
-      final response = await ApiClient.dio.post(
-        ApiClient.closeCashRegisterApi,
-        data: {
-          "is_print": isPrint,
-          "closing_amount": amount,
-          "user_type": role.name,
-          "user_id": userId,
-          "password": password,
-        },
+      final lastOpen = await DatabaseHelper().getLastOpenCashRegister();
+      if (lastOpen == null) {
+        return const Left("No open register found.");
+      }
+
+      final registerId = lastOpen['id'] as int;
+      final updateData = {
+        'closed_by': userId,
+        'closed_by_type': role.name,
+        'closing_amount': amount,
+        'closed_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+        'is_synced': 0,
+      };
+
+      await DatabaseHelper().closeCashRegister(registerId, updateData);
+
+      // Fetch the updated register data from DB to ensure report matches persisted state
+      final closedRegister = await DatabaseHelper().getLastClosedCashRegister();
+      if (closedRegister == null) {
+        return const Left("Failed to retrieve closed register.");
+      }
+
+      // Generate report data
+      final totals = await DatabaseHelper().calculateSalesTotal(registerId);
+      final totalSales = totals['total_sales'] ?? 0.0;
+      final cashSales = totals['cash_total'] ?? 0.0;
+      final count = (totals['count'] ?? 0).toInt();
+
+      final openingAmount = (closedRegister['opening_amount'] as num)
+          .toDouble();
+      final closingAmount = (closedRegister['closing_amount'] as num)
+          .toDouble();
+      final expectedClosing = openingAmount + cashSales;
+
+      final report = CloseRegisterReportModel(
+        openingAmount: openingAmount.toString(),
+        closingAmount: closingAmount,
+        openedAt: closedRegister['opened_at'] as String,
+        closedAt: closedRegister['closed_at'] as String,
+        totalSalesAmount: totalSales,
+        totalSalesCount: count,
+        expectedClosingAmount: expectedClosing,
+        discrepancy: closingAmount - expectedClosing,
+        closedBy: closedRegister['closed_by'].toString(),
+        openedBy: closedRegister['opened_by'].toString(),
+        cashRegisterId: registerId,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          CloseRegisterReportModel? report;
-          if (data['report'] != null) {
-            report = CloseRegisterReportModel.fromJson(data['report']);
-          }
-          return Right(
-            CloseRegisterResponse(
-              message: data['message'] ?? 'Cash register closed successfully.',
-              report: report,
-            ),
-          );
-        } else {
-          return Left(data['message'] ?? 'Failed to close cash register.');
-        }
-      } else {
-        return Left('Failed to close cash register: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        return Left(
-          e.response?.data['message'] ??
-              'Failed to close cash register: ${e.message}',
-        );
-      } else {
-        return Left('Failed to close cash register: ${e.message}');
-      }
+      return Right(
+        CloseRegisterResponse(
+          message: 'Cash register closed successfully.',
+          report: report,
+        ),
+      );
     } catch (e) {
-      return Left('An unexpected error occurred: $e');
+      return Left('Error closing cash register: $e');
     }
   }
 
   @override
   Future<Either<String, CloseRegisterModel>> getSalesTotal() async {
     try {
-      final response = await ApiClient.dio.get(
-        ApiClient.getTotalSalesForCloseCashRegisterApi,
-      );
+      final lastOpen = await DatabaseHelper().getLastOpenCashRegister();
+      if (lastOpen == null) {
+        return const Left("No open register found.");
+      }
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          final closeRegisterData = data['data'];
-          return Right(CloseRegisterModel.fromJson(closeRegisterData));
-        } else {
-          return Left(data['message'] ?? 'Failed to get sales total.');
-        }
-      } else {
-        return Left('Failed to get sales total: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        return Left(
-          e.response?.data['message'] ??
-              'Failed to get sales total: ${e.message}',
-        );
-      } else {
-        return Left('Failed to get sales total: ${e.message}');
-      }
+      final registerId = lastOpen['id'] as int;
+      final totals = await DatabaseHelper().calculateSalesTotal(registerId);
+      final openingAmount = (lastOpen['opening_amount'] as num).toDouble();
+      final cashSales = totals['cash_total'] ?? 0.0;
+
+      return Right(
+        CloseRegisterModel(
+          openingAmount: openingAmount,
+          totalSales: totals['total_sales'] ?? 0.0,
+          expectedClosingAmount: openingAmount + cashSales,
+        ),
+      );
     } catch (e) {
-      return Left('An unexpected error occurred: $e');
+      return Left('Error getting sales total: $e');
     }
   }
 
@@ -170,36 +147,39 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   Future<Either<String, CloseRegisterReportModel>>
   getLastCloseRegisterReport() async {
     try {
-      final response = await ApiClient.dio.get(
-        ApiClient.cashRegisterLastSalesApi,
-      );
+      final lastClosed = await DatabaseHelper().getLastClosedCashRegister();
+      if (lastClosed == null) {
+        return const Left("No closed register report found.");
+      }
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          if (data['report'] != null) {
-            return Right(CloseRegisterReportModel.fromJson(data['report']));
-          } else {
-            return Left('Report data is missing.');
-          }
-        } else {
-          return Left(
-            data['message'] ?? 'Failed to get last close register report.',
-          );
-        }
-      } else {
-        return Left('Failed to get report');
-      }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        return Left(
-          e.response?.data['message'] ?? 'Failed to get report: ${e.message}',
-        );
-      } else {
-        return Left('Failed to get report: ${e.message}');
-      }
+      final registerId = lastClosed['id'] as int;
+      final totals = await DatabaseHelper().calculateSalesTotal(registerId);
+      final totalSales = totals['total_sales'] ?? 0.0;
+      final cashSales = totals['cash_total'] ?? 0.0;
+      final count = (totals['count'] ?? 0).toInt();
+      final openingAmount = (lastClosed['opening_amount'] as num).toDouble();
+      final closingAmount =
+          (lastClosed['closing_amount'] as num?)?.toDouble() ?? 0.0;
+      final expectedClosing = openingAmount + cashSales;
+
+      return Right(
+        CloseRegisterReportModel(
+          openingAmount: openingAmount.toString(),
+
+          closingAmount: closingAmount,
+          openedAt: lastClosed['opened_at'],
+          closedAt: lastClosed['closed_at'],
+          totalSalesAmount: totalSales,
+          totalSalesCount: count,
+          expectedClosingAmount: expectedClosing,
+          discrepancy: closingAmount - expectedClosing,
+          closedBy: lastClosed['closed_by'] as String,
+          openedBy: lastClosed['opened_by'] as String,
+          cashRegisterId: registerId,
+        ),
+      );
     } catch (e) {
-      return Left('An unexpected error occurred: $e');
+      return Left('Error getting report: $e');
     }
   }
 }

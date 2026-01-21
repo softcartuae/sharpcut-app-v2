@@ -33,90 +33,46 @@ class ChairRepoImpl implements ChairRepo {
   getChairsAndStaffs() async {
     log("getChairsAndStaffs caaled");
     try {
-      final response = await ApiClient.dio.get(
-        '${ApiClient.chairsApi}?users=true',
-      );
+      final localChairs = await dbHelper.getChairs();
+      final localUsers = await dbHelper.getUsers();
 
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        final data = response.data['data'];
-        final List<dynamic> chairsJson = data['chairs'];
-        final List<dynamic> usersJson = data['users'];
-        final List<dynamic> adminJson = data['admins'];
+      if (localChairs.isNotEmpty || localUsers.isNotEmpty) {
+        final chairs = <ChairModel>[];
+        for (var chairData in localChairs) {
+          final chairId = chairData['id'] as int;
+          final chairWithTxn = await dbHelper.getChairWithActiveTransaction(
+            chairId,
+          );
+          if (chairWithTxn != null) {
+            chairs.add(ChairModel.fromJson(chairWithTxn));
+          } else {
+            chairs.add(ChairModel.fromJson(chairData));
+          }
+        }
 
-        // Cache data locally
-        final chairsToInsert = chairsJson.map((chair) {
-          final chairMap = Map<String, dynamic>.from(chair as Map);
-          chairMap.remove('transaction');
-          return chairMap;
-        }).toList();
+        // Filter and map users based on is_admin or logic
+        // Since we saved them all in 'users' table, we need to distinguish
+        // For now, we'll just return all as staff/admin based on 'is_admin' flag if available
+        // or just load them.
+        // The original code separated users and admins from different API keys.
+        // In DB they are in one table.
 
-        await dbHelper.insertChairs(chairsToInsert);
-
-        // Combine users and admins for caching
-        // We might need to ensure is_admin is set correctly if the API doesn't provide it explicitly in the object
-        // assuming the API returns full user objects.
-        final allUsers = <Map<String, dynamic>>[];
-        allUsers.addAll(usersJson.cast<Map<String, dynamic>>());
-        allUsers.addAll(adminJson.cast<Map<String, dynamic>>());
-        await dbHelper.insertUsers(allUsers);
-
-        final chairs = chairsJson
-            .map((json) => ChairModel.fromJson(json))
-            .toList();
-
-        // some staffs can be admin too so we need to check it
-        final staffs = usersJson
-            .map((json) => StaffModel.fromJson(json, role: Role.staff))
-            .toList();
-
-        final admins = adminJson
-            .map((json) => StaffModel.fromJson(json, role: Role.admin))
-            .toList();
-        // add admins too to the staff list but we can identify them by role
-        staffs.addAll(admins);
+        final staffs = <StaffModel>[];
+        for (var user in localUsers) {
+          // Check if admin
+          final isAdmin = user['is_admin'] == 1 || user['is_admin'] == true;
+          staffs.add(
+            StaffModel.fromJson(user, role: isAdmin ? Role.admin : Role.staff),
+          );
+        }
 
         return (chairs: chairs, staffs: staffs);
-      } else {
-        throw Exception('Failed to load chairs and staffs');
       }
-    } catch (e) {
-      log('Error fetching from API, trying local DB: $e');
-      try {
-        final localChairs = await dbHelper.getChairs();
-        final localUsers = await dbHelper.getUsers();
-
-        if (localChairs.isNotEmpty || localUsers.isNotEmpty) {
-          final chairs = localChairs
-              .map((json) => ChairModel.fromJson(json))
-              .toList();
-
-          // Filter and map users based on is_admin or logic
-          // Since we saved them all in 'users' table, we need to distinguish
-          // For now, we'll just return all as staff/admin based on 'is_admin' flag if available
-          // or just load them.
-          // The original code separated users and admins from different API keys.
-          // In DB they are in one table.
-
-          final staffs = <StaffModel>[];
-          for (var user in localUsers) {
-            // Check if admin
-            final isAdmin = user['is_admin'] == 1 || user['is_admin'] == true;
-            staffs.add(
-              StaffModel.fromJson(
-                user,
-                role: isAdmin ? Role.admin : Role.staff,
-              ),
-            );
-          }
-
-          return (chairs: chairs, staffs: staffs);
-        }
-        throw Exception('Failed to load chairs and staffs from local DB');
-      } catch (localError) {
-        throw Exception(
-          'Failed to load chairs and staffs: $e. Local error: $localError',
-        );
-      }
+      throw Exception('Failed to load chairs and staffs from local DB');
+    } catch (localError) {
+      throw Exception(
+        'Failed to load chairs and staffs: . Local error: $localError',
+      );
     }
   }
 }

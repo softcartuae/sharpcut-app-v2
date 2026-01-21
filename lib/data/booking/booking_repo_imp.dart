@@ -1,11 +1,14 @@
+import 'dart:developer';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/data/api_client.dart';
+import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
+import 'package:sharp_cut/core/database/database_helper.dart';
 
 class BookingRepoImp implements BookingRepo {
   @override
@@ -14,41 +17,28 @@ class BookingRepoImp implements BookingRepo {
     required int userId,
     required String userPassword,
   }) async {
-    final body = {
-      "chair_id": chairId,
-      "user_id": userId,
-      "user_password": userPassword,
-    };
-
     try {
-      final response = await ApiClient.dio.post(
-        ApiClient.slotBookingChairApi,
-        data: body,
-      );
+      // Offline-only implementation
+      final transactionData = {
+        'chair_id': chairId,
+        'user_id': userId,
+        'transaction_date': DateTime.now().toIso8601String(),
+        'status': 'ongoing',
+        'invoice_no': 'OFF-${DateTime.now().millisecondsSinceEpoch}',
+        'invoice_date': DateTime.now().toIso8601String(),
+        'app_id': 'OFFLINE',
+        'grand_total': 0.0,
+        'tax_total': 0.0,
+        'discount': 0.0,
+        'round_off': 0.0,
+        'final_total': 0.0,
+        'is_synced': 0,
+      };
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          return Right("Booking successful");
-        } else {
-          return Left(data['message'] ?? 'Booking failed');
-        }
-      } else {
-        return Left('Failed to book slot: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 409) {
-        return Left("This chair is already booked");
-      }
-
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error booking slot: ${e.message}');
+      await DatabaseHelper().createBooking(transactionData, []);
+      return const Right("Booking successful");
     } catch (e) {
+      log('Error booking slot: $e');
       return Left('Error booking slot: $e');
     }
   }
@@ -60,37 +50,10 @@ class BookingRepoImp implements BookingRepo {
     required String userPassword,
     required String reason,
   }) async {
-    final body = {
-      "transaction_id": transactionId,
-      "user_id": userId,
-      "user_password": userPassword,
-      "cancellation_reason": reason,
-    };
-
     try {
-      final response = await ApiClient.dio.post(
-        ApiClient.cancelBookingApi,
-        data: body,
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          return Right(data['message'] ?? 'Transaction cancelled successfully');
-        } else {
-          return Left(data['message'] ?? 'Cancellation failed');
-        }
-      } else {
-        return Left('Failed to cancel booking: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error cancelling booking: ${e.message}');
+      // Offline-only implementation
+      await DatabaseHelper().cancelBooking(transactionId, reason);
+      return const Right("Transaction cancelled successfully");
     } catch (e) {
       return Left('Error cancelling booking: $e');
     }
@@ -101,29 +64,26 @@ class BookingRepoImp implements BookingRepo {
     SaveBookingRequestModel request,
   ) async {
     try {
-      final response = await ApiClient.dio.post(
-        ApiClient.saveBookingApi,
-        data: request.toJson(),
+      // Offline-only implementation
+      // Convert SaveBookingRequestModel to SettlePaymentRequestModel for DatabaseHelper
+      final settleRequest = SettlePaymentRequestModel(
+        transactionId: request.transactionId,
+        subTotalValue: request.grandTotal,
+        taxTotal: request.taxTotal,
+        discount: request.discount,
+        roundOff: request.roundOff,
+        finalTotal: request.finalTotal,
+        paymentStatus: 'unpaid',
+        mode: [],
+        amount: [],
+        tenderCash: [],
+        change: [],
+        collectedUserId: [],
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          return Right(data['message'] ?? 'Booking saved successfully');
-        } else {
-          return Left(data['message'] ?? 'Failed to save booking');
-        }
-      } else {
-        return Left('Failed to save booking: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error saving booking: ${e.message}');
+      await DatabaseHelper().settlePayment(settleRequest);
+
+      return const Right("Booking saved successfully");
     } catch (e) {
       return Left('Error saving booking: $e');
     }
@@ -134,29 +94,15 @@ class BookingRepoImp implements BookingRepo {
     SettlePaymentRequestModel request,
   ) async {
     try {
-      final response = await ApiClient.dio.post(
-        ApiClient.settlePayment,
-        data: request.toJson(),
-      );
+      // Offline-only implementation
+      await DatabaseHelper().settlePayment(request);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          return Right(SettlePaymentResponseModel.fromJson(data));
-        } else {
-          return Left(data['message'] ?? 'Payment settlement failed');
-        }
-      } else {
-        return Left('Failed to settle payment: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error settling payment: ${e.message}');
+      return Right(
+        SettlePaymentResponseModel(
+          success: true,
+          message: 'Payment settlement successful',
+        ),
+      );
     } catch (e) {
       return Left('Error settling payment: $e');
     }
@@ -166,33 +112,8 @@ class BookingRepoImp implements BookingRepo {
   Future<Either<String, SettlePaymentResponseModel>> quickPayment(
     SettlePaymentRequestModel request,
   ) async {
-    try {
-      final response = await ApiClient.dio.post(
-        ApiClient.quickPayment,
-        data: request.toJson(),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          return Right(SettlePaymentResponseModel.fromJson(data));
-        } else {
-          return Left(data['message'] ?? 'Payment settlement failed');
-        }
-      } else {
-        return Left('Failed to settle payment: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error settling payment: ${e.message}');
-    } catch (e) {
-      return Left('Error settling payment: $e');
-    }
+    // Quick payment is essentially settle payment with default/single payment mode
+    return settlePayment(request);
   }
 
   @override
@@ -227,8 +148,6 @@ class BookingRepoImp implements BookingRepo {
       return Left('Error settling payment: $e');
     }
   }
-
-
 
   @override
   Future<Either<String, String>> updatePaymentMode({

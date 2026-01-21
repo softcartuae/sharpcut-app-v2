@@ -123,9 +123,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       tenderCash: [0.0],
       change: [0.0],
     );
-    
-
-
 
     final shopData = context.read<AuthCubit>().currentUser;
     if (shopData != null) {
