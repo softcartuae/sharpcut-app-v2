@@ -26,7 +26,9 @@ Future<void> showSettlementDialog(
   required String? staffName,
   required String? bookingTime,
   required String? invoiceNumber,
+  required String? invoiceDate,
   required List<CartItemModel> cartItems,
+  required int? chairId,
 }) {
   return showDialog(
     context: context,
@@ -37,7 +39,9 @@ Future<void> showSettlementDialog(
       settlePayment: settlePayment,
       staffName: staffName,
       bookingTime: bookingTime,
+      invoiceDate: invoiceDate,
       cartItems: cartItems,
+      chairId: chairId,
     ),
   );
 }
@@ -47,14 +51,18 @@ class SettlementDialog extends StatefulWidget {
   final String? staffName;
   final String? bookingTime;
   final String? invoiceNumber;
+  final String? invoiceDate;
   final List<CartItemModel> cartItems;
+  final int? chairId;
   const SettlementDialog({
     super.key,
     required this.settlePayment,
     required this.staffName,
     required this.bookingTime,
     required this.invoiceNumber,
+    required this.invoiceDate,
     required this.cartItems,
+    required this.chairId,
   });
 
   @override
@@ -148,7 +156,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
     _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0)
         .toStringAsFixed(2);
-        
+
     _discountController.text =
         widget.settlePayment.discount == null ||
             widget.settlePayment.discount == 0
@@ -342,6 +350,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     log("finalTotal : $finalTotal");
 
     final request = SettlePaymentRequestModel(
+      paymentStatus: totalPaid == 0 ? "unpaid" : null,
       transactionId: widget.settlePayment.transactionId,
       customerName: _nameController.text,
       customerNumber: _mobileController.text,
@@ -378,6 +387,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
       if (shopData != null) {
         final printCubit = context.read<PrintingCubit>();
         printCubit.printInvoice(
+          chairId: widget.chairId,
           printCount: printCubit.state.settings?.printCount.settlePayment
               .toInt(),
           balanceAmount: double.tryParse(_balanceController.text) ?? 0.0,
@@ -387,8 +397,9 @@ class _SettlementDialogState extends State<SettlementDialog> {
           staffName: widget.staffName,
           invoiceNumber: widget.invoiceNumber,
           bookingTime: widget.bookingTime != null
-              ? DateFormat('HH:mm').format(DateTime.parse(widget.bookingTime!))
+              ? widget.bookingTime!
               : "--:--",
+          invoiceDate: widget.invoiceDate,
         );
       }
       context.read<BookingCubit>().settlePayment(request: request);
@@ -446,9 +457,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                         SettlementTimeContainer(
                           label: "Time Starts",
                           time: widget.bookingTime != null
-                              ? DateFormat(
-                                  'HH:mm',
-                                ).format(DateTime.parse(widget.bookingTime!))
+                              ? (widget.bookingTime!)
                               : "--:--",
                         ),
                         const Spacer(),

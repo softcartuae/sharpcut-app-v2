@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
@@ -14,6 +17,9 @@ class ReceiptWidget extends StatelessWidget {
   final String? bookingTime;
   final double? width;
   final double balanceAmount;
+  final String? invoiceDate;
+  final int? chairId;
+  final String? endTime;
 
   const ReceiptWidget({
     super.key,
@@ -24,6 +30,9 @@ class ReceiptWidget extends StatelessWidget {
     required this.request,
     required this.cartItems,
     required this.balanceAmount,
+    required this.invoiceDate,
+    required this.chairId,
+    this.endTime,
     this.width,
   });
 
@@ -32,7 +41,7 @@ class ReceiptWidget extends StatelessWidget {
     bool isNotPaid = request.paymentStatus == 'unpaid';
     return Container(
       width:
-          width ?? 370, // Target width for 58mm printer (approx 384 dots max)
+          width ?? 384, // Target width for 58mm printer (approx 384 dots max)
       color: Colors.white,
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
@@ -42,7 +51,7 @@ class ReceiptWidget extends StatelessWidget {
           children: [
             // Logo
             const Center(
-              child: Icon(Icons.content_cut, size: 50, color: Colors.black),
+              child: Icon(Icons.content_cut, size: 65, color: Colors.black),
             ),
             const SizedBox(height: 8),
 
@@ -50,8 +59,8 @@ class ReceiptWidget extends StatelessWidget {
             Text(
               shopData.name ?? 'Shop Name',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 30,
+              style: GoogleFonts.marcellus(
+                fontSize: 35,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -62,8 +71,8 @@ class ReceiptWidget extends StatelessWidget {
               Text(
                 shopData.address!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
+                style: GoogleFonts.marcellus(
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -74,78 +83,50 @@ class ReceiptWidget extends StatelessWidget {
               Text(
                 'TRN: ${shopData.vatNo}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
+                style: TextStyle(
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
               ),
 
             const SizedBox(height: 4),
-            if (!isNotPaid)
-              const Text(
-                'TAX INVOICE - فاتورة ضريبية',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
 
-            if (isNotPaid)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'TAX INVOICE - فاتورة ضريبية',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  Text(
-                    'UNPAID',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
+            Text(
+              'TAX INVOICE - فاتورة ضريبية',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.marcellus(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
+            ),
 
-            const Divider(color: Colors.black, thickness: 1),
+            Container(height: 1.5, color: Colors.black),
 
             // Bill Details
             _buildDetailRow(
-              label1: 'Bill Date:',
+              label1: 'Bill Date',
               subLabel1: 'تاريخ الفاتورة',
               value1:
-                  bookingTime ??
+                  invoiceDate ??
                   'Unknown', // Assuming current date for bill date
-              label2: 'Invoice No:',
+              label2: 'Invoice No',
               subLabel2: 'رقم الفاتورة',
               value2: invoiceNumber ?? 'Unknown',
             ),
             const SizedBox(height: 4),
             _buildDetailRow(
-              label1: 'Print Date:',
+              label1: 'Print Date',
               subLabel1: 'تاريخ الطباعة',
               value1: _formatDate(DateTime.now()),
-              label2: 'Order No:',
-              subLabel2: 'رقم الطلب',
-              value2: '-', // Placeholder
             ),
             const SizedBox(height: 4),
             _buildDetailRow(
-              label1: 'Table No',
-              subLabel1: 'رقم الطاولة',
-              value1: 'COUNTER', // Placeholder or from request
-              label2: 'Staff:',
+              label1: 'Chair No',
+              subLabel1: 'رقم الكرسي',
+              value1: chairId?.toString() ?? '', // Placeholder or from request
+              label2: 'Staff',
               subLabel2: 'النادل',
               value2: staffName ?? 'Unknown', // Placeholder or from request
             ),
@@ -153,26 +134,60 @@ class ReceiptWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Start time : ${_formatTime(shopData.startTime)}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                Builder(
+                  builder: (context) {
+                    if (bookingTime == null) {
+                      return Text(
+                        'Start time : Unknown',
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      );
+                    }
+
+                    DateTime? dateTime;
+                    try {
+                      dateTime = DateFormat(
+                        'dd/MM/yyyy hh:mm a',
+                      ).parse(bookingTime!);
+                    } catch (e) {
+                      log("issue in parsing booking time");
+                      dateTime = DateTime.tryParse(bookingTime!);
+                    }
+
+                    final timeString = dateTime != null
+                        ? DateFormat('hh:mm a').format(dateTime)
+                        : bookingTime!;
+
+                    return Text(
+                      'Start time : $timeString',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    );
+                  },
                 ),
+
                 Text(
-                  'End time : ${_formatTime(shopData.endTime)}',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  'End time : ${endTime ?? DateFormat('hh:mm a').format(DateTime.now())}',
+                  style: TextStyle(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
               ],
             ),
-
-            const Divider(color: Colors.black, thickness: 1),
+            SizedBox(height: 3),
+            const DashedLine(),
+            const DashedLine(),
+            const DashedLine(),
+            const DashedLine(),
+            SizedBox(height: 3),
 
             // Items Header
             Row(
@@ -181,19 +196,19 @@ class ReceiptWidget extends StatelessWidget {
                   flex: 4,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         'اسم الصنف',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
                       Text(
                         'Item Name',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -205,19 +220,19 @@ class ReceiptWidget extends StatelessWidget {
                   flex: 1,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: const [
+                    children: [
                       Text(
                         'الكمية',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
                       Text(
                         'Qty',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -229,19 +244,19 @@ class ReceiptWidget extends StatelessWidget {
                   flex: 2,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: const [
+                    children: [
                       Text(
                         'السعر',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
                       Text(
                         'Price',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -253,19 +268,19 @@ class ReceiptWidget extends StatelessWidget {
                   flex: 2,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: const [
+                    children: [
                       Text(
                         'القيمة',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
                       Text(
                         'Total',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -275,7 +290,12 @@ class ReceiptWidget extends StatelessWidget {
                 ),
               ],
             ),
-            const Divider(color: Colors.black, thickness: 1),
+            SizedBox(height: 5),
+            const DashedLine(),
+            const DashedLine(),
+            const DashedLine(),
+            const DashedLine(),
+            SizedBox(height: 5),
 
             // Items List
             ...cartItems.map((item) {
@@ -296,8 +316,8 @@ class ReceiptWidget extends StatelessWidget {
                             children: [
                               Text(
                                 item.service.name ?? '',
-                                style: const TextStyle(
-                                  fontSize: 18,
+                                style: GoogleFonts.marcellus(
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
@@ -306,8 +326,8 @@ class ReceiptWidget extends StatelessWidget {
                                   item.service.nameArabic!.isNotEmpty)
                                 Text(
                                   item.service.nameArabic!,
-                                  style: const TextStyle(
-                                    fontSize: 18,
+                                  style: GoogleFonts.marcellus(
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
                                   ),
@@ -321,8 +341,8 @@ class ReceiptWidget extends StatelessWidget {
                           child: Text(
                             item.quantity.toString(),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -333,8 +353,8 @@ class ReceiptWidget extends StatelessWidget {
                           child: Text(
                             price.toStringAsFixed(2),
                             textAlign: TextAlign.right,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -345,8 +365,8 @@ class ReceiptWidget extends StatelessWidget {
                           child: Text(
                             total.toStringAsFixed(2),
                             textAlign: TextAlign.right,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                             ),
@@ -361,70 +381,66 @@ class ReceiptWidget extends StatelessWidget {
 
             const SizedBox(height: 8),
             const DashedLine(),
+            const DashedLine(),
+            const DashedLine(),
+            const DashedLine(), const DashedLine(),
+            const DashedLine(),
             const SizedBox(height: 8),
 
             // Totals
             _buildTotalRow(
-              'المجموع قبل الضريبة - Before VAT',
+              'Before VAT - المجموع قبل الضريبة',
               (request.subTotalValue ?? 0).toStringAsFixed(2),
             ),
             _buildTotalRow(
-              'المجموع شامل الضريبة - Incl VAT',
+              'Incl VAT - المجموع شامل الضريبة',
               (request.finalTotal ?? 0).toStringAsFixed(2),
             ), // Assuming final total is incl VAT
 
             _buildTotalRow(
-              'خصم - Discount',
+              'Discount - الخصم',
               (request.discount ?? 0).toStringAsFixed(2),
             ),
             _buildTotalRow(
-              'المجموع الفرعي - Sub Total',
-              (request.subTotalList?.fold(0.0, (p, c) => p + c) ?? 0)
-                  .toStringAsFixed(2),
-            ), // Need to check logic
+              'Sub Total - المجموع الفرعي',
+              (request.subTotalValue ?? 0).toStringAsFixed(2),
+            ),
             _buildTotalRow(
-              'قيمة الضريبة - VAT Amount',
+              'VAT Amount - قيمة الضريبة',
               (request.taxTotal ?? 0).toStringAsFixed(2),
             ),
-            if (balanceAmount > 0)
-              _buildTotalRow(
-                'الباقي - Balance Amount',
-                (balanceAmount.toStringAsFixed(2)),
-              ),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'المبلغ الصافي - Net Amount',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                Text(
-                  (request.finalTotal ?? 0).toStringAsFixed(2),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
+            _buildTotalRow(
+              increesFontSize: true,
+              'Net Amount - المبلغ الصافي',
+              (request.finalTotal ?? 0).toStringAsFixed(2),
             ),
 
             // Payment Modes
             if (request.mode != null)
               ...List.generate(request.mode!.length, (index) {
                 return _buildTotalRow(
+                  increesFontSize: true,
                   '${request.mode![index]} - نقدي',
                   (request.amount?[index] ?? 0).toStringAsFixed(2),
                 );
               }),
-
+            _buildTotalRow(
+              'Balance Amount - الباقي',
+              (balanceAmount.toStringAsFixed(2)),
+            ),
             const SizedBox(height: 8),
             const DashedLine(),
+            const DashedLine(),
+            Text(
+              isNotPaid ? 'UNPAID' : 'PAID',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.marcellus(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
       ),
@@ -435,9 +451,9 @@ class ReceiptWidget extends StatelessWidget {
     required String label1,
     required String subLabel1,
     required String value1,
-    required String label2,
-    required String subLabel2,
-    required String value2,
+    String? label2,
+    String? subLabel2,
+    String? value2,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -453,27 +469,27 @@ class ReceiptWidget extends StatelessWidget {
                     children: [
                       Text(
                         label1,
-                        style: const TextStyle(
-                          fontSize: 18,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
                       Text(
                         subLabel1,
-                        style: const TextStyle(
-                          fontSize: 18,
+                        style: GoogleFonts.marcellus(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(width: 4),
+
                   Text(
                     ': $value1',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -483,71 +499,86 @@ class ReceiptWidget extends StatelessWidget {
             ],
           ),
         ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Wrap(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        label2,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+        if (label2 != null)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label2,
+                          style: GoogleFonts.marcellus(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                      Text(
-                        subLabel2,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                        Text(
+                          subLabel2 ?? '',
+                          style: GoogleFonts.marcellus(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    ': $value2',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+                    const SizedBox(width: 4),
+                    Text(
+                      ': ${value2 ?? ''}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        else
+          const Spacer(),
       ],
     );
   }
 
-  Widget _buildTotalRow(String label, String value) {
+  Widget _buildTotalRow(
+    String label,
+    String value, {
+    bool increesFontSize = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+          Expanded(
+            child: Text(
+              label,
+              textAlign: TextAlign.right,
+              style: GoogleFonts.marcellus(
+                fontSize: increesFontSize ? 25 : 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 80,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: increesFontSize ? 25 : 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
           ),
         ],
@@ -557,13 +588,7 @@ class ReceiptWidget extends StatelessWidget {
 
   String _formatDate(DateTime? date) {
     if (date == null) return '';
-    return DateFormat('dd-MM-yyyy').format(date);
-  }
-
-  String _formatTime(String? time) {
-    if (time == null) return '';
-    // Assuming time string is HH:mm:ss or similar
-    return time;
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 }
 

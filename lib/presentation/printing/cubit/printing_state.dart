@@ -41,11 +41,14 @@ class PrintingState {
     PrinterSettingsModel? settings,
     bool? isLoading,
     bool? showPaperSizeDialog,
+    bool clearConnectedPrinter = false,
   }) {
     return PrintingState(
       status: status ?? this.status,
       printers: printers ?? this.printers,
-      connectedPrinter: connectedPrinter ?? this.connectedPrinter,
+      connectedPrinter: clearConnectedPrinter
+          ? null
+          : (connectedPrinter ?? this.connectedPrinter),
       errorMessage: errorMessage ?? this.errorMessage,
       scanningType: scanningType ?? this.scanningType,
       settings: settings ?? this.settings,

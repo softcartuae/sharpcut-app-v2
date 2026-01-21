@@ -25,7 +25,6 @@ abstract class BookingRepo {
     SettlePaymentRequestModel request,
   );
 
-
   Future<Either<String, SettlePaymentResponseModel>> reSettlePayment(
     ResettleModel request,
   );
@@ -34,8 +33,9 @@ abstract class BookingRepo {
     SettlePaymentRequestModel request,
   );
 
-
-
-
-
+  Future<Either<String, String>> updatePaymentMode({
+    required int paymentId,
+    required String mode,
+    required double amount,
+  });
 }

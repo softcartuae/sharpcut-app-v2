@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:sharp_cut/data/firebase_api.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
@@ -34,7 +33,6 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // 🔒 Lock orientation to portrait only
   // await SystemChrome.setPreferredOrientations([
   //   DeviceOrientation.landscapeLeft,
   //   DeviceOrientation

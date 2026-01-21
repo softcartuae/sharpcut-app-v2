@@ -14,7 +14,6 @@ class BookingRepoImp implements BookingRepo {
     required int userId,
     required String userPassword,
   }) async {
-
     final body = {
       "chair_id": chairId,
       "user_id": userId,
@@ -28,20 +27,17 @@ class BookingRepoImp implements BookingRepo {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        
         final data = response.data;
         if (data['success'] == true) {
           return Right("Booking successful");
         } else {
           return Left(data['message'] ?? 'Booking failed');
         }
-
       } else {
         return Left('Failed to book slot: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      
-      if(e.response?.statusCode == 409) {
+      if (e.response?.statusCode == 409) {
         return Left("This chair is already booked");
       }
 
@@ -229,6 +225,33 @@ class BookingRepoImp implements BookingRepo {
       return Left('Error settling payment: ${e.message}');
     } catch (e) {
       return Left('Error settling payment: $e');
+    }
+  }
+
+
+
+  @override
+  Future<Either<String, String>> updatePaymentMode({
+    required int paymentId,
+    required String mode,
+    required double amount,
+  }) async {
+    try {
+      await ApiClient.dio.post(
+        "${ApiClient.updatePaymentMode}/$paymentId/update-mode",
+        data: {"mode": mode, "amount": amount},
+      );
+      return const Right("Payment updated successfully");
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        final data = e.response!.data;
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return Left(data['message']);
+        }
+      }
+      return Left('Error updating payment: ${e.message}');
+    } catch (e) {
+      return Left('Error updating payment: $e');
     }
   }
 }

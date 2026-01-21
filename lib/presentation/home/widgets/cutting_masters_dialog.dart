@@ -111,7 +111,6 @@ class CuttingMastersDialog extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         if (chair.liveState != LiveState.occupied.name) {
-          Navigator.of(context).pop();
           showStaffSelectionDialog(context, chair);
         } else {
           final result = await ServicesOrCancelDialog.show(context);
@@ -185,7 +184,7 @@ class CuttingMastersDialog extends StatelessWidget {
               ),
             if (chair.liveState == LiveState.occupied.name)
               Text(
-                formatDate(chair.transaction?.createdAt ?? 'Unknown'),
+                chair.transaction?.transactionDate ?? 'Unknown',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,

@@ -73,18 +73,23 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     String? invoiceNumber,
     String? staffName,
     String? bookingTime,
+    String? invoiceDate,
     double discount,
     double finalTotal,
+    int? chairId,
   ) {
     double amount = serviceState.total;
+    double balanceAmount = 0.0;
+
     // if user click unpaid then make the amount zero and the payment methord zero;
     if (paymentMode == PaymentMode.Unpaid.name) {
       log("unpaid is selected");
-      paymentMode = PaymentMode.Cash.name;
+      balanceAmount = serviceState.total;
       amount = 0.0;
     }
 
     final request = SettlePaymentRequestModel(
+      paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : null,
       transactionId: transactionId,
       customerName: bookingFormState.customerName,
       customerNumber: bookingFormState.customerNumber,
@@ -113,29 +118,31 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       }).toList(),
       isTip: serviceState.cartItems.map((e) => e.service.isTip ?? 0).toList(),
       collectedUserId: [userId!], // Placeholder
-      mode: [paymentMode],
+      mode: [paymentMode == PaymentMode.Unpaid.name ? "Cash" : paymentMode],
       amount: [amount],
       tenderCash: [0.0],
       change: [0.0],
     );
+    
+
+
 
     final shopData = context.read<AuthCubit>().currentUser;
     if (shopData != null) {
       final printCubit = context.read<PrintingCubit>();
       printCubit.printInvoice(
+        chairId: chairId,
         printCount: printCubit.state.settings?.printCount.quickPayment.toInt(),
-        balanceAmount: 0.0,
+        balanceAmount: balanceAmount,
         request: request,
         shopData: shopData,
         cartItems: serviceState.cartItems,
         staffName: staffName,
         invoiceNumber: invoiceNumber,
-        bookingTime: bookingTime != null
-            ? DateFormat('HH:mm').format(DateTime.parse(bookingTime))
-            : "--:--",
+        bookingTime: bookingTime ?? "--:--",
+        invoiceDate: invoiceDate,
       );
     }
-
     context.read<BookingCubit>().quickPayment(request: request);
   }
 
@@ -361,7 +368,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           children: [
             // 1. Category Sidebar
             Expanded(
-              flex: 2,
+              flex: 3,
               child: SingleChildScrollView(
                 child: BlocBuilder<ServiceCubit, ServiceState>(
                   builder: (context, state) {
@@ -460,8 +467,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                         );
                                         return;
                                       }
-                                      log(service.isTip.toString());
                                       if (service.isTip == 1) {
+                                        // if it tip then we need to find the before wat and unit tax ok
+
                                         showDialog(
                                           context: context,
                                           builder: (context) => TipDialog(
@@ -978,9 +986,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                       ?.name,
                                                   bookingState
                                                       .bookingResponse
-                                                      .createdAt,
+                                                      .transactionDate,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .chairId,
                                                 );
                                               },
                                               (discount) {
@@ -1001,9 +1015,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                       ?.name,
                                                   bookingState
                                                       .bookingResponse
-                                                      .createdAt,
+                                                      .transactionDate,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .chairId,
                                                 );
                                               },
                                               (discount) {
@@ -1023,9 +1043,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                       ?.name,
                                                   bookingState
                                                       .bookingResponse
-                                                      .createdAt,
+                                                      .transactionDate,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
+                                                  bookingState
+                                                      .bookingResponse
+                                                      .chairId,
                                                 );
                                               },
                                               total: serviceState.total,
@@ -1168,11 +1194,17 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   ?.name,
                                               bookingTime: bookingState
                                                   .bookingResponse
-                                                  .createdAt,
+                                                  .transactionDate,
                                               invoiceNumber: bookingState
                                                   .bookingResponse
                                                   .invoiceNo,
+                                              invoiceDate: bookingState
+                                                  .bookingResponse
+                                                  .invoiceDate,
                                               cartItems: serviceState.cartItems,
+                                              chairId: bookingState
+                                                  .bookingResponse
+                                                  .chairId,
                                             );
                                           }
                                         },

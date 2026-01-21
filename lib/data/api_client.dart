@@ -5,7 +5,7 @@ import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/data/local_storage/url_storage.dart';
 
 class ApiClient {
-  static String baseUrl = "http://165.232.178.223/saloon/";
+  static String baseUrl = "https://saloon.softcart.io/";
 
   static final dio = Dio(BaseOptions(baseUrl: baseUrl))
     ..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
@@ -19,7 +19,7 @@ class ApiClient {
     if (ip != null && ip.isNotEmpty && port != null && port.isNotEmpty) {
       baseUrl = "http://$ip:$port/";
     } else {
-      baseUrl = "http://165.232.178.223/saloon/";
+      baseUrl = "https://saloon.softcart.io/";
     }
     dio.options.baseUrl = baseUrl;
   }
@@ -57,7 +57,7 @@ class ApiClient {
   static final settlePayment = "api/transactions/settle-payment";
   static final quickPayment = "api/transactions/quick-payment";
   static final reSettlementPayment = "api/transactions/payment";
-
+  static final updatePaymentMode = "api/transactions/payment";
 
   // GET API ENDPOINTS
   static final userExpenseGETapi = "api/users/expenses";
@@ -78,6 +78,8 @@ class ApiClient {
   static final getTotalSalesForCloseCashRegisterApi =
       "api/cash-registers/sales-total";
   static final printerSettingsApi = "api/settings";
-  static final cashRegisterLastSalesApi = "api/cash-registers/print-last-report";
-  
+  static final cashRegisterLastSalesApi =
+      "api/cash-registers/print-last-report";
+
+
 }

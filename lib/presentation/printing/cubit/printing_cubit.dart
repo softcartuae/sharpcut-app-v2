@@ -18,9 +18,20 @@ part 'printing_state.dart';
 class PrintingCubit extends Cubit<PrintingState> {
   final PrintingRepo _printingRepo;
   StreamSubscription? _printerSubscription;
+  StreamSubscription? _statusSubscription;
 
   PrintingCubit(this._printingRepo) : super(PrintingState()) {
     loadPrinterSettings();
+    _listenToPrinterStatus();
+  }
+
+  void _listenToPrinterStatus() {
+    _statusSubscription = _printingRepo.statusStream.listen((event) {
+      if (event['status'] == 'disconnected') {
+        disconnect();
+        ToastHelper.showError("Printer disconnected");
+      }
+    });
   }
 
   Future<void> startScan({ConnectionType type = ConnectionType.USB}) async {
@@ -89,10 +100,22 @@ class PrintingCubit extends Cubit<PrintingState> {
       emit(state.copyWith(status: PrintingStatus.disconnecting));
       try {
         await _printingRepo.disconnect(state.connectedPrinter!);
-      } catch (e) {}
-      emit(
-        state.copyWith(status: PrintingStatus.initial, connectedPrinter: null),
-      );
+        emit(
+          state.copyWith(
+            status: PrintingStatus.initial,
+            connectedPrinter: null,
+            clearConnectedPrinter: true,
+          ),
+        );
+      } catch (e) {
+        emit(
+          state.copyWith(
+            status: PrintingStatus.initial,
+            connectedPrinter: null,
+            clearConnectedPrinter: true,
+          ),
+        );
+      }
     }
   }
 
@@ -104,7 +127,10 @@ class PrintingCubit extends Cubit<PrintingState> {
     required String? staffName,
     required String? invoiceNumber,
     required String? bookingTime,
+    required String? invoiceDate,
     required int? printCount,
+    required int? chairId,
+    String? endTime,
   }) async {
     if (state.connectedPrinter == null) {
       ToastHelper.showError("No printer connected");
@@ -121,6 +147,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     try {
       final bool openDrawer = _shouldOpenDrawer(request);
       await _printingRepo.printInvoice(
+        chairId: chairId,
         printer: state.connectedPrinter!,
         request: request,
         shopData: shopData,
@@ -129,6 +156,8 @@ class PrintingCubit extends Cubit<PrintingState> {
         staffName: staffName,
         invoiceNumber: invoiceNumber,
         bookingTime: bookingTime,
+        invoiceDate: invoiceDate,
+        endTime: endTime,
         copies: printCount ?? 1,
         openDrawer: openDrawer,
       );
@@ -311,6 +340,7 @@ class PrintingCubit extends Cubit<PrintingState> {
   @override
   Future<void> close() {
     _printerSubscription?.cancel();
+    _statusSubscription?.cancel();
     return super.close();
   }
 }

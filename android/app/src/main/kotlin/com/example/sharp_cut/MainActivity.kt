@@ -23,12 +23,14 @@ class MainActivity : FlutterActivity() {
     private val USB_CHANNEL = "com.example.sharp_cut/usb_printer"
     private val BLUETOOTH_CHANNEL = "com.example.sharp_cut/bluetooth_printer"
     private val NETWORK_CHANNEL = "com.example.sharp_cut/network_printer"
+    private val EVENT_CHANNEL = "com.example.sharp_cut/printer_status"
     
     private val ACTION_USB_PERMISSION = "com.example.sharp_cut.USB_PERMISSION"
 
     // USB Variables
     private lateinit var usbManager: UsbManager
     private var usbConnection: UsbDeviceConnection? = null
+    private var connectedUsbDevice: UsbDevice? = null
     private var usbInterface: UsbInterface? = null
     private var usbEndpoint: UsbEndpoint? = null
     private var pendingPermissionResult: MethodChannel.Result? = null
@@ -41,6 +43,8 @@ class MainActivity : FlutterActivity() {
     // Network Variables
     private var networkSocket: Socket? = null
     private var networkOutputStream: OutputStream? = null
+
+    private var eventSink: io.flutter.plugin.common.EventChannel.EventSink? = null
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -123,11 +127,28 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        // Event Channel for Status Updates
+        io.flutter.plugin.common.EventChannel(flutterEngine.dartExecutor.binaryMessenger, EVENT_CHANNEL).setStreamHandler(
+            object : io.flutter.plugin.common.EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: io.flutter.plugin.common.EventChannel.EventSink?) {
+                    eventSink = events
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    eventSink = null
+                }
+            }
+        )
+
         val filter = IntentFilter(ACTION_USB_PERMISSION)
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(usbReceiver, filter, Context.RECEIVER_EXPORTED)
+            registerReceiver(disconnectionReceiver, filter, Context.RECEIVER_EXPORTED)
         } else {
             registerReceiver(usbReceiver, filter)
+            registerReceiver(disconnectionReceiver, filter)
         }
     }
 
@@ -139,6 +160,9 @@ class MainActivity : FlutterActivity() {
         disconnectUsb()
         disconnectBluetooth()
         disconnectNetwork()
+        try {
+            unregisterReceiver(disconnectionReceiver)
+        } catch (_: Exception) {}
     }
 
     // -------------------------------------------------------------------------
@@ -197,6 +221,35 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    private val disconnectionReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                UsbManager.ACTION_USB_DEVICE_DETACHED -> {
+                    val device = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
+                    if (device != null && connectedUsbDevice != null) {
+                        if (device.deviceId == connectedUsbDevice?.deviceId) {
+                            disconnectUsb()
+                            runOnUiThread {
+                                eventSink?.success(mapOf("status" to "disconnected", "type" to "USB"))
+                            }
+                        }
+                    }
+                }
+                BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                    val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                    if (device != null && bluetoothSocket != null) {
+                        if (device.address == bluetoothSocket?.remoteDevice?.address) {
+                            disconnectBluetooth()
+                            runOnUiThread {
+                                eventSink?.success(mapOf("status" to "disconnected", "type" to "BLE"))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun openUsbDevice(device: UsbDevice, result: MethodChannel.Result) {
         try {
             var foundInterface: UsbInterface? = null
@@ -235,6 +288,7 @@ class MainActivity : FlutterActivity() {
             usbConnection = connection
             usbInterface = foundInterface
             usbEndpoint = foundEndpoint
+            connectedUsbDevice = device
             result.success(true)
 
         } catch (e: Exception) {
@@ -245,7 +299,29 @@ class MainActivity : FlutterActivity() {
     private fun printUsbData(data: ByteArray): Boolean {
         val conn = usbConnection ?: return false
         val ep = usbEndpoint ?: return false
-        return conn.bulkTransfer(ep, data, data.size, 5000) >= 0
+
+        val chunkSize = 16384 // 16KB chunks
+        var offset = 0
+
+        while (offset < data.size) {
+            val length = Math.min(chunkSize, data.size - offset)
+            val chunk = ByteArray(length)
+            System.arraycopy(data, offset, chunk, 0, length)
+
+            val result = conn.bulkTransfer(ep, chunk, length, 5000)
+            if (result < 0) {
+                return false // Transfer failed
+            }
+            
+            try {
+                Thread.sleep(5) // Small delay for safety
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
+            }
+            
+            offset += length
+        }
+        return true
     }
 
     private fun disconnectUsb() {
@@ -256,6 +332,7 @@ class MainActivity : FlutterActivity() {
         usbConnection = null
         usbInterface = null
         usbEndpoint = null
+        connectedUsbDevice = null
     }
 
     // -------------------------------------------------------------------------
