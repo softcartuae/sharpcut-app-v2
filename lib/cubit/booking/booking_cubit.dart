@@ -1,11 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
+import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class BookingCubit extends Cubit<BookingState> {
@@ -83,35 +83,28 @@ class BookingCubit extends Cubit<BookingState> {
       ),
     );
   }
-  
 
-Future<bool> reSettlePayment({
-  required ResettleModel resettleModel,
-}) async {
-  emit(BookingLoading());
+  Future<bool> reSettlePayment({required ResettleModel resettleModel}) async {
+    emit(BookingLoading());
 
-  final result = await bookingRepo.reSettlePayment(resettleModel);
-  
+    final result = await bookingRepo.reSettlePayment(resettleModel);
 
-  return result.fold(
-    (error) {
-      emit(BookingError(message: error));
-      return false;
-    },
-    (response) {
-      emit(
-        BookingPaymentSettled(
-          message: response.message ?? 'Payment settled',
-          response: response,
-        ),
-      );
-      return true;
-    },
-  );
-}
-
-
-
+    return result.fold(
+      (error) {
+        emit(BookingError(message: error));
+        return false;
+      },
+      (response) {
+        emit(
+          BookingPaymentSettled(
+            message: response.message ?? 'Payment settled',
+            response: response,
+          ),
+        );
+        return true;
+      },
+    );
+  }
 
   Future<void> settlePayment({
     required SettlePaymentRequestModel request,
@@ -129,6 +122,27 @@ Future<bool> reSettlePayment({
     );
   }
 
+  Future<void> updatePaymentMode({
+    required int paymentId,
+    required String mode,
+    required double amount,
+  }) async {
+    emit(BookingLoading());
+    final result = await bookingRepo.updatePaymentMode(
+      paymentId: paymentId,
+      mode: mode,
+      amount: amount,
+    );
+    result.fold(
+      (error) => emit(BookingError(message: error)),
+      (message) => emit(
+        BookingPaymentSettled(
+          message: message,
+          response: SettlePaymentResponseModel(success: true, message: message),
+        ),
+      ),
+    );
+  }
 
   void backToInitialState() {
     emit(BookingInitial());
