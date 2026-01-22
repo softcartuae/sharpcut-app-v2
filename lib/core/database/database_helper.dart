@@ -556,6 +556,18 @@ class DatabaseHelper {
         whereArgs: [transactionId],
       );
 
+      // 5. Fetch User (Staff) for this transaction
+      final userId = transactionData['user_id'] as int;
+      final userResult = await db.query(
+        'users',
+        where: 'id = ?',
+        whereArgs: [userId],
+      );
+
+      if (userResult.isNotEmpty) {
+        transactionData['user'] = userResult.first;
+      }
+
       // Construct BookingResponseModel-like map
       // Note: The caller is responsible for mapping this Map to the actual Model
       transactionData['details'] = servicesResult;
@@ -599,6 +611,18 @@ class DatabaseHelper {
       where: 'transaction_id = ?',
       whereArgs: [transactionId],
     );
+
+    // Fetch User (Staff)
+    final userId = transactionData['user_id'] as int;
+    final userResult = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+
+    if (userResult.isNotEmpty) {
+      transactionData['user'] = userResult.first;
+    }
 
     transactionData['details'] = servicesResult;
     transactionData['payments'] = paymentsResult;

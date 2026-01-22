@@ -43,19 +43,14 @@ class ChairRepoImpl implements ChairRepo {
           final chairWithTxn = await dbHelper.getChairWithActiveTransaction(
             chairId,
           );
-          if (chairWithTxn != null) {
+          if (chairWithTxn?["transaction"] != null) {
+            // Force status to occupied if transaction exists
+            chairWithTxn!["live_status"] = 'occupied';
             chairs.add(ChairModel.fromJson(chairWithTxn));
           } else {
             chairs.add(ChairModel.fromJson(chairData));
           }
         }
-
-        // Filter and map users based on is_admin or logic
-        // Since we saved them all in 'users' table, we need to distinguish
-        // For now, we'll just return all as staff/admin based on 'is_admin' flag if available
-        // or just load them.
-        // The original code separated users and admins from different API keys.
-        // In DB they are in one table.
 
         final staffs = <StaffModel>[];
         for (var user in localUsers) {
