@@ -246,22 +246,26 @@ class PrintingCubit extends Cubit<PrintingState> {
   }
 
   Future<void> loadPrinterSettings() async {
-    emit(state.copyWith(isLoading: true));
-    final result = await _printingRepo.getPrinterSettings();
-    result.fold(
-      (failure) {
-        log(failure);
-        emit(
-          state.copyWith(
-            isLoading: false,
-            errorMessage: "Failed to fetch printer settings",
-          ),
-        );
-      },
-      (settings) {
-        emit(state.copyWith(settings: settings, isLoading: false));
-      },
-    );
+    try {
+      emit(state.copyWith(isLoading: true));
+      final result = await _printingRepo.getPrinterSettings();
+      result.fold(
+        (failure) {
+          log(failure);
+          emit(
+            state.copyWith(
+              isLoading: false,
+              errorMessage: "Failed to fetch printer settings",
+            ),
+          );
+        },
+        (settings) {
+          emit(state.copyWith(settings: settings, isLoading: false));
+        },
+      );
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   Future<void> updatePrinterSettings(PrinterSettingsModel model) async {
