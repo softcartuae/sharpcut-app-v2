@@ -33,41 +33,72 @@ import 'package:sharp_cut/injection_container.dart' as di;
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation
-        .landscapeRight, // optional, remove if you want only upright
-  ]);
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation
+          .landscapeRight, // optional, remove if you want only upright
+    ]);
 
-  await di.init();
-  await ApiClient.init();
-  await Firebase.initializeApp();
-  await FirebaseApi().initNotifications();
-  Bloc.observer = SimpleBlocObserver();
-  runApp(
-    DevicePreview(
-      enabled: false,
-      builder: (context) => MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (_) => di.sl<ServiceCubit>()),
-          BlocProvider(create: (_) => di.sl<AuthCubit>()),
-          BlocProvider(create: (_) => di.sl<ChairCubit>()),
-          BlocProvider(create: (_) => di.sl<PasswordCubit>()),
-          BlocProvider(create: (_) => di.sl<BookingCubit>()),
-          BlocProvider(create: (_) => di.sl<ExpenseCubit>()),
-          BlocProvider(create: (_) => di.sl<BookingFormCubit>()),
-          BlocProvider(
-            create: (context) => di.sl<PrintingCubit>()..loadPrinterSettings(),
+    await di.init();
+    await ApiClient.init();
+
+    Bloc.observer = SimpleBlocObserver();
+    runApp(
+      DevicePreview(
+        enabled: false,
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => di.sl<ServiceCubit>()),
+            BlocProvider(create: (_) => di.sl<AuthCubit>()),
+            BlocProvider(create: (_) => di.sl<ChairCubit>()),
+            BlocProvider(create: (_) => di.sl<PasswordCubit>()),
+            BlocProvider(create: (_) => di.sl<BookingCubit>()),
+            BlocProvider(create: (_) => di.sl<ExpenseCubit>()),
+            BlocProvider(create: (_) => di.sl<BookingFormCubit>()),
+            BlocProvider(
+              create: (context) =>
+                  di.sl<PrintingCubit>()..loadPrinterSettings(),
+            ),
+            BlocProvider(create: (_) => di.sl<ReportCubit>()),
+            BlocProvider(create: (_) => di.sl<QuickReportCubit>()),
+            BlocProvider(create: (_) => di.sl<CashRegistoryCubit>()),
+          ],
+          child: MyApp(),
+        ), // Wrap your app
+      ),
+    );
+
+    Future.microtask(() async {
+      try {
+        await Firebase.initializeApp();
+        await FirebaseApi().initNotifications();
+        log("Firebase initilazation completed successfully");
+      } catch (e) {
+        log('Firebase skipped on this device: $e');
+      }
+    });
+  } catch (e, stackTrace) {
+    log('Initialization failed', error: e, stackTrace: stackTrace);
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          backgroundColor: Colors.red,
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Text(
+                'Initialization Failed:\n$e\n\n$stackTrace',
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
-          BlocProvider(create: (_) => di.sl<ReportCubit>()),
-          BlocProvider(create: (_) => di.sl<QuickReportCubit>()),
-          BlocProvider(create: (_) => di.sl<CashRegistoryCubit>()),
-        ],
-        child: MyApp(),
-      ), // Wrap your app
-    ),
-  );
+        ),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
