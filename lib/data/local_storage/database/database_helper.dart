@@ -188,7 +188,7 @@ class DatabaseHelper {
       where: 'chair_id = ? AND status = ?',
       whereArgs: [
         chairId,
-        'ongoing',
+        'Pending',
       ], // Assuming 'ongoing' is the active status
       orderBy: 'created_at DESC',
       limit: 1,

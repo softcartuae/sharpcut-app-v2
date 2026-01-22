@@ -25,7 +25,23 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
     required String password,
   }) async {
     try {
-     
+      final localUsers = await DatabaseHelper().getUsers();
+      final user = localUsers.firstWhere(
+        (element) => element['id'] == userId,
+        orElse: () => {},
+      );
+
+      if (user.isEmpty) {
+        return const Left("User not found.");
+      }
+
+      if (user['password'] == null) {
+        return const Left("Reset Password Required");
+      }
+
+      if (user['password'] != password) {
+        return const Left("Invalid password.");
+      }
       final lastOpen = await DatabaseHelper().getLastOpenCashRegister();
       if (lastOpen != null) {
         return const Left(
@@ -58,12 +74,38 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
     required bool isPrint,
   }) async {
     try {
+      final localUsers = await DatabaseHelper().getUsers();
+      final user = localUsers.firstWhere(
+        (element) => element['id'] == userId,
+        orElse: () => {},
+      );
+
+      if (user.isEmpty) {
+        return const Left("User not found.");
+      }
+
+      if (user['password'] == null) {
+        return const Left("Reset Password Required");
+      }
+
+      if (user['password'] != password) {
+        return const Left("Invalid password.");
+      }
+
       final lastOpen = await DatabaseHelper().getLastOpenCashRegister();
       if (lastOpen == null) {
         return const Left("No open register found.");
       }
 
       final registerId = lastOpen['id'] as int;
+
+      // Calculate totals before closing
+      final totals = await DatabaseHelper().calculateSalesTotal(registerId);
+      final totalSales = totals['total_sales'] ?? 0.0;
+      final cashSales = totals['cash_total'] ?? 0.0;
+      final count = (totals['count'] ?? 0).toInt();
+      final openingAmount = (lastOpen['opening_amount'] as num).toDouble();
+      final expectedClosing = openingAmount + cashSales;
       final updateData = {
         'closed_by': userId,
         'closed_by_type': role.name,
@@ -71,6 +113,9 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
         'closed_at': DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
         'is_synced': 0,
+        'total_sales': totalSales,
+        'expected_closing': expectedClosing,
+        'discrepancy': amount - expectedClosing,
       };
 
       await DatabaseHelper().closeCashRegister(registerId, updateData);
@@ -81,27 +126,15 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
         return const Left("Failed to retrieve closed register.");
       }
 
-      // Generate report data
-      final totals = await DatabaseHelper().calculateSalesTotal(registerId);
-      final totalSales = totals['total_sales'] ?? 0.0;
-      final cashSales = totals['cash_total'] ?? 0.0;
-      final count = (totals['count'] ?? 0).toInt();
-
-      final openingAmount = (closedRegister['opening_amount'] as num)
-          .toDouble();
-      final closingAmount = (closedRegister['closing_amount'] as num)
-          .toDouble();
-      final expectedClosing = openingAmount + cashSales;
-
       final report = CloseRegisterReportModel(
         openingAmount: openingAmount.toString(),
-        closingAmount: closingAmount,
+        closingAmount: amount,
         openedAt: closedRegister['opened_at'] as String,
         closedAt: closedRegister['closed_at'] as String,
         totalSalesAmount: totalSales,
         totalSalesCount: count,
         expectedClosingAmount: expectedClosing,
-        discrepancy: closingAmount - expectedClosing,
+        discrepancy: amount - expectedClosing,
         closedBy: closedRegister['closed_by'].toString(),
         openedBy: closedRegister['opened_by'].toString(),
         cashRegisterId: registerId,

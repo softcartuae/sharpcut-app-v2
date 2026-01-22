@@ -42,7 +42,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
         password TEXT,
-        role TEXT
+        role TEXT,
+        is_synced INTEGER DEFAULT 0
       )
     ''');
 
@@ -124,7 +125,10 @@ class DatabaseHelper {
         closed_at TEXT,
         created_at TEXT,
         updated_at TEXT,
-        is_synced INTEGER DEFAULT 0
+        is_synced INTEGER DEFAULT 0,
+        total_sales REAL,
+        expected_closing REAL,
+        discrepancy REAL
       )
     ''');
 
@@ -531,7 +535,7 @@ class DatabaseHelper {
     final transactionResult = await db.query(
       'transactions',
       where: 'chair_id = ? AND status = ?',
-      whereArgs: [chairId, 'ongoing'],
+      whereArgs: [chairId, 'Pending'],
       orderBy: 'created_at DESC',
       limit: 1,
     );
@@ -630,6 +634,63 @@ class DatabaseHelper {
     return transactionData;
   }
 
+  /// Sync a transaction from API to Local DB
+  /// This handles inserting/updating the transaction and replacing its services/payments
+  Future<void> syncTransaction({
+    required Map<String, dynamic> transactionData,
+    required List<Map<String, dynamic>> services,
+    required List<Map<String, dynamic>> payments,
+  }) async {
+    log("Syncing transaction ${transactionData['id']} to local DB");
+    final db = await database;
+    await db.transaction((txn) async {
+      final transactionId = transactionData['id'];
+
+      // 1. Upsert Transaction
+      // We use INSERT OR REPLACE to handle updates
+      await txn.insert(
+        'transactions',
+        transactionData,
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      // 2. Sync Services
+      // Delete existing services for this transaction
+      await txn.delete(
+        'transaction_services',
+        where: 'transaction_id = ?',
+        whereArgs: [transactionId],
+      );
+
+      // Insert new services
+      Batch serviceBatch = txn.batch();
+      for (var service in services) {
+        var serviceData = Map<String, dynamic>.from(service);
+        serviceData['transaction_id'] = transactionId;
+        serviceBatch.insert('transaction_services', serviceData);
+      }
+      await serviceBatch.commit(noResult: true);
+
+      // 3. Sync Payments
+      // Delete existing payments for this transaction
+      await txn.delete(
+        'transaction_payments',
+        where: 'transaction_id = ?',
+        whereArgs: [transactionId],
+      );
+
+      // Insert new payments
+      Batch paymentBatch = txn.batch();
+      for (var payment in payments) {
+        var paymentData = Map<String, dynamic>.from(payment);
+        paymentData['transaction_id'] = transactionId;
+        paymentBatch.insert('transaction_payments', paymentData);
+      }
+      await paymentBatch.commit(noResult: true);
+    });
+    log("Synced transaction ${transactionData['id']} successfully");
+  }
+
   // --- Generic Helper Methods for Viewer ---
   Future<List<String>> getTables() async {
     log("Fetching all table names");
@@ -714,14 +775,6 @@ class DatabaseHelper {
     log("Calculating sales total for register $cashRegisterId");
     final db = await database;
 
-    // Sum from transactions linked to this register (assuming we link them,
-    // but currently transactions table has cash_register_id)
-    // If transactions are not linked yet, we might need to query by time range,
-    // but let's assume they are linked or we query by time > opened_at.
-    // For now, let's query by cash_register_id if it's being populated,
-    // OR query transactions created after the register was opened.
-
-    // Let's first get the register to know when it was opened.
     final registerResult = await db.query(
       'cash_registers',
       where: 'id = ?',

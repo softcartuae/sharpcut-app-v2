@@ -31,12 +31,130 @@ class ChairRepoImpl implements ChairRepo {
   @override
   Future<({List<ChairModel> chairs, List<StaffModel> staffs})>
   getChairsAndStaffs() async {
-    log("getChairsAndStaffs caaled");
+    log("getChairsAndStaffs called");
+    try {
+      // 1. Try fetching from API
+      final response = await ApiClient.dio.get(
+        ApiClient.chairsApi,
+        queryParameters: {'users': true, 'is_synced': 0},
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final data = response.data['data'];
+        final List<dynamic> chairsJson = data['chairs'];
+        final List<dynamic> usersJson = data['users'];
+        final List<dynamic> adminJson = data['admins'];
+
+        // 2. Parse Data
+        final chairs = chairsJson
+            .map((json) => ChairModel.fromJson(json))
+            .toList();
+
+        final staffs = usersJson
+            .map((json) => StaffModel.fromJson(json, role: Role.staff))
+            .toList();
+
+        final admins = adminJson
+            .map((json) => StaffModel.fromJson(json, role: Role.admin))
+            .toList();
+        staffs.addAll(admins);
+
+        // 3. Save to Local DB (Sync)
+        try {
+          // Prepare Chairs for DB
+          final chairsForDb = chairsJson
+              .map((json) => json as Map<String, dynamic>)
+              .toList();
+          await dbHelper.insertChairs(chairsForDb);
+
+          // Prepare Users for DB
+          final usersForDb = <Map<String, dynamic>>[];
+          for (var user in usersJson) {
+            var userMap = user as Map<String, dynamic>;
+            userMap['role'] = 'staff';
+            usersForDb.add(userMap);
+          }
+          for (var admin in adminJson) {
+            var adminMap = admin as Map<String, dynamic>;
+            adminMap['role'] = 'admin';
+            usersForDb.add(adminMap);
+          }
+          await dbHelper.insertUsers(usersForDb);
+          // Sync Active Transactions
+          for (var chairJson in chairsJson) {
+            if (chairJson['transaction'] != null) {
+              try {
+                final transactionMap =
+                    chairJson['transaction'] as Map<String, dynamic>;
+
+                // Extract details (services) and payments
+                final details =
+                    (transactionMap['details'] as List<dynamic>?)
+                        ?.map((e) => e as Map<String, dynamic>)
+                        .toList() ??
+                    [];
+
+                final payments =
+                    (transactionMap['payments'] as List<dynamic>?)
+                        ?.map((e) => e as Map<String, dynamic>)
+                        .toList() ??
+                    [];
+
+                // Prepare transaction data for DB (remove nested lists/objects)
+                final transactionForDb = Map<String, dynamic>.from(
+                  transactionMap,
+                );
+                transactionForDb.remove('details');
+                transactionForDb.remove('payments');
+                transactionForDb.remove('user'); // If user object is nested
+                transactionForDb.remove('chair'); // If chair object is nested
+
+                // Ensure foreign keys are present (usually they are in API response)
+                // If not, we might need to take them from chairJson['id'] etc.
+                if (transactionForDb['chair_id'] == null) {
+                  transactionForDb['chair_id'] = chairJson['id'];
+                }
+
+                await dbHelper.syncTransaction(
+                  transactionData: transactionForDb,
+                  services: details,
+                  payments: payments,
+                );
+              } catch (e) {
+                log(
+                  "Failed to sync transaction for chair ${chairJson['id']}: $e",
+                );
+              }
+            }
+          }
+
+          log(
+            "Synced chairs, staff, and active transactions from API to Local DB",
+          );
+        } catch (dbError) {
+          log("Failed to sync data to local DB: $dbError");
+          // Continue returning API data even if sync fails, but ideally we want sync to work.
+        }
+
+        return (chairs: chairs, staffs: staffs);
+      } else {
+        log("API returned unsuccessful status, falling back to local DB");
+        throw Exception('API failed');
+      }
+    } catch (e) {
+      log("Failed to load from API: $e. Falling back to local DB.");
+      return await _getLocalChairsAndStaffs();
+    }
+  }
+
+  Future<({List<ChairModel> chairs, List<StaffModel> staffs})>
+  _getLocalChairsAndStaffs() async {
     try {
       final localChairs = await dbHelper.getChairs();
       final localUsers = await dbHelper.getUsers();
 
       if (localChairs.isNotEmpty || localUsers.isNotEmpty) {
+        
         final chairs = <ChairModel>[];
         for (var chairData in localChairs) {
           final chairId = chairData['id'] as int;
@@ -55,7 +173,7 @@ class ChairRepoImpl implements ChairRepo {
         final staffs = <StaffModel>[];
         for (var user in localUsers) {
           // Check if admin
-          final isAdmin = user['is_admin'] == 1 || user['is_admin'] == true;
+          final isAdmin = user['role'] == 'admin' || user['is_admin'] == 1;
           staffs.add(
             StaffModel.fromJson(user, role: isAdmin ? Role.admin : Role.staff),
           );

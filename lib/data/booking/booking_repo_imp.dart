@@ -19,11 +19,25 @@ class BookingRepoImp implements BookingRepo {
   }) async {
     try {
       // Offline-only implementation
+
+      final localUsers = await DatabaseHelper().getUsers();
+      final user = localUsers.firstWhere(
+        (element) => element['id'] == userId,
+      );
+
+      if (user['password'] == null) {
+        return const Left("Reset Password Required");
+      }
+
+      if (user['password'] != userPassword) {
+        return const Left("Invalid password.");
+      }
+
       final transactionData = {
         'chair_id': chairId,
         'user_id': userId,
         'transaction_date': DateTime.now().toIso8601String(),
-        'status': 'ongoing',
+        'status': 'Pending',
         'invoice_no': 'OFF-${DateTime.now().millisecondsSinceEpoch}',
         'invoice_date': DateTime.now().toIso8601String(),
         'app_id': 'OFFLINE',

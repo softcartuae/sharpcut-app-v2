@@ -7,7 +7,6 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
-import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
 
 Future<void> showPasswordForValidation(
   BuildContext context,
@@ -62,18 +61,7 @@ Future<void> showPasswordForValidation(
               } else if (state is PasswordValidationFailure) {
                 if (state.error == "RESET_REQUIRED") {
                   Navigator.of(context).pop(); // Close current dialog
-
-                  // Show Reset Password Dialog
-                  // We need to pass the selected staff if possible, but ResetPasswordDialog
-                  // allows selecting user. We should probably pre-select if we can,
-                  // but ResetPasswordDialog structure might need checking.
-                  // For now, just show the dialog.
-
-                  
-               
-
-                  // Actually, I should just call the dialog.
-                  // I need to import ResetPasswordDialog at the top of this file.
+                  ToastHelper.showError("Password Reset Required");
                 } else {
                   ToastHelper.showError(state.error);
                 }
