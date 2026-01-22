@@ -33,7 +33,7 @@ class ReportTableRow extends StatelessWidget {
       child: Row(
         children: [
           _buildDataCell("${index + 1}", width: 50),
-          _buildDataCell(transaction.transactionDate ?? "-", width: 100),
+          _buildDataCell(transaction.invoiceDate ?? "-", width: 100),
           _buildDataCell(transaction.invoiceNo ?? "-", width: 120),
           _buildDataCell(transaction.customerNumber ?? "-", width: 100),
           _buildDataCell(transaction.customerName ?? "-", width: 100),
@@ -42,7 +42,7 @@ class ReportTableRow extends StatelessWidget {
             width: 80,
           ),
           _buildDataCell(
-            transaction.totalPayment?.toStringAsFixed(2) ?? "0.00",
+             transaction.totalPayment?.toStringAsFixed(2) ?? "0.00",
             width: 80,
           ),
           _buildDataCell(
