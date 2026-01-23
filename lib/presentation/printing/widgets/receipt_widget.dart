@@ -134,50 +134,54 @@ class ReceiptWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Builder(
-                  builder: (context) {
-                    if (bookingTime == null) {
+                Expanded(
+                  child: Builder(
+                    builder: (context) {
+                      if (bookingTime == null) {
+                        return Text(
+                          'Start time : Unknown',
+                          style: GoogleFonts.marcellus(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        );
+                      }
+
+                      DateTime? dateTime;
+                      try {
+                        dateTime = DateFormat(
+                          'dd/MM/yyyy hh:mm a',
+                        ).parse(bookingTime!);
+                      } catch (e) {
+                        log("issue in parsing booking time");
+                        dateTime = DateTime.tryParse(bookingTime!);
+                      }
+
+                      final timeString = dateTime != null
+                          ? DateFormat('hh:mm a').format(dateTime)
+                          : bookingTime!;
+
                       return Text(
-                        'Start time : Unknown',
-                        style: GoogleFonts.marcellus(
+                        'Start time: $timeString',
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       );
-                    }
-
-                    DateTime? dateTime;
-                    try {
-                      dateTime = DateFormat(
-                        'dd/MM/yyyy hh:mm a',
-                      ).parse(bookingTime!);
-                    } catch (e) {
-                      log("issue in parsing booking time");
-                      dateTime = DateTime.tryParse(bookingTime!);
-                    }
-
-                    final timeString = dateTime != null
-                        ? DateFormat('hh:mm a').format(dateTime)
-                        : bookingTime!;
-
-                    return Text(
-                      'Start time : $timeString',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
 
-                Text(
-                  'End time : ${endTime ?? DateFormat('hh:mm a').format(DateTime.now())}',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                Expanded(
+                  child: Text(
+                    'End time: ${endTime ?? DateFormat('hh:mm a').format(DateTime.now())}',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ],
@@ -415,28 +419,38 @@ class ReceiptWidget extends StatelessWidget {
               'Net Amount - المبلغ الصافي',
               (request.finalTotal ?? 0).toStringAsFixed(2),
             ),
+            SizedBox(height: 3),
+            const DashedLine(),
+            const DashedLine(),
+            const DashedLine(),
+            const DashedLine(),
 
             // Payment Modes
             if (request.mode != null)
               ...List.generate(request.mode!.length, (index) {
                 return _buildTotalRow(
+                  balanceANdCard: true,
                   increesFontSize: true,
                   '${request.mode![index]} - نقدي',
                   (request.amount?[index] ?? 0).toStringAsFixed(2),
                 );
               }),
             _buildTotalRow(
+              balanceANdCard: true,
+              increesFontSize: true,
               'Balance Amount - الباقي',
               (balanceAmount.toStringAsFixed(2)),
             ),
             const SizedBox(height: 8),
             const DashedLine(),
             const DashedLine(),
+            const DashedLine(),
+            const DashedLine(),
             Text(
               isNotPaid ? 'UNPAID' : 'PAID',
               textAlign: TextAlign.center,
               style: GoogleFonts.marcellus(
-                fontSize: 22,
+                fontSize: 40,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -551,6 +565,7 @@ class ReceiptWidget extends StatelessWidget {
     String label,
     String value, {
     bool increesFontSize = false,
+    bool balanceANdCard = false,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -562,7 +577,7 @@ class ReceiptWidget extends StatelessWidget {
               label,
               textAlign: TextAlign.right,
               style: GoogleFonts.marcellus(
-                fontSize: increesFontSize ? 25 : 22,
+                fontSize: increesFontSize ? 27 : 23,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -575,7 +590,11 @@ class ReceiptWidget extends StatelessWidget {
               value,
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: increesFontSize ? 25 : 22,
+                fontSize: balanceANdCard
+                    ? 28
+                    : increesFontSize
+                    ? 25
+                    : 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),

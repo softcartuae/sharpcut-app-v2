@@ -23,6 +23,7 @@ class PrintingCubit extends Cubit<PrintingState> {
   PrintingCubit(this._printingRepo) : super(PrintingState()) {
     loadPrinterSettings();
     _listenToPrinterStatus();
+    getPrintingMode();
   }
 
   void _listenToPrinterStatus() {
@@ -246,22 +247,26 @@ class PrintingCubit extends Cubit<PrintingState> {
   }
 
   Future<void> loadPrinterSettings() async {
-    emit(state.copyWith(isLoading: true));
-    final result = await _printingRepo.getPrinterSettings();
-    result.fold(
-      (failure) {
-        log(failure);
-        emit(
-          state.copyWith(
-            isLoading: false,
-            errorMessage: "Failed to fetch printer settings",
-          ),
-        );
-      },
-      (settings) {
-        emit(state.copyWith(settings: settings, isLoading: false));
-      },
-    );
+    try {
+      emit(state.copyWith(isLoading: true));
+      final result = await _printingRepo.getPrinterSettings();
+      result.fold(
+        (failure) {
+          log(failure);
+          emit(
+            state.copyWith(
+              isLoading: false,
+              errorMessage: "Failed to fetch printer settings",
+            ),
+          );
+        },
+        (settings) {
+          emit(state.copyWith(settings: settings, isLoading: false));
+        },
+      );
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   Future<void> updatePrinterSettings(PrinterSettingsModel model) async {
@@ -335,6 +340,17 @@ class PrintingCubit extends Cubit<PrintingState> {
   Future<void> setPaperSize(Printer printer, PrinterPaperSize size) async {
     await _printingRepo.savePaperSize(printer, size);
     emit(state.copyWith(showPaperSizeDialog: false));
+  }
+
+  Future<void> getPrintingMode() async {
+    final isServerPrinting = await _printingRepo
+        .isPrintingFromServerSideOrNot();
+    emit(state.copyWith(isServerPrinting: isServerPrinting));
+  }
+
+  Future<void> togglePrintingMode(bool value) async {
+    await _printingRepo.settingPrintingToServerSide(isApiPrinter: value);
+    emit(state.copyWith(isServerPrinting: value));
   }
 
   @override

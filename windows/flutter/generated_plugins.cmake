@@ -3,7 +3,6 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  firebase_core
   flutter_thermal_printer
   permission_handler_windows
   universal_ble

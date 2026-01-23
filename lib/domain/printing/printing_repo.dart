@@ -57,4 +57,10 @@ abstract class PrintingRepo {
   Future<void> savePaperSize(Printer printer, PrinterPaperSize size);
   Future<PrinterPaperSize> getPaperSize(Printer printer);
   Future<bool> hasPaperSize(Printer printer);
+
+
+  Future<void> settingPrintingToServerSide({required bool isApiPrinter});
+  Future<bool> isPrintingFromServerSideOrNot();
+  
+
 }

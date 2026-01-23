@@ -26,7 +26,7 @@ Future<StaffModel?> showStaffSelectionDialog(
         backgroundColor: const Color(0xFF1E1E2C), // Dark background
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Container(
-          width: 500,
+          width: MediaQuery.of(context).size.width * 0.8  ,
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
