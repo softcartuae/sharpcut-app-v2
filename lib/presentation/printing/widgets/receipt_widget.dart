@@ -162,7 +162,7 @@ class ReceiptWidget extends StatelessWidget {
                         : bookingTime!;
 
                     return Text(
-                      'Start time : $timeString',
+                      'Start time: $timeString',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -173,7 +173,7 @@ class ReceiptWidget extends StatelessWidget {
                 ),
 
                 Text(
-                  'End time : ${endTime ?? DateFormat('hh:mm a').format(DateTime.now())}',
+                  'End time: ${endTime ?? DateFormat('hh:mm a').format(DateTime.now())}',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -426,6 +426,7 @@ class ReceiptWidget extends StatelessWidget {
                 );
               }),
             _buildTotalRow(
+              increesFontSize: true,
               'Balance Amount - الباقي',
               (balanceAmount.toStringAsFixed(2)),
             ),
@@ -436,7 +437,7 @@ class ReceiptWidget extends StatelessWidget {
               isNotPaid ? 'UNPAID' : 'PAID',
               textAlign: TextAlign.center,
               style: GoogleFonts.marcellus(
-                fontSize: 22,
+                fontSize: 40,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -562,7 +563,7 @@ class ReceiptWidget extends StatelessWidget {
               label,
               textAlign: TextAlign.right,
               style: GoogleFonts.marcellus(
-                fontSize: increesFontSize ? 25 : 22,
+                fontSize: increesFontSize ? 27 : 23,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),

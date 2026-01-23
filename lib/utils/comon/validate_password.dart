@@ -80,17 +80,27 @@ Future<void> showPasswordForValidation(
                         children: [
                           Align(
                             alignment: Alignment.center,
-                            child: Text(
-                              showAdminToo == true
-                                  ? "Select User"
-                                  : "Select Staff",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.rajdhani(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            child: preSelectedStaff != null
+                                ? Text(
+                                    preSelectedStaff.name,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.rajdhani(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                : Text(
+                                    showAdminToo == true
+                                        ? "Select User"
+                                        : "Select Staff",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.rajdhani(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
                           Align(
                             alignment: Alignment.centerRight,
@@ -113,52 +123,55 @@ Future<void> showPasswordForValidation(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               // Staff Dropdown
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.white.withAlpha(77),
+                              Visibility(
+                                visible: preSelectedStaff == null,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
                                   ),
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<StaffModel>(
-                                    value: selectedStaff,
-                                    dropdownColor: const Color(0xFF1E1E2C),
-                                    icon: const Icon(
-                                      Icons.arrow_drop_down,
-                                      color: Colors.white,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.white.withAlpha(77),
                                     ),
-                                    isExpanded: true,
-                                    // Disable dropdown if staff is pre-selected
-                                    onChanged: preSelectedStaff != null
-                                        ? null
-                                        : (StaffModel? newValue) {
-                                            setState(() {
-                                              selectedStaff = newValue;
-                                            });
-                                          },
-                                    hint: Text(
-                                      showAdminToo == true
-                                          ? "Select User"
-                                          : "Select Staff",
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<StaffModel>(
+                                      value: selectedStaff,
+                                      dropdownColor: const Color(0xFF1E1E2C),
+                                      icon: const Icon(
+                                        Icons.arrow_drop_down,
+                                        color: Colors.white,
+                                      ),
+                                      isExpanded: true,
+                                      // Disable dropdown if staff is pre-selected
+                                      onChanged: preSelectedStaff != null
+                                          ? null
+                                          : (StaffModel? newValue) {
+                                              setState(() {
+                                                selectedStaff = newValue;
+                                              });
+                                            },
+                                      hint: Text(
+                                        showAdminToo == true
+                                            ? "Select User"
+                                            : "Select Staff",
+                                        style: GoogleFonts.rajdhani(
+                                          color: Colors.white.withAlpha(179),
+                                          fontSize: 16,
+                                        ),
+                                      ),
                                       style: GoogleFonts.rajdhani(
-                                        color: Colors.white.withAlpha(179),
+                                        color: Colors.white,
                                         fontSize: 16,
                                       ),
+                                      items: staffList.map((StaffModel staff) {
+                                        return DropdownMenuItem<StaffModel>(
+                                          value: staff,
+                                          child: Text(staff.name),
+                                        );
+                                      }).toList(),
                                     ),
-                                    style: GoogleFonts.rajdhani(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                    ),
-                                    items: staffList.map((StaffModel staff) {
-                                      return DropdownMenuItem<StaffModel>(
-                                        value: staff,
-                                        child: Text(staff.name),
-                                      );
-                                    }).toList(),
                                   ),
                                 ),
                               ),

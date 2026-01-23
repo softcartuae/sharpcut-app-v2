@@ -28,7 +28,7 @@ class ReportTableRow extends StatelessWidget {
       height: 60,
       decoration: BoxDecoration(
         color: index % 2 == 0 ? Colors.white : Colors.grey[50],
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        border: Border(bottom: BorderSide(color: Colors.black)),
       ),
       child: Row(
         children: [
@@ -42,7 +42,7 @@ class ReportTableRow extends StatelessWidget {
             width: 80,
           ),
           _buildDataCell(
-             transaction.totalPayment?.toStringAsFixed(2) ?? "0.00",
+            transaction.totalPayment?.toStringAsFixed(2) ?? "0.00",
             width: 80,
           ),
           _buildDataCell(
