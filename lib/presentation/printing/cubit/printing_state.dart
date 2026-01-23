@@ -20,6 +20,7 @@ class PrintingState {
   final PrinterSettingsModel? settings;
   final bool isLoading;
   final bool showPaperSizeDialog;
+  final bool isServerPrinting;
 
   PrintingState({
     this.status = PrintingStatus.initial,
@@ -30,6 +31,7 @@ class PrintingState {
     this.settings,
     this.isLoading = false,
     this.showPaperSizeDialog = false,
+    this.isServerPrinting = false,
   });
 
   PrintingState copyWith({
@@ -42,6 +44,7 @@ class PrintingState {
     bool? isLoading,
     bool? showPaperSizeDialog,
     bool clearConnectedPrinter = false,
+    bool? isServerPrinting,
   }) {
     return PrintingState(
       status: status ?? this.status,
@@ -54,6 +57,7 @@ class PrintingState {
       settings: settings ?? this.settings,
       isLoading: isLoading ?? this.isLoading,
       showPaperSizeDialog: showPaperSizeDialog ?? this.showPaperSizeDialog,
+      isServerPrinting: isServerPrinting ?? this.isServerPrinting,
     );
   }
 }

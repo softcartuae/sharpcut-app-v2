@@ -571,4 +571,16 @@ class PrintingRepoImp implements PrintingRepo {
         "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
     return prefs.containsKey(key);
   }
+
+  @override
+  Future<void> settingPrintingToServerSide({required bool isApiPrinter}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("is_server_printing", isApiPrinter);
+  }
+
+  @override
+  Future<bool> isPrintingFromServerSideOrNot() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool("is_server_printing") ?? false;
+  }
 }

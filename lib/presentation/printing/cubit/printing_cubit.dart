@@ -23,6 +23,7 @@ class PrintingCubit extends Cubit<PrintingState> {
   PrintingCubit(this._printingRepo) : super(PrintingState()) {
     loadPrinterSettings();
     _listenToPrinterStatus();
+    getPrintingMode();
   }
 
   void _listenToPrinterStatus() {
@@ -339,6 +340,17 @@ class PrintingCubit extends Cubit<PrintingState> {
   Future<void> setPaperSize(Printer printer, PrinterPaperSize size) async {
     await _printingRepo.savePaperSize(printer, size);
     emit(state.copyWith(showPaperSizeDialog: false));
+  }
+
+  Future<void> getPrintingMode() async {
+    final isServerPrinting = await _printingRepo
+        .isPrintingFromServerSideOrNot();
+    emit(state.copyWith(isServerPrinting: isServerPrinting));
+  }
+
+  Future<void> togglePrintingMode(bool value) async {
+    await _printingRepo.settingPrintingToServerSide(isApiPrinter: value);
+    emit(state.copyWith(isServerPrinting: value));
   }
 
   @override

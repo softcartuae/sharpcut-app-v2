@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:sharp_cut/presentation/printing/screens/test_receipt_screen.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
@@ -33,11 +34,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    // await SystemChrome.setPreferredOrientations([
-    //   DeviceOrientation.landscapeLeft,
-    //   DeviceOrientation
-    //       .landscapeRight, // optional, remove if you want only upright
-    // ]);
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation
+          .landscapeRight, // optional, remove if you want only upright
+    ]);
 
     await di.init();
     await ApiClient.init();

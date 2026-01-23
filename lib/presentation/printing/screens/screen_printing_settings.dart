@@ -164,6 +164,16 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                       ),
                                     ),
                                   ),
+
+                                _buildSwitchTile(
+                                  title: "Print from Server",
+                                  value: state.isServerPrinting,
+                                  onChanged: (val) {
+                                    context
+                                        .read<PrintingCubit>()
+                                        .togglePrintingMode(val);
+                                  },
+                                ),
                               ],
                             ),
                           ),
