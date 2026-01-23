@@ -28,7 +28,7 @@ class ReportTableRow extends StatelessWidget {
       height: 60,
       decoration: BoxDecoration(
         color: index % 2 == 0 ? Colors.white : Colors.grey[50],
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        border: Border(bottom: BorderSide(color: Colors.black)),
       ),
       child: Row(
         children: [

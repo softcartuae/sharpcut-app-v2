@@ -44,7 +44,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
   StaffModel? _selectedStaff;
   bool _obscurePassword = true;
   double _balance = 0.0;
-  bool _printReceipt = false;
+  bool _printReceipt = true;
 
   @override
   void initState() {

@@ -51,7 +51,7 @@ Future<void> showPasswordDialoge(
                         alignment: Alignment.center,
                         children: [
                           Text(
-                            "Enter Password",
+                            staff.name,
                             style: GoogleFonts.rajdhani(
                               color: Colors.white,
                               fontSize: 24,

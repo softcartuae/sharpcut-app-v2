@@ -3,8 +3,11 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+<<<<<<< HEAD
   connectivity_plus
   firebase_core
+=======
+>>>>>>> 04852cd (??)
   flutter_thermal_printer
   permission_handler_windows
   universal_ble
