@@ -211,10 +211,9 @@ class PrintingRepoImp implements PrintingRepo {
         log(e.toString());
       }
 
-      // Create the widget
+   
       final double targetWidth = paperSize.widthInPixels.toDouble();
 
-      // Create the receipt widget
       final receiptWidget = MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
@@ -243,29 +242,24 @@ class PrintingRepoImp implements PrintingRepo {
           ),
         ),
       );
-      // Calculate estimated height
-      // Base height (Header + Footer) ~ 1000
-      // Per item ~ 100 (allowing for wrapping text)
+   
       double estimatedHeight = 1500 + (cartItems.length * 100.0);
 
-      // Capture the widget as an image
       final ScreenshotController screenshotController = ScreenshotController();
       final Uint8List capturedImage = await screenshotController
           .captureFromWidget(
             receiptWidget,
             delay: const Duration(milliseconds: 100),
-            pixelRatio: 1.0, // Reduced to avoid buffer overflow
+            pixelRatio: 1.0, 
             targetSize: Size(
               targetWidth,
               estimatedHeight,
-            ), // Ensure height is sufficient
+            ), 
           );
 
-      // Decode the image for the printer
       final img.Image? image = img.decodePng(capturedImage);
 
       if (image != null) {
-        // Resize to paper width
         final img.Image resizedImage = img.copyResize(
           image,
           width: paperSize.widthInPixels,
@@ -277,11 +271,9 @@ class PrintingRepoImp implements PrintingRepo {
       bytes.addAll(generator.feed(2));
       bytes.addAll(generator.cut());
 
-      // Loop 'copies' times
       for (int i = 0; i < copies; i++) {
         await _printBytes(printer, Uint8List.fromList(bytes));
 
-        // Optional: Add a small delay between copies to prevent printer buffer overflow
         if (i < copies - 1) {
           await Future.delayed(const Duration(milliseconds: 500));
         }
