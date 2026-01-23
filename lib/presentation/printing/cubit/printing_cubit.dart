@@ -162,7 +162,7 @@ class PrintingCubit extends Cubit<PrintingState> {
           emit(
             state.copyWith(status: PrintingStatus.error, errorMessage: failure),
           );
-          ToastHelper.showError(failure);
+          ToastHelper.showError("Printing failed");
         },
         (_) {
           emit(state.copyWith(status: PrintingStatus.printed));
