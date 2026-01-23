@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
@@ -60,10 +59,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
               builder: (context) => const PaperWidthSelectionDialog(),
             ).then((size) {
               if (size != null && context.mounted) {
-                context.read<PrintingCubit>().setPaperSize(
-                  state.connectedPrinter!,
-                  size,
-                );
+                context.read<PrintingCubit>().setPaperSize(size);
               }
             });
           }
@@ -165,20 +161,150 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                     ),
                                   ),
 
-                                // _buildSwitchTile(
-                                //   title: "Print from Server",
-                                //   value: state.isServerPrinting,
-                                //   onChanged: (val) {
-                                //     context
-                                //         .read<PrintingCubit>()
-                                //         .togglePrintingMode(val);
-                                //   },
-                                // ),
+                                _buildSwitchTile(
+                                  title: "Print from Server",
+                                  value: state.isServerPrinting,
+                                  onChanged: (val) {
+                                    context
+                                        .read<PrintingCubit>()
+                                        .togglePrintingMode(val);
+                                  },
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 50.0,
+                                    vertical: 8.0,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Paper Size: ${state.currentPaperSize?.name ?? 'Not Set'}",
+                                        style: GoogleFonts.rajdhani(
+                                          color: Colors.black87,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          showDialog<PrinterPaperSize>(
+                                            context: context,
+                                            builder: (context) =>
+                                                const PaperWidthSelectionDialog(),
+                                          ).then((size) {
+                                            if (size != null &&
+                                                context.mounted) {
+                                              context
+                                                  .read<PrintingCubit>()
+                                                  .setPaperSize(size);
+                                            }
+                                          });
+                                        },
+                                        child: Text(
+                                          "Change Size",
+                                          style: GoogleFonts.rajdhani(
+                                            color: AppColors.violetNormal,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                         ),
                         const SizedBox(height: 24),
+                        if (state.isServerPrinting) ...[
+                          Text(
+                            "Server Printers",
+                            style: GoogleFonts.rajdhani(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const Divider(height: 24, thickness: 1),
+                          if (state.isFetchingServerPrinters)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  color: AppColors.violetNormal,
+                                ),
+                              ),
+                            )
+                          else if (state.serverPrinters.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                "No server printers found.",
+                                style: GoogleFonts.rajdhani(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            )
+                          
+                          else
+                            ...state.serverPrinters.map((printer) {
+                              final isSelected =
+                                  state.selectedServerPrinter?.name ==
+                                      printer.name;
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                color: isSelected
+                                    ? AppColors.violetLightActive
+                                    : Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? AppColors.violetNormal
+                                        : Colors.grey.shade300,
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                ),
+                                child: ListTile(
+                                  onTap: () {
+                                    context
+                                        .read<PrintingCubit>()
+                                        .selectServerPrinter(printer);
+                                  },
+                                  leading: Icon(
+                                    Icons.print,
+                                    color: isSelected
+                                        ? AppColors.violetNormal
+                                        : Colors.grey,
+                                  ),
+                                  title: Text(
+                                    printer.name ?? "Unknown Printer",
+                                    style: GoogleFonts.rajdhani(
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      color: isSelected
+                                          ? AppColors.violetNormal
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    "Width: ${printer.width ?? 'Default'}",
+                                  ),
+                                  trailing: isSelected
+                                      ? const Icon(
+                                          Icons.check_circle,
+                                          color: AppColors.violetNormal,
+                                        )
+                                      : null,
+                                ),
+                              );
+                            }),
+                          const SizedBox(height: 24),
+                        ],
 
                         // Scan Button (USB)
                         Card(

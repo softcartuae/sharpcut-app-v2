@@ -18,6 +18,7 @@ import 'package:sharp_cut/domain/printing/printing_repo.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
+import 'package:sharp_cut/domain/printing/model/server_printer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:sharp_cut/data/printing/service/printing_service.dart';
@@ -199,7 +200,7 @@ class PrintingRepoImp implements PrintingRepo {
   }) async {
     try {
       final profile = await CapabilityProfile.load();
-      final paperSize = await getPaperSize(printer);
+      final paperSize = await getPaperSize();
       final generator = Generator(paperSize.generatorPaperSize, profile);
       List<int> bytes = [];
 
@@ -211,7 +212,6 @@ class PrintingRepoImp implements PrintingRepo {
         log(e.toString());
       }
 
-   
       final double targetWidth = paperSize.widthInPixels.toDouble();
 
       final receiptWidget = MediaQuery(
@@ -242,7 +242,7 @@ class PrintingRepoImp implements PrintingRepo {
           ),
         ),
       );
-   
+
       double estimatedHeight = 1500 + (cartItems.length * 100.0);
 
       final ScreenshotController screenshotController = ScreenshotController();
@@ -250,11 +250,8 @@ class PrintingRepoImp implements PrintingRepo {
           .captureFromWidget(
             receiptWidget,
             delay: const Duration(milliseconds: 100),
-            pixelRatio: 1.0, 
-            targetSize: Size(
-              targetWidth,
-              estimatedHeight,
-            ), 
+            pixelRatio: 1.0,
+            targetSize: Size(targetWidth, estimatedHeight),
           );
 
       final img.Image? image = img.decodePng(capturedImage);
@@ -291,7 +288,7 @@ class PrintingRepoImp implements PrintingRepo {
     bool openDrawer = false,
   }) async {
     final profile = await CapabilityProfile.load();
-    final paperSize = await getPaperSize(printer);
+    final paperSize = await getPaperSize();
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
     log("called in quick report");
@@ -391,7 +388,7 @@ class PrintingRepoImp implements PrintingRepo {
     bool openDrawer = false,
   }) async {
     final profile = await CapabilityProfile.load();
-    final paperSize = await getPaperSize(printer);
+    final paperSize = await getPaperSize();
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
 
@@ -517,7 +514,7 @@ class PrintingRepoImp implements PrintingRepo {
   @override
   Future<void> testPrint(Printer printer) async {
     final profile = await CapabilityProfile.load();
-    final paperSize = await getPaperSize(printer);
+    final paperSize = await getPaperSize();
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
 
@@ -534,18 +531,16 @@ class PrintingRepoImp implements PrintingRepo {
   }
 
   @override
-  Future<void> savePaperSize(Printer printer, PrinterPaperSize size) async {
+  Future<void> savePaperSize(PrinterPaperSize size) async {
     final prefs = await SharedPreferences.getInstance();
-    final key =
-        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    final key = "printer_size";
     await prefs.setString(key, size.name);
   }
 
   @override
-  Future<PrinterPaperSize> getPaperSize(Printer printer) async {
+  Future<PrinterPaperSize> getPaperSize() async {
     final prefs = await SharedPreferences.getInstance();
-    final key =
-        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    final key = "printer_size";
     final sizeName = prefs.getString(key);
     if (sizeName != null) {
       return PrinterPaperSize.values.firstWhere(
@@ -557,10 +552,9 @@ class PrintingRepoImp implements PrintingRepo {
   }
 
   @override
-  Future<bool> hasPaperSize(Printer printer) async {
+  Future<bool> hasPaperSize() async {
     final prefs = await SharedPreferences.getInstance();
-    final key =
-        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    final key = "printer_size";
     return prefs.containsKey(key);
   }
 
@@ -574,5 +568,47 @@ class PrintingRepoImp implements PrintingRepo {
   Future<bool> isPrintingFromServerSideOrNot() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool("is_server_printing") ?? false;
+  }
+
+  @override
+  Future<Either<String, List<ServerPrinter>>> getServerPrinters({
+    int? width,
+  }) async {
+    try {
+      final response = await _printingService.getServerPrinters();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> printers = response.data['printers'];
+        final serverPrinters = printers
+            .map((name) => ServerPrinter(name: name.toString(), width: width))
+            .toList();
+        return Right(serverPrinters);
+      } else {
+        return Left(response.data['message'] ?? "Failed to fetch printers");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> printServerInvoice({
+    required int transactionId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printInvoice(
+        transactionId: transactionId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(response.data['message'] ?? "Failed to print invoice");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
   }
 }

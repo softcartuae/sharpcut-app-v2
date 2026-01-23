@@ -15,4 +15,22 @@ class PrintingService {
       data: model.toJson(),
     );
   }
+
+  Future<Response> getServerPrinters() async {
+    return await ApiClient.dio.get(ApiClient.printerListApi);
+  }
+
+  Future<Response> printInvoice({
+    required int transactionId,
+    required String printerName,
+    required int size,
+  }) async {
+    return await ApiClient.dio.post(
+      ApiClient.printInvoiceApi,
+      data: {
+        "transaction_id": transactionId,
+        "printer": {"name": printerName, "size": size},
+      },
+    );
+  }
 }
