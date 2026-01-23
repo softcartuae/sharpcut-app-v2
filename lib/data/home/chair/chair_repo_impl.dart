@@ -80,6 +80,38 @@ class ChairRepoImpl implements ChairRepo {
             usersForDb.add(adminMap);
           }
           await dbHelper.insertUsers(usersForDb);
+
+          // Sync Acknowledgement
+          try {
+            final chairIds = chairsJson.map((e) => e['id']).toList();
+            log("chair ids $chairIds");
+            if (chairIds.isNotEmpty) {
+              await ApiClient.dio.post(
+                ApiClient.chairsSyncApi,
+                data: {'chairs': chairIds},
+              );
+            }
+
+            final staffIds = usersJson.map((e) => e['id']).toList();
+            log("staff ids $staffIds");
+            if (staffIds.isNotEmpty) {
+              await ApiClient.dio.post(
+                ApiClient.usersStaffSyncApi,
+                data: {'users': staffIds},
+              );
+            }
+
+            final adminIds = adminJson.map((e) => e['id']).toList();
+            log("admin ids $adminIds");
+            if (adminIds.isNotEmpty) {
+              await ApiClient.dio.post(
+                ApiClient.usersAdminSyncApi,
+                data: {'users': adminIds},
+              );
+            }
+          } catch (e) {
+            log("Failed to acknowledge sync: $e");
+          }
           // Sync Active Transactions
           for (var chairJson in chairsJson) {
             if (chairJson['transaction'] != null) {
@@ -136,7 +168,7 @@ class ChairRepoImpl implements ChairRepo {
           // Continue returning API data even if sync fails, but ideally we want sync to work.
         }
 
-        return (chairs: chairs, staffs: staffs);
+        return await _getLocalChairsAndStaffs();
       } else {
         log("API returned unsuccessful status, falling back to local DB");
         throw Exception('API failed');
@@ -154,7 +186,6 @@ class ChairRepoImpl implements ChairRepo {
       final localUsers = await dbHelper.getUsers();
 
       if (localChairs.isNotEmpty || localUsers.isNotEmpty) {
-        
         final chairs = <ChairModel>[];
         for (var chairData in localChairs) {
           final chairId = chairData['id'] as int;
