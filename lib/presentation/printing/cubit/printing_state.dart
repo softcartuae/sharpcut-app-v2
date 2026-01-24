@@ -21,6 +21,10 @@ class PrintingState {
   final bool isLoading;
   final bool showPaperSizeDialog;
   final bool isServerPrinting;
+  final PrinterPaperSize? currentPaperSize;
+  final List<ServerPrinter> serverPrinters;
+  final bool isFetchingServerPrinters;
+  final ServerPrinter? selectedServerPrinter;
 
   PrintingState({
     this.status = PrintingStatus.initial,
@@ -32,6 +36,10 @@ class PrintingState {
     this.isLoading = false,
     this.showPaperSizeDialog = false,
     this.isServerPrinting = false,
+    this.currentPaperSize,
+    this.serverPrinters = const [],
+    this.isFetchingServerPrinters = false,
+    this.selectedServerPrinter,
   });
 
   PrintingState copyWith({
@@ -45,6 +53,10 @@ class PrintingState {
     bool? showPaperSizeDialog,
     bool clearConnectedPrinter = false,
     bool? isServerPrinting,
+    PrinterPaperSize? currentPaperSize,
+    List<ServerPrinter>? serverPrinters,
+    bool? isFetchingServerPrinters,
+    ServerPrinter? selectedServerPrinter,
   }) {
     return PrintingState(
       status: status ?? this.status,
@@ -58,6 +70,12 @@ class PrintingState {
       isLoading: isLoading ?? this.isLoading,
       showPaperSizeDialog: showPaperSizeDialog ?? this.showPaperSizeDialog,
       isServerPrinting: isServerPrinting ?? this.isServerPrinting,
+      currentPaperSize: currentPaperSize ?? this.currentPaperSize,
+      serverPrinters: serverPrinters ?? this.serverPrinters,
+      isFetchingServerPrinters:
+          isFetchingServerPrinters ?? this.isFetchingServerPrinters,
+      selectedServerPrinter:
+          selectedServerPrinter ?? this.selectedServerPrinter,
     );
   }
 }

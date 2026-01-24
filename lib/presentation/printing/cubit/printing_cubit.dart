@@ -12,6 +12,7 @@ import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
+import 'package:sharp_cut/domain/printing/model/server_printer.dart';
 
 part 'printing_state.dart';
 
@@ -24,6 +25,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     loadPrinterSettings();
     _listenToPrinterStatus();
     getPrintingMode();
+    getPaperSize();
   }
 
   void _listenToPrinterStatus() {
@@ -69,7 +71,7 @@ class PrintingCubit extends Cubit<PrintingState> {
 
       final isConnected = await _printingRepo.connect(printer);
       if (isConnected) {
-        final hasPaperSize = await _printingRepo.hasPaperSize(printer);
+        final hasPaperSize = await _printingRepo.hasPaperSize();
         emit(
           state.copyWith(
             status: PrintingStatus.connected,
@@ -120,6 +122,10 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
   }
 
+  void selectServerPrinter(ServerPrinter printer) {
+    emit(state.copyWith(selectedServerPrinter: printer));
+  }
+
   Future<void> printInvoice({
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
@@ -133,6 +139,41 @@ class PrintingCubit extends Cubit<PrintingState> {
     required int? chairId,
     String? endTime,
   }) async {
+    if (state.isServerPrinting) {
+      if (state.selectedServerPrinter == null) {
+        ToastHelper.showError("Please select a server printer");
+        return;
+      }
+
+      if (state.currentPaperSize == null) {
+        ToastHelper.showError("Please select a paper size");
+        return;
+      }
+
+      emit(state.copyWith(status: PrintingStatus.printing));
+      final result = await _printingRepo.printServerInvoice(
+        transactionId: request.transactionId!,
+        printerName: state.selectedServerPrinter!.name!,
+        size: state.currentPaperSize!.widthInPixels,
+      );
+
+      result.fold(
+        (failure) {
+          emit(
+            state.copyWith(status: PrintingStatus.error, errorMessage: failure),
+          );
+          ToastHelper.showError(failure);
+        },
+        (_) {
+          emit(state.copyWith(status: PrintingStatus.printed));
+          ToastHelper.showSuccess(
+            "Printing from server: ${state.selectedServerPrinter?.name}",
+          );
+        },
+      );
+      return;
+    }
+
     if (state.connectedPrinter == null) {
       ToastHelper.showError("No printer connected");
       emit(
@@ -337,20 +378,57 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
   }
 
-  Future<void> setPaperSize(Printer printer, PrinterPaperSize size) async {
-    await _printingRepo.savePaperSize(printer, size);
-    emit(state.copyWith(showPaperSizeDialog: false));
+  Future<void> setPaperSize(PrinterPaperSize size) async {
+    await _printingRepo.savePaperSize(size);
+    emit(state.copyWith(showPaperSizeDialog: false, currentPaperSize: size));
+  }
+
+  Future<void> getPaperSize() async {
+    final size = await _printingRepo.getPaperSize();
+    emit(state.copyWith(currentPaperSize: size));
   }
 
   Future<void> getPrintingMode() async {
     final isServerPrinting = await _printingRepo
         .isPrintingFromServerSideOrNot();
     emit(state.copyWith(isServerPrinting: isServerPrinting));
+    if (isServerPrinting) {
+      fetchServerPrinters();
+    }
   }
 
   Future<void> togglePrintingMode(bool value) async {
     await _printingRepo.settingPrintingToServerSide(isApiPrinter: value);
     emit(state.copyWith(isServerPrinting: value));
+    if (value) {
+      fetchServerPrinters();
+    }
+  }
+
+  Future<void> fetchServerPrinters() async {
+    emit(state.copyWith(isFetchingServerPrinters: true));
+    final result = await _printingRepo.getServerPrinters(
+      width: state.currentPaperSize?.widthInPixels,
+    );
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            isFetchingServerPrinters: false,
+            errorMessage: failure,
+          ),
+        );
+        ToastHelper.showError(failure);
+      },
+      (printers) {
+        emit(
+          state.copyWith(
+            isFetchingServerPrinters: false,
+            serverPrinters: printers,
+          ),
+        );
+      },
+    );
   }
 
   @override
