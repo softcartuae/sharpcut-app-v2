@@ -50,6 +50,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
       final token = await tokenStorage.getToken();
       if (token != null) {
         await getUser();
+        await authRepo.getInvoiceSettings();
       } else {
         emit(AuthUnauthenticated());
       }

@@ -18,6 +18,7 @@ import 'package:sharp_cut/domain/printing/printing_repo.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
+import 'package:sharp_cut/domain/printing/model/server_printer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:sharp_cut/data/printing/service/printing_service.dart';
@@ -199,7 +200,7 @@ class PrintingRepoImp implements PrintingRepo {
   }) async {
     try {
       final profile = await CapabilityProfile.load();
-      final paperSize = await getPaperSize(printer);
+      final paperSize = await getPaperSize();
       final generator = Generator(paperSize.generatorPaperSize, profile);
       List<int> bytes = [];
 
@@ -211,10 +212,8 @@ class PrintingRepoImp implements PrintingRepo {
         log(e.toString());
       }
 
-      // Create the widget
       final double targetWidth = paperSize.widthInPixels.toDouble();
 
-      // Create the receipt widget
       final receiptWidget = MediaQuery(
         data: const MediaQueryData(),
         child: Directionality(
@@ -243,29 +242,21 @@ class PrintingRepoImp implements PrintingRepo {
           ),
         ),
       );
-      // Calculate estimated height
-      // Base height (Header + Footer) ~ 1000
-      // Per item ~ 100 (allowing for wrapping text)
+
       double estimatedHeight = 1500 + (cartItems.length * 100.0);
 
-      // Capture the widget as an image
       final ScreenshotController screenshotController = ScreenshotController();
       final Uint8List capturedImage = await screenshotController
           .captureFromWidget(
             receiptWidget,
             delay: const Duration(milliseconds: 100),
-            pixelRatio: 1.0, // Reduced to avoid buffer overflow
-            targetSize: Size(
-              targetWidth,
-              estimatedHeight,
-            ), // Ensure height is sufficient
+            pixelRatio: 1.0,
+            targetSize: Size(targetWidth, estimatedHeight),
           );
 
-      // Decode the image for the printer
       final img.Image? image = img.decodePng(capturedImage);
 
       if (image != null) {
-        // Resize to paper width
         final img.Image resizedImage = img.copyResize(
           image,
           width: paperSize.widthInPixels,
@@ -277,11 +268,9 @@ class PrintingRepoImp implements PrintingRepo {
       bytes.addAll(generator.feed(2));
       bytes.addAll(generator.cut());
 
-      // Loop 'copies' times
       for (int i = 0; i < copies; i++) {
         await _printBytes(printer, Uint8List.fromList(bytes));
 
-        // Optional: Add a small delay between copies to prevent printer buffer overflow
         if (i < copies - 1) {
           await Future.delayed(const Duration(milliseconds: 500));
         }
@@ -299,7 +288,7 @@ class PrintingRepoImp implements PrintingRepo {
     bool openDrawer = false,
   }) async {
     final profile = await CapabilityProfile.load();
-    final paperSize = await getPaperSize(printer);
+    final paperSize = await getPaperSize();
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
     log("called in quick report");
@@ -399,7 +388,7 @@ class PrintingRepoImp implements PrintingRepo {
     bool openDrawer = false,
   }) async {
     final profile = await CapabilityProfile.load();
-    final paperSize = await getPaperSize(printer);
+    final paperSize = await getPaperSize();
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
 
@@ -525,7 +514,7 @@ class PrintingRepoImp implements PrintingRepo {
   @override
   Future<void> testPrint(Printer printer) async {
     final profile = await CapabilityProfile.load();
-    final paperSize = await getPaperSize(printer);
+    final paperSize = await getPaperSize();
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
 
@@ -542,18 +531,16 @@ class PrintingRepoImp implements PrintingRepo {
   }
 
   @override
-  Future<void> savePaperSize(Printer printer, PrinterPaperSize size) async {
+  Future<void> savePaperSize(PrinterPaperSize size) async {
     final prefs = await SharedPreferences.getInstance();
-    final key =
-        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    final key = "printer_size";
     await prefs.setString(key, size.name);
   }
 
   @override
-  Future<PrinterPaperSize> getPaperSize(Printer printer) async {
+  Future<PrinterPaperSize> getPaperSize() async {
     final prefs = await SharedPreferences.getInstance();
-    final key =
-        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    final key = "printer_size";
     final sizeName = prefs.getString(key);
     if (sizeName != null) {
       return PrinterPaperSize.values.firstWhere(
@@ -565,10 +552,127 @@ class PrintingRepoImp implements PrintingRepo {
   }
 
   @override
-  Future<bool> hasPaperSize(Printer printer) async {
+  Future<bool> hasPaperSize() async {
     final prefs = await SharedPreferences.getInstance();
-    final key =
-        "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
+    final key = "printer_size";
     return prefs.containsKey(key);
+  }
+
+  @override
+  Future<void> settingPrintingToServerSide({required bool isApiPrinter}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("is_server_printing", isApiPrinter);
+  }
+
+  @override
+  Future<bool> isPrintingFromServerSideOrNot() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool("is_server_printing") ?? false;
+  }
+
+  @override
+  Future<Either<String, List<ServerPrinter>>> getServerPrinters({
+    int? width,
+  }) async {
+    try {
+      final response = await _printingService.getServerPrinters();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> printers = response.data['printers'];
+        final serverPrinters = printers
+            .map((name) => ServerPrinter(name: name.toString(), width: width))
+            .toList();
+        return Right(serverPrinters);
+      } else {
+        return Left(response.data['message'] ?? "Failed to fetch printers");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> printServerPrinter({
+    required int transactionId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printInvoice(
+        transactionId: transactionId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(response.data['message'] ?? "Failed to print invoice");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<void> saveSelectedServerPrinter(ServerPrinter printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_server_printer', printer.name ?? '');
+  }
+
+  @override
+  Future<ServerPrinter?> getSelectedServerPrinter() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('selected_server_printer');
+    if (name != null && name.isNotEmpty) {
+      return ServerPrinter(name: name);
+    }
+    return null;
+  }
+
+  @override
+  Future<Either<String, void>> printQuickReportServer({
+    required String dateRange,
+    required int? userId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printQuickReport(
+        dateRange: dateRange,
+        userId: userId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(response.data['message'] ?? "Failed to print quick report");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> printCashRegisterReportServer({
+    required int cashRegisterId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printCashRegisterReport(
+        cashRegisterId: cashRegisterId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(
+          response.data['message'] ?? "Failed to print cash register report",
+        );
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
   }
 }

@@ -51,11 +51,36 @@ class HomeServicesSection extends StatefulWidget {
   State<HomeServicesSection> createState() => _HomeServicesSectionState();
 }
 
+class _PendingPrintData {
+  final int? chairId;
+  final double balanceAmount;
+  final SettlePaymentRequestModel request;
+  final dynamic shopData;
+  final List<CartItemModel> cartItems;
+  final String? staffName;
+  final String? invoiceNumber;
+  final String bookingTime;
+  final String? invoiceDate;
+
+  _PendingPrintData({
+    required this.chairId,
+    required this.balanceAmount,
+    required this.request,
+    required this.shopData,
+    required this.cartItems,
+    required this.staffName,
+    required this.invoiceNumber,
+    required this.bookingTime,
+    required this.invoiceDate,
+  });
+}
+
 class _HomeServicesSectionState extends State<HomeServicesSection> {
   final GlobalKey _menuKey = GlobalKey();
   final ValueNotifier<String> _selectedButtonNotifier = ValueNotifier(
     "BOOK A SLOT",
   );
+  _PendingPrintData? _pendingPrintData;
 
   @override
   void initState() {
@@ -126,10 +151,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
     final shopData = context.read<AuthCubit>().currentUser;
     if (shopData != null) {
-      final printCubit = context.read<PrintingCubit>();
-      printCubit.printInvoice(
+      _pendingPrintData = _PendingPrintData(
         chairId: chairId,
-        printCount: printCubit.state.settings?.printCount.quickPayment.toInt(),
         balanceAmount: balanceAmount,
         request: request,
         shopData: shopData,
@@ -328,6 +351,23 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 );
               }
             } else if (state is BookingPaymentSettled) {
+              if (_pendingPrintData != null) {
+                final printCubit = context.read<PrintingCubit>();
+                printCubit.printInvoice(
+                  chairId: _pendingPrintData!.chairId,
+                  printCount: printCubit.state.settings?.printCount.quickPayment
+                      .toInt(),
+                  balanceAmount: _pendingPrintData!.balanceAmount,
+                  request: _pendingPrintData!.request,
+                  shopData: _pendingPrintData!.shopData,
+                  cartItems: _pendingPrintData!.cartItems,
+                  staffName: _pendingPrintData!.staffName,
+                  invoiceNumber: _pendingPrintData!.invoiceNumber,
+                  bookingTime: _pendingPrintData!.bookingTime,
+                  invoiceDate: _pendingPrintData!.invoiceDate,
+                );
+                _pendingPrintData = null;
+              }
               ToastHelper.showSuccess(state.message);
               context.read<ServiceCubit>().clearCart();
               context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);

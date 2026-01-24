@@ -537,7 +537,6 @@ class DatabaseHelper {
             'sub_total':
                 (request.subTotalList != null &&
                     i < request.subTotalList!.length)
-                    
                 ? request.subTotalList![i]
                 : 0.0,
             'amount_total':
@@ -963,4 +962,34 @@ class DatabaseHelper {
     );
     log("Payment $paymentId updated");
   }
+
+  // --- Invoice Settings ---
+  Future<void> saveInvoiceSettings(Map<String, dynamic> settings) async {
+    log("Saving invoice settings");
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete('invoice_settings'); // Clear old settings
+      await txn.insert('invoice_settings', settings);
+    });
+    log("Invoice settings saved");
+  }
+
+  Future<Map<String, dynamic>?> getInvoiceSettings() async {
+    log("Fetching invoice settings");
+    final db = await database;
+    final result = await db.query('invoice_settings', limit: 1);
+    if (result.isNotEmpty) {
+      return result.first;
+    }
+    return null;
+  }
+
+  Future<void> incrementInvoiceCount() async {
+    log("Incrementing invoice count");
+    final db = await database;
+    await db.rawUpdate('UPDATE invoice_settings SET count = count + 1');
+    log("Invoice count incremented");
+  }
 }
+
+
