@@ -32,13 +32,13 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   try {
-  WidgetsFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized();
 
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation
-          .landscapeRight, // optional, remove if you want only upright
-    ]);
+    // await SystemChrome.setPreferredOrientations([
+    //   DeviceOrientation.landscapeLeft,
+    //   DeviceOrientation
+    //       .landscapeRight, // optional, remove if you want only upright
+    // ]);
 
     await di.init();
     await ApiClient.init();

@@ -43,7 +43,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
               state.errorMessage != null) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+            ).showSnackBar(SnackBar(content: Text("Failed to print")));
           }
           if (state.status == PrintingStatus.connected) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -274,7 +274,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                         .read<PrintingCubit>()
                                         .selectServerPrinter(printer);
                                   },
-                                  leading: Icon(
+                                leading: Icon(
                                     Icons.print,
                                     color: isSelected
                                         ? AppColors.violetNormal

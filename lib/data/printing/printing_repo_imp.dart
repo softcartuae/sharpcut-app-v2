@@ -591,7 +591,7 @@ class PrintingRepoImp implements PrintingRepo {
   }
 
   @override
-  Future<Either<String, void>> printServerInvoice({
+  Future<Either<String, void>> printServerPrinter({
     required int transactionId,
     required String printerName,
     required int size,
@@ -606,6 +606,70 @@ class PrintingRepoImp implements PrintingRepo {
         return const Right(null);
       } else {
         return Left(response.data['message'] ?? "Failed to print invoice");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<void> saveSelectedServerPrinter(ServerPrinter printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_server_printer', printer.name ?? '');
+  }
+
+  @override
+  Future<ServerPrinter?> getSelectedServerPrinter() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('selected_server_printer');
+    if (name != null && name.isNotEmpty) {
+      return ServerPrinter(name: name);
+    }
+    return null;
+  }
+
+  @override
+  Future<Either<String, void>> printQuickReportServer({
+    required String dateRange,
+    required int? userId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printQuickReport(
+        dateRange: dateRange,
+        userId: userId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(response.data['message'] ?? "Failed to print quick report");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> printCashRegisterReportServer({
+    required int cashRegisterId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printCashRegisterReport(
+        cashRegisterId: cashRegisterId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(
+          response.data['message'] ?? "Failed to print cash register report",
+        );
       }
     } catch (e) {
       return Left(e.toString());
