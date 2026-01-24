@@ -44,7 +44,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
               state.errorMessage != null) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+            ).showSnackBar(SnackBar(content: Text("Failed to print")));
           }
           if (state.status == PrintingStatus.connected) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -169,6 +169,93 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                           ),
                         ),
                         const SizedBox(height: 24),
+                        if (state.isServerPrinting) ...[
+                          Text(
+                            "Server Printers",
+                            style: GoogleFonts.rajdhani(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const Divider(height: 24, thickness: 1),
+                          if (state.isFetchingServerPrinters)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  color: AppColors.violetNormal,
+                                ),
+                              ),
+                            )
+                          else if (state.serverPrinters.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                "No server printers found.",
+                                style: GoogleFonts.rajdhani(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            )
+                          
+                          else
+                            ...state.serverPrinters.map((printer) {
+                              final isSelected =
+                                  state.selectedServerPrinter?.name ==
+                                      printer.name;
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                color: isSelected
+                                    ? AppColors.violetLightActive
+                                    : Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? AppColors.violetNormal
+                                        : Colors.grey.shade300,
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                ),
+                                child: ListTile(
+                                  onTap: () {
+                                    context
+                                        .read<PrintingCubit>()
+                                        .selectServerPrinter(printer);
+                                  },
+                                leading: Icon(
+                                    Icons.print,
+                                    color: isSelected
+                                        ? AppColors.violetNormal
+                                        : Colors.grey,
+                                  ),
+                                  title: Text(
+                                    printer.name ?? "Unknown Printer",
+                                    style: GoogleFonts.rajdhani(
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      color: isSelected
+                                          ? AppColors.violetNormal
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    "Width: ${printer.width ?? 'Default'}",
+                                  ),
+                                  trailing: isSelected
+                                      ? const Icon(
+                                          Icons.check_circle,
+                                          color: AppColors.violetNormal,
+                                        )
+                                      : null,
+                                ),
+                              );
+                            }),
+                          const SizedBox(height: 24),
+                        ],
 
                         // Scan Button (USB)
                         Card(

@@ -54,7 +54,34 @@ abstract class PrintingRepo {
     PrinterSettingsModel model,
   );
 
-  Future<void> savePaperSize(Printer printer, PrinterPaperSize size);
-  Future<PrinterPaperSize> getPaperSize(Printer printer);
-  Future<bool> hasPaperSize(Printer printer);
+  Future<void> savePaperSize(PrinterPaperSize size);
+  Future<PrinterPaperSize> getPaperSize();
+  Future<bool> hasPaperSize();
+
+  Future<void> settingPrintingToServerSide({required bool isApiPrinter});
+  Future<bool> isPrintingFromServerSideOrNot();
+
+  Future<Either<String, List<ServerPrinter>>> getServerPrinters({int? width});
+
+  Future<Either<String, void>> printServerPrinter({
+    required int transactionId,
+    required String printerName,
+    required int size,
+  });
+
+  Future<void> saveSelectedServerPrinter(ServerPrinter printer);
+  Future<ServerPrinter?> getSelectedServerPrinter();
+
+  Future<Either<String, void>> printQuickReportServer({
+    required String dateRange,
+    required int? userId,
+    required String printerName,
+    required int size,
+  });
+
+  Future<Either<String, void>> printCashRegisterReportServer({
+    required int cashRegisterId,
+    required String printerName,
+    required int size,
+  });
 }

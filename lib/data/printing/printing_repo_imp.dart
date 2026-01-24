@@ -563,4 +563,122 @@ class PrintingRepoImp implements PrintingRepo {
         "printer_size_${printer.name ?? 'unknown'}_${printer.connectionType?.name}";
     return prefs.containsKey(key);
   }
+
+  @override
+  Future<void> settingPrintingToServerSide({required bool isApiPrinter}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("is_server_printing", isApiPrinter);
+  }
+
+  @override
+  Future<bool> isPrintingFromServerSideOrNot() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool("is_server_printing") ?? false;
+  }
+
+  @override
+  Future<Either<String, List<ServerPrinter>>> getServerPrinters({
+    int? width,
+  }) async {
+    try {
+      final response = await _printingService.getServerPrinters();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final List<dynamic> printers = response.data['printers'];
+        final serverPrinters = printers
+            .map((name) => ServerPrinter(name: name.toString(), width: width))
+            .toList();
+        return Right(serverPrinters);
+      } else {
+        return Left(response.data['message'] ?? "Failed to fetch printers");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> printServerPrinter({
+    required int transactionId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printInvoice(
+        transactionId: transactionId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(response.data['message'] ?? "Failed to print invoice");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<void> saveSelectedServerPrinter(ServerPrinter printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_server_printer', printer.name ?? '');
+  }
+
+  @override
+  Future<ServerPrinter?> getSelectedServerPrinter() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('selected_server_printer');
+    if (name != null && name.isNotEmpty) {
+      return ServerPrinter(name: name);
+    }
+    return null;
+  }
+
+  @override
+  Future<Either<String, void>> printQuickReportServer({
+    required String dateRange,
+    required int? userId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printQuickReport(
+        dateRange: dateRange,
+        userId: userId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(response.data['message'] ?? "Failed to print quick report");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> printCashRegisterReportServer({
+    required int cashRegisterId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printCashRegisterReport(
+        cashRegisterId: cashRegisterId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(
+          response.data['message'] ?? "Failed to print cash register report",
+        );
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
 }

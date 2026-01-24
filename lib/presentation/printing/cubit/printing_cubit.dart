@@ -119,6 +119,11 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
   }
 
+  void selectServerPrinter(ServerPrinter printer) {
+    _printingRepo.saveSelectedServerPrinter(printer);
+    emit(state.copyWith(selectedServerPrinter: printer));
+  }
+
   Future<void> printInvoice({
     required SettlePaymentRequestModel request,
     required ShopModel shopData,
@@ -132,6 +137,44 @@ class PrintingCubit extends Cubit<PrintingState> {
     required int? chairId,
     String? endTime,
   }) async {
+<<<<<<< HEAD
+=======
+    if (state.isServerPrinting) {
+      if (state.selectedServerPrinter == null) {
+        ToastHelper.showError("Please select a server printer");
+        return;
+      }
+
+      if (state.currentPaperSize == null) {
+        ToastHelper.showError("Please select a paper size");
+        return;
+      }
+
+      emit(state.copyWith(status: PrintingStatus.printing));
+      final result = await _printingRepo.printServerPrinter(
+        transactionId: request.transactionId!,
+        printerName: state.selectedServerPrinter!.name!,
+        size: state.currentPaperSize!.widthInPixels,
+      );
+
+      result.fold(
+        (failure) {
+          emit(
+            state.copyWith(status: PrintingStatus.error, errorMessage: failure),
+          );
+          ToastHelper.showError("Printing failed");
+        },
+        (_) {
+          emit(state.copyWith(status: PrintingStatus.printed));
+          ToastHelper.showSuccess(
+            "Printing from server: ${state.selectedServerPrinter?.name}",
+          );
+        },
+      );
+      return;
+    }
+
+>>>>>>> ed48a19 (made the printing after response)
     if (state.connectedPrinter == null) {
       ToastHelper.showError("No printer connected");
       emit(
@@ -176,7 +219,44 @@ class PrintingCubit extends Cubit<PrintingState> {
   Future<void> printQuickReport({
     required QuickReportModel report,
     required int? printCount,
+    int? userId,
   }) async {
+    if (state.isServerPrinting) {
+      if (state.selectedServerPrinter == null) {
+        ToastHelper.showError("Please select a server printer");
+        return;
+      }
+
+      if (state.currentPaperSize == null) {
+        ToastHelper.showError("Please select a paper size");
+        return;
+      }
+
+      emit(state.copyWith(status: PrintingStatus.printing));
+      final result = await _printingRepo.printQuickReportServer(
+        dateRange: report.dateRange,
+        userId: userId,
+        printerName: state.selectedServerPrinter!.name!,
+        size: state.currentPaperSize!.widthInPixels,
+      );
+
+      result.fold(
+        (failure) {
+          emit(
+            state.copyWith(status: PrintingStatus.error, errorMessage: failure),
+          );
+          ToastHelper.showError("Printing failed");
+        },
+        (_) {
+          emit(state.copyWith(status: PrintingStatus.printed));
+          ToastHelper.showSuccess(
+            "Printing from server: ${state.selectedServerPrinter?.name}",
+          );
+        },
+      );
+      return;
+    }
+
     if (state.connectedPrinter == null) {
       log("No printer connected");
       // ToastHelper.showError("No printer connected");
@@ -213,6 +293,41 @@ class PrintingCubit extends Cubit<PrintingState> {
     required ShopModel shop,
     required int? printCount,
   }) async {
+    if (state.isServerPrinting) {
+      if (state.selectedServerPrinter == null) {
+        ToastHelper.showError("Please select a server printer");
+        return;
+      }
+
+      if (state.currentPaperSize == null) {
+        ToastHelper.showError("Please select a paper size");
+        return;
+      }
+
+      emit(state.copyWith(status: PrintingStatus.printing));
+      final result = await _printingRepo.printCashRegisterReportServer(
+        cashRegisterId: report.cashRegisterId,
+        printerName: state.selectedServerPrinter!.name!,
+        size: state.currentPaperSize!.widthInPixels,
+      );
+
+      result.fold(
+        (failure) {
+          emit(
+            state.copyWith(status: PrintingStatus.error, errorMessage: failure),
+          );
+          ToastHelper.showError("Printing failed");
+        },
+        (_) {
+          emit(state.copyWith(status: PrintingStatus.printed));
+          ToastHelper.showSuccess(
+            "Printing from server: ${state.selectedServerPrinter?.name}",
+          );
+        },
+      );
+      return;
+    }
+
     if (state.connectedPrinter == null) {
       ToastHelper.showError("No printer connected");
       log("No printer connected printign ");
@@ -239,7 +354,7 @@ class PrintingCubit extends Cubit<PrintingState> {
       emit(
         state.copyWith(
           status: PrintingStatus.error,
-          errorMessage: "Failed to print: ${e.toString()}",
+          errorMessage: "Failed to print",
         ),
       );
     }
@@ -336,9 +451,67 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
   }
 
+<<<<<<< HEAD
   Future<void> setPaperSize(Printer printer, PrinterPaperSize size) async {
     await _printingRepo.savePaperSize(printer, size);
     emit(state.copyWith(showPaperSizeDialog: false));
+=======
+  Future<void> setPaperSize(PrinterPaperSize size) async {
+    await _printingRepo.savePaperSize(size);
+    emit(state.copyWith(showPaperSizeDialog: false, currentPaperSize: size));
+  }
+
+  Future<void> getPaperSize() async {
+    final size = await _printingRepo.getPaperSize();
+    emit(state.copyWith(currentPaperSize: size));
+  }
+
+  Future<void> getPrintingMode() async {
+    final isServerPrinting = await _printingRepo
+        .isPrintingFromServerSideOrNot();
+    emit(state.copyWith(isServerPrinting: isServerPrinting));
+    if (isServerPrinting) {
+      fetchServerPrinters();
+      final savedPrinter = await _printingRepo.getSelectedServerPrinter();
+      if (savedPrinter != null) {
+        emit(state.copyWith(selectedServerPrinter: savedPrinter));
+      }
+    }
+  }
+
+  Future<void> togglePrintingMode(bool value) async {
+    await _printingRepo.settingPrintingToServerSide(isApiPrinter: value);
+    emit(state.copyWith(isServerPrinting: value));
+    if (value) {
+      fetchServerPrinters();
+    }
+  }
+
+  Future<void> fetchServerPrinters() async {
+    emit(state.copyWith(isFetchingServerPrinters: true));
+    final result = await _printingRepo.getServerPrinters(
+      width: state.currentPaperSize?.widthInPixels,
+    );
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            isFetchingServerPrinters: false,
+            errorMessage: failure,
+          ),
+        );
+        ToastHelper.showError(failure);
+      },
+      (printers) {
+        emit(
+          state.copyWith(
+            isFetchingServerPrinters: false,
+            serverPrinters: printers,
+          ),
+        );
+      },
+    );
+>>>>>>> ed48a19 (made the printing after response)
   }
 
   @override
