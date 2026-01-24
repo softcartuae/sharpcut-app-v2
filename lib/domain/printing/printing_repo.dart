@@ -7,6 +7,7 @@ import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
+import 'package:sharp_cut/domain/printing/model/server_printer.dart';
 
 abstract class PrintingRepo {
   Stream<List<Printer>> get printersStream;
@@ -63,24 +64,8 @@ abstract class PrintingRepo {
 
   Future<Either<String, List<ServerPrinter>>> getServerPrinters({int? width});
 
-  Future<Either<String, void>> printServerPrinter({
+  Future<Either<String, void>> printServerInvoice({
     required int transactionId,
-    required String printerName,
-    required int size,
-  });
-
-  Future<void> saveSelectedServerPrinter(ServerPrinter printer);
-  Future<ServerPrinter?> getSelectedServerPrinter();
-
-  Future<Either<String, void>> printQuickReportServer({
-    required String dateRange,
-    required int? userId,
-    required String printerName,
-    required int size,
-  });
-
-  Future<Either<String, void>> printCashRegisterReportServer({
-    required int cashRegisterId,
     required String printerName,
     required int size,
   });

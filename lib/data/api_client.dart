@@ -81,7 +81,5 @@ class ApiClient {
   static final cashRegisterLastSalesApi =
       "api/cash-registers/print-last-report";
   static final printerListApi = "api/printers/list";
-  static final printInvoiceApi = "api/print/invoice";
-  static final printQuickReportApi = "api/print/transaction-report";
-  static final printCashRegisterApi = "api/print/cash-register-report";
+  static final printInvoiceApi = "api/print-invoice";
 }

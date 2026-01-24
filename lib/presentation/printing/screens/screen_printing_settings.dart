@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
@@ -60,10 +59,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
               builder: (context) => const PaperWidthSelectionDialog(),
             ).then((size) {
               if (size != null && context.mounted) {
-                context.read<PrintingCubit>().setPaperSize(
-                  state.connectedPrinter!,
-                  size,
-                );
+                context.read<PrintingCubit>().setPaperSize(size);
               }
             });
           }
@@ -164,6 +160,59 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                       ),
                                     ),
                                   ),
+
+                                _buildSwitchTile(
+                                  title: "Print from Server",
+                                  value: state.isServerPrinting,
+                                  onChanged: (val) {
+                                    context
+                                        .read<PrintingCubit>()
+                                        .togglePrintingMode(val);
+                                  },
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 50.0,
+                                    vertical: 8.0,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Paper Size: ${state.currentPaperSize?.name ?? 'Not Set'}",
+                                        style: GoogleFonts.rajdhani(
+                                          color: Colors.black87,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          showDialog<PrinterPaperSize>(
+                                            context: context,
+                                            builder: (context) =>
+                                                const PaperWidthSelectionDialog(),
+                                          ).then((size) {
+                                            if (size != null &&
+                                                context.mounted) {
+                                              context
+                                                  .read<PrintingCubit>()
+                                                  .setPaperSize(size);
+                                            }
+                                          });
+                                        },
+                                        child: Text(
+                                          "Change Size",
+                                          style: GoogleFonts.rajdhani(
+                                            color: AppColors.violetNormal,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -225,7 +274,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                         .read<PrintingCubit>()
                                         .selectServerPrinter(printer);
                                   },
-                                leading: Icon(
+                                  leading: Icon(
                                     Icons.print,
                                     color: isSelected
                                         ? AppColors.violetNormal

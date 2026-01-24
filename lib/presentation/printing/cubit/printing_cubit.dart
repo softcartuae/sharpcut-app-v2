@@ -12,6 +12,7 @@ import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
+import 'package:sharp_cut/domain/printing/model/server_printer.dart';
 
 part 'printing_state.dart';
 
@@ -23,6 +24,8 @@ class PrintingCubit extends Cubit<PrintingState> {
   PrintingCubit(this._printingRepo) : super(PrintingState()) {
     loadPrinterSettings();
     _listenToPrinterStatus();
+    getPrintingMode();
+    getPaperSize();
   }
 
   void _listenToPrinterStatus() {
@@ -68,7 +71,7 @@ class PrintingCubit extends Cubit<PrintingState> {
 
       final isConnected = await _printingRepo.connect(printer);
       if (isConnected) {
-        final hasPaperSize = await _printingRepo.hasPaperSize(printer);
+        final hasPaperSize = await _printingRepo.hasPaperSize();
         emit(
           state.copyWith(
             status: PrintingStatus.connected,
@@ -120,7 +123,6 @@ class PrintingCubit extends Cubit<PrintingState> {
   }
 
   void selectServerPrinter(ServerPrinter printer) {
-    _printingRepo.saveSelectedServerPrinter(printer);
     emit(state.copyWith(selectedServerPrinter: printer));
   }
 
@@ -137,8 +139,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     required int? chairId,
     String? endTime,
   }) async {
-<<<<<<< HEAD
-=======
+
     if (state.isServerPrinting) {
       if (state.selectedServerPrinter == null) {
         ToastHelper.showError("Please select a server printer");
@@ -151,7 +152,7 @@ class PrintingCubit extends Cubit<PrintingState> {
       }
 
       emit(state.copyWith(status: PrintingStatus.printing));
-      final result = await _printingRepo.printServerPrinter(
+      final result = await _printingRepo.printServerInvoice(
         transactionId: request.transactionId!,
         printerName: state.selectedServerPrinter!.name!,
         size: state.currentPaperSize!.widthInPixels,
@@ -162,7 +163,7 @@ class PrintingCubit extends Cubit<PrintingState> {
           emit(
             state.copyWith(status: PrintingStatus.error, errorMessage: failure),
           );
-          ToastHelper.showError("Printing failed");
+          ToastHelper.showError(failure);
         },
         (_) {
           emit(state.copyWith(status: PrintingStatus.printed));
@@ -174,7 +175,7 @@ class PrintingCubit extends Cubit<PrintingState> {
       return;
     }
 
->>>>>>> ed48a19 (made the printing after response)
+
     if (state.connectedPrinter == null) {
       ToastHelper.showError("No printer connected");
       emit(
@@ -452,10 +453,13 @@ class PrintingCubit extends Cubit<PrintingState> {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   Future<void> setPaperSize(Printer printer, PrinterPaperSize size) async {
     await _printingRepo.savePaperSize(printer, size);
     emit(state.copyWith(showPaperSizeDialog: false));
 =======
+=======
+>>>>>>> main
   Future<void> setPaperSize(PrinterPaperSize size) async {
     await _printingRepo.savePaperSize(size);
     emit(state.copyWith(showPaperSizeDialog: false, currentPaperSize: size));
@@ -472,10 +476,13 @@ class PrintingCubit extends Cubit<PrintingState> {
     emit(state.copyWith(isServerPrinting: isServerPrinting));
     if (isServerPrinting) {
       fetchServerPrinters();
+<<<<<<< HEAD
       final savedPrinter = await _printingRepo.getSelectedServerPrinter();
       if (savedPrinter != null) {
         emit(state.copyWith(selectedServerPrinter: savedPrinter));
       }
+=======
+>>>>>>> main
     }
   }
 
@@ -511,7 +518,10 @@ class PrintingCubit extends Cubit<PrintingState> {
         );
       },
     );
+<<<<<<< HEAD
 >>>>>>> ed48a19 (made the printing after response)
+=======
+>>>>>>> main
   }
 
   @override
