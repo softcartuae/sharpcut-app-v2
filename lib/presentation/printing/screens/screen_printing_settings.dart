@@ -274,7 +274,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                         .read<PrintingCubit>()
                                         .selectServerPrinter(printer);
                                   },
-                                  leading: Icon(
+                                leading: Icon(
                                     Icons.print,
                                     color: isSelected
                                         ? AppColors.violetNormal

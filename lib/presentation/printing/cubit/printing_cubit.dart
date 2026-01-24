@@ -123,6 +123,7 @@ class PrintingCubit extends Cubit<PrintingState> {
   }
 
   void selectServerPrinter(ServerPrinter printer) {
+    _printingRepo.saveSelectedServerPrinter(printer);
     emit(state.copyWith(selectedServerPrinter: printer));
   }
 
@@ -152,7 +153,7 @@ class PrintingCubit extends Cubit<PrintingState> {
       }
 
       emit(state.copyWith(status: PrintingStatus.printing));
-      final result = await _printingRepo.printServerInvoice(
+      final result = await _printingRepo.printServerPrinter(
         transactionId: request.transactionId!,
         printerName: state.selectedServerPrinter!.name!,
         size: state.currentPaperSize!.widthInPixels,
@@ -163,7 +164,7 @@ class PrintingCubit extends Cubit<PrintingState> {
           emit(
             state.copyWith(status: PrintingStatus.error, errorMessage: failure),
           );
-          ToastHelper.showError(failure);
+          ToastHelper.showError("Printing failed");
         },
         (_) {
           emit(state.copyWith(status: PrintingStatus.printed));
@@ -477,12 +478,18 @@ class PrintingCubit extends Cubit<PrintingState> {
     if (isServerPrinting) {
       fetchServerPrinters();
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> printer_realtime_stream
       final savedPrinter = await _printingRepo.getSelectedServerPrinter();
       if (savedPrinter != null) {
         emit(state.copyWith(selectedServerPrinter: savedPrinter));
       }
+<<<<<<< HEAD
 =======
 >>>>>>> main
+=======
+>>>>>>> printer_realtime_stream
     }
   }
 
