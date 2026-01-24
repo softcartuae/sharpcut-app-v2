@@ -453,14 +453,10 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   Future<void> setPaperSize(Printer printer, PrinterPaperSize size) async {
     await _printingRepo.savePaperSize(printer, size);
     emit(state.copyWith(showPaperSizeDialog: false));
-=======
-=======
->>>>>>> main
+
   Future<void> setPaperSize(PrinterPaperSize size) async {
     await _printingRepo.savePaperSize(size);
     emit(state.copyWith(showPaperSizeDialog: false, currentPaperSize: size));
@@ -477,19 +473,12 @@ class PrintingCubit extends Cubit<PrintingState> {
     emit(state.copyWith(isServerPrinting: isServerPrinting));
     if (isServerPrinting) {
       fetchServerPrinters();
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> printer_realtime_stream
+
       final savedPrinter = await _printingRepo.getSelectedServerPrinter();
       if (savedPrinter != null) {
         emit(state.copyWith(selectedServerPrinter: savedPrinter));
       }
-<<<<<<< HEAD
-=======
->>>>>>> main
-=======
->>>>>>> printer_realtime_stream
+
     }
   }
 
@@ -525,10 +514,7 @@ class PrintingCubit extends Cubit<PrintingState> {
         );
       },
     );
-<<<<<<< HEAD
->>>>>>> ed48a19 (made the printing after response)
-=======
->>>>>>> main
+
   }
 
   @override
