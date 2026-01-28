@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart';
 import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
 import 'package:sharp_cut/core/database/database_helper.dart';
@@ -100,6 +99,14 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
 
       final registerId = lastOpen['id'] as int;
 
+      // Check for pending transactions
+      final hasPending = await DatabaseHelper().hasPendingTransactions();
+      if (hasPending) {
+        return const Left(
+          "there are pending transactions .Please complet or cancel all pending transactions before closing the cash register",
+        );
+      }
+
       // Calculate totals before closing
       final totals = await DatabaseHelper().calculateSalesTotal(registerId);
       final totalSales = totals['total_sales'] ?? 0.0;
@@ -200,7 +207,7 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
       return Right(
         CloseRegisterReportModel(
           openingAmount: openingAmount.toString(),
-         
+
           closingAmount: closingAmount,
           openedAt: lastClosed['opened_at'],
           closedAt: lastClosed['closed_at'],

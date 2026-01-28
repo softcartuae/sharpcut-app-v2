@@ -738,6 +738,18 @@ class DatabaseHelper {
     log("Synced transaction ${transactionData['id']} successfully");
   }
 
+  Future<bool> hasPendingTransactions() async {
+    log("Checking for pending transactions");
+    final db = await database;
+    final result = await db.query(
+      'transactions',
+      where: 'status = ?',
+      whereArgs: ['Pending'],
+      limit: 1,
+    );
+    return result.isNotEmpty;
+  }
+
   // --- Generic Helper Methods for Viewer ---
   Future<List<String>> getTables() async {
     log("Fetching all table names");
@@ -991,5 +1003,3 @@ class DatabaseHelper {
     log("Invoice count incremented");
   }
 }
-
-
