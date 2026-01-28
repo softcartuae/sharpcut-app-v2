@@ -58,9 +58,8 @@ class _PendingPrintData {
   final dynamic shopData;
   final List<CartItemModel> cartItems;
   final String? staffName;
-  final String? invoiceNumber;
+
   final String bookingTime;
-  final String? invoiceDate;
 
   _PendingPrintData({
     required this.chairId,
@@ -69,9 +68,8 @@ class _PendingPrintData {
     required this.shopData,
     required this.cartItems,
     required this.staffName,
-    required this.invoiceNumber,
+
     required this.bookingTime,
-    required this.invoiceDate,
   });
 }
 
@@ -95,10 +93,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     ServiceStateSuccess serviceState,
     BookingFormState bookingFormState,
     String paymentMode,
-    String? invoiceNumber,
     String? staffName,
     String? bookingTime,
-    String? invoiceDate,
     double discount,
     double finalTotal,
     int? chairId,
@@ -114,7 +110,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     }
 
     final request = SettlePaymentRequestModel(
-      paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : null,
+      paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : "full",
       transactionId: transactionId,
       customerName: bookingFormState.customerName,
       customerNumber: bookingFormState.customerNumber,
@@ -158,9 +154,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         shopData: shopData,
         cartItems: serviceState.cartItems,
         staffName: staffName,
-        invoiceNumber: invoiceNumber,
         bookingTime: bookingTime ?? "--:--",
-        invoiceDate: invoiceDate,
       );
     }
     context.read<BookingCubit>().quickPayment(request: request);
@@ -362,9 +356,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                   shopData: _pendingPrintData!.shopData,
                   cartItems: _pendingPrintData!.cartItems,
                   staffName: _pendingPrintData!.staffName,
-                  invoiceNumber: _pendingPrintData!.invoiceNumber,
+                  invoiceNumber: state.response.bookingResponse?.invoiceNo,
                   bookingTime: _pendingPrintData!.bookingTime,
-                  invoiceDate: _pendingPrintData!.invoiceDate,
+                  invoiceDate: state.response.bookingResponse?.invoiceDate,
                 );
                 _pendingPrintData = null;
               }
@@ -1014,9 +1008,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   serviceState,
                                                   bookingFormState,
                                                   PaymentMode.Cash.name,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceNo,
+
                                                   bookingState
                                                       .bookingResponse
                                                       .staff
@@ -1024,9 +1016,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .transactionDate,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
                                                   bookingState
@@ -1043,9 +1032,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   serviceState,
                                                   bookingFormState,
                                                   PaymentMode.Card.name,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceNo,
+
                                                   bookingState
                                                       .bookingResponse
                                                       .staff
@@ -1053,9 +1040,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .transactionDate,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceDate,
+
                                                   discount,
                                                   serviceState.total,
                                                   bookingState
@@ -1071,9 +1056,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   serviceState,
                                                   bookingFormState,
                                                   PaymentMode.Unpaid.name,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceNo,
+
                                                   bookingState
                                                       .bookingResponse
                                                       .staff
@@ -1081,9 +1064,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .transactionDate,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceDate,
+
                                                   discount,
                                                   serviceState.total,
                                                   bookingState
@@ -1232,12 +1213,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                               bookingTime: bookingState
                                                   .bookingResponse
                                                   .transactionDate,
-                                              invoiceNumber: bookingState
-                                                  .bookingResponse
-                                                  .invoiceNo,
-                                              invoiceDate: bookingState
-                                                  .bookingResponse
-                                                  .invoiceDate,
+                                          
+                                         
                                               cartItems: serviceState.cartItems,
                                               chairId: bookingState
                                                   .bookingResponse

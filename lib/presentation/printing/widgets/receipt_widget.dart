@@ -38,7 +38,6 @@ class ReceiptWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isNotPaid = request.paymentStatus == 'unpaid';
     return Container(
       width:
           width ?? 384, // Target width for 58mm printer (approx 384 dots max)
@@ -120,6 +119,9 @@ class ReceiptWidget extends StatelessWidget {
               label1: 'Print Date',
               subLabel1: 'تاريخ الطباعة',
               value1: _formatDate(DateTime.now()),
+              label2: 'Customer',
+              subLabel2: 'اسم العميل',
+              value2: request.customerName ?? 'Cash Customer',
             ),
             const SizedBox(height: 4),
             _buildDetailRow(
@@ -447,7 +449,7 @@ class ReceiptWidget extends StatelessWidget {
             const DashedLine(),
             const DashedLine(),
             Text(
-              isNotPaid ? 'UNPAID' : 'PAID',
+              request.paymentStatus?.toUpperCase() ?? "UNKNOWN",
               textAlign: TextAlign.center,
               style: GoogleFonts.marcellus(
                 fontSize: 40,

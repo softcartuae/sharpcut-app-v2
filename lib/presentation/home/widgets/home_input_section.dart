@@ -69,7 +69,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
               bookingTime = booking.transactionDate!;
             }
 
-            customerName = booking.customerName ?? "cash";
+            customerName = booking.customerName ?? "Cash Customer";
             customerNumber = booking.customerNumber ?? "0000000000";
             staffName = booking.staff?.name ?? "Sales Man";
           }
