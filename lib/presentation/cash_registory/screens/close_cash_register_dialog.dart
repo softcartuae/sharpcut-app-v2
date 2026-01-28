@@ -347,7 +347,9 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                             ToastHelper.showError("Invalid amount");
                             return;
                           }
-                          if (_printReceipt) {}
+                          if (_printReceipt) {
+                              
+                          }
                           context.read<CashRegistoryCubit>().closeCashRegister(
                             isPrint: _printReceipt,
                             amount: amount,

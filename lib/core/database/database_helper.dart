@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
+import 'package:sharp_cut/core/utils/date_formatter.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -469,7 +470,7 @@ class DatabaseHelper {
         'round_off': request.roundOff,
         'final_total': request.finalTotal,
         'total_payment': request.finalTotal,
-        'updated_at': DateTime.now().toIso8601String(),
+        'updated_at': DateFormatter.now(),
         'is_synced': 0,
       };
 
@@ -496,7 +497,7 @@ class DatabaseHelper {
             'change': (request.change != null && i < request.change!.length)
                 ? request.change![i]
                 : 0.0,
-            'date': DateTime.now().toIso8601String(),
+            'date': DateFormatter.now(),
             'collected_user_id':
                 (request.collectedUserId != null &&
                     i < request.collectedUserId!.length)
@@ -738,13 +739,13 @@ class DatabaseHelper {
     log("Synced transaction ${transactionData['id']} successfully");
   }
 
-  Future<bool> hasPendingTransactions() async {
-    log("Checking for pending transactions");
+  Future<bool> hasPendingTransactions(int cashRegisterId) async {
+    log("Checking for pending transactions for register $cashRegisterId");
     final db = await database;
     final result = await db.query(
       'transactions',
-      where: 'status = ?',
-      whereArgs: ['Pending'],
+      where: 'status = ? AND cash_register_id = ?',
+      whereArgs: ['Pending', cashRegisterId],
       limit: 1,
     );
     return result.isNotEmpty;
@@ -979,8 +980,23 @@ class DatabaseHelper {
   Future<void> saveInvoiceSettings(Map<String, dynamic> settings) async {
     log("Saving invoice settings");
     final db = await database;
+
+    // Check if settings already exist
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM invoice_settings'),
+    );
+
+    if (count != null && count > 0) {
+      log(
+        "Invoice settings already exist. Skipping save to preserve local count.",
+      );
+      return;
+    }
+
     await db.transaction((txn) async {
-      await txn.delete('invoice_settings'); // Clear old settings
+      await txn.delete(
+        'invoice_settings',
+      ); // Clear old settings (safety, though we checked count)
       await txn.insert('invoice_settings', settings);
     });
     log("Invoice settings saved");
@@ -1001,5 +1017,177 @@ class DatabaseHelper {
     final db = await database;
     await db.rawUpdate('UPDATE invoice_settings SET count = count + 1');
     log("Invoice count incremented");
+  }
+
+  /// Generates data for the offline close register report
+  Future<Map<String, dynamic>> getOfflineReportData(int registerId) async {
+    log("Generating offline report data for register $registerId");
+    final db = await database;
+
+    // 1. Get Register Details
+    final registerResult = await db.query(
+      'cash_registers',
+      where: 'id = ?',
+      whereArgs: [registerId],
+    );
+    if (registerResult.isEmpty) {
+      throw Exception("Register not found");
+    }
+    final register = registerResult.first;
+    final openedAt = register['opened_at'] as String;
+    final closedAt = register['closed_at'] as String? ?? DateFormatter.now();
+
+    // 2. Get Transactions in range
+    // We consider transactions created after openedAt.
+    // Ideally we should filter by cash_register_id if we were storing it reliably on every transaction,
+    // but based on the user's PHP code, they filter by time range and cash_register_id.
+    // In offline mode, we might rely on time range or just all transactions since opening if we assume single register usage.
+    // Let's stick to time range >= openedAt for simplicity and robustness in single-device offline mode.
+
+    // Fetch all completed transactions in the session for this register
+    final transactionsResult = await db.rawQuery(
+      '''
+      SELECT * FROM transactions 
+      WHERE created_at >= ? AND status = 'completed' AND cash_register_id = ?
+      ''',
+      [openedAt, registerId],
+    );
+
+    final transactionIds = transactionsResult.map((t) => t['id']).toList();
+
+    // 3. Calculate Invoice Details
+    int totalInvoice = transactionsResult.length;
+    double totalInvoiceSalesAmount = 0.0;
+    double totalDiscount = 0.0;
+
+    for (var t in transactionsResult) {
+      totalInvoiceSalesAmount += (t['final_total'] as num?)?.toDouble() ?? 0.0;
+      totalDiscount += (t['discount'] as num?)?.toDouble() ?? 0.0;
+    }
+
+    // 4. Get Payments for these transactions
+    List<Map<String, dynamic>> paymentsResult = [];
+    if (transactionIds.isNotEmpty) {
+      final placeholders = List.filled(transactionIds.length, '?').join(',');
+      paymentsResult = await db.rawQuery('''
+        SELECT * FROM transaction_payments 
+        WHERE transaction_id IN ($placeholders)
+        ''', transactionIds);
+    }
+
+    double totalPayments = 0.0;
+    double cashAmount = 0.0;
+    int cashCount = 0;
+    double cardAmount = 0.0;
+    int cardCount = 0;
+
+    // Track unique transactions for counts
+    Set<int> cashTransactionIds = {};
+    Set<int> cardTransactionIds = {};
+
+    for (var p in paymentsResult) {
+      double amount = (p['amount'] as num?)?.toDouble() ?? 0.0;
+      String mode = p['mode'] as String;
+      int tId = p['transaction_id'] as int;
+
+      totalPayments += amount;
+
+      if (mode == 'cash') {
+        cashAmount += amount;
+        cashTransactionIds.add(tId);
+      } else if (mode == 'card' || mode == 'online') {
+        cardAmount += amount;
+        cardTransactionIds.add(tId);
+      }
+    }
+
+    cashCount = cashTransactionIds.length;
+    cardCount = cardTransactionIds.length;
+
+    double totalUnpaidAmount = totalInvoiceSalesAmount - totalPayments;
+
+    double totalCreditAmount = 0.0;
+
+    // 5. Salesman Wise Details
+    // Group payments by collected_user_id
+    Map<int, Map<String, double>> salesmanStats = {};
+
+    for (var p in paymentsResult) {
+      int? userId = p['collected_user_id'] as int?;
+      if (userId == null) continue;
+
+      double amount = (p['amount'] as num?)?.toDouble() ?? 0.0;
+      String mode = p['mode'] as String;
+
+      salesmanStats.putIfAbsent(userId, () => {'cash': 0.0, 'card': 0.0});
+
+      if (mode == 'cash') {
+        salesmanStats[userId]!['cash'] =
+            (salesmanStats[userId]!['cash'] ?? 0.0) + amount;
+      } else {
+        salesmanStats[userId]!['card'] =
+            (salesmanStats[userId]!['card'] ?? 0.0) + amount;
+      }
+    }
+
+    List<Map<String, dynamic>> salesmanDetails = [];
+    double salesmanTotalCash = 0.0;
+    double salesmanTotalCard = 0.0;
+
+    for (var entry in salesmanStats.entries) {
+      int userId = entry.key;
+      double cash = entry.value['cash']!;
+      double card = entry.value['card']!;
+
+      salesmanTotalCash += cash;
+      salesmanTotalCard += card;
+
+      // Get user name
+      String salesmanName = 'N/A';
+      final userRes = await db.query(
+        'users',
+        where: 'id = ?',
+        whereArgs: [userId],
+      );
+      if (userRes.isNotEmpty) {
+        salesmanName = userRes.first['name'] as String;
+      }
+
+      salesmanDetails.add({
+        'salesman_name': salesmanName,
+        'total_cash_amount': cash,
+        'total_card_amount': card,
+        'total_amount': cash + card,
+      });
+    }
+
+    return {
+      'salon_name':
+          'Salon Name', // You might want to fetch this from somewhere if available
+      'branch': 'MAIN',
+      'date_range': '$openedAt - $closedAt',
+      'print_datetime': DateFormatter.now(),
+      'invoice_details': {
+        'total_invoice': totalInvoice,
+        'total_invoice_sales_amount': totalInvoiceSalesAmount,
+        'total_paid_amount': totalPayments,
+        'total_unpaid_amount': totalUnpaidAmount,
+        'total_discount': totalDiscount,
+        'total_credit_amount': totalCreditAmount,
+      },
+      'customer_type_details': {
+        'cash_customer_count': cashCount,
+        'cash_customer_amount': cashAmount,
+        'card_customer_count': cardCount,
+        'card_customer_amount': cardAmount,
+      },
+      'salesman_wise_details': salesmanDetails,
+      'salesman_totals': {
+        'salesman_total_cash_amount': salesmanTotalCash,
+        'salesman_total_card_amount': salesmanTotalCard,
+        'salesman_total_amount': salesmanTotalCash + salesmanTotalCard,
+        'salesman_total_count': salesmanDetails.length,
+      },
+    };
   }
 }

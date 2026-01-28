@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
+import 'package:sharp_cut/core/utils/date_formatter.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
@@ -51,10 +52,10 @@ class BookingRepoImp implements BookingRepo {
       final transactionData = {
         'chair_id': chairId,
         'user_id': userId,
-        'transaction_date': DateTime.now().toIso8601String(),
+        'transaction_date': DateFormatter.now(),
         'status': 'Pending',
         'invoice_no': invoiceNo,
-        'invoice_date': DateTime.now().toIso8601String(),
+        'invoice_date': DateFormatter.now(),
         'app_id': 'OFFLINE',
         'grand_total': 0.0,
         'tax_total': 0.0,

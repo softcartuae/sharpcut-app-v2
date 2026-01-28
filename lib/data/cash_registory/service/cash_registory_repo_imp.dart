@@ -1,10 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
 import 'package:sharp_cut/core/database/database_helper.dart';
+import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_response.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
+import 'package:sharp_cut/core/utils/date_formatter.dart';
 
 class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
@@ -53,8 +55,8 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
         'opened_by': userId,
         'opened_by_type': role.name,
         'opening_amount': amount,
-        'opened_at': DateTime.now().toIso8601String(),
-        'created_at': DateTime.now().toIso8601String(),
+        'opened_at': DateFormatter.now(),
+        'created_at': DateFormatter.now(),
         'is_synced': 0,
       };
 
@@ -100,7 +102,9 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
       final registerId = lastOpen['id'] as int;
 
       // Check for pending transactions
-      final hasPending = await DatabaseHelper().hasPendingTransactions();
+      final hasPending = await DatabaseHelper().hasPendingTransactions(
+        registerId,
+      );
       if (hasPending) {
         return const Left(
           "there are pending transactions .Please complet or cancel all pending transactions before closing the cash register",
@@ -118,8 +122,8 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
         'closed_by': userId,
         'closed_by_type': role.name,
         'closing_amount': amount,
-        'closed_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
+        'closed_at': DateFormatter.now(),
+        'updated_at': DateFormatter.now(),
         'is_synced': 0,
         'total_sales': totalSales,
         'expected_closing': expectedClosing,
@@ -129,12 +133,20 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
       await DatabaseHelper().closeCashRegister(registerId, updateData);
 
       // Fetch the updated register data from DB to ensure report matches persisted state
+      // Fetch the updated register data from DB to ensure report matches persisted state
       final closedRegister = await DatabaseHelper().getLastClosedCashRegister();
       if (closedRegister == null) {
         return const Left("Failed to retrieve closed register.");
       }
 
+      // Generate Offline Report Data
+      final reportData = await DatabaseHelper().getOfflineReportData(
+        registerId,
+      );
+      final quickReport = QuickReportModel.fromJson(reportData);
+
       final report = CloseRegisterReportModel(
+        transactions: quickReport,
         openingAmount: openingAmount.toString(),
         closingAmount: amount,
         openedAt: closedRegister['opened_at'] as String,
@@ -204,10 +216,16 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
           (lastClosed['closing_amount'] as num?)?.toDouble() ?? 0.0;
       final expectedClosing = openingAmount + cashSales;
 
+      // Generate Offline Report Data
+      final reportData = await DatabaseHelper().getOfflineReportData(
+        registerId,
+      );
+      final quickReport = QuickReportModel.fromJson(reportData);
+
       return Right(
         CloseRegisterReportModel(
+          transactions: quickReport,
           openingAmount: openingAmount.toString(),
-
           closingAmount: closingAmount,
           openedAt: lastClosed['opened_at'],
           closedAt: lastClosed['closed_at'],
