@@ -89,6 +89,7 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
     required String password,
     required bool isPrint,
   }) async {
+    
     try {
       final response = await ApiClient.dio.post(
         ApiClient.closeCashRegisterApi,
