@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
+import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
@@ -135,8 +136,18 @@ class BookingRepoImp implements BookingRepo {
       // Offline-only implementation
       await DatabaseHelper().settlePayment(request);
 
+      final transactionData = await DatabaseHelper().getBookingDetails(
+        request.transactionId!,
+      );
+
+      BookingResponseModel? bookingResponse;
+      if (transactionData != null) {
+        bookingResponse = BookingResponseModel.fromJson(transactionData);
+      }
+
       return Right(
         SettlePaymentResponseModel(
+          bookingResponse: bookingResponse,
           success: true,
           message: 'Payment settlement successful',
         ),
