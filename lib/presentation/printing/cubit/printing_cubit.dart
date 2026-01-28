@@ -453,10 +453,6 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
   }
 
-  Future<void> setPaperSize(Printer printer, PrinterPaperSize size) async {
-    await _printingRepo.savePaperSize(printer, size);
-    emit(state.copyWith(showPaperSizeDialog: false));
-
   Future<void> setPaperSize(PrinterPaperSize size) async {
     await _printingRepo.savePaperSize(size);
     emit(state.copyWith(showPaperSizeDialog: false, currentPaperSize: size));

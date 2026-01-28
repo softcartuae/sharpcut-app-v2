@@ -148,6 +148,17 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                             fontSize: 16,
                           ),
                         ),
+                        Builder(
+                          builder: (context) {
+                            return Text(
+                              "Opening Date: ${widget.closeRegisterDetails.openingDate}",
+                              style: GoogleFonts.rajdhani(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                     Text(

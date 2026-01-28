@@ -26,8 +26,6 @@ Future<void> showSettlementDialog(
   required SettlePaymentRequestModel settlePayment,
   required String? staffName,
   required String? bookingTime,
-  required String? invoiceNumber,
-  required String? invoiceDate,
   required List<CartItemModel> cartItems,
   required int? chairId,
 }) {
@@ -36,12 +34,9 @@ Future<void> showSettlementDialog(
     barrierDismissible: false,
     barrierColor: Colors.black.withValues(alpha: 0.5),
     builder: (context) => SettlementDialog(
-      invoiceDate: invoiceDate,
-      invoiceNumber: invoiceNumber,
       settlePayment: settlePayment,
       staffName: staffName,
       bookingTime: bookingTime,
-   
       cartItems: cartItems,
       chairId: chairId,
     ),
@@ -52,8 +47,7 @@ class SettlementDialog extends StatefulWidget {
   final SettlePaymentRequestModel settlePayment;
   final String? staffName;
   final String? bookingTime;
-  final String? invoiceNumber;
-  final String? invoiceDate;
+
   final List<CartItemModel> cartItems;
   final int? chairId;
   const SettlementDialog({
@@ -61,8 +55,7 @@ class SettlementDialog extends StatefulWidget {
     required this.settlePayment,
     required this.staffName,
     required this.bookingTime,
-    required this.invoiceNumber,
-    required this.invoiceDate,
+   
     required this.cartItems,
     required this.chairId,
   });
@@ -149,7 +142,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     _staffNameController.text = widget.staffName ?? "";
     _vatController.text = (widget.settlePayment.taxTotal ?? 0.0)
         .toStringAsFixed(2);
-    _invoiceController.text = widget.invoiceNumber ?? "";
+    _invoiceController.text =  "";
     // Calculate total quantity
     int totalQty = 0;
     if (widget.settlePayment.quantity != null) {
@@ -354,8 +347,14 @@ class _SettlementDialogState extends State<SettlementDialog> {
     log("discount : $discount");
     log("finalTotal : $finalTotal");
 
+    String getPaymentStatus(double totalPaid, double finalTotal) {
+      if (totalPaid == 0) return "unpaid";
+      if (totalPaid < finalTotal) return "partial";
+      return "full";
+    }
+
     final request = SettlePaymentRequestModel(
-      paymentStatus: totalPaid == 0 ? "unpaid" : null,
+      paymentStatus: getPaymentStatus(paid, finalTotal),
       transactionId: widget.settlePayment.transactionId,
       customerName: _nameController.text,
       customerNumber: _mobileController.text,
@@ -410,11 +409,11 @@ class _SettlementDialogState extends State<SettlementDialog> {
                 shopData: shopData,
                 cartItems: widget.cartItems,
                 staffName: widget.staffName,
-                invoiceNumber: widget.invoiceNumber,
+                invoiceNumber: state.response.bookingResponse?.invoiceNo,
                 bookingTime: widget.bookingTime != null
                     ? widget.bookingTime!
                     : "--:--",
-                invoiceDate: widget.invoiceDate,
+                invoiceDate: state.response.bookingResponse?.invoiceDate,
               );
             }
           }

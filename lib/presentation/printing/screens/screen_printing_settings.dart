@@ -40,11 +40,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
       body: BlocConsumer<PrintingCubit, PrintingState>(
         listener: (context, state) {
           if (state.status == PrintingStatus.error &&
-              state.errorMessage != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text("Failed to print")));
-          }
+              state.errorMessage != null) {}
           if (state.status == PrintingStatus.connected) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -248,12 +244,11 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                 ),
                               ),
                             )
-                          
                           else
                             ...state.serverPrinters.map((printer) {
                               final isSelected =
                                   state.selectedServerPrinter?.name ==
-                                      printer.name;
+                                  printer.name;
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 color: isSelected
@@ -274,7 +269,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                         .read<PrintingCubit>()
                                         .selectServerPrinter(printer);
                                   },
-                                leading: Icon(
+                                  leading: Icon(
                                     Icons.print,
                                     color: isSelected
                                         ? AppColors.violetNormal
