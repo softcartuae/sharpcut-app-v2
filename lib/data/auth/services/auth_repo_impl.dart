@@ -6,6 +6,7 @@ import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
 
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
+import 'package:sharp_cut/core/database/database_helper.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final TokenStorage tokenStorage;
@@ -62,4 +63,18 @@ class AuthRepoImpl implements AuthRepo {
       await tokenStorage.deleteToken();
     }
   }
+
+  @override
+  Future<void> getInvoiceSettings() async {
+    try {
+      final response = await ApiClient.dio.get(ApiClient.invoiceSettingsApi);
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final settings = response.data['data'];
+        await DatabaseHelper().saveInvoiceSettings(settings);
+      }
+    } catch (e) {
+      log("Failed to fetch invoice settings: $e");
+    }
+  }
 }
+

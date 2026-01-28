@@ -21,9 +21,7 @@ class BookingRepoImp implements BookingRepo {
       // Offline-only implementation
 
       final localUsers = await DatabaseHelper().getUsers();
-      final user = localUsers.firstWhere(
-        (element) => element['id'] == userId,
-      );
+      final user = localUsers.firstWhere((element) => element['id'] == userId);
 
       if (user['password'] == null) {
         return const Left("Reset Password Required");
@@ -33,12 +31,28 @@ class BookingRepoImp implements BookingRepo {
         return const Left("Invalid password.");
       }
 
+      // Fetch invoice settings
+      final invoiceSettings = await DatabaseHelper().getInvoiceSettings();
+      String invoiceNo;
+      if (invoiceSettings != null) {
+        final prefix = invoiceSettings['invoice_prefix'];
+        final year = invoiceSettings['financial_year'];
+        final count = (invoiceSettings['count'] as int) + 1;
+        invoiceNo = "$prefix/$year/$count";
+
+        // Increment count in DB
+        await DatabaseHelper().incrementInvoiceCount();
+      } else {
+        // Fallback
+        invoiceNo = 'OFF-${DateTime.now().millisecondsSinceEpoch}';
+      }
+
       final transactionData = {
         'chair_id': chairId,
         'user_id': userId,
         'transaction_date': DateTime.now().toIso8601String(),
         'status': 'Pending',
-        'invoice_no': 'OFF-${DateTime.now().millisecondsSinceEpoch}',
+        'invoice_no': invoiceNo,
         'invoice_date': DateTime.now().toIso8601String(),
         'app_id': 'OFFLINE',
         'grand_total': 0.0,
@@ -93,6 +107,16 @@ class BookingRepoImp implements BookingRepo {
         tenderCash: [],
         change: [],
         collectedUserId: [],
+        // Map service details
+        serviceId: request.serviceId,
+        quantity: request.quantity,
+        rate: request.rate,
+        taxAmount: request.taxAmount,
+        currency: request.currency,
+        amountTotal: request.amountTotal,
+        tax: request.tax,
+        subTotalList: request.subTotal,
+        isTip: request.isTip,
       );
 
       await DatabaseHelper().settlePayment(settleRequest);

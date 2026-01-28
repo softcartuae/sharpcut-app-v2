@@ -25,6 +25,19 @@ class ServiceRepoImpl implements ServiceRepo {
           data.cast<Map<String, dynamic>>(),
         );
 
+        // Sync Acknowledgement
+        try {
+          final categoryIds = data.map((e) => e['id']).toList();
+          if (categoryIds.isNotEmpty) {
+            await ApiClient.dio.post(
+              ApiClient.serviceCategoriesSyncApi,
+              data: {'service_categories': categoryIds},
+            );
+          }
+        } catch (e) {
+          log("Failed to acknowledge category sync: $e");
+        }
+
         return data.map((json) => CategoryModel.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load services');
@@ -62,6 +75,19 @@ class ServiceRepoImpl implements ServiceRepo {
 
         // Cache
         await dbHelper.insertServices(data.cast<Map<String, dynamic>>());
+
+        // Sync Acknowledgement
+        try {
+          final serviceIds = data.map((e) => e['id']).toList();
+          if (serviceIds.isNotEmpty) {
+            await ApiClient.dio.post(
+              ApiClient.servicesSyncApi,
+              data: {'services': serviceIds},
+            );
+          }
+        } catch (e) {
+          log("Failed to acknowledge service sync: $e");
+        }
 
         return data.map((json) => ServiceModel.fromJson(json)).toList();
       } else {

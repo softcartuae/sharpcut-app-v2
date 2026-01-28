@@ -506,8 +506,55 @@ class DatabaseHelper {
           batch.insert('transaction_payments', paymentData);
         }
       }
+
+      // 3. Insert Services (if provided)
+      if (request.serviceId != null && request.serviceId!.isNotEmpty) {
+        // First delete existing services to avoid duplication/conflicts if re-settling or updating
+        await txn.delete(
+          'transaction_services',
+          where: 'transaction_id = ?',
+          whereArgs: [request.transactionId],
+        );
+
+        for (int i = 0; i < request.serviceId!.length; i++) {
+          final serviceData = {
+            'transaction_id': request.transactionId,
+            'service_id': request.serviceId![i],
+            'quantity':
+                (request.quantity != null && i < request.quantity!.length)
+                ? request.quantity![i]
+                : 1,
+            'rate': (request.rate != null && i < request.rate!.length)
+                ? request.rate![i]
+                : 0.0,
+            'tax': (request.tax != null && i < request.tax!.length)
+                ? request.tax![i]
+                : 0.0,
+            'tax_amount':
+                (request.taxAmount != null && i < request.taxAmount!.length)
+                ? request.taxAmount![i]
+                : 0.0,
+            'sub_total':
+                (request.subTotalList != null &&
+                    i < request.subTotalList!.length)
+                ? request.subTotalList![i]
+                : 0.0,
+            'amount_total':
+                (request.amountTotal != null && i < request.amountTotal!.length)
+                ? request.amountTotal![i]
+                : 0.0,
+            'is_tip': (request.isTip != null && i < request.isTip!.length)
+                ? request.isTip![i]
+                : 0,
+          };
+          batch.insert('transaction_services', serviceData);
+        }
+      }
+
       await batch.commit(noResult: true);
-      log("Inserted payments for transaction ${request.transactionId}");
+      log(
+        "Inserted payments and services for transaction ${request.transactionId}",
+      );
     });
   }
 
@@ -915,4 +962,34 @@ class DatabaseHelper {
     );
     log("Payment $paymentId updated");
   }
+
+  // --- Invoice Settings ---
+  Future<void> saveInvoiceSettings(Map<String, dynamic> settings) async {
+    log("Saving invoice settings");
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete('invoice_settings'); // Clear old settings
+      await txn.insert('invoice_settings', settings);
+    });
+    log("Invoice settings saved");
+  }
+
+  Future<Map<String, dynamic>?> getInvoiceSettings() async {
+    log("Fetching invoice settings");
+    final db = await database;
+    final result = await db.query('invoice_settings', limit: 1);
+    if (result.isNotEmpty) {
+      return result.first;
+    }
+    return null;
+  }
+
+  Future<void> incrementInvoiceCount() async {
+    log("Incrementing invoice count");
+    final db = await database;
+    await db.rawUpdate('UPDATE invoice_settings SET count = count + 1');
+    log("Invoice count incremented");
+  }
 }
+
+

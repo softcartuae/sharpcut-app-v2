@@ -58,6 +58,11 @@ class ApiClient {
   static final quickPayment = "api/transactions/quick-payment";
   static final reSettlementPayment = "api/transactions/payment";
   static final updatePaymentMode = "api/transactions/payment";
+  static final chairsSyncApi = "api/chairs/sync";
+  static final serviceCategoriesSyncApi = "api/service-categories/sync";
+  static final servicesSyncApi = "api/services/sync";
+  static final usersAdminSyncApi = "api/users/admin/sync";
+  static final usersStaffSyncApi = "api/users/staff/sync";
 
   // GET API ENDPOINTS
   static final userExpenseGETapi = "api/users/expenses";
