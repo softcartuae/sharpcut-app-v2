@@ -100,7 +100,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     double finalTotal,
     int? chairId,
   ) {
-    double amount = serviceState.total;
+    double amount = serviceState.total - discount;
     double balanceAmount = 0.0;
 
     // if user click unpaid then make the amount zero and the payment methord zero;

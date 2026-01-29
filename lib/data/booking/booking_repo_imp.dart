@@ -49,16 +49,21 @@ class BookingRepoImp implements BookingRepo {
         // Fallback
         invoiceNo = 'OFF-${DateTime.now().millisecondsSinceEpoch}';
       }
-      
-      final appid  = generateUniqueId();
+
+      final appid = generateUniqueInt();
+
+      // Fetch last open cash register
+      final cashRegister = await DatabaseHelper().getLastOpenCashRegister();
+      final cashRegisterId = cashRegister?['id'] as int?;
 
       final transactionData = {
         'chair_id': chairId,
         'user_id': userId,
+        'cash_register_id': cashRegisterId,
         'transaction_date': DateFormatter.now(),
         'status': 'Pending',
         'invoice_no': invoiceNo,
-        'invoice_date': DateFormatter.now(),
+        'invoice_date': DateFormatter.dateonly(DateTime.now() ),
         'app_id': appid,
         'grand_total': 0.0,
         'tax_total': 0.0,
@@ -122,6 +127,8 @@ class BookingRepoImp implements BookingRepo {
         tax: request.tax,
         subTotalList: request.subTotal,
         isTip: request.isTip,
+        customerName: request.customerName,
+        customerNumber: request.customerNumber,
       );
 
       await DatabaseHelper().settlePayment(settleRequest);

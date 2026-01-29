@@ -138,7 +138,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE transactions (
         id INTEGER PRIMARY KEY,
-        app_id TEXT NOT NULL,
+        app_id INTEGER NOT NULL,
         cash_register_id INTEGER,
         chair_id INTEGER NOT NULL,
         user_id INTEGER NOT NULL,
@@ -176,7 +176,7 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY,
         transaction_id INTEGER NOT NULL,
         service_id INTEGER,
-        detail_id TEXT,
+        detail_id INTEGER,
         quantity INTEGER NOT NULL,
         rate REAL NOT NULL,
         tax REAL DEFAULT 0.0,
@@ -196,7 +196,7 @@ class DatabaseHelper {
       CREATE TABLE transaction_payments (
         id INTEGER PRIMARY KEY,
         transaction_id INTEGER NOT NULL,
-        payment_id TEXT,
+        payment_id INTEGER,
         collected_user_id INTEGER,
         mode TEXT NOT NULL,
         amount REAL NOT NULL,
@@ -435,7 +435,7 @@ class DatabaseHelper {
         // Ensure transaction_id is set
         var serviceData = Map<String, dynamic>.from(service);
         serviceData['transaction_id'] = transactionId;
-        serviceData['detail_id'] = generateUniqueId();
+        serviceData['detail_id'] = generateUniqueInt();
         serviceData['created_at'] = DateFormatter.now();
         serviceData['updated_at'] = DateFormatter.now();
         batch.insert('transaction_services', serviceData);
@@ -456,8 +456,10 @@ class DatabaseHelper {
     await db.transaction((txn) async {
       // 1. Update Transaction Status & Totals
       final updateData = {
-        'status': 'completed',
-        'payment_status': 'paid',
+        'status': "completed",
+        'payment_status': request.paymentStatus,
+        'customer_name': request.customerName,
+        'customer_number': request.customerNumber,
         'grand_total': request.subTotalValue,
         'tax_total': request.taxTotal,
         'discount': request.discount,
@@ -497,7 +499,7 @@ class DatabaseHelper {
                     i < request.collectedUserId!.length)
                 ? request.collectedUserId![i]
                 : null,
-            'payment_id': generateUniqueId(),
+            'payment_id': generateUniqueInt(),
             'created_at': DateFormatter.now(),
             'updated_at': DateFormatter.now(),
           };
@@ -544,7 +546,7 @@ class DatabaseHelper {
             'is_tip': (request.isTip != null && i < request.isTip!.length)
                 ? request.isTip![i]
                 : 0,
-            'detail_id': generateUniqueId(),
+            'detail_id': generateUniqueInt(),
             'created_at': DateFormatter.now(),
             'updated_at': DateFormatter.now(),
           };
@@ -716,7 +718,7 @@ class DatabaseHelper {
         var serviceData = Map<String, dynamic>.from(service);
         serviceData['transaction_id'] = transactionId;
         if (serviceData['detail_id'] == null) {
-          serviceData['detail_id'] = generateUniqueId();
+          serviceData['detail_id'] = generateUniqueInt();
         }
         if (serviceData['created_at'] == null) {
           serviceData['created_at'] = DateFormatter.now();
@@ -742,7 +744,7 @@ class DatabaseHelper {
         var paymentData = Map<String, dynamic>.from(payment);
         paymentData['transaction_id'] = transactionId;
         if (paymentData['payment_id'] == null) {
-          paymentData['payment_id'] = generateUniqueId();
+          paymentData['payment_id'] = generateUniqueInt();
         }
         if (paymentData['created_at'] == null) {
           paymentData['created_at'] = DateFormatter.now();

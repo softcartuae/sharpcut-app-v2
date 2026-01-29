@@ -9,13 +9,11 @@ double toDouble(dynamic value) {
   }
 
 
-String generateUniqueId({int length = 28}) {
-  const chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  final rand = Random.secure();
 
-  return List.generate(
-    length,
-    (_) => chars[rand.nextInt(chars.length)],
-  ).join();
+int generateUniqueInt() {
+  final random = Random.secure();
+  final timestamp = DateTime.now().microsecondsSinceEpoch;
+  final randomPart = random.nextInt(1000); // 0–999
+
+  return timestamp * 1000 + randomPart;
 }

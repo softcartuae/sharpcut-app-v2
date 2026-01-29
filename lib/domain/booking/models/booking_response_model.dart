@@ -4,7 +4,7 @@ import 'package:sharp_cut/utils/helpers/convertion.dart';
 
 class BookingResponseModel {
   final int? id;
-  final String? appId;
+  final int? appId;
   final int? chairId;
   final int? userId;
   final String? customerName;
@@ -53,7 +53,7 @@ class BookingResponseModel {
     return BookingResponseModel(
       id: json['id'],
       staff: json['user'] != null ? StaffModel.fromJson(json['user']) : null,
-      appId: json['app_id'],
+      appId: int.tryParse(json['app_id'].toString()),
       chairId: json['chair_id'],
       userId: json['user_id'],
       customerName: json['customer_name'],
@@ -86,6 +86,7 @@ class BookingResponseModel {
 
 class BookingDetail {
   final int? id;
+  final int? detailId;
   final ServiceModel? service;
   final int? quantity;
   final double? rate;
@@ -93,6 +94,7 @@ class BookingDetail {
 
   BookingDetail({
     this.id,
+    this.detailId,
     this.service,
     this.quantity,
     this.rate,
@@ -102,6 +104,7 @@ class BookingDetail {
   factory BookingDetail.fromJson(Map<String, dynamic> json) {
     return BookingDetail(
       id: json['id'],
+      detailId: int.tryParse(json['detail_id'].toString()),
       quantity: json['quantity'],
       rate: toDouble(json['rate']),
       amountTotal: toDouble(json['amount_total']),
@@ -114,15 +117,17 @@ class BookingDetail {
 
 class PaymentModel {
   final int? id;
+  final int? paymentId;
   final String? mode;
   final double? amount;
   final String? date;
 
-  PaymentModel({this.id, this.mode, this.amount, this.date});
+  PaymentModel({this.id, this.paymentId, this.mode, this.amount, this.date});
 
   factory PaymentModel.fromJson(Map<String, dynamic> json) {
     return PaymentModel(
       id: json['id'],
+      paymentId: int.tryParse(json['payment_id'].toString()),
       mode: json['mode'],
       amount: toDouble(json['amount']),
       date: json['date'],

@@ -42,7 +42,9 @@ class SyncToServer {
         List<int> isTips = [];
 
         for (var s in services) {
-          detailIds.add(s['detail_id'] ?? ""); // Use actual detail_id
+          detailIds.add(
+            (s['detail_id'] ?? 0).toString(),
+          ); // Use actual detail_id
           serviceIds.add(s['service_id'] ?? 0);
           quantities.add(s['quantity'] ?? 0);
           rates.add(s['rate'] ?? 0.0);
@@ -70,7 +72,9 @@ class SyncToServer {
         List<String> dates = [];
 
         for (var p in payments) {
-          paymentIds.add(p['payment_id'] ?? ""); // Use actual payment_id
+          paymentIds.add(
+            (p['payment_id'] ?? 0).toString(),
+          ); // Use actual payment_id
           collectedUserIds.add(p['collected_user_id'] ?? 0);
           modes.add(p['mode'] ?? "");
           amounts.add(p['amount'] ?? 0.0);
@@ -80,7 +84,7 @@ class SyncToServer {
         }
 
         Map<String, dynamic> transactionMap = {
-          "app_id": transaction['app_id'].toString(),
+          "app_id": transaction['app_id'],
           "chair_id": transaction['chair_id'],
           "user_id": transaction['user_id'],
           "customer_name": transaction['customer_name'] ?? "",
