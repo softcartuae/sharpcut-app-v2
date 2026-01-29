@@ -68,7 +68,6 @@ class _PendingPrintData {
     required this.shopData,
     required this.cartItems,
     required this.staffName,
-
     required this.bookingTime,
   });
 }
