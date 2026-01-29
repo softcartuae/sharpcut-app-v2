@@ -386,20 +386,27 @@ class PrintingCubit extends Cubit<PrintingState> {
   }
 
   Future<void> updatePrinterSettings(PrinterSettingsModel model) async {
-    emit(state.copyWith(isLoading: true));
+    // Optimistic Update: Update UI immediately
+    final oldSettings = state.settings;
+    emit(state.copyWith(settings: model, isLoading: true));
+
     final result = await _printingRepo.updatePrinterSettings(model);
     result.fold(
       (failure) {
         log(failure);
+        // Revert to old settings on failure
         emit(
           state.copyWith(
             isLoading: false,
             errorMessage: "Failed to update printer settings",
+            settings: oldSettings,
           ),
         );
         ToastHelper.showError(failure);
       },
       (_) async {
+        // Success: We can either keep the optimistic state or reload.
+        // Reloading ensures we are in sync with server, but the UI is already correct.
         await loadPrinterSettings();
         ToastHelper.showSuccess("Printer settings updated successfully");
       },

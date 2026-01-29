@@ -5,8 +5,14 @@ import 'package:google_fonts/google_fonts.dart';
 class ServiceItem extends StatelessWidget {
   final String title;
   final String imagePath;
+  final String? cacheKey;
 
-  const ServiceItem({super.key, required this.title, required this.imagePath});
+  const ServiceItem({
+    super.key,
+    required this.title,
+    required this.imagePath,
+    this.cacheKey,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +29,10 @@ class ServiceItem extends StatelessWidget {
             child: imagePath.startsWith('http')
                 ? CachedNetworkImage(
                     imageUrl: imagePath,
+                    cacheKey: cacheKey,
                     memCacheWidth: 200,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) =>
-                        const Center(child: CircularProgressIndicator()),
+                    placeholder: (context, url) => const SizedBox(),
                     errorWidget: (context, url, error) => Image.asset(
                       "lib/utils/images/hair_cut.png",
                       fit: BoxFit.cover,
