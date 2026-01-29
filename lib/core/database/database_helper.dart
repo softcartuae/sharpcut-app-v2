@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/core/utils/date_formatter.dart';
+import 'package:sharp_cut/utils/helpers/convertion.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -175,6 +176,7 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY,
         transaction_id INTEGER NOT NULL,
         service_id INTEGER,
+        detail_id TEXT,
         quantity INTEGER NOT NULL,
         rate REAL NOT NULL,
         tax REAL DEFAULT 0.0,
@@ -182,6 +184,9 @@ class DatabaseHelper {
         sub_total REAL NOT NULL,
         amount_total REAL NOT NULL,
         is_tip INTEGER DEFAULT 0,
+        created_at TEXT,
+        updated_at TEXT,
+        deleted_at TEXT,
         FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE ON UPDATE CASCADE
       )
     ''');
@@ -191,12 +196,15 @@ class DatabaseHelper {
       CREATE TABLE transaction_payments (
         id INTEGER PRIMARY KEY,
         transaction_id INTEGER NOT NULL,
+        payment_id TEXT,
         collected_user_id INTEGER,
         mode TEXT NOT NULL,
         amount REAL NOT NULL,
         tender_cash REAL DEFAULT 0.0,
         change REAL DEFAULT 0.0,
         date TEXT NOT NULL,
+        created_at TEXT,
+        updated_at TEXT,
         FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE ON UPDATE CASCADE
       )
     ''');
@@ -427,6 +435,9 @@ class DatabaseHelper {
         // Ensure transaction_id is set
         var serviceData = Map<String, dynamic>.from(service);
         serviceData['transaction_id'] = transactionId;
+        serviceData['detail_id'] = generateUniqueId();
+        serviceData['created_at'] = DateFormatter.now();
+        serviceData['updated_at'] = DateFormatter.now();
         batch.insert('transaction_services', serviceData);
       }
       await batch.commit(noResult: true);
@@ -436,23 +447,6 @@ class DatabaseHelper {
 
       return transactionId;
     });
-  }
-
-  /// Add services to an existing booking
-  Future<void> addServicesToBooking(
-    int transactionId,
-    List<Map<String, dynamic>> services,
-  ) async {
-    log("Adding ${services.length} services to transaction $transactionId");
-    final db = await database;
-    Batch batch = db.batch();
-    for (var service in services) {
-      var serviceData = Map<String, dynamic>.from(service);
-      serviceData['transaction_id'] = transactionId;
-      batch.insert('transaction_services', serviceData);
-    }
-    await batch.commit(noResult: true);
-    log("Services added successfully");
   }
 
   /// Settle payment for a booking
@@ -503,6 +497,9 @@ class DatabaseHelper {
                     i < request.collectedUserId!.length)
                 ? request.collectedUserId![i]
                 : null,
+            'payment_id': generateUniqueId(),
+            'created_at': DateFormatter.now(),
+            'updated_at': DateFormatter.now(),
           };
           batch.insert('transaction_payments', paymentData);
         }
@@ -547,6 +544,9 @@ class DatabaseHelper {
             'is_tip': (request.isTip != null && i < request.isTip!.length)
                 ? request.isTip![i]
                 : 0,
+            'detail_id': generateUniqueId(),
+            'created_at': DateFormatter.now(),
+            'updated_at': DateFormatter.now(),
           };
           batch.insert('transaction_services', serviceData);
         }
@@ -715,6 +715,15 @@ class DatabaseHelper {
       for (var service in services) {
         var serviceData = Map<String, dynamic>.from(service);
         serviceData['transaction_id'] = transactionId;
+        if (serviceData['detail_id'] == null) {
+          serviceData['detail_id'] = generateUniqueId();
+        }
+        if (serviceData['created_at'] == null) {
+          serviceData['created_at'] = DateFormatter.now();
+        }
+        if (serviceData['updated_at'] == null) {
+          serviceData['updated_at'] = DateFormatter.now();
+        }
         serviceBatch.insert('transaction_services', serviceData);
       }
       await serviceBatch.commit(noResult: true);
@@ -732,6 +741,15 @@ class DatabaseHelper {
       for (var payment in payments) {
         var paymentData = Map<String, dynamic>.from(payment);
         paymentData['transaction_id'] = transactionId;
+        if (paymentData['payment_id'] == null) {
+          paymentData['payment_id'] = generateUniqueId();
+        }
+        if (paymentData['created_at'] == null) {
+          paymentData['created_at'] = DateFormatter.now();
+        }
+        if (paymentData['updated_at'] == null) {
+          paymentData['updated_at'] = DateFormatter.now();
+        }
         paymentBatch.insert('transaction_payments', paymentData);
       }
       await paymentBatch.commit(noResult: true);
@@ -749,6 +767,40 @@ class DatabaseHelper {
       limit: 1,
     );
     return result.isNotEmpty;
+  }
+
+  Future<bool> isFullySynced() async {
+    log("Checking if local DB is fully synced");
+    final db = await database;
+
+    // Check users
+    // final usersResult = await db.query(
+    //   'users',
+    //   where: 'is_synced = ?',
+    //   whereArgs: [0],
+    //   limit: 1,
+    // );
+    // if (usersResult.isNotEmpty) return false;
+
+    // Check cash_registers
+    final registersResult = await db.query(
+      'cash_registers',
+      where: 'is_synced = ?',
+      whereArgs: [0],
+      limit: 1,
+    );
+    if (registersResult.isNotEmpty) return false;
+
+    // Check transactions
+    final transactionsResult = await db.query(
+      'transactions',
+      where: 'is_synced = ?',
+      whereArgs: [0],
+      limit: 1,
+    );
+    if (transactionsResult.isNotEmpty) return false;
+
+    return true;
   }
 
   // --- Generic Helper Methods for Viewer ---
@@ -793,10 +845,86 @@ class DatabaseHelper {
   }
 
   Future<void> closeCashRegister(int id, Map<String, dynamic> data) async {
-    log("Closing cash register $id");
-    final db = await database;
-    await db.update('cash_registers', data, where: 'id = ?', whereArgs: [id]);
     log("Cash register closed");
+  }
+
+  // --- Sync Helpers ---
+
+  Future<List<Map<String, dynamic>>> getUnsyncedTransactions() async {
+    log("Fetching unsynced transactions");
+    final db = await database;
+    return await db.query(
+      'transactions',
+      where: 'is_synced = ? AND status = ?',
+      whereArgs: [0, 'completed'],
+    );
+  }
+
+  Future<void> markTransactionsAsSynced(List<int> ids) async {
+    log("Marking transactions $ids as synced");
+    final db = await database;
+    await db.transaction((txn) async {
+      Batch batch = txn.batch();
+      for (var id in ids) {
+        batch.update(
+          'transactions',
+          {'is_synced': 1},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+      await batch.commit(noResult: true);
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getTransactionServices(
+    int transactionId,
+  ) async {
+    final db = await database;
+    return await db.query(
+      'transaction_services',
+      where: 'transaction_id = ?',
+      whereArgs: [transactionId],
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getTransactionPayments(
+    int transactionId,
+  ) async {
+    final db = await database;
+    return await db.query(
+      'transaction_payments',
+      where: 'transaction_id = ?',
+      whereArgs: [transactionId],
+    );
+  }
+
+  Future<int?> getShopIdForChair(int chairId) async {
+    final db = await database;
+    final result = await db.query(
+      'chairs',
+      columns: ['shop_id'],
+      where: 'id = ?',
+      whereArgs: [chairId],
+    );
+    if (result.isNotEmpty) {
+      return result.first['shop_id'] as int?;
+    }
+    return null;
+  }
+
+  Future<String?> getCurrencyForService(int serviceId) async {
+    final db = await database;
+    final result = await db.query(
+      'services',
+      columns: ['currency'],
+      where: 'id = ?',
+      whereArgs: [serviceId],
+    );
+    if (result.isNotEmpty) {
+      return result.first['currency'] as String?;
+    }
+    return null;
   }
 
   Future<Map<String, dynamic>?> getLastOpenCashRegister() async {

@@ -43,6 +43,7 @@ import 'package:sharp_cut/utils/comon/validate_password.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/presentation/sync/cubit/sync_cubit.dart';
 
 class HomeServicesSection extends StatefulWidget {
   const HomeServicesSection({super.key});
@@ -387,6 +388,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 ToastHelper.showError("Shop data not found");
               }
             } else if (state is CashRegistoryAddError) {
+              ToastHelper.showError(state.message);
+            }
+          },
+        ),
+        BlocListener<SyncCubit, SyncState>(
+          listener: (context, state) {
+            if (state is SyncSuccess) {
+              ToastHelper.showSuccess(state.message);
+            } else if (state is SyncError) {
               ToastHelper.showError(state.message);
             }
           },
@@ -1213,8 +1223,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                               bookingTime: bookingState
                                                   .bookingResponse
                                                   .transactionDate,
-                                          
-                                         
+
                                               cartItems: serviceState.cartItems,
                                               chairId: bookingState
                                                   .bookingResponse
@@ -1329,6 +1338,27 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             context
                                                 .read<CashRegistoryCubit>()
                                                 .getSalesTotal();
+                                          },
+                                  );
+                                },
+                              ),
+                            const SizedBox(height: 12),
+                            if (!isBooked)
+                              BlocBuilder<SyncCubit, SyncState>(
+                                builder: (context, state) {
+                                  return ActionButton(
+                                    isLoading: state is SyncLoading,
+                                    label: "SYNC TRANSACTIONS",
+                                    isPrimary:
+                                        selectedButton == "SYNC TRANSACTIONS",
+                                    onTap: isBooked
+                                        ? null
+                                        : () {
+                                            _selectedButtonNotifier.value =
+                                                "SYNC TRANSACTIONS";
+                                            context
+                                                .read<SyncCubit>()
+                                                .syncTransactions();
                                           },
                                   );
                                 },

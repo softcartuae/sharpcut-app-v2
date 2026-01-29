@@ -38,6 +38,8 @@ import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
 import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
 import 'package:sharp_cut/data/cash_registory/service/cash_registory_repo_imp.dart';
 import 'package:sharp_cut/core/database/database_helper.dart';
+import 'package:sharp_cut/presentation/sync/cubit/sync_cubit.dart';
+import 'package:sharp_cut/data/sync/sync_to_server.dart';
 
 final sl = GetIt.instance;
 
@@ -79,6 +81,10 @@ Future<void> init() async {
     () => CashRegistoryCubit(cashRegistoryRepo: sl<CashRegistoryRepo>()),
   );
 
+  sl.registerFactory<SyncCubit>(
+    () => SyncCubit(syncToServer: sl<SyncToServer>()),
+  );
+
   // Repositories
   sl.registerLazySingleton<DatabaseHelper>(() => DatabaseHelper());
 
@@ -103,4 +109,5 @@ Future<void> init() async {
     () => QuickReportRepoImp(QuickReportService()),
   );
   sl.registerLazySingleton<CashRegistoryRepo>(() => CashRegistoryRepoImp());
+  sl.registerLazySingleton<SyncToServer>(() => SyncToServer());
 }

@@ -11,6 +11,7 @@ import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart'
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
 import 'package:sharp_cut/core/database/database_helper.dart';
+import 'package:sharp_cut/utils/helpers/convertion.dart';
 
 class BookingRepoImp implements BookingRepo {
   @override
@@ -48,6 +49,8 @@ class BookingRepoImp implements BookingRepo {
         // Fallback
         invoiceNo = 'OFF-${DateTime.now().millisecondsSinceEpoch}';
       }
+      
+      final appid  = generateUniqueId();
 
       final transactionData = {
         'chair_id': chairId,
@@ -56,7 +59,7 @@ class BookingRepoImp implements BookingRepo {
         'status': 'Pending',
         'invoice_no': invoiceNo,
         'invoice_date': DateFormatter.now(),
-        'app_id': 'OFFLINE',
+        'app_id': appid,
         'grand_total': 0.0,
         'tax_total': 0.0,
         'discount': 0.0,
