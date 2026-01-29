@@ -199,18 +199,21 @@ class PrintingRepoImp implements PrintingRepo {
     bool openDrawer = false,
   }) async {
     try {
+      
       final profile = await CapabilityProfile.load();
       final paperSize = await getPaperSize();
       final generator = Generator(paperSize.generatorPaperSize, profile);
-      List<int> bytes = [];
-
-      try {
-        if (openDrawer) {
-          bytes.addAll(generator.drawer());
+      // Open drawer immediately if requested
+      if (openDrawer) {
+        try {
+          final drawerBytes = generator.drawer();
+          await _printBytes(printer, Uint8List.fromList(drawerBytes));
+        } catch (e) {
+          log("Error opening drawer immediately: $e");
         }
-      } catch (e) {
-        log(e.toString());
       }
+
+      List<int> bytes = [];
 
       final double targetWidth = paperSize.widthInPixels.toDouble();
 
@@ -243,26 +246,32 @@ class PrintingRepoImp implements PrintingRepo {
         ),
       );
 
-      double estimatedHeight = 1500 + (cartItems.length * 100.0);
+      double estimatedHeight = 1350 + (cartItems.length * 100.0);
 
       final ScreenshotController screenshotController = ScreenshotController();
       final Uint8List capturedImage = await screenshotController
           .captureFromWidget(
             receiptWidget,
             delay: const Duration(milliseconds: 100),
-            pixelRatio: 1.0,
+            pixelRatio:
+                1.0, // Keep resolution low (1.0 is standard screen density)
             targetSize: Size(targetWidth, estimatedHeight),
           );
 
       final img.Image? image = img.decodePng(capturedImage);
 
       if (image != null) {
+        // Resize to paper width using nearest neighbor interpolation (fastest)
         final img.Image resizedImage = img.copyResize(
           image,
           width: paperSize.widthInPixels,
+          interpolation: img.Interpolation.nearest,
         );
 
-        bytes.addAll(generator.image(resizedImage));
+        // Convert to grayscale to reduce data size and processing time for the printer
+        final img.Image grayscaleImage = img.grayscale(resizedImage);
+
+        bytes.addAll(generator.image(grayscaleImage));
       }
 
       bytes.addAll(generator.feed(2));
@@ -274,6 +283,7 @@ class PrintingRepoImp implements PrintingRepo {
         if (i < copies - 1) {
           await Future.delayed(const Duration(milliseconds: 500));
         }
+
       }
     } catch (e) {
       log(e.toString());
@@ -293,12 +303,14 @@ class PrintingRepoImp implements PrintingRepo {
     List<int> bytes = [];
     log("called in quick report");
 
-    try {
-      if (openDrawer) {
-        bytes.addAll(generator.drawer());
+    // Open drawer immediately if requested
+    if (openDrawer) {
+      try {
+        final drawerBytes = generator.drawer();
+        await _printBytes(printer, Uint8List.fromList(drawerBytes));
+      } catch (e) {
+        log("Error opening drawer immediately: $e");
       }
-    } catch (e) {
-      log(e.toString());
     }
 
     // Create the widget
@@ -335,7 +347,7 @@ class PrintingRepoImp implements PrintingRepo {
         .captureFromWidget(
           widget,
           delay: const Duration(milliseconds: 100),
-          pixelRatio: 1.0,
+          pixelRatio: 1.0, // Keep resolution low
           targetSize: Size(targetWidth, estimatedHeight),
         );
 
@@ -344,12 +356,17 @@ class PrintingRepoImp implements PrintingRepo {
     log("called in iamge procees $image");
 
     if (image != null) {
-      // Resize to paper width
+      // Resize to paper width using nearest neighbor interpolation (fastest)
       final img.Image resizedImage = img.copyResize(
         image,
         width: paperSize.widthInPixels,
+        interpolation: img.Interpolation.nearest,
       );
-      bytes.addAll(generator.image(resizedImage));
+
+      // Convert to grayscale
+      final img.Image grayscaleImage = img.grayscale(resizedImage);
+
+      bytes.addAll(generator.image(grayscaleImage));
     }
 
     bytes.addAll(generator.feed(2));
@@ -392,12 +409,14 @@ class PrintingRepoImp implements PrintingRepo {
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
 
-    try {
-      if (openDrawer) {
-        bytes.addAll(generator.drawer());
+    // Open drawer immediately if requested
+    if (openDrawer) {
+      try {
+        final drawerBytes = generator.drawer();
+        await _printBytes(printer, Uint8List.fromList(drawerBytes));
+      } catch (e) {
+        log("Error opening drawer immediately: $e");
       }
-    } catch (e) {
-      log(e.toString());
     }
 
     // Create the widget
@@ -439,7 +458,7 @@ class PrintingRepoImp implements PrintingRepo {
         .captureFromWidget(
           widget,
           delay: const Duration(milliseconds: 100),
-          pixelRatio: 1.0,
+          pixelRatio: 1.0, // Keep resolution low
           targetSize: Size(targetWidth, estimatedHeight),
         );
 
@@ -447,12 +466,17 @@ class PrintingRepoImp implements PrintingRepo {
     final img.Image? image = img.decodePng(capturedImage);
 
     if (image != null) {
-      // Resize to paper width
+      // Resize to paper width using nearest neighbor interpolation (fastest)
       final img.Image resizedImage = img.copyResize(
         image,
         width: paperSize.widthInPixels,
+        interpolation: img.Interpolation.nearest,
       );
-      bytes.addAll(generator.image(resizedImage));
+
+      // Convert to grayscale
+      final img.Image grayscaleImage = img.grayscale(resizedImage);
+
+      bytes.addAll(generator.image(grayscaleImage));
     }
 
     bytes.addAll(generator.feed(2));
