@@ -28,7 +28,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
 
   String get _dateLabel {
     if (_selectedRange == null) {
-      return "All";
+      return "";
     }
 
     final now = DateTime.now();
@@ -53,12 +53,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
   @override
   void initState() {
     super.initState();
-    // Set default range to Today
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    _selectedRange = DateTimeRange(start: today, end: today);
-
-    // Fetch initial report with default range
+    // Fetch initial report with default range (null)
     _fetchReport();
   }
 
@@ -100,48 +95,61 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
       context: context,
       builder: (BuildContext context) {
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.today),
-                title: const Text('Today'),
-                onTap: () {
-                  Navigator.pop(context);
-                  final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day);
-                  setState(() {
-                    _selectedRange = DateTimeRange(start: today, end: today);
-                  });
-                  _fetchReport();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.history),
-                title: const Text('Yesterday'),
-                onTap: () {
-                  Navigator.pop(context);
-                  final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day);
-                  final yesterday = today.subtract(const Duration(days: 1));
-                  setState(() {
-                    _selectedRange = DateTimeRange(
-                      start: yesterday,
-                      end: yesterday,
-                    );
-                  });
-                  _fetchReport();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.date_range),
-                title: const Text('Custom Date'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickDateRange(context);
-                },
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                // ListTile(
+                //   leading: const Icon(Icons.all_inclusive),
+                //   title: const Text('All'),
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //     setState(() {
+                //       _selectedRange = null;
+                //     });
+                //     _fetchReport();
+                //   },
+                // ),
+                ListTile(
+                  leading: const Icon(Icons.today),
+                  title: const Text('Today'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+                    setState(() {
+                      _selectedRange = DateTimeRange(start: today, end: today);
+                    });
+                    _fetchReport();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.history),
+                  title: const Text('Yesterday'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+                    final yesterday = today.subtract(const Duration(days: 1));
+                    setState(() {
+                      _selectedRange = DateTimeRange(
+                        start: yesterday,
+                        end: yesterday,
+                      );
+                    });
+                    _fetchReport();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.date_range),
+                  title: const Text('Custom Date'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickDateRange(context);
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },

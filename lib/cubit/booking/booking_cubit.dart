@@ -3,10 +3,8 @@ import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
-import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
-import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class BookingCubit extends Cubit<BookingState> {
   final BookingRepo bookingRepo;
@@ -53,20 +51,20 @@ class BookingCubit extends Cubit<BookingState> {
     );
   }
 
-  Future<void> saveBooking({required SaveBookingRequestModel request}) async {
-    // emit(BookingLoading());
-    final result = await bookingRepo.saveBooking(request);
-    result.fold(
-      (error) {
-        emit(BookingError(message: error));
-        ToastHelper.showError(error);
-      },
-      (message) {
-        emit(BookingInitial());
-        ToastHelper.showSuccess(message);
-      },
-    );
-  }
+  // Future<void> saveBooking({required SaveBookingRequestModel request}) async {
+  //   // emit(BookingLoading());
+  //   final result = await bookingRepo.saveBooking(request);
+  //   result.fold(
+  //     (error) {
+  //       emit(BookingError(message: error));
+  //       ToastHelper.showError(error);
+  //     },
+  //     (message) {
+  //       emit(BookingInitial());
+  //       ToastHelper.showSuccess(message);
+  //     },
+  //   );
+  // }
 
   Future<void> quickPayment({
     required SettlePaymentRequestModel request,
