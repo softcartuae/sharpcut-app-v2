@@ -9,6 +9,18 @@ class SyncToServer {
   Future<Either<String, String>> syncTransactionsToServer() async {
     try {
       log("Starting transaction sync...");
+
+      // 0. Sync Cash Register if needed
+      final registerSyncResult = await _syncCashRegisterIfNeeded();
+
+      String? registerSyncError;
+      registerSyncResult.fold((l) => registerSyncError = l, (r) => null);
+
+      if (registerSyncError != null) {
+        log("Cash register sync failed: $registerSyncError");
+        return Left(registerSyncError!);
+      }
+
       // 1. Fetch unsynced transactions
       final transactions = await _dbHelper.getUnsyncedTransactions();
       if (transactions.isEmpty) {
@@ -87,6 +99,8 @@ class SyncToServer {
           "app_id": transaction['app_id'],
           "chair_id": transaction['chair_id'],
           "user_id": transaction['user_id'],
+          "cash_register_id":
+              transaction['cash_register_id'], // Ensure this is sent if available
           "customer_name": transaction['customer_name'] ?? "",
           "customer_number": transaction['customer_number'] ?? "",
           "transaction_date": transaction['transaction_date'],
@@ -97,7 +111,7 @@ class SyncToServer {
           "final_total": transaction['final_total'],
           "invoice_no": transaction['invoice_no'],
           "invoice_date": transaction['invoice_date'],
-          "status": "final",
+          "status": transaction['status'],
           "cancellation_reason": transaction['cancellation_reason'],
 
           "detail_id": detailIds,
@@ -157,6 +171,60 @@ class SyncToServer {
       return Right(result);
     } catch (e) {
       return Left(e.toString());
+    }
+  }
+
+  Future<Either<String, bool>> _syncCashRegisterIfNeeded() async {
+    try {
+      final register = await _dbHelper.getLastOpenCashRegister();
+      if (register == null) {
+        log("No open cash register found. Nothing to sync.");
+        return const Left("No open cash register found.");
+      }
+
+      int isSynced = register['is_synced'] ?? 0;
+      if (isSynced == 1) {
+        log("Cash register ${register['id']} is already synced.");
+        return const Right(true);
+      }
+
+      log("Syncing cash register ${register['id']}...");
+
+      final payload = {
+        "id": register['id'],
+        "opened_by": register['opened_by'],
+        "closed_by": register['closed_by'], // Might be null
+        "opened_by_type": register['opened_by_type'],
+        "closed_by_type": register['closed_by_type'], // Might be null
+        "opening_amount": register['opening_amount'],
+        "closing_amount": register['closing_amount'], // Might be null
+        "opened_at": register['opened_at'],
+        "closed_at": register['closed_at'], // Might be null
+        "is_sync": true, // As per request body example
+      };
+
+      final response = await ApiClient.dio.post(
+        ApiClient.cashRegistersSyncApi,
+        data: payload,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true) {
+          log("Cash register synced successfully.");
+          await _dbHelper.updateCashRegisterSyncStatus(register['id'], 1);
+          return const Right(true);
+        } else {
+          log("Failed to sync cash register: ${data['message']}");
+          return Left(data['message'] ?? "Failed to sync cash register.");
+        }
+      } else {
+        log("Failed to sync cash register: ${response.statusCode}");
+        return Left("Failed to sync cash register: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error syncing cash register: $e");
+      return Left("Error syncing cash register");
     }
   }
 }

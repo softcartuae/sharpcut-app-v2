@@ -426,6 +426,11 @@ class DatabaseHelper {
     final db = await database;
     return await db.transaction((txn) async {
       // 1. Insert Transaction
+      if (transactionData['created_at'] == null) {
+        transactionData['created_at'] = DateFormatter.now();
+      }
+      transactionData['updated_at'] = DateFormatter.now();
+
       int transactionId = await txn.insert('transactions', transactionData);
       log("Inserted transaction ID: $transactionId");
 
@@ -467,6 +472,7 @@ class DatabaseHelper {
         'final_total': request.finalTotal,
         'total_payment': request.finalTotal,
         'updated_at': DateFormatter.now(),
+        'end_time': DateFormatter.now(),
         'is_synced': 0,
       };
 
@@ -847,7 +853,37 @@ class DatabaseHelper {
   }
 
   Future<void> closeCashRegister(int id, Map<String, dynamic> data) async {
+    log("Closing cash register $id");
+    final db = await database;
+    await db.update('cash_registers', data, where: 'id = ?', whereArgs: [id]);
     log("Cash register closed");
+  }
+
+  Future<Map<String, dynamic>?> getLastOpenSyncedCashRegister() async {
+    log("Fetching last open synced cash register");
+    final db = await database;
+    final result = await db.query(
+      'cash_registers',
+      where: 'is_synced = 1 AND closed_at IS NULL',
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return result.first;
+    }
+    return null;
+  }
+
+  Future<void> updateCashRegisterSyncStatus(int id, int isSynced) async {
+    log("Updating cash register $id sync status to $isSynced");
+    final db = await database;
+    await db.update(
+      'cash_registers',
+      {'is_synced': isSynced},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   // --- Sync Helpers ---
@@ -982,7 +1018,7 @@ class DatabaseHelper {
       SELECT 
         COUNT(*) as count,
         SUM(final_total) as total_sales,
-        SUM(CASE WHEN payment_status = 'paid' THEN final_total ELSE 0 END) as cash_total
+        SUM(CASE WHEN payment_status = 'full' THEN final_total ELSE 0 END) as cash_total
       FROM transactions 
       WHERE created_at >= ?
     ''',
@@ -1320,4 +1356,6 @@ class DatabaseHelper {
       },
     };
   }
+
+
 }

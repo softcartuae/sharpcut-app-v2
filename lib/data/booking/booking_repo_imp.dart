@@ -7,7 +7,6 @@ import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/core/utils/date_formatter.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
-import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
 import 'package:sharp_cut/core/database/database_helper.dart';
@@ -46,8 +45,8 @@ class BookingRepoImp implements BookingRepo {
         // Increment count in DB
         await DatabaseHelper().incrementInvoiceCount();
       } else {
-        // Fallback
-        invoiceNo = 'OFF-${DateTime.now().millisecondsSinceEpoch}';
+        log("Invoice settings not found");
+        return Left("Invoice settings not found");
       }
 
       final appid = generateUniqueInt();
@@ -63,7 +62,7 @@ class BookingRepoImp implements BookingRepo {
         'transaction_date': DateFormatter.now(),
         'status': 'Pending',
         'invoice_no': invoiceNo,
-        'invoice_date': DateFormatter.dateonly(DateTime.now() ),
+        'invoice_date': DateFormatter.dateonly(DateTime.now()),
         'app_id': appid,
         'grand_total': 0.0,
         'tax_total': 0.0,
@@ -97,47 +96,47 @@ class BookingRepoImp implements BookingRepo {
     }
   }
 
-  @override
-  Future<Either<String, String>> saveBooking(
-    SaveBookingRequestModel request,
-  ) async {
-    try {
-      // Offline-only implementation
-      // Convert SaveBookingRequestModel to SettlePaymentRequestModel for DatabaseHelper
-      final settleRequest = SettlePaymentRequestModel(
-        transactionId: request.transactionId,
-        subTotalValue: request.grandTotal,
-        taxTotal: request.taxTotal,
-        discount: request.discount,
-        roundOff: request.roundOff,
-        finalTotal: request.finalTotal,
-        paymentStatus: 'unpaid',
-        mode: [],
-        amount: [],
-        tenderCash: [],
-        change: [],
-        collectedUserId: [],
-        // Map service details
-        serviceId: request.serviceId,
-        quantity: request.quantity,
-        rate: request.rate,
-        taxAmount: request.taxAmount,
-        currency: request.currency,
-        amountTotal: request.amountTotal,
-        tax: request.tax,
-        subTotalList: request.subTotal,
-        isTip: request.isTip,
-        customerName: request.customerName,
-        customerNumber: request.customerNumber,
-      );
+  // @override
+  // Future<Either<String, String>> saveBooking(
+  //   SaveBookingRequestModel request,
+  // ) async {
+  //   try {
+  //     // Offline-only implementation
+  //     // Convert SaveBookingRequestModel to SettlePaymentRequestModel for DatabaseHelper
+  //     final settleRequest = SettlePaymentRequestModel(
+  //       transactionId: request.transactionId,
+  //       subTotalValue: request.grandTotal,
+  //       taxTotal: request.taxTotal,
+  //       discount: request.discount,
+  //       roundOff: request.roundOff,
+  //       finalTotal: request.finalTotal,
+  //       paymentStatus: 'unpaid',
+  //       mode: [],
+  //       amount: [],
+  //       tenderCash: [],
+  //       change: [],
+  //       collectedUserId: [],
+  //       // Map service details
+  //       serviceId: request.serviceId,
+  //       quantity: request.quantity,
+  //       rate: request.rate,
+  //       taxAmount: request.taxAmount,
+  //       currency: request.currency,
+  //       amountTotal: request.amountTotal,
+  //       tax: request.tax,
+  //       subTotalList: request.subTotal,
+  //       isTip: request.isTip,
+  //       customerName: request.customerName,
+  //       customerNumber: request.customerNumber,
+  //     );
 
-      await DatabaseHelper().settlePayment(settleRequest);
+  //     await DatabaseHelper().settlePayment(settleRequest);
 
-      return const Right("Booking saved successfully");
-    } catch (e) {
-      return Left('Error saving booking: $e');
-    }
-  }
+  //     return const Right("Booking saved successfully");
+  //   } catch (e) {
+  //     return Left('Error saving booking: $e');
+  //   }
+  // }
 
   @override
   Future<Either<String, SettlePaymentResponseModel>> settlePayment(

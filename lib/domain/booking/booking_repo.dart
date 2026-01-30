@@ -19,7 +19,7 @@ abstract class BookingRepo {
     required String reason,
   });
 
-  Future<Either<String, String>> saveBooking(SaveBookingRequestModel request);
+  // Future<Either<String, String>> saveBooking(SaveBookingRequestModel request);
 
   Future<Either<String, SettlePaymentResponseModel>> settlePayment(
     SettlePaymentRequestModel request,

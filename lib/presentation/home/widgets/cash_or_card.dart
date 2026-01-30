@@ -54,7 +54,9 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
   void initState() {
     super.initState();
     _discountController = TextEditingController(
-      text: widget.initialDiscount.toString(),
+      text: widget.initialDiscount == 0
+          ? ''
+          : widget.initialDiscount.toString(),
     );
     _grandTotal = widget.total - widget.initialDiscount;
     _uiGrandTotal = _grandTotal;

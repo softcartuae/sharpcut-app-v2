@@ -754,7 +754,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                     ),
                                     const SizedBox(height: 10),
                                     SettlementRowInput(
-                                      isReadOnly: true,
+                                      isReadOnly: false,
                                       label: "P. Discount",
                                       controller: _discountController,
                                       onChanged: (val) =>
