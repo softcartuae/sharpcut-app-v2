@@ -1012,17 +1012,18 @@ class DatabaseHelper {
     final register = registerResult.first;
     final openedAt = register['opened_at'] as String;
 
-    // Query transactions after openedAt
+    // Query transaction_payments after openedAt, linked to transactions for cash_register_id
     final result = await db.rawQuery(
       '''
       SELECT 
-        COUNT(*) as count,
-        SUM(final_total) as total_sales,
-        SUM(CASE WHEN payment_status = 'full' THEN final_total ELSE 0 END) as cash_total
-      FROM transactions 
-      WHERE created_at >= ?
+        COUNT(DISTINCT tp.transaction_id) as count,
+        SUM(tp.amount) as total_sales,
+        SUM(CASE WHEN tp.mode = 'cash' THEN tp.amount ELSE 0 END) as cash_total
+      FROM transaction_payments tp
+      JOIN transactions t ON tp.transaction_id = t.id
+      WHERE tp.date >= ? AND t.cash_register_id = ?
     ''',
-      [openedAt],
+      [openedAt, cashRegisterId],
     );
 
     double totalSales = 0.0;
@@ -1356,6 +1357,4 @@ class DatabaseHelper {
       },
     };
   }
-
-
 }

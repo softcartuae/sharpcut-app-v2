@@ -262,28 +262,60 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
   Future<Either<String, CloseRegisterModel>> getSalesTotal() async {
     try {
-      final lastOpen = await DatabaseHelper().getLastOpenCashRegister();
-      if (lastOpen == null) {
-        return const Left("No open register found.");
-      }
-
-      final registerId = lastOpen['id'] as int;
-      final totals = await DatabaseHelper().calculateSalesTotal(registerId);
-      final openingAmount = (lastOpen['opening_amount'] as num).toDouble();
-      final cashSales = totals['cash_total'] ?? 0.0;
-
-      return Right(
-        CloseRegisterModel(
-          openingDate: lastOpen['opened_at'] as String,
-          openingAmount: openingAmount,
-          totalSales: totals['total_sales'] ?? 0.0,
-          expectedClosingAmount: openingAmount + cashSales,
-        ),
+      final response = await ApiClient.dio.get(
+        ApiClient.getTotalSalesForCloseCashRegisterApi,
       );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true) {
+          final closeRegisterData = data['data'];
+          return Right(CloseRegisterModel.fromJson(closeRegisterData));
+        } else {
+          return Left(data['message'] ?? 'Failed to get sales total.');
+        }
+      } else {
+        return Left('Failed to get sales total: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return Left(
+          e.response?.data['message'] ??
+              'Failed to get sales total: ${e.message}',
+        );
+      } else {
+        return Left('Failed to get sales total: ${e.message}');
+      }
     } catch (e) {
-      return Left('Error getting sales total: $e');
+      return Left('An unexpected error occurred: $e');
     }
   }
+
+  // @override
+  // Future<Either<String, CloseRegisterModel>> getSalesTotal() async {
+  //   try {
+  //     final lastOpen = await DatabaseHelper().getLastOpenCashRegister();
+  //     if (lastOpen == null) {
+  //       return const Left("No open register found.");
+  //     }
+
+  //     final registerId = lastOpen['id'] as int;
+  //     final totals = await DatabaseHelper().calculateSalesTotal(registerId);
+  //     final openingAmount = (lastOpen['opening_amount'] as num).toDouble();
+  //     final cashSales = totals['cash_total'] ?? 0.0;
+
+  //     return Right(
+  //       CloseRegisterModel(
+  //         openingDate: lastOpen['opened_at'] as String,
+  //         openingAmount: openingAmount,
+  //         totalSales: totals['total_sales'] ?? 0.0,
+  //         expectedClosingAmount: openingAmount + cashSales,
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     return Left('Error getting sales total: $e');
+  //   }
+  // }
 
   @override
   Future<Either<String, CloseRegisterReportModel>>
