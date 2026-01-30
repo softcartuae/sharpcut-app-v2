@@ -449,7 +449,9 @@ class ReceiptWidget extends StatelessWidget {
             const DashedLine(),
             const DashedLine(),
             Text(
-              request.paymentStatus?.toUpperCase() ?? "UNKNOWN",
+              request.paymentStatus == "full"
+                  ? "PAID"
+                  : request.paymentStatus?.toUpperCase() ?? "UNKNOWN",
               textAlign: TextAlign.center,
               style: GoogleFonts.marcellus(
                 fontSize: 40,

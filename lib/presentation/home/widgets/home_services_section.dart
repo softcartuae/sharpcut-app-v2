@@ -110,6 +110,10 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       balanceAmount = serviceState.total;
       amount = 0.0;
     }
+    log("amount: $amount");
+    log("discount: $discount");
+    log("finalTotal: $finalTotal");
+    log("serviceState.total: ${serviceState.total}");
 
     final request = SettlePaymentRequestModel(
       paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : "full",
@@ -554,6 +558,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                       imagePath:
                                           service.image ??
                                           "lib/utils/images/hair_cut.png", // Placeholder image
+                                      cacheKey:
+                                          "${service.id}_${service.updatedAt}",
                                     ),
                                   );
                                 },
