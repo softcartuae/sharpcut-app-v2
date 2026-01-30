@@ -729,20 +729,35 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                   onTap: isBooked
                                       ? null
                                       : () async {
-                                          showPasswordForValidation(
-                                            showAdminToo: true,
-                                            context,
-                                            false,
-                                            onSuccessWithStaff: (staff) {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ScreenSearch(
-                                                        staff: staff,
+                                          final isSynced = await SyncToServer()
+                                              .isFullySynced();
+                                          isSynced.fold(
+                                            (l) => ToastHelper.showError(
+                                              "You can navigate only after sync",
+                                            ),
+                                            (r) {
+                                              if (r) {
+                                                showPasswordForValidation(
+                                                  showAdminToo: true,
+                                                  context,
+                                                  false,
+                                                  onSuccessWithStaff: (staff) {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            ScreenSearch(
+                                                              staff: staff,
+                                                            ),
                                                       ),
-                                                ),
-                                              );
+                                                    );
+                                                  },
+                                                );
+                                              } else {
+                                                ToastHelper.showError(
+                                                  "You can navigate only after sync",
+                                                );
+                                              }
                                             },
                                           );
                                         },
