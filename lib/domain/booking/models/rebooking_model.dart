@@ -5,8 +5,10 @@ class ResettleModel {
   final List<double>? amount;
   final List<double>? tenderCash;
   final List<double>? change;
+  final double? discount;
 
   ResettleModel({
+    this.discount,
     this.transactionId,
     this.collectedUserId,
     this.mode,
@@ -23,6 +25,7 @@ class ResettleModel {
       "amount": amount,
       "tender_cash": tenderCash,
       "change": change,
+      "discount": discount,
     };
   }
 }

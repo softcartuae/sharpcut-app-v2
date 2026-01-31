@@ -55,7 +55,7 @@ class SettlementDialog extends StatefulWidget {
     required this.settlePayment,
     required this.staffName,
     required this.bookingTime,
-   
+
     required this.cartItems,
     required this.chairId,
   });
@@ -142,7 +142,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     _staffNameController.text = widget.staffName ?? "";
     _vatController.text = (widget.settlePayment.taxTotal ?? 0.0)
         .toStringAsFixed(2);
-    _invoiceController.text =  "";
+    _invoiceController.text = "";
     // Calculate total quantity
     int totalQty = 0;
     if (widget.settlePayment.quantity != null) {
@@ -287,7 +287,10 @@ class _SettlementDialogState extends State<SettlementDialog> {
 
     log("paid $paid and finalTotal $finalTotal");
 
-    if (paid > finalTotal) {
+    log("discount $discount");
+    log("finalTotal + discount ${finalTotal + discount}");
+
+    if ((paid + discount) > finalTotal) {
       ToastHelper.showError("Total amount cannot be greater than Final Total");
       return;
     }
@@ -839,7 +842,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                             ),
                                         inputFormatters: [
                                           FilteringTextInputFormatter.allow(
-                                            RegExp(r'^\d+\.?\d{0,2}'),
+                                            RegExp(r'^\d*\.?\d{0,2}'),
                                           ),
                                         ],
                                       ),

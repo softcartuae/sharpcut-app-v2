@@ -393,7 +393,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Expanded(child: ReportDataTable()),
+                    Expanded(child: ReportDataTable(staff: widget.staff)),
                   ],
                 ),
               ),

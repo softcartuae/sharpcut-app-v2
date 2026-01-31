@@ -23,7 +23,7 @@ class SettlementSimpleInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 40,
+      height: 35,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
@@ -45,7 +45,7 @@ class SettlementSimpleInput extends StatelessWidget {
         style: GoogleFonts.rajdhani(color: Colors.white),
         decoration: const InputDecoration(
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           isDense: true,
         ),
         onChanged: onChanged,
