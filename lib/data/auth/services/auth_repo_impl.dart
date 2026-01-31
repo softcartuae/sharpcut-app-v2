@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
@@ -16,11 +16,11 @@ class AuthRepoImpl implements AuthRepo {
     try {
       String? token;
 
-      // try {
-      //   token = await FirebaseMessaging.instance.getToken();
-      // } catch (e) {
-      //   log(e.toString());
-      // }
+      try {
+        token = await FirebaseMessaging.instance.getToken();
+      } catch (e) {
+        log(e.toString());
+      }
 
       final response = await ApiClient.dio.post(
         ApiClient.loginApi,
