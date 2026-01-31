@@ -101,7 +101,7 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
                               ),
                               isExpanded: true,
                               hint: Text(
-                                "Select Admin",
+                                "Select User",
                                 style: GoogleFonts.rajdhani(
                                   color: Colors.white.withAlpha(179),
                                   fontSize: 16,

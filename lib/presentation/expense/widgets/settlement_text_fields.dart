@@ -25,7 +25,7 @@ class SettlementSimpleInput extends StatelessWidget {
     return Container(
       height: 35,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
         border: GradientBoxBorder(
           gradient: LinearGradient(
