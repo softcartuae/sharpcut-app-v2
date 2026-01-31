@@ -180,29 +180,26 @@ class BookingRepoImp implements BookingRepo {
     ResettleModel request,
   ) async {
     try {
-      final response = await ApiClient.dio.post(
-        ApiClient.reSettlementPayment,
-        data: request.toJson(),
+      // Update local database
+      await DatabaseHelper().reSettlePayment(request);
+
+      // Fetch updated transaction details
+      final transactionData = await DatabaseHelper().getBookingDetails(
+        request.transactionId!,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          return Right(SettlePaymentResponseModel.fromJson(data));
-        } else {
-          return Left(data['message'] ?? 'Payment settlement failed');
-        }
-      } else {
-        return Left('Failed to settle payment: ${response.statusCode}');
+      BookingResponseModel? bookingResponse;
+      if (transactionData != null) {
+        bookingResponse = BookingResponseModel.fromJson(transactionData);
       }
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error settling payment: ${e.message}');
+
+      return Right(
+        SettlePaymentResponseModel(
+          bookingResponse: bookingResponse,
+          success: true,
+          message: 'Payment resettlement successful',
+        ),
+      );
     } catch (e) {
       return Left('Error settling payment: $e');
     }

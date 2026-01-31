@@ -27,7 +27,6 @@ import 'package:sharp_cut/data/printing/service/printing_service.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/domain/report/report_repo.dart';
 import 'package:sharp_cut/data/report/report_repo_imp.dart';
-import 'package:sharp_cut/data/report/service/report_service.dart';
 
 import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
 import 'package:sharp_cut/domain/quick_report/service/quick_report_repo.dart';
@@ -104,7 +103,9 @@ Future<void> init() async {
   sl.registerLazySingleton<PrintingRepo>(
     () => PrintingRepoImp(PrintingService()),
   );
-  sl.registerLazySingleton<ReportRepo>(() => ReportRepoImp(ReportService()));
+  sl.registerLazySingleton<ReportRepo>(
+    () => ReportRepoImp(sl<DatabaseHelper>()),
+  );
   sl.registerLazySingleton<QuickReportRepo>(
     () => QuickReportRepoImp(QuickReportService()),
   );
