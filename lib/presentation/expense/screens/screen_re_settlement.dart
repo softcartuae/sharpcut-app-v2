@@ -205,9 +205,14 @@ class _SettlementDialogState extends State<ResettlementScreen> {
         cardAmount = amount;
       }
     }
-
     final double curPayment = cashAmount + cardAmount;
-    final double balance = widget.balance;
+    final double discount = double.tryParse(_discountController.text) ?? 0.0;
+
+    // Balance is based on Net Total (Gross - Discount)
+    final double netTotal = _finalTotal - discount;
+
+    final double balance =
+        netTotal - (double.tryParse(_paidController.text) ?? 0.0) - curPayment;
 
     _curPaymentController.text = curPayment.toStringAsFixed(2);
     _balanceController.text = balance.toStringAsFixed(2);
@@ -761,7 +766,9 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                     const SizedBox(height: 5),
                                     SettlementRowInput(
                                       isReadOnly: !widget.isAdmin,
-                                      label: "P. Discount",
+                                      label: !widget.isAdmin
+                                          ? "P. Discount (Admin Only)"
+                                          : "P. Discount",
                                       controller: _discountController,
                                       onChanged: (val) =>
                                           _calculateFinalTotal(),
@@ -816,7 +823,13 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                             ),
                                           ),
                                           Text(
-                                            _finalTotal.toStringAsFixed(2),
+                                            (_finalTotal -
+                                                    (double.tryParse(
+                                                          _discountController
+                                                              .text,
+                                                        ) ??
+                                                        0.0))
+                                                .toStringAsFixed(2),
                                             style: GoogleFonts.rajdhani(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
