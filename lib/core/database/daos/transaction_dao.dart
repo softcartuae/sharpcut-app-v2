@@ -63,8 +63,9 @@ class TransactionDao {
         'discount': request.discount,
         'round_off': request.roundOff,
         'final_total': request.finalTotal,
-        'final_total_before': request.finalTotal,
-        'total_payment': request.finalTotal,
+        'final_total_before': request.finalTotalbefore ?? request.finalTotal,
+        'total_payment':
+            request.amount?.fold(0.0, (sum, item) => sum + item) ?? 0.0,
         'updated_at': DateFormatter.now(),
         'end_time': DateFormatter.now(),
         'is_synced': 0,

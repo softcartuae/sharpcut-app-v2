@@ -408,6 +408,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           listener: (context, state) {
             if (state is SyncSuccess) {
               ToastHelper.showSuccess(state.message);
+              if (_selectedButtonNotifier.value == "REPORT") {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ScreenQuickReport()),
+                );
+              }
             } else if (state is SyncError) {
               ToastHelper.showError(state.message);
             }
@@ -581,7 +587,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                       imagePath:
                                           service.image ??
                                           "lib/utils/images/hair_cut.png", // Placeholder image
-                                   
                                     ),
                                   );
                                 },
@@ -1317,40 +1322,51 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               ),
                             const SizedBox(height: 12),
                             if (!isBooked)
-                              Opacity(
-                                opacity: isBooked ? 0.5 : 1.0,
-                                child: ActionButton(
-                                  label: "REPORT",
-                                  isPrimary: selectedButton == "REPORT",
-                                  onTap: isBooked
-                                      ? null
-                                      : () async {
-                                          _selectedButtonNotifier.value =
-                                              "REPORT";
-                                          final isSynced = await SyncToServer()
-                                              .isFullySynced();
-                                          isSynced.fold(
-                                            (l) => ToastHelper.showError(
-                                              "You can navigate only after sync",
-                                            ),
-                                            (r) {
-                                              if (r) {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ScreenQuickReport(),
-                                                  ),
-                                                );
-                                              } else {
-                                                ToastHelper.showError(
-                                                  "You can navigate only after sync",
-                                                );
-                                              }
-                                            },
-                                          );
-                                        },
-                                ),
+                              BlocBuilder<SyncCubit, SyncState>(
+                                builder: (context, state) {
+                                  return ActionButton(
+                                    label: "REPORT",
+                                    isPrimary: selectedButton == "REPORT",
+                                    isLoading:
+                                        state is SyncLoading &&
+                                        selectedButton == "REPORT",
+                                    onTap: isBooked
+                                        ? null
+                                        : () async {
+                                            _selectedButtonNotifier.value =
+                                                "REPORT";
+                                            final isSynced =
+                                                await SyncToServer()
+                                                    .isFullySynced();
+                                            isSynced.fold(
+                                              (l) => ToastHelper.showError(
+                                                "You can navigate only after sync",
+                                              ),
+                                              (r) {
+                                                if (r) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          ScreenQuickReport(),
+                                                    ),
+                                                  );
+                                                } else {
+                                                  ToastHelper.showToast(
+                                                    msg:
+                                                        "Syncing data first...",
+                                                    backgroundColor:
+                                                        Colors.orange,
+                                                  );
+                                                  context
+                                                      .read<SyncCubit>()
+                                                      .syncTransactions();
+                                                }
+                                              },
+                                            );
+                                          },
+                                  );
+                                },
                               ),
                             const SizedBox(height: 12),
                             if (!isBooked)
@@ -1411,7 +1427,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               BlocBuilder<SyncCubit, SyncState>(
                                 builder: (context, state) {
                                   return ActionButton(
-                                    isLoading: state is SyncLoading,
+                                    isLoading:
+                                        selectedButton == "SYNC" &&
+                                        state is SyncLoading,
                                     label: "SYNC",
                                     isPrimary: selectedButton == "SYNC",
                                     onTap: isBooked

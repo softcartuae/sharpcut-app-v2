@@ -113,7 +113,6 @@ class SyncToServer {
           "invoice_date": transaction['invoice_date'],
           "status": transaction['status'],
           "cancellation_reason": transaction['cancellation_reason'],
-
           "detail_id": detailIds,
           "service_id": serviceIds,
           "quantity": quantities,
@@ -124,7 +123,6 @@ class SyncToServer {
           "tax": taxes,
           "sub_total": subTotals,
           "is_tip": isTips,
-
           "payment_id": paymentIds,
           "collected_user_id": collectedUserIds,
           "mode": modes,

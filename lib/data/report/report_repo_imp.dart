@@ -134,6 +134,13 @@ class ReportRepoImp implements ReportRepo {
         );
         mutableTransaction['payments'] = paymentsResult;
 
+        // Deduct Discount from Final Total as requested
+        final double currentFinalTotal =
+            (mutableTransaction['final_total'] as num?)?.toDouble() ?? 0.0;
+        final double currentDiscount =
+            (mutableTransaction['discount'] as num?)?.toDouble() ?? 0.0;
+        mutableTransaction['final_total'] = currentFinalTotal - currentDiscount;
+
         // Map to Model
         transactions.add(BookingResponseModel.fromJson(mutableTransaction));
       }
