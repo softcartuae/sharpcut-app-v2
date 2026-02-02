@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:sharp_cut/core/database/database_helper.dart';
+// import 'package:sharp_cut/core/database/database_helper.dart';
 
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +23,12 @@ import 'package:sharp_cut/utils/simple_bloc_observer.dart';
 
 import 'package:sharp_cut/utils/theme.dart';
 import 'package:sharp_cut/presentation/login/screens/screen_login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:sharp_cut/firebase_push/firebase_push_service.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:sharp_cut/data/firebase_api.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+// import 'dart:convert';
+// import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:sharp_cut/firebase_push/firebase_push_service.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:sharp_cut/data/firebase_api.dart';
 import 'package:sharp_cut/injection_container.dart' as di;
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -73,15 +73,15 @@ void main() async {
       ),
     );
 
-    Future.microtask(() async {
-      try {
-        await Firebase.initializeApp();
-        await FirebaseApi().initNotifications();
-        log("Firebase initilazation completed successfully");
-      } catch (e) {
-        log('Firebase skipped on this device: $e');
-      }
-    });
+    // Future.microtask(() async {
+    //   try {
+    //     await Firebase.initializeApp();
+    //     await FirebaseApi().initNotifications();
+    //     log("Firebase initilazation completed successfully");
+    //   } catch (e) {
+    //     log('Firebase skipped on this device: $e');
+    //   }
+    // });
   } catch (e, stackTrace) {
     log('Initialization failed', error: e, stackTrace: stackTrace);
     runApp(
@@ -116,7 +116,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkBackgroundNotification();
+    // _checkBackgroundNotification();
   }
 
   @override
@@ -128,41 +128,41 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _checkBackgroundNotification();
+      // _checkBackgroundNotification();
     }
   }
 
-  Future<void> _checkBackgroundNotification() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.reload();
-      final notificationDataString = prefs.getString(
-        'background_notification_data',
-      );
+  // Future<void> _checkBackgroundNotification() async {
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     await prefs.reload();
+  //     final notificationDataString = prefs.getString(
+  //       'background_notification_data',
+  //     );
 
-      if (notificationDataString != null) {
-        log('Found background notification data: $notificationDataString');
-        final Map<String, dynamic> data = jsonDecode(notificationDataString);
-        final message = RemoteMessage(data: data);
-        if (mounted) {
-          // Use the navigatorKey context or the current context if available
-          final context = navigatorKey.currentContext;
-          if (context != null) {
-            FirebasePushService.callingApiAndChangeStateByPushNotification(
-              message,
-              context,
-            );
-            // Clear the data after processing
-            await prefs.remove('background_notification_data');
-          }
-        }
-      } else {
-        log("No background notification data found");
-      }
-    } catch (e) {
-      log('Error checking background notification: $e');
-    }
-  }
+  //     if (notificationDataString != null) {
+  //       log('Found background notification data: $notificationDataString');
+  //       final Map<String, dynamic> data = jsonDecode(notificationDataString);
+  //       final message = RemoteMessage(data: data);
+  //       if (mounted) {
+  //         // Use the navigatorKey context or the current context if available
+  //         final context = navigatorKey.currentContext;
+  //         if (context != null) {
+  //           FirebasePushService.callingApiAndChangeStateByPushNotification(
+  //             message,
+  //             context,
+  //           );
+  //           // Clear the data after processing
+  //           await prefs.remove('background_notification_data');
+  //         }
+  //       }
+  //     } else {
+  //       log("No background notification data found");
+  //     }
+  //   } catch (e) {
+  //     log('Error checking background notification: $e');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

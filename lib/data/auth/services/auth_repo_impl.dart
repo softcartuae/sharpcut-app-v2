@@ -17,11 +17,11 @@ class AuthRepoImpl implements AuthRepo {
     try {
       String? token;
 
-      try {
-        token = await FirebaseMessaging.instance.getToken();
-      } catch (e) {
-        log(e.toString());
-      }
+      // try {
+      //   token = await FirebaseMessaging.instance.getToken();
+      // } catch (e) {
+      //   log(e.toString());
+      // }
 
       final response = await ApiClient.dio.post(
         ApiClient.loginApi,
