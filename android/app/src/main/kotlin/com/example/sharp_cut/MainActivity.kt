@@ -18,6 +18,8 @@ import java.net.Socket
 import java.io.OutputStream
 import java.util.UUID
 
+import android.os.PowerManager
+
 class MainActivity : FlutterActivity() {
 
     private val USB_CHANNEL = "com.example.sharp_cut/usb_printer"
@@ -26,6 +28,10 @@ class MainActivity : FlutterActivity() {
     private val EVENT_CHANNEL = "com.example.sharp_cut/printer_status"
     
     private val ACTION_USB_PERMISSION = "com.example.sharp_cut.USB_PERMISSION"
+
+    // Power Manager Variables
+    private var powerManager: PowerManager? = null
+    private var wakeLock: PowerManager.WakeLock? = null
 
     // USB Variables
     private lateinit var usbManager: UsbManager
@@ -49,7 +55,11 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
+        super.configureFlutterEngine(flutterEngine)
+
         usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+        powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = powerManager?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SharpCut::PrinterWakeLock")
 
         // USB Channel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, USB_CHANNEL).setMethodCallHandler { call, result ->
@@ -157,9 +167,9 @@ class MainActivity : FlutterActivity() {
         try {
             unregisterReceiver(usbReceiver)
         } catch (_: Exception) {}
-        disconnectUsb()
-        disconnectBluetooth()
-        disconnectNetwork()
+        // disconnectUsb()
+        // disconnectBluetooth()
+        // disconnectNetwork()
         try {
             unregisterReceiver(disconnectionReceiver)
         } catch (_: Exception) {}
@@ -289,6 +299,11 @@ class MainActivity : FlutterActivity() {
             usbInterface = foundInterface
             usbEndpoint = foundEndpoint
             connectedUsbDevice = device
+            usbConnection = connection
+            usbInterface = foundInterface
+            usbEndpoint = foundEndpoint
+            connectedUsbDevice = device
+            acquireWakeLock()
             result.success(true)
 
         } catch (e: Exception) {
@@ -324,8 +339,22 @@ class MainActivity : FlutterActivity() {
         return true
     }
 
+    private fun acquireWakeLock() {
+        if (wakeLock?.isHeld == false) {
+            wakeLock?.acquire()
+        }
+    }
+
+    private fun releaseWakeLock() {
+        if (wakeLock?.isHeld == true) {
+            wakeLock?.release()
+        }
+    }
+
     private fun disconnectUsb() {
         try {
+            releaseWakeLock()
+            usbConnection?.releaseInterface(usbInterface)
             usbConnection?.releaseInterface(usbInterface)
             usbConnection?.close()
         } catch (_: Exception) {}
@@ -379,7 +408,11 @@ class MainActivity : FlutterActivity() {
                 }
                 
                 bluetoothSocket = socket
-                runOnUiThread { result.success(true) }
+                bluetoothSocket = socket
+                runOnUiThread {
+                    acquireWakeLock()
+                    result.success(true)
+                }
             } catch (e: Exception) {
                 runOnUiThread { result.error("CONNECTION_FAILED", e.message, null) }
             }
@@ -405,6 +438,7 @@ class MainActivity : FlutterActivity() {
 
     private fun disconnectBluetooth() {
         try {
+            releaseWakeLock()
             bluetoothSocket?.close()
         } catch (_: Exception) {}
         bluetoothSocket = null
@@ -421,7 +455,12 @@ class MainActivity : FlutterActivity() {
                 socket.connect(java.net.InetSocketAddress(ip, port), 5000) // 5s timeout
                 networkSocket = socket
                 networkOutputStream = socket.getOutputStream()
-                runOnUiThread { result.success(true) }
+                networkSocket = socket
+                networkOutputStream = socket.getOutputStream()
+                runOnUiThread {
+                    acquireWakeLock()
+                    result.success(true)
+                }
             } catch (e: Exception) {
                 runOnUiThread { result.error("CONNECTION_FAILED", e.message, null) }
             }
@@ -447,6 +486,7 @@ class MainActivity : FlutterActivity() {
 
     private fun disconnectNetwork() {
         try {
+            releaseWakeLock()
             networkOutputStream?.close()
             networkSocket?.close()
         } catch (_: Exception) {}

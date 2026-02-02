@@ -366,6 +366,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
       discount: discount,
       roundOff: 0,
       finalTotal: finalTotal,
+      finalTotalbefore: widget.settlePayment.finalTotalbefore,
       serviceId: widget.settlePayment.serviceId,
       quantity: widget.settlePayment.quantity,
       rate: widget.settlePayment.rate,

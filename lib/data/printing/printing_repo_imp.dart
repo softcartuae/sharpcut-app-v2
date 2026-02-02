@@ -199,7 +199,6 @@ class PrintingRepoImp implements PrintingRepo {
     bool openDrawer = false,
   }) async {
     try {
-      
       final profile = await CapabilityProfile.load();
       final paperSize = await getPaperSize();
       final generator = Generator(paperSize.generatorPaperSize, profile);
@@ -283,7 +282,6 @@ class PrintingRepoImp implements PrintingRepo {
         if (i < copies - 1) {
           await Future.delayed(const Duration(milliseconds: 500));
         }
-
       }
     } catch (e) {
       log(e.toString());
@@ -698,5 +696,55 @@ class PrintingRepoImp implements PrintingRepo {
     } catch (e) {
       return Left(e.toString());
     }
+  }
+
+  @override
+  Future<void> saveLastConnectedPrinter(Printer printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_printer_name', printer.name ?? '');
+    await prefs.setString('last_printer_vendor', printer.vendorId ?? '');
+    await prefs.setString('last_printer_product', printer.productId ?? '');
+    await prefs.setString('last_printer_address', printer.address ?? '');
+    await prefs.setInt('last_printer_type', printer.connectionType?.index ?? 0);
+  }
+
+  @override
+  Future<Printer?> getLastConnectedPrinter() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey('last_printer_type')) return null;
+
+    final typeIndex = prefs.getInt('last_printer_type');
+    final type = ConnectionType.values[typeIndex!];
+    final name = prefs.getString('last_printer_name');
+    final vendor = prefs.getString('last_printer_vendor');
+    final product = prefs.getString('last_printer_product');
+    final address = prefs.getString('last_printer_address');
+
+    return Printer(
+      name: name,
+      vendorId: vendor,
+      productId: product,
+      address: address,
+      connectionType: type,
+    );
+  }
+
+  @override
+  Future<void> clearLastConnectedPrinter() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('last_printer_name');
+    await prefs.remove('last_printer_vendor');
+    await prefs.remove('last_printer_product');
+    await prefs.remove('last_printer_address');
+    await prefs.remove('last_printer_type');
+  }
+
+  @override
+  Future<void> sendHeartbeat(Printer printer) async {
+    // DLE EOT 1 : Real-time status transmission
+    // Bytes: 16 (DLE), 4 (EOT), 1 (Recoverable error status) - or just 1 for general status
+    // Common ESC/POS keep-alive
+    final bytes = Uint8List.fromList([16, 4, 1]);
+    await _printBytes(printer, bytes);
   }
 }

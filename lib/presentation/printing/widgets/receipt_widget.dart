@@ -24,7 +24,7 @@ class ReceiptWidget extends StatelessWidget {
   const ReceiptWidget({
     super.key,
     required this.staffName,
-    required this.invoiceNumber,
+    required this.invoiceNumber, 
     required this.bookingTime,
     required this.shopData,
     required this.request,
@@ -395,24 +395,25 @@ class ReceiptWidget extends StatelessWidget {
 
             // Totals
             _buildTotalRow(
-              'Before VAT - المجموع قبل الضريبة',
-              (request.subTotalValue ?? 0).toStringAsFixed(2),
+              'Sub Total - المجموع الفرعي',
+              (request.finalTotalbefore ?? 0).toStringAsFixed(2),
             ),
-            _buildTotalRow(
-              'Incl VAT - المجموع شامل الضريبة',
-              (request.finalTotal ?? 0).toStringAsFixed(2),
-            ), // Assuming final total is incl VAT
-
             _buildTotalRow(
               'Discount - الخصم',
               (request.discount ?? 0).toStringAsFixed(2),
             ),
+
             _buildTotalRow(
-              'Sub Total - المجموع الفرعي',
+              'Before VAT - المجموع قبل الضريبة',
               (request.subTotalValue ?? 0).toStringAsFixed(2),
             ),
+
+            // _buildTotalRow(
+            //   'Incl VAT - المجموع شامل الضريبة',
+            //   (request.finalTotal ?? 0).toStringAsFixed(2),
+            // ), // Assuming final total is incl VAT
             _buildTotalRow(
-              'VAT Amount - قيمة الضريبة',
+              'VAT (5%) Amount - قيمة الضريبة',
               (request.taxTotal ?? 0).toStringAsFixed(2),
             ),
 

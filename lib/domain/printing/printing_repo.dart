@@ -85,4 +85,9 @@ abstract class PrintingRepo {
     required String printerName,
     required int size,
   });
+
+  Future<void> saveLastConnectedPrinter(Printer printer);
+  Future<Printer?> getLastConnectedPrinter();
+  Future<void> clearLastConnectedPrinter();
+  Future<void> sendHeartbeat(Printer printer);
 }
