@@ -20,6 +20,7 @@ class BookingResponseModel {
   final double? subtotal;
   final double? taxTotal;
   final double? finalTotal;
+  final double? finalTotalbefore;
   final String? paymentStatus;
   final double? totalPayment;
   final String? endTime;
@@ -47,6 +48,7 @@ class BookingResponseModel {
     this.payments,
     this.discount,
     this.endTime,
+    this.finalTotalbefore,
   });
 
   factory BookingResponseModel.fromJson(Map<String, dynamic> json) {
@@ -70,6 +72,7 @@ class BookingResponseModel {
       paymentStatus: json['payment_status'],
       totalPayment: toDouble(json['total_payment']),
       endTime: json['end_time'],
+      finalTotalbefore: toDouble(json['final_total_before']),
       details: json['details'] != null
           ? (json['details'] as List)
                 .map((e) => BookingDetail.fromJson(e))

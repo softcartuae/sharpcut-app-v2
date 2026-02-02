@@ -20,12 +20,14 @@ class PrintingCubit extends Cubit<PrintingState> {
   final PrintingRepo _printingRepo;
   StreamSubscription? _printerSubscription;
   StreamSubscription? _statusSubscription;
+  Timer? _heartbeatTimer;
 
   PrintingCubit(this._printingRepo) : super(PrintingState()) {
     loadPrinterSettings();
     _listenToPrinterStatus();
     getPrintingMode();
     getPaperSize();
+    _tryAutoConnect();
   }
 
   void _listenToPrinterStatus() {
@@ -79,6 +81,8 @@ class PrintingCubit extends Cubit<PrintingState> {
             showPaperSizeDialog: !hasPaperSize,
           ),
         );
+        _printingRepo.saveLastConnectedPrinter(printer);
+        _startHeartbeat();
       } else {
         emit(
           state.copyWith(
@@ -110,6 +114,8 @@ class PrintingCubit extends Cubit<PrintingState> {
             clearConnectedPrinter: true,
           ),
         );
+        _stopHeartbeat();
+        _printingRepo.clearLastConnectedPrinter();
       } catch (e) {
         emit(
           state.copyWith(
@@ -515,10 +521,34 @@ class PrintingCubit extends Cubit<PrintingState> {
     );
   }
 
+  Future<void> _tryAutoConnect() async {
+    final lastPrinter = await _printingRepo.getLastConnectedPrinter();
+    if (lastPrinter != null) {
+      log("Auto-connecting to: ${lastPrinter.name}");
+      connect(lastPrinter);
+    }
+  }
+
+  void _startHeartbeat() {
+    _stopHeartbeat();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (state.connectedPrinter != null &&
+          state.status == PrintingStatus.connected) {
+        _printingRepo.sendHeartbeat(state.connectedPrinter!);
+      }
+    });
+  }
+
+  void _stopHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+  }
+
   @override
   Future<void> close() {
     _printerSubscription?.cancel();
     _statusSubscription?.cancel();
+    _stopHeartbeat();
     return super.close();
   }
 }

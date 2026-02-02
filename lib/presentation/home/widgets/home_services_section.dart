@@ -98,6 +98,10 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     double finalTotal,
     int? chairId,
   ) {
+    if ((discount) > finalTotal) {
+      ToastHelper.showError("Total amount cannot be greater than Final Total");
+      return;
+    }
     // calculate the amount after discount
     double amount = serviceState.total - discount;
     // if user click unpaid then make the amount zero and the payment methord zero;
@@ -108,7 +112,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       log("unpaid is selected");
       balanceAmount = serviceState.total;
       amount = 0.0;
-    }
+    } else {}
+
     log("amount: $amount");
     log("discount: $discount");
     log("finalTotal: $finalTotal");
@@ -124,6 +129,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       discount: discount,
       roundOff: 0.0,
       finalTotal: finalTotal,
+      finalTotalbefore: finalTotal + discount,
       serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
       quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
       rate: serviceState.cartItems.map((e) => e.service.price ?? 0.0).toList(),
@@ -407,6 +413,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               flex: 3,
               child: SingleChildScrollView(
                 child: BlocBuilder<ServiceCubit, ServiceState>(
+                  buildWhen: (p, c) {
+                    if (p is ServiceStateSuccess && c is ServiceStateSuccess) {
+                      return p.categories != c.categories ||
+                          p.selectedCategoryId != c.selectedCategoryId;
+                    }
+                    return true;
+                  },
                   builder: (context, state) {
                     List<Widget> categories = [];
                     if (state is ServiceStateSuccess) {
@@ -476,6 +489,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                         backgroundImageUrl: "lib/utils/images/Card.png",
                         padding: const EdgeInsets.all(16),
                         child: BlocBuilder<ServiceCubit, ServiceState>(
+                          buildWhen: (previous, current) {
+                            if (previous is ServiceStateSuccess &&
+                                current is ServiceStateSuccess) {
+                              return previous.services != current.services ||
+                                  previous.isLoadingServices !=
+                                      current.isLoadingServices;
+                            }
+                            return true;
+                          },
                           builder: (context, state) {
                             if (state is ServiceStateSuccess) {
                               if (state.isLoadingServices) {
@@ -548,8 +570,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                       imagePath:
                                           service.image ??
                                           "lib/utils/images/hair_cut.png", // Placeholder image
-                                      cacheKey:
-                                          "${service.id}_${service.updatedAt}",
+                                   
                                     ),
                                   );
                                 },
@@ -1135,6 +1156,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
                                             SettlePaymentRequestModel
                                             request = SettlePaymentRequestModel(
+                                              finalTotalbefore:
+                                                  serviceState.total + 0,
                                               transactionId: transactionId,
                                               customerName:
                                                   bookingFormState.customerName,

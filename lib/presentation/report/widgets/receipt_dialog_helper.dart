@@ -27,6 +27,7 @@ void showReceiptDialog(
 
   // Map BookingResponseModel to SettlePaymentRequestModel
   final request = SettlePaymentRequestModel(
+    finalTotalbefore: booking.finalTotalbefore,
     customerName: booking.customerName,
     customerNumber: booking.customerNumber,
 
