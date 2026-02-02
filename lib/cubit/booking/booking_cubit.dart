@@ -125,12 +125,14 @@ class BookingCubit extends Cubit<BookingState> {
 
   Future<void> updatePaymentMode({
     required int paymentId,
+    required int transactionId,
     required String mode,
     required double amount,
   }) async {
     emit(BookingLoading());
     final result = await bookingRepo.updatePaymentMode(
       paymentId: paymentId,
+      transactionId: transactionId,
       mode: mode,
       amount: amount,
     );

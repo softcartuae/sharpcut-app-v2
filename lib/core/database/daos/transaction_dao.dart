@@ -63,6 +63,7 @@ class TransactionDao {
         'discount': request.discount,
         'round_off': request.roundOff,
         'final_total': request.finalTotal,
+        'final_total_before': request.finalTotal,
         'total_payment': request.finalTotal,
         'updated_at': DateFormatter.now(),
         'end_time': DateFormatter.now(),
@@ -451,20 +452,81 @@ class TransactionDao {
     log("Transaction $transactionId cancelled");
   }
 
-  Future<void> updatePaymentMode(
-    int paymentId,
-    String mode,
-    double amount,
-  ) async {
-    log("Updating payment $paymentId mode to $mode");
-    final db = await _dbFuture;
-    await db.update(
-      'transaction_payments',
-      {'mode': mode, 'amount': amount},
-      where: 'id = ?',
-      whereArgs: [paymentId],
+  Future<void> updatePaymentMode({
+    required int paymentId,
+    required int transactionId,
+    required String mode,
+    required double amount,
+  }) async {
+    log(
+      "Updating payment $paymentId for transaction $transactionId. New Mode: $mode, New Amount: $amount",
     );
-    log("Payment $paymentId updated");
+    final db = await _dbFuture;
+
+    await db.transaction((txn) async {
+      // 1. Fetch Transaction Final Total
+      final transactionResult = await txn.query(
+        'transactions',
+        columns: ['final_total'],
+        where: 'id = ?',
+        whereArgs: [transactionId],
+      );
+
+      if (transactionResult.isEmpty) {
+        throw Exception("Transaction $transactionId not found");
+      }
+
+      final finalTotal =
+          (transactionResult.first['final_total'] as num?)?.toDouble() ?? 0.0;
+
+      // 2. Calculate Sum of OTHER payments
+      final otherPaymentsResult = await txn.rawQuery(
+        'SELECT SUM(amount) as total FROM transaction_payments WHERE transaction_id = ? AND id != ?',
+        [transactionId, paymentId],
+      );
+
+      final otherPaymentsTotal =
+          (otherPaymentsResult.first['total'] as num?)?.toDouble() ?? 0.0;
+
+      final potentialTotal = otherPaymentsTotal + amount;
+
+      // 3. Validate
+      if (potentialTotal > finalTotal) {
+        throw Exception(
+          "Total payment ($potentialTotal) exceeds transaction total ($finalTotal).",
+        );
+      }
+
+      // 4. Update the Payment
+      await txn.update(
+        'transaction_payments',
+        {'mode': mode, 'amount': amount, 'updated_at': DateFormatter.now()},
+        where: 'id = ?',
+        whereArgs: [paymentId],
+      );
+
+      // 5. Update Transaction Totals & Status
+      String newPaymentStatus = 'partial';
+      if (potentialTotal >= finalTotal) {
+        newPaymentStatus = 'full';
+      }
+
+      await txn.update(
+        'transactions',
+        {
+          'total_payment': potentialTotal,
+          'payment_status': newPaymentStatus,
+          'is_synced': 0, // Mark for sync
+          'updated_at': DateFormatter.now(),
+        },
+        where: 'id = ?',
+        whereArgs: [transactionId],
+      );
+
+      log(
+        "Payment updated successfully. New Transaction Total: $potentialTotal, Status: $newPaymentStatus",
+      );
+    });
   }
 
   Future<Map<String, dynamic>> getTransactionsForRegister(

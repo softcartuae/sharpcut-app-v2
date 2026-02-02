@@ -8,6 +8,7 @@ class TransactionEntity {
   final double? discount;
   final double? roundOff;
   final double? finalTotal;
+  final double? finalTotalBefore;
   final String? paymentStatus;
   final String? status;
   final String? createdAt;
@@ -22,6 +23,7 @@ class TransactionEntity {
     this.discount,
     this.roundOff,
     this.finalTotal,
+    this.finalTotalBefore,
     this.paymentStatus,
     this.status,
     this.createdAt,
@@ -38,6 +40,7 @@ class TransactionEntity {
       discount: (json['discount'] as num?)?.toDouble(),
       roundOff: (json['round_off'] as num?)?.toDouble(),
       finalTotal: (json['final_total'] as num?)?.toDouble(),
+      finalTotalBefore: (json['final_total_before'] as num?)?.toDouble(),
       paymentStatus: json['payment_status'] as String?,
       status: json['status'] as String?,
       createdAt: json['created_at'] as String?,
@@ -55,6 +58,7 @@ class TransactionEntity {
       'discount': discount,
       'round_off': roundOff,
       'final_total': finalTotal,
+      'final_total_before': finalTotalBefore,
       'payment_status': paymentStatus,
       'status': status,
       'created_at': createdAt,

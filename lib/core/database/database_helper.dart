@@ -177,6 +177,7 @@ class DatabaseHelper {
         before_vat_after REAL,
         tax_total_after REAL,
         final_total_after REAL,
+        final_total_before REAL,
         invoice_no TEXT NOT NULL,
         invoice_date TEXT NOT NULL,
         status TEXT NOT NULL,
@@ -307,8 +308,17 @@ class DatabaseHelper {
   Future<void> cancelBooking(int transactionId, String reason) =>
       transactionDao.cancelBooking(transactionId, reason);
 
-  Future<void> updatePaymentMode(int paymentId, String mode, double amount) =>
-      transactionDao.updatePaymentMode(paymentId, mode, amount);
+  Future<void> updatePaymentMode({
+    required int paymentId,
+    required int transactionId,
+    required String mode,
+    required double amount,
+  }) => transactionDao.updatePaymentMode(
+    paymentId: paymentId,
+    transactionId: transactionId,
+    mode: mode,
+    amount: amount,
+  );
 
   Future<Map<String, dynamic>> getTransactionsForRegister(
     String openedAt,

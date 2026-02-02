@@ -1,8 +1,6 @@
 import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/core/utils/date_formatter.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
@@ -208,25 +206,21 @@ class BookingRepoImp implements BookingRepo {
   @override
   Future<Either<String, String>> updatePaymentMode({
     required int paymentId,
+    required int transactionId,
     required String mode,
     required double amount,
   }) async {
     try {
-      await ApiClient.dio.post(
-        "${ApiClient.updatePaymentMode}/$paymentId/update-mode",
-        data: {"mode": mode, "amount": amount},
+      await DatabaseHelper().updatePaymentMode(
+        paymentId: paymentId,
+        transactionId: transactionId,
+        mode: mode,
+        amount: amount,
       );
       return const Right("Payment updated successfully");
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error updating payment: ${e.message}');
     } catch (e) {
-      return Left('Error updating payment: $e');
+      log('Error updating payment: $e');
+      return Left(e.toString().replaceAll("Exception: ", ""));
     }
   }
 }

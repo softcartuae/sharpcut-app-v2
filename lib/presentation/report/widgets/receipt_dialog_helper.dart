@@ -30,7 +30,6 @@ void showReceiptDialog(
     finalTotalbefore: booking.finalTotalbefore,
     customerName: booking.customerName,
     customerNumber: booking.customerNumber,
-
     paymentStatus: booking.paymentStatus,
     subTotalValue: booking.subtotal,
     taxTotal: booking.taxTotal,

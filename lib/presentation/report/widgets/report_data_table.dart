@@ -87,38 +87,35 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                   onEdit: (payment) {
                                                     showDialog(
                                                       context: context,
-                                                      builder: (context) =>
-                                                          PaymentEditDialog(
-                                                            invoiceNo:
-                                                                booking
-                                                                    .invoiceNo ??
-                                                                "",
-                                                            invoiceAmount:
-                                                                booking
-                                                                    .finalTotal ??
-                                                                0.0,
-                                                            currentMode:
-                                                                payment.mode ??
-                                                                "Cash",
-                                                            currentAmount:
-                                                                payment
-                                                                    .amount ??
-                                                                0.0,
-                                                            onUpdate: (mode, amount) {
-                                                              context
-                                                                  .read<
-                                                                    BookingCubit
-                                                                  >()
-                                                                  .updatePaymentMode(
-                                                                    paymentId:
-                                                                        payment
-                                                                            .id!,
-                                                                    mode: mode,
-                                                                    amount:
-                                                                        amount,
-                                                                  );
-                                                            },
-                                                          ),
+                                                      builder: (context) => PaymentEditDialog(
+                                                        invoiceNo:
+                                                            booking.invoiceNo ??
+                                                            "",
+                                                        invoiceAmount:
+                                                            booking
+                                                                .finalTotal ??
+                                                            0.0,
+                                                        currentMode:
+                                                            payment.mode ??
+                                                            "Cash",
+                                                        currentAmount:
+                                                            payment.amount ??
+                                                            0.0,
+                                                        onUpdate: (mode, amount) {
+                                                          context
+                                                              .read<
+                                                                BookingCubit
+                                                              >()
+                                                              .updatePaymentMode(
+                                                                paymentId:
+                                                                    payment.id!,
+                                                                transactionId:
+                                                                    booking.id!,
+                                                                mode: mode,
+                                                                amount: amount,
+                                                              );
+                                                        },
+                                                      ),
                                                     );
                                                   },
                                                 ),
@@ -151,7 +148,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
-                                                 finalTotalbefore: booking.finalTotalbefore,
+                                                finalTotalbefore:
+                                                    booking.finalTotalbefore,
                                                 paymentStatus:
                                                     booking.paymentStatus,
                                                 transactionId: booking.id,
@@ -286,7 +284,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
-                                                finalTotalbefore: booking.finalTotalbefore,
+                                                finalTotalbefore:
+                                                    booking.finalTotalbefore,
                                                 paymentStatus:
                                                     booking.paymentStatus,
                                                 transactionId: booking.id,
