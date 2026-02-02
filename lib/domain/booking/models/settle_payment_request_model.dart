@@ -8,6 +8,7 @@ class SettlePaymentRequestModel {
   final double? discount;
   final double? roundOff;
   final double? finalTotal;
+  final double? finalTotalbefore;
   final List<int>? serviceId;
   final List<int>? quantity;
   final List<double>? rate;
@@ -24,6 +25,7 @@ class SettlePaymentRequestModel {
   final List<double>? change;
 
   SettlePaymentRequestModel({
+    required this.finalTotalbefore,
     this.paymentStatus,
     this.transactionId,
     this.customerName,
@@ -51,6 +53,7 @@ class SettlePaymentRequestModel {
 
   Map<String, dynamic> toJson() {
     return {
+      
       "transaction_id": transactionId,
       "customer_name": customerName,
       "customer_number": customerNumber,
