@@ -206,6 +206,7 @@ class DatabaseHelper {
         tax_amount REAL DEFAULT 0.0,
         sub_total REAL NOT NULL,
         amount_total REAL NOT NULL,
+        currency TEXT DEFAULT 'AED',
         is_tip INTEGER DEFAULT 0,
         created_at TEXT,
         updated_at TEXT,
@@ -400,5 +401,19 @@ class DatabaseHelper {
     final result = await db.query(tableName);
     log("Fetched ${result.length} rows from $tableName");
     return result;
+  }
+
+  Future<bool> hasData() async {
+    final db = await database;
+
+    // // Check invoice settings first as it's a good indicator of setup
+    // final invoiceSettings = await db.query('invoice_settings', limit: 1);
+    // if (invoiceSettings.isNotEmpty) return true;
+
+    // Also check transactions
+    final transactions = await db.query('transactions', limit: 1);
+    if (transactions.isNotEmpty) return true;
+
+    return false;
   }
 }

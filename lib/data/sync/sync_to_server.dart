@@ -225,4 +225,78 @@ class SyncToServer {
       return Left("Error syncing cash register");
     }
   }
+
+  Future<Either<String, String>> syncTransactionsFromServer() async {
+    try {
+      log("Starting transaction pull from server...");
+      // Check if DB has data (if empty => first time/fresh install)
+      final hasData = await _dbHelper.hasData();
+
+      if (hasData) {
+        return const Right("No new transactions from server.");
+      }
+
+      final response = await ApiClient.dio.get(ApiClient.searchinvoiceApi);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+
+        if (data.isEmpty) {
+          return const Right("No new transactions from server.");
+        }
+
+        log("Received transactions from server.");
+
+        for (var item in data) {
+          await _processTransaction(item);
+        }
+
+        return Right("Pulled transactions successfully.");
+      } else {
+        return Left("Failed to pull transactions: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error pulling transactions: $e");
+      return Left("Error pulling transactions: $e");
+    }
+  }
+
+  Future<void> _processTransaction(Map<String, dynamic> transactionMap) async {
+    try {
+      // Extract details (services) and payments
+      final details =
+          (transactionMap['details'] as List<dynamic>?)
+              ?.map((e) => e as Map<String, dynamic>)
+              .toList() ??
+          [];
+
+      final payments =
+          (transactionMap['payments'] as List<dynamic>?)
+              ?.map((e) => e as Map<String, dynamic>)
+              .toList() ??
+          [];
+
+      // Prepare transaction data for DB (remove nested lists/objects)
+      final transactionForDb = Map<String, dynamic>.from(transactionMap);
+      transactionForDb.remove('details');
+      transactionForDb.remove('payments');
+      transactionForDb.remove('user'); // If user object is nested
+      transactionForDb.remove('chair'); // If chair object is nested
+
+      // Force is_synced to 1 because we just got it from server
+      transactionForDb['is_synced'] = 1;
+      
+
+      await _dbHelper.syncTransaction(
+        transactionData: transactionForDb,
+        services: details,
+        payments: payments,
+      );
+    } catch (e) {
+      log("Failed to sync transaction ${transactionMap['id']}: $e");
+    }
+  }
+
+
+
 }

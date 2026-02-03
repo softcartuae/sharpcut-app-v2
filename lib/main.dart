@@ -31,11 +31,43 @@ import 'package:sharp_cut/presentation/login/screens/screen_login.dart';
 // import 'package:sharp_cut/data/firebase_api.dart';
 import 'package:sharp_cut/injection_container.dart' as di;
 
+import 'package:workmanager/workmanager.dart';
+import 'package:sharp_cut/data/sync/sync_to_server.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// @pragma('vm:entry-point')
+// void callbackDispatcher() {
+//   Workmanager().executeTask((task, inputData) async {
+//     try {
+//       // Initialize necessary components
+//       await ApiClient.init(); // Ensure Dio/interceptors are ready
+
+//       final sync = SyncToServer();
+//       await sync.syncTransactionsToServer();
+//       log("Background sync completed successfully");
+//       return Future.value(true);
+//     } catch (e) {
+//       log("Background sync failed: $e");
+//       return Future.value(false);
+//     }
+//   });
+// }
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Workmanager().initialize(
+    //   callbackDispatcher,
+    // );
+
+    // Workmanager().registerPeriodicTask(
+    //   "1",
+    //   "simplePeriodicTask",
+    //   frequency: const Duration(minutes: 30),
+    //   constraints: Constraints(networkType: NetworkType.connected),
+    // );
 
     // await SystemChrome.setPreferredOrientations([
     //   DeviceOrientation.landscapeLeft,

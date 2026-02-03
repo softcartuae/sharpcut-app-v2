@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
+import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_input_section.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_services_section.dart';
@@ -21,6 +22,7 @@ class _ScreenHomeState extends State<ScreenHome> {
   void initState() {
     super.initState();
     context.read<ChairCubit>().getChairsAndStaffs();
+    SyncToServer().syncTransactionsFromServer();
   }
 
   @override

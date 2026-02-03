@@ -13,9 +13,17 @@ class ServiceRepoImpl implements ServiceRepo {
   @override
   Future<List<CategoryModel>> getCategories() async {
     try {
+
+      final hasData = await dbHelper.hasData();
+
+      Map<String, dynamic> data = {};
+      if (hasData) {
+        data['is_synced'] = 0;
+      }
+
       final response = await ApiClient.dio.get(
         ApiClient.serviceCategoriesApi,
-        queryParameters: {'is_synced': 0},
+        queryParameters: data,
       );
       if (response.statusCode == 200 && response.data['success'] == true) {
         final List<dynamic> data = response.data['data'];
@@ -61,13 +69,20 @@ class ServiceRepoImpl implements ServiceRepo {
   @override
   Future<List<ServiceModel>> getServices({int? categoryId}) async {
     try {
-      final Map<String, dynamic> queryParameters = {'is_synced': 0};
+
+      final hasData = await dbHelper.hasData();
+
+      Map<String, dynamic> data = {};
+      if (hasData) {
+        data['is_synced'] = 0;
+      }
+
       if (categoryId != null) {
-        queryParameters['category_id'] = categoryId;
+        data['category_id'] = categoryId;
       }
       final response = await ApiClient.dio.get(
         ApiClient.servicesApi,
-        queryParameters: queryParameters,
+        queryParameters: data,
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {

@@ -86,6 +86,7 @@ class ApiClient {
   static final cashRegisterCheckApi = "api/cash-registers/check";
   static final openCashRegisterApi = "api/cash-registers/open";
   static final closeCashRegisterApi = "api/cash-registers/close";
+   static final searchinvoiceApi = '/api/transactions/search';
   static final getTotalSalesForCloseCashRegisterApi =
       "api/cash-registers/sales-total";
   static final printerSettingsApi = "api/settings";

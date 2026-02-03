@@ -188,7 +188,13 @@ class TransactionDao {
       // 1. Fetch current transaction details
       final transactionResult = await txn.query(
         'transactions',
-        columns: ['grand_total', 'tax_total', 'round_off', 'final_total', 'final_total_before'],
+        columns: [
+          'grand_total',
+          'tax_total',
+          'round_off',
+          'final_total',
+          'final_total_before',
+        ],
         where: 'id = ?',
         whereArgs: [request.transactionId],
       );
@@ -206,9 +212,12 @@ class TransactionDao {
       final newDiscount = request.discount ?? 0.0;
       double? newGrandTotalAfter;
       double? newTaxTotalAfter;
-      if (newDiscount != 0) {
-        newGrandTotalAfter = finalTotal / 1.05;
-        newTaxTotalAfter = finalTotal - newGrandTotalAfter;
+
+      double netTotal = finalTotal;
+      if (newDiscount > 0) {
+        netTotal = finalTotal - newDiscount;
+        newGrandTotalAfter = netTotal / 1.05;
+        newTaxTotalAfter = netTotal - newGrandTotalAfter;
       }
 
       log("newGrandTotalAfter: $newGrandTotalAfter");
@@ -279,7 +288,6 @@ class TransactionDao {
       log(
         "Resettled transaction ${request.transactionId}. New Final: $finalTotal, Paid: $newTotalPayment, Status: $newPaymentStatus",
       );
-      
     });
   }
 
@@ -311,6 +319,7 @@ class TransactionDao {
       Batch serviceBatch = txn.batch();
       for (var service in services) {
         var serviceData = Map<String, dynamic>.from(service);
+        serviceData.remove('service');
         serviceData['transaction_id'] = transactionId;
         if (serviceData['detail_id'] == null) {
           serviceData['detail_id'] = generateUniqueInt();

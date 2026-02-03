@@ -34,9 +34,17 @@ class ChairRepoImpl implements ChairRepo {
     log("getChairsAndStaffs called");
     try {
       // 1. Try fetching from API
+
+      final hasData = await dbHelper.hasData();
+
+      Map<String, dynamic> data = {'users': true};
+      if (hasData) {
+        data['is_synced'] = 0;
+      }
+
       final response = await ApiClient.dio.get(
         ApiClient.chairsApi,
-        queryParameters: {'users': true, 'is_synced': 0},
+        queryParameters: data,
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
@@ -46,9 +54,7 @@ class ChairRepoImpl implements ChairRepo {
         final List<dynamic> adminJson = data['admins'];
 
         // 2. Parse Data
-        final chairs = chairsJson
-            .map((json) => ChairModel.fromJson(json))
-            .toList();
+      
 
         final staffs = usersJson
             .map((json) => StaffModel.fromJson(json, role: Role.staff))
@@ -112,53 +118,7 @@ class ChairRepoImpl implements ChairRepo {
           } catch (e) {
             log("Failed to acknowledge sync: $e");
           }
-          // Sync Active Transactions
-          for (var chairJson in chairsJson) {
-            if (chairJson['transaction'] != null) {
-              try {
-                final transactionMap =
-                    chairJson['transaction'] as Map<String, dynamic>;
-
-                // Extract details (services) and payments
-                final details =
-                    (transactionMap['details'] as List<dynamic>?)
-                        ?.map((e) => e as Map<String, dynamic>)
-                        .toList() ??
-                    [];
-
-                final payments =
-                    (transactionMap['payments'] as List<dynamic>?)
-                        ?.map((e) => e as Map<String, dynamic>)
-                        .toList() ??
-                    [];
-
-                // Prepare transaction data for DB (remove nested lists/objects)
-                final transactionForDb = Map<String, dynamic>.from(
-                  transactionMap,
-                );
-                transactionForDb.remove('details');
-                transactionForDb.remove('payments');
-                transactionForDb.remove('user'); // If user object is nested
-                transactionForDb.remove('chair'); // If chair object is nested
-
-                // Ensure foreign keys are present (usually they are in API response)
-                // If not, we might need to take them from chairJson['id'] etc.
-                if (transactionForDb['chair_id'] == null) {
-                  transactionForDb['chair_id'] = chairJson['id'];
-                }
-
-                await dbHelper.syncTransaction(
-                  transactionData: transactionForDb,
-                  services: details,
-                  payments: payments,
-                );
-              } catch (e) {
-                log(
-                  "Failed to sync transaction for chair ${chairJson['id']}: $e",
-                );
-              }
-            }
-          }
+         
 
           log(
             "Synced chairs, staff, and active transactions from API to Local DB",
