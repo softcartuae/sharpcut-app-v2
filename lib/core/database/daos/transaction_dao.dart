@@ -52,7 +52,21 @@ class TransactionDao {
     log("Settling payment for transaction ${request.transactionId}");
     final db = await _dbFuture;
     await db.transaction((txn) async {
-      // 1. Update Transaction Status & Totals
+      // Calculate Tax and Grand Total after Discount
+      final double finalTotal = request.finalTotal ?? 0.0;
+      final double discount = request.discount ?? 0.0;
+
+      double? grandTotalAfter;
+      double? taxTotalAfter;
+
+      double netTotal = finalTotal;
+      if (discount > 0) {
+        netTotal = finalTotal - discount;
+        grandTotalAfter = netTotal / 1.05;
+        taxTotalAfter = netTotal - grandTotalAfter;
+      }
+      // Assuming 5% VAT
+
       final updateData = {
         'status': "completed",
         'payment_status': request.paymentStatus,
@@ -64,6 +78,8 @@ class TransactionDao {
         'round_off': request.roundOff,
         'final_total': request.finalTotal,
         'final_total_before': request.finalTotalbefore ?? request.finalTotal,
+        'grand_total_after': grandTotalAfter,
+        'tax_total_after': taxTotalAfter,
         'total_payment':
             request.amount?.fold(0.0, (sum, item) => sum + item) ?? 0.0,
         'updated_at': DateFormatter.now(),
@@ -77,6 +93,7 @@ class TransactionDao {
         where: 'id = ?',
         whereArgs: [request.transactionId],
       );
+
       log("Updated transaction ${request.transactionId} status");
 
       // 2. Insert Payments
@@ -171,7 +188,7 @@ class TransactionDao {
       // 1. Fetch current transaction details
       final transactionResult = await txn.query(
         'transactions',
-        columns: ['grand_total', 'tax_total', 'round_off'],
+        columns: ['grand_total', 'tax_total', 'round_off', 'final_total', 'final_total_before'],
         where: 'id = ?',
         whereArgs: [request.transactionId],
       );
@@ -181,14 +198,21 @@ class TransactionDao {
       }
 
       final transaction = transactionResult.first;
-      final grandTotal =
-          (transaction['grand_total'] as num?)?.toDouble() ?? 0.0;
-      final taxTotal = (transaction['tax_total'] as num?)?.toDouble() ?? 0.0;
-      final roundOff = (transaction['round_off'] as num?)?.toDouble() ?? 0.0;
+
+      final finalTotal =
+          (transaction['final_total'] as num?)?.toDouble() ?? 0.0;
 
       // 2. Calculate new Final Total
       final newDiscount = request.discount ?? 0.0;
-      final newFinalTotal = grandTotal + taxTotal - newDiscount + roundOff;
+      double? newGrandTotalAfter;
+      double? newTaxTotalAfter;
+      if (newDiscount != 0) {
+        newGrandTotalAfter = finalTotal / 1.05;
+        newTaxTotalAfter = finalTotal - newGrandTotalAfter;
+      }
+
+      log("newGrandTotalAfter: $newGrandTotalAfter");
+      log("newTaxTotalAfter: $newTaxTotalAfter");
 
       // 3. Insert NEW Payments (Append)
       if (request.mode != null && request.amount != null) {
@@ -230,17 +254,18 @@ class TransactionDao {
 
       // 5. Determine Payment Status
       String newPaymentStatus = 'partial';
-      if (newTotalPayment >= newFinalTotal) {
+      if (newTotalPayment >= finalTotal) {
         newPaymentStatus = 'full';
       }
 
       // 6. Update Transaction
       final updateData = {
         'discount': newDiscount,
-        'final_total': newFinalTotal,
         'total_payment': newTotalPayment,
         'payment_status': newPaymentStatus,
         'updated_at': DateFormatter.now(),
+        if (newGrandTotalAfter != null) 'grand_total_after': newGrandTotalAfter,
+        if (newTaxTotalAfter != null) 'tax_total_after': newTaxTotalAfter,
         'is_synced': 0,
       };
 
@@ -252,8 +277,9 @@ class TransactionDao {
       );
 
       log(
-        "Resettled transaction ${request.transactionId}. New Final: $newFinalTotal, Paid: $newTotalPayment, Status: $newPaymentStatus",
+        "Resettled transaction ${request.transactionId}. New Final: $finalTotal, Paid: $newTotalPayment, Status: $newPaymentStatus",
       );
+      
     });
   }
 

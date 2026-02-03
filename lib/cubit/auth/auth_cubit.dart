@@ -22,7 +22,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
       final token = await authRepo.login(licenseNo);
       await tokenStorage.saveToken(token);
       emit(AuthLoginSuccess(token));
-      // Fetch user immediately after login
+      await authRepo.getInvoiceSettings();
       await getUser();
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -30,8 +30,6 @@ class AuthCubit extends Cubit<AuthCubitState> {
   }
 
   Future<void> getUser() async {
-    // If we are already loading (from login), don't emit loading again if you want to keep the flow smooth,
-    // but typically it's fine. However, if called separately, we need loading.
     if (state is! AuthLoading) {
       emit(AuthLoading());
     }
@@ -49,8 +47,8 @@ class AuthCubit extends Cubit<AuthCubitState> {
     try {
       final token = await tokenStorage.getToken();
       if (token != null) {
-        await getUser();
         await authRepo.getInvoiceSettings();
+        await getUser();
       } else {
         emit(AuthUnauthenticated());
       }

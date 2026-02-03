@@ -23,6 +23,8 @@ class SettlePaymentRequestModel {
   final List<double>? amount;
   final List<double>? tenderCash;
   final List<double>? change;
+  final double? grandTotalAfter;
+  final double? taxTotalAfter;
 
   SettlePaymentRequestModel({
     required this.finalTotalbefore,
@@ -49,11 +51,12 @@ class SettlePaymentRequestModel {
     this.amount,
     this.tenderCash,
     this.change,
+    this.grandTotalAfter,
+    this.taxTotalAfter,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      
       "transaction_id": transactionId,
       "customer_name": customerName,
       "customer_number": customerNumber,

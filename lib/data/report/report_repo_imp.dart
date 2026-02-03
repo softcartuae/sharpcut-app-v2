@@ -141,6 +141,15 @@ class ReportRepoImp implements ReportRepo {
             (mutableTransaction['discount'] as num?)?.toDouble() ?? 0.0;
         mutableTransaction['final_total'] = currentFinalTotal - currentDiscount;
 
+        if (currentDiscount != 0) {
+          mutableTransaction['grand_total'] =
+              (mutableTransaction['grand_total_after'] as num?)?.toDouble() ??
+              0.0;
+          mutableTransaction['tax_total'] =
+              (mutableTransaction['tax_total_after'] as num?)?.toDouble() ??
+              0.0;
+        }
+
         // Map to Model
         transactions.add(BookingResponseModel.fromJson(mutableTransaction));
       }

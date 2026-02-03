@@ -181,7 +181,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
     setState(() {
       _finalTotal = subTotal + taxTotal;
-      _calculatePaymentAndBalance();  
+      _calculatePaymentAndBalance();
       _calculateChange();
     });
   }
