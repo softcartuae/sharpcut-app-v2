@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -14,7 +15,7 @@ class AuthRepoImpl implements AuthRepo {
 
   AuthRepoImpl({required this.tokenStorage});
   @override
-   Future<Either<String, String>> login(String licenseNo) async {
+  Future<Either<String, String>> login(String licenseNo) async {
     try {
       String? token;
 
@@ -29,14 +30,12 @@ class AuthRepoImpl implements AuthRepo {
         data: {
           "license_no": licenseNo,
           "device_token": token,
+          "device_os": Platform.isAndroid ? "android" : "ios",
         },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
-        if (data['success'] == false) {
-          return Left(data['error'] ?? 'Login failed');
-        }
         return Right(data['token']);
       } else {
         return Left("Login failed: ${response.statusMessage}");
