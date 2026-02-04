@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -178,6 +179,10 @@ class _SettlementDialogState extends State<ResettlementScreen> {
   void _calculateFinalTotal() {
     final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
     final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
+
+    log("subTotal: $subTotal");
+    log("taxTotal: $taxTotal");
+    log("finalTotal: ${subTotal + taxTotal}");
 
     setState(() {
       _finalTotal = subTotal + taxTotal;

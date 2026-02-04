@@ -182,14 +182,17 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
 
     if (state.connectedPrinter == null) {
-      ToastHelper.showError("No printer connected");
-      emit(
-        state.copyWith(
-          status: PrintingStatus.error,
-          errorMessage: "No printer connected",
-        ),
-      );
-      return;
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        ToastHelper.showError("No printer connected");
+        emit(
+          state.copyWith(
+            status: PrintingStatus.error,
+            errorMessage: "No printer connected",
+          ),
+        );
+        return;
+      }
     }
 
     emit(state.copyWith(status: PrintingStatus.printing));
@@ -264,15 +267,18 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
 
     if (state.connectedPrinter == null) {
-      log("No printer connected");
-      // ToastHelper.showError("No printer connected");
-      emit(
-        state.copyWith(
-          status: PrintingStatus.error,
-          errorMessage: "No printer connected",
-        ),
-      );
-      return;
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        // ToastHelper.showError("No printer connected");
+        log("No printer connected");
+        emit(
+          state.copyWith(
+            status: PrintingStatus.error,
+            errorMessage: "No printer connected",
+          ),
+        );
+        return;
+      }
     }
 
     emit(state.copyWith(status: PrintingStatus.printing));
@@ -335,15 +341,18 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
 
     if (state.connectedPrinter == null) {
-      ToastHelper.showError("No printer connected");
-      log("No printer connected printign ");
-      emit(
-        state.copyWith(
-          status: PrintingStatus.error,
-          errorMessage: "No printer connected",
-        ),
-      );
-      return;
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        ToastHelper.showError("No printer connected");
+        log("No printer connected printign ");
+        emit(
+          state.copyWith(
+            status: PrintingStatus.error,
+            errorMessage: "No printer connected",
+          ),
+        );
+        return;
+      }
     }
 
     emit(state.copyWith(status: PrintingStatus.printing));
@@ -438,8 +447,11 @@ class PrintingCubit extends Cubit<PrintingState> {
 
   Future<void> openDrawer() async {
     if (state.connectedPrinter == null) {
-      ToastHelper.showError("No printer connected");
-      return;
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        ToastHelper.showError("No printer connected");
+        return;
+      }
     }
     try {
       await _printingRepo.openDrawer(state.connectedPrinter!);
@@ -452,8 +464,11 @@ class PrintingCubit extends Cubit<PrintingState> {
 
   Future<void> testPrint() async {
     if (state.connectedPrinter == null) {
-      ToastHelper.showError("No printer connected");
-      return;
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        ToastHelper.showError("No printer connected");
+        return;
+      }
     }
     try {
       await _printingRepo.testPrint(state.connectedPrinter!);
@@ -521,12 +536,14 @@ class PrintingCubit extends Cubit<PrintingState> {
     );
   }
 
-  Future<void> _tryAutoConnect() async {
+  Future<bool> _tryAutoConnect() async {
     final lastPrinter = await _printingRepo.getLastConnectedPrinter();
     if (lastPrinter != null) {
       log("Auto-connecting to: ${lastPrinter.name}");
-      connect(lastPrinter);
+      await connect(lastPrinter);
+      return state.connectedPrinter != null;
     }
+    return false;
   }
 
   void _startHeartbeat() {

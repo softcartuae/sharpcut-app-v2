@@ -570,7 +570,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                       imagePath:
                                           service.image ??
                                           "lib/utils/images/hair_cut.png", // Placeholder image
-                                   
                                     ),
                                   );
                                 },
