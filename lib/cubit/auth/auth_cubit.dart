@@ -19,11 +19,13 @@ class AuthCubit extends Cubit<AuthCubitState> {
   Future<void> login(String licenseNo) async {
     emit(AuthLoading());
     try {
-      final token = await authRepo.login(licenseNo);
-      await tokenStorage.saveToken(token);
-      emit(AuthLoginSuccess(token));
-      await authRepo.getInvoiceSettings();
-      await getUser();
+      final result = await authRepo.login(licenseNo);
+      await result.fold((error) async => emit(AuthError(error)), (token) async {
+        await tokenStorage.saveToken(token);
+        emit(AuthLoginSuccess(token));
+        await authRepo.getInvoiceSettings();
+        await getUser();
+      });
     } catch (e) {
       emit(AuthError(e.toString()));
     }

@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:android_id/android_id.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
@@ -39,7 +42,11 @@ class _HomeAppBarState extends State<HomeAppBar> {
         Row(
           children: [
             GestureDetector(
-              onTap: () {
+              onTap: () async {
+                // const androidIdPlugin = AndroidId();
+                // final deviceId = await androidIdPlugin.getId() ?? '';
+                // log(deviceId);
+                // return;
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => DatabaseViewerScreen(),

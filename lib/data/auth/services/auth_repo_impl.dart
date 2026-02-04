@@ -1,40 +1,74 @@
 import 'dart:developer';
 
+import 'package:android_id/android_id.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
 
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/core/database/database_helper.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
 
 class AuthRepoImpl implements AuthRepo {
   final TokenStorage tokenStorage;
 
   AuthRepoImpl({required this.tokenStorage});
   @override
-  Future<String> login(String licenseNo) async {
+  Future<Either<String, String>> login(String licenseNo) async {
     try {
       String? token;
 
-      // try {
-      //   token = await FirebaseMessaging.instance.getToken();
-      // } catch (e) {
-      //   log(e.toString());
-      // }
+      try {
+        token = await FirebaseMessaging.instance.getToken();
+      } catch (e) {
+        log(e.toString());
+      }
+
+      String deviceId = '';
+
+      try {
+        if (Platform.isAndroid) {
+          const androidIdPlugin = AndroidId();
+          deviceId = await androidIdPlugin.getId() ?? '';
+        } else if (Platform.isIOS) {
+          final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+          IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+          deviceId = iosInfo.identifierForVendor ?? '';
+        }
+      } catch (e) {
+        log('Failed to get device info: $e');
+      }
 
       final response = await ApiClient.dio.post(
         ApiClient.loginApi,
-        data: {"license_no": licenseNo, "device_token": token},
+        data: {
+          "license_no": licenseNo,
+          "device_token": token,
+          "device_id": deviceId,
+          "device_os": Platform.isAndroid ? "android" : "ios",
+        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return response.data['token'];
+        final data = response.data;
+        return Right(data['token']);
       } else {
-        throw Exception("Login failed: ${response.statusMessage}");
+        return Left("Login failed: ${response.statusMessage}");
       }
     } catch (e) {
-      throw Exception("Login error: SOMETHING WENT WRONG");
+      if (e is DioException) {
+        if (e.response != null && e.response?.data != null) {
+          final data = e.response?.data;
+          if (data is Map && data.containsKey('message')) {
+            return Left(data['message']);
+          }
+        }
+      }
+      return Left("Login error: ${e.toString()}");
     }
   }
 
@@ -77,4 +111,3 @@ class AuthRepoImpl implements AuthRepo {
     }
   }
 }
-
