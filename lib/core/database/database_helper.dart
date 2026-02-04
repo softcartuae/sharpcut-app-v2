@@ -333,6 +333,9 @@ class DatabaseHelper {
   Future<void> openCashRegister(Map<String, dynamic> data) =>
       cashRegisterDao.openCashRegister(data);
 
+  Future<void> syncCashRegister(Map<String, dynamic> data) =>
+      cashRegisterDao.syncCashRegister(data);
+
   Future<void> closeCashRegister(int id, Map<String, dynamic> data) =>
       cashRegisterDao.closeCashRegister(id, data);
 

@@ -23,6 +23,7 @@ class _ScreenHomeState extends State<ScreenHome> {
     super.initState();
     context.read<ChairCubit>().getChairsAndStaffs();
     SyncToServer().syncTransactionsFromServer();
+    SyncToServer().syncCashRegistersFromServer();
   }
 
   @override

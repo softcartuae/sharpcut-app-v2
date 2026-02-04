@@ -236,7 +236,7 @@ class SyncToServer {
         return const Right("No new transactions from server.");
       }
 
-      final response = await ApiClient.dio.get(ApiClient.searchinvoiceApi);
+      final response = await ApiClient.dio.get(ApiClient.transactionsGETApi);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
@@ -258,6 +258,39 @@ class SyncToServer {
     } catch (e) {
       log("Error pulling transactions: $e");
       return Left("Error pulling transactions: $e");
+    }
+  }
+
+  Future<Either<String, String>> syncCashRegistersFromServer() async {
+    try {
+      log("Starting cash registers pull from server...");
+
+      final response = await ApiClient.dio.get(ApiClient.cashRegistersGetApi);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+
+        if (data.isEmpty) {
+          return const Right("No cash registers from server.");
+        }
+
+        log("Received ${data.length} cash registers from server.");
+
+        for (var item in data) {
+          // Force is_synced to 1 because we just got it from server
+          var registerData = Map<String, dynamic>.from(item);
+          registerData['is_synced'] = 1;
+          registerData.remove("is_sync");
+          await _dbHelper.syncCashRegister(registerData);
+        }
+
+        return Right("Pulled ${data.length} cash registers successfully.");
+      } else {
+        return Left("Failed to pull cash registers: ${response.statusCode}");
+      }
+    } catch (e) {
+      log("Error pulling cash registers: $e");
+      return Left("Error pulling cash registers: $e");
     }
   }
 
@@ -285,7 +318,6 @@ class SyncToServer {
 
       // Force is_synced to 1 because we just got it from server
       transactionForDb['is_synced'] = 1;
-      
 
       await _dbHelper.syncTransaction(
         transactionData: transactionForDb,
@@ -296,7 +328,4 @@ class SyncToServer {
       log("Failed to sync transaction ${transactionMap['id']}: $e");
     }
   }
-
-
-
 }

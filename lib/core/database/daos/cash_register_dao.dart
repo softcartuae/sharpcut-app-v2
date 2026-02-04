@@ -13,6 +13,17 @@ class CashRegisterDao {
     log("Cash register opened");
   }
 
+  Future<void> syncCashRegister(Map<String, dynamic> data) async {
+   
+    // log("Syncing cash register ${data['id']}");
+    final db = await _dbFuture;
+    await db.insert(
+      'cash_registers',
+      data,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<void> closeCashRegister(int id, Map<String, dynamic> data) async {
     log("Closing cash register $id");
     final db = await _dbFuture;

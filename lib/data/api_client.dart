@@ -83,10 +83,11 @@ class ApiClient {
   static final allUsers = "api/users";
   static final resetPasswordUsers = "api/reset-password/users";
   static final quickReportapi = '/api/transactions/report';
+  static final cashRegistersGetApi = "api/cash-registers";
   static final cashRegisterCheckApi = "api/cash-registers/check";
   static final openCashRegisterApi = "api/cash-registers/open";
   static final closeCashRegisterApi = "api/cash-registers/close";
-   static final searchinvoiceApi = '/api/transactions/search';
+  static final searchinvoiceApi = '/api/transactions/search';
   static final getTotalSalesForCloseCashRegisterApi =
       "api/cash-registers/sales-total";
   static final printerSettingsApi = "api/settings";
@@ -97,4 +98,3 @@ class ApiClient {
   static final printQuickReportApi = "api/print/transaction-report";
   static final printCashRegisterApi = "api/print/cash-register-report";
 }
-  
