@@ -27,6 +27,7 @@ class AuthRepoImpl implements AuthRepo {
         log(e.toString());
       }
 
+      String deviceId = await tokenStorage.getDeviceId();
       String deviceOs = 'unknown';
       if (Platform.isAndroid) {
         deviceOs = 'android';
@@ -41,6 +42,7 @@ class AuthRepoImpl implements AuthRepo {
         data: {
           "license_no": licenseNo,
           "device_token": token,
+          "device_id": deviceId,
           "device_os": deviceOs,
         },
       );
