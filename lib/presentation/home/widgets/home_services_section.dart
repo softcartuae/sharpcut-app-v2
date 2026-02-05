@@ -317,32 +317,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        BlocListener<ChairCubit, ChairState>(
-          listener: (context, state) {
-            final bookingState = context.read<BookingCubit>().state;
-            if (state is ChairSuccess && bookingState is BookingSuccess) {
-              // for (var chair in state.chairs) {
-              //   if (chair.transaction != null &&
-              //       chair.transaction!.details != null &&
-              //       chair.transaction!.details!.isNotEmpty) {
-              //     final cartItems = chair.transaction!.details!
-              //         .where((detail) => detail.service != null)
-              //         .map(
-              //           (detail) => CartItemModel(
-              //             service: detail.service!,
-              //             quantity: 1,
-              //           ),
-              //         )
-              //         .toList();
-              //     if (cartItems.isNotEmpty) {
-              //       context.read<ServiceCubit>().setCart(cartItems);
-              //       break;
-              //     }
-              //   }
-              // }
-            }
-          },
-        ),
         BlocListener<BookingCubit, BookingState>(
           listener: (context, state) {
             if (state is BookingSaved) {
