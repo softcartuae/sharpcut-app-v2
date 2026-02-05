@@ -318,10 +318,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-<<<<<<< HEAD
-     
-=======
->>>>>>> daef5e1 (solved toest issue)
         BlocListener<BookingCubit, BookingState>(
           listener: (context, state) {
             if (state is BookingSaved) {
