@@ -33,4 +33,34 @@ class PrintingService {
       },
     );
   }
+
+  Future<Response> printQuickReport({
+    required String dateRange,
+    required int? userId,
+    required String printerName,
+    required int size,
+  }) async {
+    return await ApiClient.dio.post(
+      ApiClient.printQuickReportApi,
+      data: {
+        "date_range": dateRange,
+        "user_id": userId,
+        "printer": {"name": printerName, "size": size},
+      },
+    );
+  }
+
+  Future<Response> printCashRegisterReport({
+    required int cashRegisterId,
+    required String printerName,
+    required int size,
+  }) async {
+    return await ApiClient.dio.post(
+      ApiClient.printCashRegisterApi,
+      data: {
+        "cash_register_id": cashRegisterId,
+        "printer": {"name": printerName, "size": size},
+      },
+    );
+  }
 }

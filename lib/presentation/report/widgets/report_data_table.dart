@@ -4,6 +4,8 @@ import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
+import 'package:sharp_cut/domain/home/models/staff_model.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_re_settlement.dart';
@@ -20,7 +22,9 @@ import 'package:sharp_cut/presentation/report/widgets/payment_details_dialog.dar
 import 'package:sharp_cut/presentation/report/widgets/paymentedit_dialoge.dart';
 
 class ReportDataTable extends StatefulWidget {
-  const ReportDataTable({super.key});
+  const ReportDataTable({super.key, this.staff});
+
+  final StaffModel? staff;
 
   @override
   State<ReportDataTable> createState() => _ReportDataTableState();
@@ -147,6 +151,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
+                                                 finalTotalbefore: booking.finalTotalbefore,
                                                 paymentStatus:
                                                     booking.paymentStatus,
                                                 transactionId: booking.id,
@@ -157,7 +162,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 subTotalValue:
                                                     booking.subtotal ?? 0,
                                                 taxTotal: booking.taxTotal ?? 0,
-                                                discount: 0.0,
+                                                discount: booking.discount ?? 0,
                                                 roundOff: 0.0,
                                                 finalTotal:
                                                     booking.finalTotal ?? 0,
@@ -223,7 +228,12 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                   (booking.finalTotal ?? 0) -
                                                   ((booking.totalPayment ?? 0));
 
+                                              final bool isAdmin =
+                                                  widget.staff?.role ==
+                                                  Role.admin;
+
                                               showResettmentScreen(
+                                                isAdmin: isAdmin,
                                                 balance: balenceAmount,
                                                 paidAmount: booking.totalPayment
                                                     ?.toString(),
@@ -276,6 +286,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
+                                                finalTotalbefore: booking.finalTotalbefore,
                                                 paymentStatus:
                                                     booking.paymentStatus,
                                                 transactionId: booking.id,

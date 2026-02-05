@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
-import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
 
@@ -96,38 +95,38 @@ class BookingRepoImp implements BookingRepo {
     }
   }
 
-  @override
-  Future<Either<String, String>> saveBooking(
-    SaveBookingRequestModel request,
-  ) async {
-    try {
-      final response = await ApiClient.dio.post(
-        ApiClient.saveBookingApi,
-        data: request.toJson(),
-      );
+  // @override
+  // Future<Either<String, String>> saveBooking(
+  //   SaveBookingRequestModel request,
+  // ) async {
+  //   try {
+  //     final response = await ApiClient.dio.post(
+  //       ApiClient.saveBookingApi,
+  //       data: request.toJson(),
+  //     );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data['success'] == true) {
-          return Right(data['message'] ?? 'Booking saved successfully');
-        } else {
-          return Left(data['message'] ?? 'Failed to save booking');
-        }
-      } else {
-        return Left('Failed to save booking: ${response.statusCode}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null && e.response!.data != null) {
-        final data = e.response!.data;
-        if (data is Map<String, dynamic> && data.containsKey('message')) {
-          return Left(data['message']);
-        }
-      }
-      return Left('Error saving booking: ${e.message}');
-    } catch (e) {
-      return Left('Error saving booking: $e');
-    }
-  }
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       final data = response.data;
+  //       if (data['success'] == true) {
+  //         return Right(data['message'] ?? 'Booking saved successfully');
+  //       } else {
+  //         return Left(data['message'] ?? 'Failed to save booking');
+  //       }
+  //     } else {
+  //       return Left('Failed to save booking: ${response.statusCode}');
+  //     }
+  //   } on DioException catch (e) {
+  //     if (e.response != null && e.response!.data != null) {
+  //       final data = e.response!.data;
+  //       if (data is Map<String, dynamic> && data.containsKey('message')) {
+  //         return Left(data['message']);
+  //       }
+  //     }
+  //     return Left('Error saving booking: ${e.message}');
+  //   } catch (e) {
+  //     return Left('Error saving booking: $e');
+  //   }
+  // }
 
   @override
   Future<Either<String, SettlePaymentResponseModel>> settlePayment(

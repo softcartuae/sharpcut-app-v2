@@ -51,11 +51,33 @@ class HomeServicesSection extends StatefulWidget {
   State<HomeServicesSection> createState() => _HomeServicesSectionState();
 }
 
+class _PendingPrintData {
+  final int? chairId;
+  final double balanceAmount;
+  final SettlePaymentRequestModel request;
+  final dynamic shopData;
+  final List<CartItemModel> cartItems;
+  final String? staffName;
+
+  final String bookingTime;
+
+  _PendingPrintData({
+    required this.chairId,
+    required this.balanceAmount,
+    required this.request,
+    required this.shopData,
+    required this.cartItems,
+    required this.staffName,
+    required this.bookingTime,
+  });
+}
+
 class _HomeServicesSectionState extends State<HomeServicesSection> {
   final GlobalKey _menuKey = GlobalKey();
   final ValueNotifier<String> _selectedButtonNotifier = ValueNotifier(
     "BOOK A SLOT",
   );
+  _PendingPrintData? _pendingPrintData;
 
   @override
   void initState() {
@@ -70,15 +92,19 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     ServiceStateSuccess serviceState,
     BookingFormState bookingFormState,
     String paymentMode,
-    String? invoiceNumber,
     String? staffName,
     String? bookingTime,
-    String? invoiceDate,
     double discount,
     double finalTotal,
     int? chairId,
   ) {
-    double amount = serviceState.total;
+    if ((discount) > finalTotal) {
+      ToastHelper.showError("Total amount cannot be greater than Final Total");
+      return;
+    }
+    // calculate the amount after discount
+    double amount = serviceState.total - discount;
+    // if user click unpaid then make the amount zero and the payment methord zero;
     double balanceAmount = 0.0;
 
     // if user click unpaid then make the amount zero and the payment methord zero;
@@ -86,10 +112,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       log("unpaid is selected");
       balanceAmount = serviceState.total;
       amount = 0.0;
-    }
+    } else {}
+
+    log("amount: $amount");
+    log("discount: $discount");
+    log("finalTotal: $finalTotal");
+    log("serviceState.total: ${serviceState.total}");
 
     final request = SettlePaymentRequestModel(
-      paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : null,
+      paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : "full",
       transactionId: transactionId,
       customerName: bookingFormState.customerName,
       customerNumber: bookingFormState.customerNumber,
@@ -98,6 +129,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       discount: discount,
       roundOff: 0.0,
       finalTotal: finalTotal,
+      finalTotalbefore: finalTotal + discount,
       serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
       quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
       rate: serviceState.cartItems.map((e) => e.service.price ?? 0.0).toList(),
@@ -123,24 +155,17 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       tenderCash: [0.0],
       change: [0.0],
     );
-    
-
-
 
     final shopData = context.read<AuthCubit>().currentUser;
     if (shopData != null) {
-      final printCubit = context.read<PrintingCubit>();
-      printCubit.printInvoice(
+      _pendingPrintData = _PendingPrintData(
         chairId: chairId,
-        printCount: printCubit.state.settings?.printCount.quickPayment.toInt(),
         balanceAmount: balanceAmount,
         request: request,
         shopData: shopData,
         cartItems: serviceState.cartItems,
         staffName: staffName,
-        invoiceNumber: invoiceNumber,
         bookingTime: bookingTime ?? "--:--",
-        invoiceDate: invoiceDate,
       );
     }
     context.read<BookingCubit>().quickPayment(request: request);
@@ -296,25 +321,25 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           listener: (context, state) {
             final bookingState = context.read<BookingCubit>().state;
             if (state is ChairSuccess && bookingState is BookingSuccess) {
-              for (var chair in state.chairs) {
-                if (chair.transaction != null &&
-                    chair.transaction!.details != null &&
-                    chair.transaction!.details!.isNotEmpty) {
-                  final cartItems = chair.transaction!.details!
-                      .where((detail) => detail.service != null)
-                      .map(
-                        (detail) => CartItemModel(
-                          service: detail.service!,
-                          quantity: 1,
-                        ),
-                      )
-                      .toList();
-                  if (cartItems.isNotEmpty) {
-                    context.read<ServiceCubit>().setCart(cartItems);
-                    break;
-                  }
-                }
-              }
+              // for (var chair in state.chairs) {
+              //   if (chair.transaction != null &&
+              //       chair.transaction!.details != null &&
+              //       chair.transaction!.details!.isNotEmpty) {
+              //     final cartItems = chair.transaction!.details!
+              //         .where((detail) => detail.service != null)
+              //         .map(
+              //           (detail) => CartItemModel(
+              //             service: detail.service!,
+              //             quantity: 1,
+              //           ),
+              //         )
+              //         .toList();
+              //     if (cartItems.isNotEmpty) {
+              //       context.read<ServiceCubit>().setCart(cartItems);
+              //       break;
+              //     }
+              //   }
+              // }
             }
           },
         ),
@@ -331,6 +356,23 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 );
               }
             } else if (state is BookingPaymentSettled) {
+              if (_pendingPrintData != null) {
+                final printCubit = context.read<PrintingCubit>();
+                printCubit.printInvoice(
+                  chairId: _pendingPrintData!.chairId,
+                  printCount: printCubit.state.settings?.printCount.quickPayment
+                      .toInt(),
+                  balanceAmount: _pendingPrintData!.balanceAmount,
+                  request: _pendingPrintData!.request,
+                  shopData: _pendingPrintData!.shopData,
+                  cartItems: _pendingPrintData!.cartItems,
+                  staffName: _pendingPrintData!.staffName,
+                  invoiceNumber: state.response.bookingResponse?.invoiceNo,
+                  bookingTime: _pendingPrintData!.bookingTime,
+                  invoiceDate: state.response.bookingResponse?.invoiceDate,
+                );
+                _pendingPrintData = null;
+              }
               ToastHelper.showSuccess(state.message);
               context.read<ServiceCubit>().clearCart();
               context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
@@ -371,6 +413,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               flex: 3,
               child: SingleChildScrollView(
                 child: BlocBuilder<ServiceCubit, ServiceState>(
+                  buildWhen: (p, c) {
+                    if (p is ServiceStateSuccess && c is ServiceStateSuccess) {
+                      return p.categories != c.categories ||
+                          p.selectedCategoryId != c.selectedCategoryId;
+                    }
+                    return true;
+                  },
                   builder: (context, state) {
                     List<Widget> categories = [];
                     if (state is ServiceStateSuccess) {
@@ -440,6 +489,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                         backgroundImageUrl: "lib/utils/images/Card.png",
                         padding: const EdgeInsets.all(16),
                         child: BlocBuilder<ServiceCubit, ServiceState>(
+                          buildWhen: (previous, current) {
+                            if (previous is ServiceStateSuccess &&
+                                current is ServiceStateSuccess) {
+                              return previous.services != current.services ||
+                                  previous.isLoadingServices !=
+                                      current.isLoadingServices;
+                            }
+                            return true;
+                          },
                           builder: (context, state) {
                             if (state is ServiceStateSuccess) {
                               if (state.isLoadingServices) {
@@ -757,151 +815,151 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 },
                               ),
 
-                            if (isBooked) const SizedBox(height: 12),
-                            // SAVE BOOKING - Disabled if NOT booked
-                            if (isBooked)
-                              Opacity(
-                                opacity: !isBooked ? 0.5 : 1.0,
-                                child: ActionButton(
-                                  label: "SAVE BOOKING",
-                                  isPrimary:
-                                      isBooked &&
-                                      selectedButton == "SAVE BOOKING",
-                                  onTap: !isBooked
-                                      ? null
-                                      : () {
-                                          _selectedButtonNotifier.value =
-                                              "SAVE BOOKING";
-                                          final serviceState = context
-                                              .read<ServiceCubit>()
-                                              .state;
-                                          if (serviceState
-                                              is ServiceStateSuccess) {
-                                            if (serviceState
-                                                .cartItems
-                                                .isEmpty) {
-                                              ToastHelper.showError(
-                                                "You have to select the services",
-                                              );
-                                              return;
-                                            }
+                            // if (isBooked) const SizedBox(height: 12),
+                            // // SAVE BOOKING - Disabled if NOT booked
+                            // if (isBooked)
+                            //   Opacity(
+                            //     opacity: !isBooked ? 0.5 : 1.0,
+                            //     child: ActionButton(
+                            //       label: "SAVE BOOKING",
+                            //       isPrimary:
+                            //           isBooked &&
+                            //           selectedButton == "SAVE BOOKING",
+                            //       onTap: !isBooked
+                            //           ? null
+                            //           : () {
+                            //               _selectedButtonNotifier.value =
+                            //                   "SAVE BOOKING";
+                            //               final serviceState = context
+                            //                   .read<ServiceCubit>()
+                            //                   .state;
+                            //               if (serviceState
+                            //                   is ServiceStateSuccess) {
+                            //                 if (serviceState
+                            //                     .cartItems
+                            //                     .isEmpty) {
+                            //                   ToastHelper.showError(
+                            //                     "You have to select the services",
+                            //                   );
+                            //                   return;
+                            //                 }
 
-                                            int? transactionId;
-                                            if (bookingState
-                                                is BookingSuccess) {
-                                              transactionId = bookingState
-                                                  .bookingResponse
-                                                  .id;
-                                            }
+                            //                 int? transactionId;
+                            //                 if (bookingState
+                            //                     is BookingSuccess) {
+                            //                   transactionId = bookingState
+                            //                       .bookingResponse
+                            //                       .id;
+                            //                 }
 
-                                            final bookingFormState = context
-                                                .read<BookingFormCubit>()
-                                                .state;
+                            //                 final bookingFormState = context
+                            //                     .read<BookingFormCubit>()
+                            //                     .state;
 
-                                            if (bookingFormState
-                                                .customerName
-                                                .isEmpty) {
-                                              ToastHelper.showError(
-                                                "Customer name is required",
-                                              );
-                                              return;
-                                            }
+                            //                 if (bookingFormState
+                            //                     .customerName
+                            //                     .isEmpty) {
+                            //                   ToastHelper.showError(
+                            //                     "Customer name is required",
+                            //                   );
+                            //                   return;
+                            //                 }
 
-                                            if (bookingFormState
-                                                .customerNumber
-                                                .isEmpty) {
-                                              ToastHelper.showError(
-                                                "Customer number is required",
-                                              );
-                                              return;
-                                            }
+                            //                 if (bookingFormState
+                            //                     .customerNumber
+                            //                     .isEmpty) {
+                            //                   ToastHelper.showError(
+                            //                     "Customer number is required",
+                            //                   );
+                            //                   return;
+                            //                 }
 
-                                            final request =
-                                                SaveBookingRequestModel(
-                                                  transactionId: transactionId,
-                                                  customerName: bookingFormState
-                                                      .customerName,
-                                                  customerNumber:
-                                                      bookingFormState
-                                                          .customerNumber,
-                                                  grandTotal:
-                                                      serviceState.subTotal,
-                                                  taxTotal: serviceState.vat,
-                                                  discount: 0.0,
-                                                  roundOff: 0.0,
-                                                  finalTotal:
-                                                      serviceState.total,
-                                                  serviceId: serviceState
-                                                      .cartItems
-                                                      .map((e) => e.service.id!)
-                                                      .toList(),
-                                                  quantity: serviceState
-                                                      .cartItems
-                                                      .map((e) => e.quantity)
-                                                      .toList(),
-                                                  rate: serviceState.cartItems
-                                                      .map(
-                                                        (e) =>
-                                                            e.service.price ??
-                                                            0.0,
-                                                      )
-                                                      .toList(),
-                                                  taxAmount: serviceState
-                                                      .cartItems
-                                                      .map(
-                                                        (e) =>
-                                                            e.service.unitTax ??
-                                                            0,
-                                                      ) // Placeholder
-                                                      .toList(),
-                                                  currency: serviceState
-                                                      .cartItems
-                                                      .map((e) => "AED")
-                                                      .toList(),
-                                                  amountTotal: serviceState
-                                                      .cartItems
-                                                      .map(
-                                                        (e) =>
-                                                            (e.service.price ??
-                                                                0.0) *
-                                                            e.quantity,
-                                                      )
-                                                      .toList(),
-                                                  tax: serviceState.cartItems
-                                                      .map(
-                                                        (e) =>
-                                                            (e
-                                                                    .service
-                                                                    .unitTax ??
-                                                                0.0) *
-                                                            e.quantity,
-                                                      )
-                                                      .toList(),
-                                                  subTotal: serviceState
-                                                      .cartItems
-                                                      .map((e) {
-                                                        final price =
-                                                            e.service.price ??
-                                                            0.0;
-                                                        final tax =
-                                                            e.service.unitTax ??
-                                                            0.0;
-                                                        return (price + tax) *
-                                                            e.quantity;
-                                                      })
-                                                      .toList(),
-                                                  isTip: serviceState.cartItems
-                                                      .map((e) => 0)
-                                                      .toList(),
-                                                );
+                            //                 final request =
+                            //                     SaveBookingRequestModel(
+                            //                       transactionId: transactionId,
+                            //                       customerName: bookingFormState
+                            //                           .customerName,
+                            //                       customerNumber:
+                            //                           bookingFormState
+                            //                               .customerNumber,
+                            //                       grandTotal:
+                            //                           serviceState.subTotal,
+                            //                       taxTotal: serviceState.vat,
+                            //                       discount: 0.0,
+                            //                       roundOff: 0.0,
+                            //                       finalTotal:
+                            //                           serviceState.total,
+                            //                       serviceId: serviceState
+                            //                           .cartItems
+                            //                           .map((e) => e.service.id!)
+                            //                           .toList(),
+                            //                       quantity: serviceState
+                            //                           .cartItems
+                            //                           .map((e) => e.quantity)
+                            //                           .toList(),
+                            //                       rate: serviceState.cartItems
+                            //                           .map(
+                            //                             (e) =>
+                            //                                 e.service.price ??
+                            //                                 0.0,
+                            //                           )
+                            //                           .toList(),
+                            //                       taxAmount: serviceState
+                            //                           .cartItems
+                            //                           .map(
+                            //                             (e) =>
+                            //                                 e.service.unitTax ??
+                            //                                 0,
+                            //                           ) // Placeholder
+                            //                           .toList(),
+                            //                       currency: serviceState
+                            //                           .cartItems
+                            //                           .map((e) => "AED")
+                            //                           .toList(),
+                            //                       amountTotal: serviceState
+                            //                           .cartItems
+                            //                           .map(
+                            //                             (e) =>
+                            //                                 (e.service.price ??
+                            //                                     0.0) *
+                            //                                 e.quantity,
+                            //                           )
+                            //                           .toList(),
+                            //                       tax: serviceState.cartItems
+                            //                           .map(
+                            //                             (e) =>
+                            //                                 (e
+                            //                                         .service
+                            //                                         .unitTax ??
+                            //                                     0.0) *
+                            //                                 e.quantity,
+                            //                           )
+                            //                           .toList(),
+                            //                       subTotal: serviceState
+                            //                           .cartItems
+                            //                           .map((e) {
+                            //                             final price =
+                            //                                 e.service.price ??
+                            //                                 0.0;
+                            //                             final tax =
+                            //                                 e.service.unitTax ??
+                            //                                 0.0;
+                            //                             return (price + tax) *
+                            //                                 e.quantity;
+                            //                           })
+                            //                           .toList(),
+                            //                       isTip: serviceState.cartItems
+                            //                           .map((e) => 0)
+                            //                           .toList(),
+                            //                     );
 
-                                            context
-                                                .read<BookingCubit>()
-                                                .saveBooking(request: request);
-                                          }
-                                        },
-                                ),
-                              ),
+                            //                 context
+                            //                     .read<BookingCubit>()
+                            //                     .saveBooking(request: request);
+                            //               }
+                            //             },
+                            //     ),
+                            //   ),
                             if (isBooked) const SizedBox(height: 12),
                             // QUICK PAYMENT - Disabled if NOT booked
                             if (isBooked)
@@ -977,9 +1035,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   serviceState,
                                                   bookingFormState,
                                                   PaymentMode.Cash.name,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceNo,
+
                                                   bookingState
                                                       .bookingResponse
                                                       .staff
@@ -987,9 +1043,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .transactionDate,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceDate,
                                                   discount,
                                                   serviceState.total,
                                                   bookingState
@@ -1006,9 +1059,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   serviceState,
                                                   bookingFormState,
                                                   PaymentMode.Card.name,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceNo,
+
                                                   bookingState
                                                       .bookingResponse
                                                       .staff
@@ -1016,9 +1067,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .transactionDate,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceDate,
+
                                                   discount,
                                                   serviceState.total,
                                                   bookingState
@@ -1034,9 +1083,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   serviceState,
                                                   bookingFormState,
                                                   PaymentMode.Unpaid.name,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceNo,
+
                                                   bookingState
                                                       .bookingResponse
                                                       .staff
@@ -1044,9 +1091,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   bookingState
                                                       .bookingResponse
                                                       .transactionDate,
-                                                  bookingState
-                                                      .bookingResponse
-                                                      .invoiceDate,
+
                                                   discount,
                                                   serviceState.total,
                                                   bookingState
@@ -1110,6 +1155,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
                                             SettlePaymentRequestModel
                                             request = SettlePaymentRequestModel(
+                                              finalTotalbefore:
+                                                  serviceState.total + 0,
                                               transactionId: transactionId,
                                               customerName:
                                                   bookingFormState.customerName,
@@ -1195,12 +1242,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                               bookingTime: bookingState
                                                   .bookingResponse
                                                   .transactionDate,
-                                              invoiceNumber: bookingState
-                                                  .bookingResponse
-                                                  .invoiceNo,
-                                              invoiceDate: bookingState
-                                                  .bookingResponse
-                                                  .invoiceDate,
+
                                               cartItems: serviceState.cartItems,
                                               chairId: bookingState
                                                   .bookingResponse

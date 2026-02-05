@@ -30,7 +30,7 @@ class ReportService {
     }
 
     return await ApiClient.dio.get(
-      '/api/transactions/search',
+      ApiClient.searchinvoiceApi,
       queryParameters: queryParams,
     );
   }

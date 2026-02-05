@@ -20,28 +20,30 @@ class ServiceItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: imagePath.startsWith('http')
-                  ? CachedNetworkImage(
-                      imageUrl: imagePath,
-                      memCacheWidth: 200,
+            child: imagePath.startsWith('http')
+                ? CachedNetworkImage(
+                    imageUrl: imagePath,
+                    width: double.infinity,
+                    memCacheWidth: 200,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => const SizedBox(),
+                    errorWidget: (context, url, error) => Image.asset(
+                      "lib/utils/images/hair_cut.png",
+                      width: double.infinity,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          const Center(child: CircularProgressIndicator()),
-                      errorWidget: (context, url, error) => Image.asset(
-                        "lib/utils/images/hair_cut.png",
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Image.asset(imagePath, fit: BoxFit.cover),
-            ),
+                    ),
+                  )
+                : Image.asset(
+                    imagePath,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
           ),
           Text(
             title,
             style: GoogleFonts.rajdhani(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 10,
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,

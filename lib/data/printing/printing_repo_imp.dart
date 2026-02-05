@@ -202,15 +202,17 @@ class PrintingRepoImp implements PrintingRepo {
       final profile = await CapabilityProfile.load();
       final paperSize = await getPaperSize();
       final generator = Generator(paperSize.generatorPaperSize, profile);
-      List<int> bytes = [];
-
-      try {
-        if (openDrawer) {
-          bytes.addAll(generator.drawer());
+      // Open drawer immediately if requested
+      if (openDrawer) {
+        try {
+          final drawerBytes = generator.drawer();
+          await _printBytes(printer, Uint8List.fromList(drawerBytes));
+        } catch (e) {
+          log("Error opening drawer immediately: $e");
         }
-      } catch (e) {
-        log(e.toString());
       }
+
+      List<int> bytes = [];
 
       final double targetWidth = paperSize.widthInPixels.toDouble();
 
@@ -243,26 +245,32 @@ class PrintingRepoImp implements PrintingRepo {
         ),
       );
 
-      double estimatedHeight = 1500 + (cartItems.length * 100.0);
+      double estimatedHeight = 1350 + (cartItems.length * 100.0);
 
       final ScreenshotController screenshotController = ScreenshotController();
       final Uint8List capturedImage = await screenshotController
           .captureFromWidget(
             receiptWidget,
             delay: const Duration(milliseconds: 100),
-            pixelRatio: 1.0,
+            pixelRatio:
+                1.0, // Keep resolution low (1.0 is standard screen density)
             targetSize: Size(targetWidth, estimatedHeight),
           );
 
       final img.Image? image = img.decodePng(capturedImage);
 
       if (image != null) {
+        // Resize to paper width using nearest neighbor interpolation (fastest)
         final img.Image resizedImage = img.copyResize(
           image,
           width: paperSize.widthInPixels,
+          interpolation: img.Interpolation.nearest,
         );
 
-        bytes.addAll(generator.image(resizedImage));
+        // Convert to grayscale to reduce data size and processing time for the printer
+        final img.Image grayscaleImage = img.grayscale(resizedImage);
+
+        bytes.addAll(generator.image(grayscaleImage));
       }
 
       bytes.addAll(generator.feed(2));
@@ -293,12 +301,14 @@ class PrintingRepoImp implements PrintingRepo {
     List<int> bytes = [];
     log("called in quick report");
 
-    try {
-      if (openDrawer) {
-        bytes.addAll(generator.drawer());
+    // Open drawer immediately if requested
+    if (openDrawer) {
+      try {
+        final drawerBytes = generator.drawer();
+        await _printBytes(printer, Uint8List.fromList(drawerBytes));
+      } catch (e) {
+        log("Error opening drawer immediately: $e");
       }
-    } catch (e) {
-      log(e.toString());
     }
 
     // Create the widget
@@ -335,7 +345,7 @@ class PrintingRepoImp implements PrintingRepo {
         .captureFromWidget(
           widget,
           delay: const Duration(milliseconds: 100),
-          pixelRatio: 1.0,
+          pixelRatio: 1.0, // Keep resolution low
           targetSize: Size(targetWidth, estimatedHeight),
         );
 
@@ -344,12 +354,17 @@ class PrintingRepoImp implements PrintingRepo {
     log("called in iamge procees $image");
 
     if (image != null) {
-      // Resize to paper width
+      // Resize to paper width using nearest neighbor interpolation (fastest)
       final img.Image resizedImage = img.copyResize(
         image,
         width: paperSize.widthInPixels,
+        interpolation: img.Interpolation.nearest,
       );
-      bytes.addAll(generator.image(resizedImage));
+
+      // Convert to grayscale
+      final img.Image grayscaleImage = img.grayscale(resizedImage);
+
+      bytes.addAll(generator.image(grayscaleImage));
     }
 
     bytes.addAll(generator.feed(2));
@@ -392,12 +407,14 @@ class PrintingRepoImp implements PrintingRepo {
     final generator = Generator(paperSize.generatorPaperSize, profile);
     List<int> bytes = [];
 
-    try {
-      if (openDrawer) {
-        bytes.addAll(generator.drawer());
+    // Open drawer immediately if requested
+    if (openDrawer) {
+      try {
+        final drawerBytes = generator.drawer();
+        await _printBytes(printer, Uint8List.fromList(drawerBytes));
+      } catch (e) {
+        log("Error opening drawer immediately: $e");
       }
-    } catch (e) {
-      log(e.toString());
     }
 
     // Create the widget
@@ -439,7 +456,7 @@ class PrintingRepoImp implements PrintingRepo {
         .captureFromWidget(
           widget,
           delay: const Duration(milliseconds: 100),
-          pixelRatio: 1.0,
+          pixelRatio: 1.0, // Keep resolution low
           targetSize: Size(targetWidth, estimatedHeight),
         );
 
@@ -447,12 +464,17 @@ class PrintingRepoImp implements PrintingRepo {
     final img.Image? image = img.decodePng(capturedImage);
 
     if (image != null) {
-      // Resize to paper width
+      // Resize to paper width using nearest neighbor interpolation (fastest)
       final img.Image resizedImage = img.copyResize(
         image,
         width: paperSize.widthInPixels,
+        interpolation: img.Interpolation.nearest,
       );
-      bytes.addAll(generator.image(resizedImage));
+
+      // Convert to grayscale
+      final img.Image grayscaleImage = img.grayscale(resizedImage);
+
+      bytes.addAll(generator.image(grayscaleImage));
     }
 
     bytes.addAll(generator.feed(2));
@@ -591,7 +613,7 @@ class PrintingRepoImp implements PrintingRepo {
   }
 
   @override
-  Future<Either<String, void>> printServerInvoice({
+  Future<Either<String, void>> printServerPrinter({
     required int transactionId,
     required String printerName,
     required int size,
@@ -610,5 +632,119 @@ class PrintingRepoImp implements PrintingRepo {
     } catch (e) {
       return Left(e.toString());
     }
+  }
+
+  @override
+  Future<void> saveSelectedServerPrinter(ServerPrinter printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_server_printer', printer.name ?? '');
+  }
+
+  @override
+  Future<ServerPrinter?> getSelectedServerPrinter() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('selected_server_printer');
+    if (name != null && name.isNotEmpty) {
+      return ServerPrinter(name: name);
+    }
+    return null;
+  }
+
+  @override
+  Future<Either<String, void>> printQuickReportServer({
+    required String dateRange,
+    required int? userId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printQuickReport(
+        dateRange: dateRange,
+        userId: userId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(response.data['message'] ?? "Failed to print quick report");
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> printCashRegisterReportServer({
+    required int cashRegisterId,
+    required String printerName,
+    required int size,
+  }) async {
+    try {
+      final response = await _printingService.printCashRegisterReport(
+        cashRegisterId: cashRegisterId,
+        printerName: printerName,
+        size: size,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return const Right(null);
+      } else {
+        return Left(
+          response.data['message'] ?? "Failed to print cash register report",
+        );
+      }
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<void> saveLastConnectedPrinter(Printer printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_printer_name', printer.name ?? '');
+    await prefs.setString('last_printer_vendor', printer.vendorId ?? '');
+    await prefs.setString('last_printer_product', printer.productId ?? '');
+    await prefs.setString('last_printer_address', printer.address ?? '');
+    await prefs.setInt('last_printer_type', printer.connectionType?.index ?? 0);
+  }
+
+  @override
+  Future<Printer?> getLastConnectedPrinter() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey('last_printer_type')) return null;
+
+    final typeIndex = prefs.getInt('last_printer_type');
+    final type = ConnectionType.values[typeIndex!];
+    final name = prefs.getString('last_printer_name');
+    final vendor = prefs.getString('last_printer_vendor');
+    final product = prefs.getString('last_printer_product');
+    final address = prefs.getString('last_printer_address');
+
+    return Printer(
+      name: name,
+      vendorId: vendor,
+      productId: product,
+      address: address,
+      connectionType: type,
+    );
+  }
+
+  @override
+  Future<void> clearLastConnectedPrinter() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('last_printer_name');
+    await prefs.remove('last_printer_vendor');
+    await prefs.remove('last_printer_product');
+    await prefs.remove('last_printer_address');
+    await prefs.remove('last_printer_type');
+  }
+
+  @override
+  Future<void> sendHeartbeat(Printer printer) async {
+    // DLE EOT 1 : Real-time status transmission
+    // Bytes: 16 (DLE), 4 (EOT), 1 (Recoverable error status) - or just 1 for general status
+    // Common ESC/POS keep-alive
+    final bytes = Uint8List.fromList([16, 4, 1]);
+    await _printBytes(printer, bytes);
   }
 }

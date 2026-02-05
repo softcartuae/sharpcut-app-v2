@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +27,7 @@ Future<bool?> showResettmentScreen(
   required List<CartItemModel> cartItems,
   required String? paidAmount,
   required double balance,
+  bool isAdmin = false,
 }) {
   return showDialog(
     context: context,
@@ -39,6 +41,7 @@ Future<bool?> showResettmentScreen(
       bookingTime: bookingTime,
       cartItems: cartItems,
       balance: balance,
+      isAdmin: isAdmin,
     ),
   );
 }
@@ -51,6 +54,7 @@ class ResettlementScreen extends StatefulWidget {
   final List<CartItemModel> cartItems;
   final String? paidAmount;
   final double balance;
+  final bool isAdmin;
 
   const ResettlementScreen({
     super.key,
@@ -61,6 +65,7 @@ class ResettlementScreen extends StatefulWidget {
     required this.cartItems,
     required this.paidAmount,
     required this.balance,
+    required this.isAdmin,
   });
 
   @override
@@ -175,6 +180,10 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
     final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
 
+    log("subTotal: $subTotal");
+    log("taxTotal: $taxTotal");
+    log("finalTotal: ${subTotal + taxTotal}");
+
     setState(() {
       _finalTotal = subTotal + taxTotal;
       _calculatePaymentAndBalance();
@@ -201,9 +210,14 @@ class _SettlementDialogState extends State<ResettlementScreen> {
         cardAmount = amount;
       }
     }
-
     final double curPayment = cashAmount + cardAmount;
-    final double balance = widget.balance;
+    final double discount = double.tryParse(_discountController.text) ?? 0.0;
+
+    // Balance is based on Net Total (Gross - Discount)
+    final double netTotal = _finalTotal - discount;
+
+    final double balance =
+        netTotal - (double.tryParse(_paidController.text) ?? 0.0) - curPayment;
 
     _curPaymentController.text = curPayment.toStringAsFixed(2);
     _balanceController.text = balance.toStringAsFixed(2);
@@ -245,6 +259,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
   void _onSettle({required bool alsoPrint}) async {
     final double calculatedFinalTotal = _finalTotal;
+    final double discount = double.tryParse(_discountController.text) ?? 0.0;
 
     double cashAmount = 0.0;
     double cardAmount = 0.0;
@@ -271,7 +286,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     // total going to paid
     final double theAmountGoingToPayTotaly = totalPaid + alreadyPaid;
 
-    if (theAmountGoingToPayTotaly > calculatedFinalTotal) {
+    if ((theAmountGoingToPayTotaly + discount) > calculatedFinalTotal) {
       // if total going to paid is greater than final total
       // need to prevent over payment
       ToastHelper.showError("Total amount cannot be greater than Final Total");
@@ -330,6 +345,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     }
 
     final ResettleModel resettleModel = ResettleModel(
+      discount: discount,
       transactionId: widget.settlePayment.transactionId,
       collectedUserId:
           widget.settlePayment.collectedUserId != null &&
@@ -352,7 +368,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(20),
+      insetPadding: const EdgeInsets.all(15),
       child: SingleChildScrollView(
         child: SizedBox(
           width: MediaQuery.of(context).size.width * 0.95,
@@ -385,7 +401,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
               // Content
               Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -411,7 +427,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
 
                     // Customer Details Section
                     Row(
@@ -461,9 +477,9 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     const Divider(color: Colors.white24),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
 
                     // Main Content: 3 Columns
                     Expanded(
@@ -538,7 +554,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                           : Colors.transparent,
                                     ),
                                   ),
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: 10),
                                 ],
                               ),
                             ),
@@ -552,7 +568,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                 children: [
                                   // Split Payment & Inputs
                                   SettlementGlassContainer(
-                                    padding: const EdgeInsets.all(16),
+                                    padding: const EdgeInsets.all(12),
                                     child: Column(
                                       children: [
                                         Wrap(
@@ -737,7 +753,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                           Expanded(
                             flex: 3,
                             child: SettlementGlassContainer(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(12),
                               child: SingleChildScrollView(
                                 child: Column(
                                   children: [
@@ -746,16 +762,18 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                       controller: _totalQtyController,
                                       isReadOnly: true,
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 5),
                                     SettlementRowInput(
                                       label: "Sub Total",
                                       controller: _subTotalController,
                                       isReadOnly: true,
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 5),
                                     SettlementRowInput(
-                                      isReadOnly: true,
-                                      label: "P. Discount",
+                                      isReadOnly: !widget.isAdmin,
+                                      label: !widget.isAdmin
+                                          ? "P. Discount (Admin Only)"
+                                          : "P. Discount",
                                       controller: _discountController,
                                       onChanged: (val) =>
                                           _calculateFinalTotal(),
@@ -765,24 +783,24 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                           ),
                                       inputFormatters: [
                                         FilteringTextInputFormatter.allow(
-                                          RegExp(r'^\d+\.?\d{0,2}'),
+                                          RegExp(r'^\d*\.?\d{0,2}'),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 5),
 
                                     SettlementRowInput(
                                       label: "VAT",
                                       controller: _vatController,
                                       isReadOnly: true,
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 5),
                                     SettlementRowInput(
                                       isReadOnly: true,
                                       label: "Paid",
                                       controller: _paidController,
                                     ),
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 10),
 
                                     // Grand Total
                                     Container(
@@ -810,17 +828,23 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                             ),
                                           ),
                                           Text(
-                                            _finalTotal.toStringAsFixed(2),
+                                            (_finalTotal -
+                                                    (double.tryParse(
+                                                          _discountController
+                                                              .text,
+                                                        ) ??
+                                                        0.0))
+                                                .toStringAsFixed(2),
                                             style: GoogleFonts.rajdhani(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 22,
+                                              fontSize: 20,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 10),
 
                                     Row(
                                       children: [
@@ -877,7 +901,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                           Expanded(
                             flex: 3,
                             child: SettlementGlassContainer(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(12),
                               child: SingleChildScrollView(
                                 child: Column(
                                   children: [

@@ -64,9 +64,30 @@ abstract class PrintingRepo {
 
   Future<Either<String, List<ServerPrinter>>> getServerPrinters({int? width});
 
-  Future<Either<String, void>> printServerInvoice({
+  Future<Either<String, void>> printServerPrinter({
     required int transactionId,
     required String printerName,
     required int size,
   });
+
+  Future<void> saveSelectedServerPrinter(ServerPrinter printer);
+  Future<ServerPrinter?> getSelectedServerPrinter();
+
+  Future<Either<String, void>> printQuickReportServer({
+    required String dateRange,
+    required int? userId,
+    required String printerName,
+    required int size,
+  });
+
+  Future<Either<String, void>> printCashRegisterReportServer({
+    required int cashRegisterId,
+    required String printerName,
+    required int size,
+  });
+
+  Future<void> saveLastConnectedPrinter(Printer printer);
+  Future<Printer?> getLastConnectedPrinter();
+  Future<void> clearLastConnectedPrinter();
+  Future<void> sendHeartbeat(Printer printer);
 }

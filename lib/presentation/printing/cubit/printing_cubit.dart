@@ -20,12 +20,14 @@ class PrintingCubit extends Cubit<PrintingState> {
   final PrintingRepo _printingRepo;
   StreamSubscription? _printerSubscription;
   StreamSubscription? _statusSubscription;
+  Timer? _heartbeatTimer;
 
   PrintingCubit(this._printingRepo) : super(PrintingState()) {
     loadPrinterSettings();
     _listenToPrinterStatus();
     getPrintingMode();
     getPaperSize();
+    _tryAutoConnect();
   }
 
   void _listenToPrinterStatus() {
@@ -79,6 +81,8 @@ class PrintingCubit extends Cubit<PrintingState> {
             showPaperSizeDialog: !hasPaperSize,
           ),
         );
+        _printingRepo.saveLastConnectedPrinter(printer);
+        _startHeartbeat();
       } else {
         emit(
           state.copyWith(
@@ -110,6 +114,8 @@ class PrintingCubit extends Cubit<PrintingState> {
             clearConnectedPrinter: true,
           ),
         );
+        _stopHeartbeat();
+        _printingRepo.clearLastConnectedPrinter();
       } catch (e) {
         emit(
           state.copyWith(
@@ -123,6 +129,7 @@ class PrintingCubit extends Cubit<PrintingState> {
   }
 
   void selectServerPrinter(ServerPrinter printer) {
+    _printingRepo.saveSelectedServerPrinter(printer);
     emit(state.copyWith(selectedServerPrinter: printer));
   }
 
@@ -151,7 +158,7 @@ class PrintingCubit extends Cubit<PrintingState> {
       }
 
       emit(state.copyWith(status: PrintingStatus.printing));
-      final result = await _printingRepo.printServerInvoice(
+      final result = await _printingRepo.printServerPrinter(
         transactionId: request.transactionId!,
         printerName: state.selectedServerPrinter!.name!,
         size: state.currentPaperSize!.widthInPixels,
@@ -162,7 +169,7 @@ class PrintingCubit extends Cubit<PrintingState> {
           emit(
             state.copyWith(status: PrintingStatus.error, errorMessage: failure),
           );
-          ToastHelper.showError(failure);
+          ToastHelper.showError("Printing failed");
         },
         (_) {
           emit(state.copyWith(status: PrintingStatus.printed));
@@ -175,14 +182,17 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
 
     if (state.connectedPrinter == null) {
-      ToastHelper.showError("No printer connected");
-      emit(
-        state.copyWith(
-          status: PrintingStatus.error,
-          errorMessage: "No printer connected",
-        ),
-      );
-      return;
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        ToastHelper.showError("No printer connected");
+        emit(
+          state.copyWith(
+            status: PrintingStatus.error,
+            errorMessage: "No printer connected",
+          ),
+        );
+        return;
+      }
     }
 
     emit(state.copyWith(status: PrintingStatus.printing));
@@ -218,17 +228,57 @@ class PrintingCubit extends Cubit<PrintingState> {
   Future<void> printQuickReport({
     required QuickReportModel report,
     required int? printCount,
+    int? userId,
   }) async {
-    if (state.connectedPrinter == null) {
-      log("No printer connected");
-      // ToastHelper.showError("No printer connected");
-      emit(
-        state.copyWith(
-          status: PrintingStatus.error,
-          errorMessage: "No printer connected",
-        ),
+    if (state.isServerPrinting) {
+      if (state.selectedServerPrinter == null) {
+        ToastHelper.showError("Please select a server printer");
+        return;
+      }
+
+      if (state.currentPaperSize == null) {
+        ToastHelper.showError("Please select a paper size");
+        return;
+      }
+
+      emit(state.copyWith(status: PrintingStatus.printing));
+      final result = await _printingRepo.printQuickReportServer(
+        dateRange: report.dateRange,
+        userId: userId,
+        printerName: state.selectedServerPrinter!.name!,
+        size: state.currentPaperSize!.widthInPixels,
+      );
+
+      result.fold(
+        (failure) {
+          emit(
+            state.copyWith(status: PrintingStatus.error, errorMessage: failure),
+          );
+          ToastHelper.showError("Printing failed");
+        },
+        (_) {
+          emit(state.copyWith(status: PrintingStatus.printed));
+          ToastHelper.showSuccess(
+            "Printing from server: ${state.selectedServerPrinter?.name}",
+          );
+        },
       );
       return;
+    }
+
+    if (state.connectedPrinter == null) {
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        // ToastHelper.showError("No printer connected");
+        log("No printer connected");
+        emit(
+          state.copyWith(
+            status: PrintingStatus.error,
+            errorMessage: "No printer connected",
+          ),
+        );
+        return;
+      }
     }
 
     emit(state.copyWith(status: PrintingStatus.printing));
@@ -255,16 +305,54 @@ class PrintingCubit extends Cubit<PrintingState> {
     required ShopModel shop,
     required int? printCount,
   }) async {
-    if (state.connectedPrinter == null) {
-      ToastHelper.showError("No printer connected");
-      log("No printer connected printign ");
-      emit(
-        state.copyWith(
-          status: PrintingStatus.error,
-          errorMessage: "No printer connected",
-        ),
+    if (state.isServerPrinting) {
+      if (state.selectedServerPrinter == null) {
+        ToastHelper.showError("Please select a server printer");
+        return;
+      }
+
+      if (state.currentPaperSize == null) {
+        ToastHelper.showError("Please select a paper size");
+        return;
+      }
+
+      emit(state.copyWith(status: PrintingStatus.printing));
+      final result = await _printingRepo.printCashRegisterReportServer(
+        cashRegisterId: report.cashRegisterId,
+        printerName: state.selectedServerPrinter!.name!,
+        size: state.currentPaperSize!.widthInPixels,
+      );
+
+      result.fold(
+        (failure) {
+          emit(
+            state.copyWith(status: PrintingStatus.error, errorMessage: failure),
+          );
+          ToastHelper.showError("Printing failed");
+        },
+        (_) {
+          emit(state.copyWith(status: PrintingStatus.printed));
+          ToastHelper.showSuccess(
+            "Printing from server: ${state.selectedServerPrinter?.name}",
+          );
+        },
       );
       return;
+    }
+
+    if (state.connectedPrinter == null) {
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        ToastHelper.showError("No printer connected");
+        log("No printer connected printign ");
+        emit(
+          state.copyWith(
+            status: PrintingStatus.error,
+            errorMessage: "No printer connected",
+          ),
+        );
+        return;
+      }
     }
 
     emit(state.copyWith(status: PrintingStatus.printing));
@@ -281,7 +369,7 @@ class PrintingCubit extends Cubit<PrintingState> {
       emit(
         state.copyWith(
           status: PrintingStatus.error,
-          errorMessage: "Failed to print: ${e.toString()}",
+          errorMessage: "Failed to print",
         ),
       );
     }
@@ -311,20 +399,27 @@ class PrintingCubit extends Cubit<PrintingState> {
   }
 
   Future<void> updatePrinterSettings(PrinterSettingsModel model) async {
-    emit(state.copyWith(isLoading: true));
+    // Optimistic Update: Update UI immediately
+    final oldSettings = state.settings;
+    emit(state.copyWith(settings: model, isLoading: true));
+
     final result = await _printingRepo.updatePrinterSettings(model);
     result.fold(
       (failure) {
         log(failure);
+        // Revert to old settings on failure
         emit(
           state.copyWith(
             isLoading: false,
             errorMessage: "Failed to update printer settings",
+            settings: oldSettings,
           ),
         );
         ToastHelper.showError(failure);
       },
       (_) async {
+        // Success: We can either keep the optimistic state or reload.
+        // Reloading ensures we are in sync with server, but the UI is already correct.
         await loadPrinterSettings();
         ToastHelper.showSuccess("Printer settings updated successfully");
       },
@@ -352,8 +447,11 @@ class PrintingCubit extends Cubit<PrintingState> {
 
   Future<void> openDrawer() async {
     if (state.connectedPrinter == null) {
-      ToastHelper.showError("No printer connected");
-      return;
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        ToastHelper.showError("No printer connected");
+        return;
+      }
     }
     try {
       await _printingRepo.openDrawer(state.connectedPrinter!);
@@ -366,8 +464,11 @@ class PrintingCubit extends Cubit<PrintingState> {
 
   Future<void> testPrint() async {
     if (state.connectedPrinter == null) {
-      ToastHelper.showError("No printer connected");
-      return;
+      final connected = await _tryAutoConnect();
+      if (!connected) {
+        ToastHelper.showError("No printer connected");
+        return;
+      }
     }
     try {
       await _printingRepo.testPrint(state.connectedPrinter!);
@@ -394,6 +495,10 @@ class PrintingCubit extends Cubit<PrintingState> {
     emit(state.copyWith(isServerPrinting: isServerPrinting));
     if (isServerPrinting) {
       fetchServerPrinters();
+      final savedPrinter = await _printingRepo.getSelectedServerPrinter();
+      if (savedPrinter != null) {
+        emit(state.copyWith(selectedServerPrinter: savedPrinter));
+      }
     }
   }
 
@@ -431,10 +536,36 @@ class PrintingCubit extends Cubit<PrintingState> {
     );
   }
 
+  Future<bool> _tryAutoConnect() async {
+    final lastPrinter = await _printingRepo.getLastConnectedPrinter();
+    if (lastPrinter != null) {
+      log("Auto-connecting to: ${lastPrinter.name}");
+      await connect(lastPrinter);
+      return state.connectedPrinter != null;
+    }
+    return false;
+  }
+
+  void _startHeartbeat() {
+    _stopHeartbeat();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (state.connectedPrinter != null &&
+          state.status == PrintingStatus.connected) {
+        _printingRepo.sendHeartbeat(state.connectedPrinter!);
+      }
+    });
+  }
+
+  void _stopHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+  }
+
   @override
   Future<void> close() {
     _printerSubscription?.cancel();
     _statusSubscription?.cancel();
+    _stopHeartbeat();
     return super.close();
   }
 }
