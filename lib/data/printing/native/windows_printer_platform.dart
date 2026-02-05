@@ -5,6 +5,7 @@ import 'package:ffi/ffi.dart';
 import 'package:win32/win32.dart';
 
 class WindowsPrinterPlatform {
+  
   /// Lists all local printers using EnumPrinters.
   List<String> getPrinters() {
     final printers = <String>[];
