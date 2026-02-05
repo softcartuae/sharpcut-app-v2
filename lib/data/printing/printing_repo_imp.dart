@@ -25,6 +25,8 @@ import 'package:sharp_cut/data/printing/service/printing_service.dart';
 import 'package:sharp_cut/data/printing/native/usb_printer_platform.dart';
 import 'package:sharp_cut/data/printing/native/bluetooth_printer_platform.dart';
 import 'package:sharp_cut/data/printing/native/network_printer_platform.dart';
+import 'package:sharp_cut/data/printing/native/windows_printer_platform.dart';
+import 'dart:io';
 
 import 'package:sharp_cut/presentation/printing/widgets/receipt_widget.dart';
 import 'package:sharp_cut/presentation/quick_report/widgets/quick_report_print_widget.dart';
@@ -38,6 +40,9 @@ class PrintingRepoImp implements PrintingRepo {
   final BluetoothPrinterPlatform _bluetoothPlatform =
       BluetoothPrinterPlatform();
   final NetworkPrinterPlatform _networkPlatform = NetworkPrinterPlatform();
+  // Initialize Windows platform lazily or nullable since it might crash on non-Windows if instantiated eagerly?
+  // Actually class definition is fine, but we should probably only use it if on Windows.
+  final WindowsPrinterPlatform _windowsPlatform = WindowsPrinterPlatform();
 
   // Stream controller to merge/manage printers from both sources
   final StreamController<List<Printer>> _printersController =
@@ -66,6 +71,25 @@ class PrintingRepoImp implements PrintingRepo {
         connectionTypes ??
         [ConnectionType.USB, ConnectionType.BLE, ConnectionType.NETWORK];
     List<Printer> allPrinters = [];
+
+    if (Platform.isWindows) {
+      try {
+        final windowsPrinters = _windowsPlatform.getPrinters();
+        allPrinters.addAll(
+          windowsPrinters.map(
+            (name) => Printer(
+              name: name,
+              connectionType: ConnectionType.USB, // Treat as USB/Local for now
+              address: name, // Use name as address/identifier
+            ),
+          ),
+        );
+      } catch (e) {
+        log("Windows Scan Error: $e");
+      }
+      _printersController.add(allPrinters);
+      return;
+    }
 
     // Native USB Scan
     if (types.contains(ConnectionType.USB)) {
@@ -135,6 +159,12 @@ class PrintingRepoImp implements PrintingRepo {
 
   @override
   Future<bool> connect(Printer printer) async {
+    if (Platform.isWindows) {
+      // Windows spooler is stateless in terms of "app connection".
+      // We just assume success if we can find it, or even just always return true and fail at print time.
+      return true;
+    }
+
     if (printer.connectionType == ConnectionType.USB) {
       try {
         final int vendorId = int.parse(printer.vendorId!);
@@ -385,6 +415,11 @@ class PrintingRepoImp implements PrintingRepo {
   }
 
   Future<void> _printBytes(Printer printer, Uint8List bytes) async {
+    if (Platform.isWindows) {
+      await _windowsPlatform.print(printer.name!, bytes);
+      return;
+    }
+
     if (printer.connectionType == ConnectionType.USB) {
       await _usbPlatform.print(bytes);
     } else if (printer.connectionType == ConnectionType.BLE) {

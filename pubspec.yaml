@@ -32,6 +32,8 @@ dependencies:
   screenshot: ^3.0.0
   firebase_core: ^4.3.0
   firebase_messaging: ^16.1.0
+  win32: ^5.15.0
+  ffi: ^2.1.5
 
 dev_dependencies:
   flutter_test:
