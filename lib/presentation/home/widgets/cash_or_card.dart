@@ -257,6 +257,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
               style: GoogleFonts.rajdhani(fontSize: 16, color: Colors.black87),
               decoration: const InputDecoration(
                 border: InputBorder.none,
+                hintText: "0.0",
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 8,

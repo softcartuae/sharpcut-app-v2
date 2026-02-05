@@ -24,7 +24,7 @@ class ReceiptWidget extends StatelessWidget {
   const ReceiptWidget({
     super.key,
     required this.staffName,
-    required this.invoiceNumber,
+    required this.invoiceNumber, 
     required this.bookingTime,
     required this.shopData,
     required this.request,
@@ -408,6 +408,7 @@ class ReceiptWidget extends StatelessWidget {
               (request.subTotalValue ?? 0).toStringAsFixed(2),
             ),
 
+         
             _buildTotalRow(
               'VAT (5%) Amount - قيمة الضريبة',
               (request.taxTotal ?? 0).toStringAsFixed(2),

@@ -70,7 +70,6 @@ class _PendingPrintData {
     required this.shopData,
     required this.cartItems,
     required this.staffName,
-
     required this.bookingTime,
   });
 }
@@ -319,14 +318,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        BlocListener<ChairCubit, ChairState>(
-          listener: (context, state) {
-            final bookingState = context.read<BookingCubit>().state;
-            if (state is ChairSuccess && bookingState is BookingSuccess) {
-          
-            }
-          },
-        ),
+     
         BlocListener<BookingCubit, BookingState>(
           listener: (context, state) {
             if (state is BookingSaved) {

@@ -57,6 +57,7 @@ class SettlePaymentRequestModel {
 
   Map<String, dynamic> toJson() {
     return {
+      
       "transaction_id": transactionId,
       "customer_name": customerName,
       "customer_number": customerNumber,

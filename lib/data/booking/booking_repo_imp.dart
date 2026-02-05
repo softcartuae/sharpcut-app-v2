@@ -94,47 +94,6 @@ class BookingRepoImp implements BookingRepo {
     }
   }
 
-  // @override
-  // Future<Either<String, String>> saveBooking(
-  //   SaveBookingRequestModel request,
-  // ) async {
-  //   try {
-  //     // Offline-only implementation
-  //     // Convert SaveBookingRequestModel to SettlePaymentRequestModel for DatabaseHelper
-  //     final settleRequest = SettlePaymentRequestModel(
-  //       transactionId: request.transactionId,
-  //       subTotalValue: request.grandTotal,
-  //       taxTotal: request.taxTotal,
-  //       discount: request.discount,
-  //       roundOff: request.roundOff,
-  //       finalTotal: request.finalTotal,
-  //       paymentStatus: 'unpaid',
-  //       mode: [],
-  //       amount: [],
-  //       tenderCash: [],
-  //       change: [],
-  //       collectedUserId: [],
-  //       // Map service details
-  //       serviceId: request.serviceId,
-  //       quantity: request.quantity,
-  //       rate: request.rate,
-  //       taxAmount: request.taxAmount,
-  //       currency: request.currency,
-  //       amountTotal: request.amountTotal,
-  //       tax: request.tax,
-  //       subTotalList: request.subTotal,
-  //       isTip: request.isTip,
-  //       customerName: request.customerName,
-  //       customerNumber: request.customerNumber,
-  //     );
-
-  //     await DatabaseHelper().settlePayment(settleRequest);
-
-  //     return const Right("Booking saved successfully");
-  //   } catch (e) {
-  //     return Left('Error saving booking: $e');
-  //   }
-  // }
 
   @override
   Future<Either<String, SettlePaymentResponseModel>> settlePayment(

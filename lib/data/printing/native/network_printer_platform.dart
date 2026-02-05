@@ -1,47 +1,55 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
+
+import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
 
 class NetworkPrinterPlatform {
-  static const MethodChannel _channel = MethodChannel(
-    'com.example.sharp_cut/network_printer',
-  );
+  Socket? _socket;
 
   /// Scans for devices on the network.
-  /// Currently, this might just return a dummy list or rely on manual IP entry
-  /// as full network scanning can be slow/complex.
-  /// For now, we'll implement a basic subnet scan on the native side if requested,
-  /// or just rely on direct connection.
-  /// Let's assume we might want to scan.
+  /// Currently limited to a simple ping or assumed knowledge, as full scanning is complex.
+  /// This returns an empty list as we rely on manual entry or simple connection for now.
   Future<List<Map<String, dynamic>>> scan(String? subnet) async {
-    final List<dynamic>? devices = await _channel.invokeMethod('scan', {
-      'subnet': subnet,
-    });
-    if (devices == null) return [];
-
-    return devices.map((device) {
-      final Map<Object?, Object?> map = device as Map<Object?, Object?>;
-      return map.map((key, value) => MapEntry(key.toString(), value));
-    }).toList();
+    // Implementing a full network scan using Sockets is resource intensive and slow.
+    // For now, we will return empty and rely on direct IP connection.
+    return [];
   }
 
   /// Connects to a Network device by IP and Port.
   /// Returns true if connection was successful.
   Future<bool> connect(String ipAddress, int port) async {
-    final bool? result = await _channel.invokeMethod('connect', {
-      'ipAddress': ipAddress,
-      'port': port,
-    });
-    return result ?? false;
+    try {
+      _socket = await Socket.connect(
+        ipAddress,
+        port,
+        timeout: const Duration(seconds: 5),
+      );
+      return true;
+    } catch (e) {
+      log("Network Connect Error: $e");
+      return false;
+    }
   }
 
   /// Prints raw bytes to the connected printer.
   Future<bool> print(Uint8List data) async {
-    final bool? result = await _channel.invokeMethod('print', {'data': data});
-    return result ?? false;
+    if (_socket == null) return false;
+    try {
+      _socket!.add(data);
+      await _socket!.flush();
+      return true;
+    } catch (e) {
+      log("Network Print Error: $e");
+      return false;
+    }
   }
 
   /// Disconnects the current printer.
   Future<void> disconnect() async {
-    await _channel.invokeMethod('disconnect');
+    if (_socket != null) {
+      await _socket!.close();
+      _socket = null;
+    }
   }
 }
