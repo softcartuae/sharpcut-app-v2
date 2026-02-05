@@ -20,16 +20,19 @@ class AuthCubit extends Cubit<AuthCubitState> {
     emit(AuthLoading());
     try {
       final result = await authRepo.login(licenseNo);
-      result.fold((l) {
-        emit(AuthError(l));
-      }, (r) async {
-        await tokenStorage.saveToken(r);
-        emit(AuthLoginSuccess(r));
-        // Fetch user immediately after login
-        await getUser();
-      });
+      result.fold(
+        (l) {
+          emit(AuthError(l));
+        },
+        (r) async {
+          await tokenStorage.saveToken(r);
+          emit(AuthLoginSuccess(r));
+          // Fetch user immediately after login
+          await getUser();
+        },
+      );
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError("Something Went Wrong"));
     }
   }
 

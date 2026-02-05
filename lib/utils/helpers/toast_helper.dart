@@ -11,7 +11,7 @@ class ToastHelper {
     ToastGravity gravity = ToastGravity.BOTTOM,
     Toast toastLength = Toast.LENGTH_SHORT,
   }) {
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       Fluttertoast.showToast(
         msg: msg,
         toastLength: toastLength,
