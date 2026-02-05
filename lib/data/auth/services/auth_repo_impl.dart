@@ -20,20 +20,37 @@ class AuthRepoImpl implements AuthRepo {
       String? token;
 
       try {
-        token = await FirebaseMessaging.instance.getToken();
+        if (Platform.isAndroid || Platform.isIOS) {
+          token = await FirebaseMessaging.instance.getToken();
+        }
       } catch (e) {
         log(e.toString());
       }
 
+<<<<<<< HEAD
       String deviceId = await tokenStorage.getDeviceId();
+=======
+      String deviceOs = 'unknown';
+      if (Platform.isAndroid) {
+        deviceOs = 'android';
+      } else if (Platform.isIOS) {
+        deviceOs = 'ios';
+      } else if (Platform.isWindows) {
+        deviceOs = 'windows';
+      }
+>>>>>>> daef5e1 (solved toest issue)
 
       final response = await ApiClient.dio.post(
         ApiClient.loginApi,
         data: {
           "license_no": licenseNo,
           "device_token": token,
+<<<<<<< HEAD
           "device_id": deviceId,
           "device_os": Platform.isAndroid ? "android" : "ios",
+=======
+          "device_os": deviceOs,
+>>>>>>> daef5e1 (solved toest issue)
         },
       );
 

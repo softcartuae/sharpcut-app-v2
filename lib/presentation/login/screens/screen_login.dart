@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_home.dart';
 import 'package:sharp_cut/data/api_client.dart';
