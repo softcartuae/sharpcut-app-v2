@@ -1,17 +1,14 @@
 import 'dart:developer';
+import 'dart:io';
 
-import 'package:android_id/android_id.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:sharp_cut/core/database/database_helper.dart';
 import 'package:sharp_cut/data/api_client.dart';
+import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
-
-import 'package:sharp_cut/data/local_storage/token_storage.dart';
-import 'package:sharp_cut/core/database/database_helper.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'dart:io';
 
 class AuthRepoImpl implements AuthRepo {
   final TokenStorage tokenStorage;
@@ -28,20 +25,7 @@ class AuthRepoImpl implements AuthRepo {
         log(e.toString());
       }
 
-      String deviceId = '';
-
-      try {
-        if (Platform.isAndroid) {
-          const androidIdPlugin = AndroidId();
-          deviceId = await androidIdPlugin.getId() ?? '';
-        } else if (Platform.isIOS) {
-          final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-          IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-          deviceId = iosInfo.identifierForVendor ?? '';
-        }
-      } catch (e) {
-        log('Failed to get device info: $e');
-      }
+      String deviceId = await tokenStorage.getDeviceId();
 
       final response = await ApiClient.dio.post(
         ApiClient.loginApi,
