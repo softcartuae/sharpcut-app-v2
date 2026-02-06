@@ -459,6 +459,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                     opacity: isBooked ? 1.0 : 0.5,
                     child: RepaintBoundary(
                       child: CommonContainer(
+                        height: MediaQuery.of(context).size.height,
                         borderRadius: BorderRadius.circular(15),
                         backgroundImageUrl: "lib/utils/images/Card.png",
                         padding: const EdgeInsets.all(16),
@@ -575,6 +576,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             Expanded(
               flex: 6,
               child: CommonContainer(
+                height: MediaQuery.of(context).size.height,
                 borderRadius: BorderRadius.circular(15),
                 backgroundImageUrl: "lib/utils/images/Card.png",
                 padding: const EdgeInsets.all(16),
@@ -1231,13 +1233,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               Opacity(
                                 opacity: isBooked ? 0.5 : 1.0,
                                 child: ActionButton(
-                                  label: "ADD EXPENSE",
-                                  isPrimary: selectedButton == "ADD EXPENSE",
+                                  label: "STAFF EXPENSE",
+                                  isPrimary: selectedButton == "STAFF EXPENSE",
                                   onTap: isBooked
                                       ? null
                                       : () {
                                           _selectedButtonNotifier.value =
-                                              "ADD EXPENSE";
+                                              "STAFF EXPENSE";
                                           showPasswordForValidation(
                                             context,
                                             false,

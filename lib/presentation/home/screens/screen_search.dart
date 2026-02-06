@@ -19,8 +19,8 @@ class ScreenSearch extends StatelessWidget {
         child: Column(
           children: [
             const HomeAppBar(),
-            const SizedBox(height: 24),
-            Expanded(
+            const SizedBox(height: 15),
+            SingleChildScrollView(
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -32,30 +32,42 @@ class ScreenSearch extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.close, color: Colors.black),
-                          style: IconButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: const BorderSide(color: Colors.grey),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 80,
+                      SizedBox(
                         height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.person_search_outlined,
-                          size: 40,
-                          color: Colors.black87,
+                        width: double.infinity,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.black,
+                                ),
+                                style: IconButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    side: const BorderSide(color: Colors.grey),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.person_search_outlined,
+                                size: 40,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 24),

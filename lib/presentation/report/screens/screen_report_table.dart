@@ -206,7 +206,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   children: [
                     Row(
@@ -228,7 +228,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 8),
 
                         /// DATE RANGE PICKER
                         Expanded(
@@ -244,7 +244,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                           ),
                         ),
 
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 8),
                         Expanded(
                           flex: 2,
                           child: ReportFilterItem(
@@ -260,7 +260,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 8),
                         Expanded(
                           flex: 2,
                           child: ReportFilterItem(
@@ -281,7 +281,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 8),
 
                         Expanded(
                           flex: 3,
@@ -297,102 +297,102 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              TextField(
-                                controller: _searchController,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: InputDecoration(
-                                  hintText: "Search here..",
-                                  hintStyle: GoogleFonts.rajdhani(
-                                    color: Colors.grey,
-                                  ),
-                                  suffixIcon: const Icon(Icons.search),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                    borderSide: const BorderSide(
+                              SizedBox(
+                                height: 40,
+                                child: TextField(
+                                  controller: _searchController,
+                                  textAlignVertical: TextAlignVertical.center,
+                                  style: const TextStyle(color: Colors.black),
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    hintText: "Search here..",
+                                    hintStyle: GoogleFonts.rajdhani(
                                       color: Colors.grey,
-                                      width: 1,
                                     ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                    borderSide: const BorderSide(
-                                      color: Colors.black,
-                                      width: 1,
+                                    suffixIcon: const Icon(
+                                      Icons.search,
+                                      size: 20,
                                     ),
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 0,
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                      borderSide: const BorderSide(
+                                        color: Colors.grey,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 0,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Column(
-                          children: [
-                            IconButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.black,
-                              ),
-                              style: IconButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  side: const BorderSide(color: Colors.grey),
-                                ),
-                              ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _searchController.clear();
+                              _selectedRange = null;
+                              _filterKey =
+                                  UniqueKey(); // Force rebuild of filters
+                            });
+                            context.read<ReportCubit>().resetFilters();
+                            // Re-apply staff filter if not admin
+                            if (widget.staff != null &&
+                                widget.staff!.role != Role.admin) {
+                              context.read<ReportCubit>().updateFilter(
+                                'user_id',
+                                widget.staff!.id,
+                              );
+                            }
+                            context.read<ReportCubit>().fetchTransactions();
+                          },
+                          child: const ReportActionButton(
+                            label: "Reset",
+                            bgColor: Colors.red,
+                            textColor: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () {
+                            final cubit = context.read<ReportCubit>();
+                            cubit.updateFilter(
+                              'search_query',
+                              _searchController.text,
+                            );
+                            cubit.fetchTransactions();
+                          },
+                          child: const ReportActionButton(
+                            label: "Search",
+                            bgColor: Colors.blue,
+                            textColor: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.close, color: Colors.black),
+                          style: IconButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: const BorderSide(color: Colors.grey),
                             ),
-
-                            const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _searchController.clear();
-                                  _selectedRange = null;
-                                  _filterKey =
-                                      UniqueKey(); // Force rebuild of filters
-                                });
-                                context.read<ReportCubit>().resetFilters();
-                                // Re-apply staff filter if not admin
-                                if (widget.staff != null &&
-                                    widget.staff!.role != Role.admin) {
-                                  context.read<ReportCubit>().updateFilter(
-                                    'user_id',
-                                    widget.staff!.id,
-                                  );
-                                }
-                                context.read<ReportCubit>().fetchTransactions();
-                              },
-                              child: const ReportActionButton(
-                                label: "Reset",
-                                bgColor: Colors.red,
-                                textColor: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () {
-                                final cubit = context.read<ReportCubit>();
-                                cubit.updateFilter(
-                                  'search_query',
-                                  _searchController.text,
-                                );
-                                cubit.fetchTransactions();
-                              },
-                              child: const ReportActionButton(
-                                label: "Search",
-                                bgColor: Colors.blue,
-                                textColor: Colors.white,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     Expanded(child: ReportDataTable(staff: widget.staff)),
                   ],
                 ),

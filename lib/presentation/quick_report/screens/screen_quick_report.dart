@@ -172,161 +172,58 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
             // Custom AppBar
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
+                horizontal: 8.0,
                 vertical: 8.0,
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(width: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.menu, color: Colors.blue),
-                      const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Colors.blue,
-                                  width: 2.0,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              "Counter Cash",
-                              style: GoogleFonts.rajdhani(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
-
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Custom Staff Name Dropdown
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  Expanded(
+                    child: Row(
                       children: [
-                        Text(
-                          "STAFF NAME",
-                          style: GoogleFonts.rajdhani(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                        IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back,
                             color: Colors.black,
                           ),
+                          onPressed: () => Navigator.pop(context),
                         ),
-                        const SizedBox(height: 8),
-                        Container(
-                          height: 45,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<int>(
-                              value: _selectedStaffId,
-                              isExpanded: true,
-                              hint: Text(
-                                "All",
-                                style: GoogleFonts.rajdhani(
-                                  color: Colors.black,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.arrow_drop_down,
-                                color: Colors.black,
-                              ),
-                              dropdownColor: Colors.white,
-                              style: GoogleFonts.rajdhani(
-                                color: Colors.black,
-                                fontSize: 14,
-                              ),
-                              items: [
-                                const DropdownMenuItem<int>(
-                                  value: null,
-                                  child: Text("All"),
-                                ),
-                                ...staffList.map((StaffModel staff) {
-                                  return DropdownMenuItem<int>(
-                                    value: staff.id,
-                                    child: Text(
-                                      staff.name,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                }),
-                              ],
-                              onChanged: (int? newValue) {
-                                setState(() {
-                                  _selectedStaffId = newValue;
-                                });
-                                _fetchReport();
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Date Range Filter
-                    GestureDetector(
-                      onTap: () => _showDateFilterOptions(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        const SizedBox(width: 8),
+                        Row(
                           children: [
-                            Text(
-                              _dateLabel,
-                              style: GoogleFonts.rajdhani(
-                                fontSize: 14,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            const Icon(
-                              Icons.calendar_today_outlined,
-                              color: Colors.grey,
-                              size: 20,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Colors.black,
+                                        width: 2.0,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Sales Report",
+                                    style: GoogleFonts.rajdhani(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-
-                    // Print Report Button
-                    BlocBuilder<QuickReportCubit, QuickReportState>(
+                  ),
+                  Expanded(
+                    child: BlocBuilder<QuickReportCubit, QuickReportState>(
                       builder: (context, state) {
-                        return Center(
+                        return Align(
+                          alignment: Alignment.centerRight,
                           child: SizedBox(
                             width: 150,
                             child: ElevatedButton(
@@ -370,7 +267,130 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                         );
                       },
                     ),
-                    const SizedBox(height: 24),
+                  ),
+                  SizedBox(width: 8),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Custom Staff Name Dropdown
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "STAFF NAME",
+                          style: GoogleFonts.rajdhani(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 45,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<int>(
+                                    value: _selectedStaffId,
+                                    isExpanded: true,
+                                    hint: Text(
+                                      "All",
+                                      style: GoogleFonts.rajdhani(
+                                        color: Colors.black,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Colors.black,
+                                    ),
+                                    dropdownColor: Colors.white,
+                                    style: GoogleFonts.rajdhani(
+                                      color: Colors.black,
+                                      fontSize: 14,
+                                    ),
+                                    items: [
+                                      const DropdownMenuItem<int>(
+                                        value: null,
+                                        child: Text("All"),
+                                      ),
+                                      ...staffList.map((StaffModel staff) {
+                                        return DropdownMenuItem<int>(
+                                          value: staff.id,
+                                          child: Text(
+                                            staff.name,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      }),
+                                    ],
+                                    onChanged: (int? newValue) {
+                                      setState(() {
+                                        _selectedStaffId = newValue;
+                                      });
+                                      _fetchReport();
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => _showDateFilterOptions(context),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.grey.shade400,
+                                    ),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        _dateLabel,
+                                        style: GoogleFonts.rajdhani(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.calendar_today_outlined,
+                                        color: Colors.grey,
+                                        size: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
 
                     // Report Preview Card
                     BlocBuilder<QuickReportCubit, QuickReportState>(

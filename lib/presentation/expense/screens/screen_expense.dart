@@ -52,7 +52,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "VIEW EXPENSE",
+                            "STAFF EXPENSE",
                             style: GoogleFonts.rajdhani(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -178,7 +178,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    // const SizedBox(height: 24),
 
                     // Table Header
                     Container(
@@ -265,11 +265,10 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                             return ListView.separated(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 24,
-                                vertical: 12,
                               ),
                               itemCount: state.expenses.length,
                               separatorBuilder: (context, index) =>
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 5),
                               itemBuilder: (context, index) {
                                 final expense = state.expenses[index];
                                 return Column(
@@ -283,7 +282,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                                               vertical: 12,
                                               horizontal: 24,
                                             ),
-                                            color: const Color(0xFFF9F9F9),
+                                            // color: const Color(0xFFF9F9F9),
                                             child: Text(
                                               expense.purchaseDate ?? "",
                                               style: GoogleFonts.rajdhani(
@@ -301,7 +300,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                                               vertical: 12,
                                               horizontal: 24,
                                             ),
-                                            color: const Color(0xFFF9F9F9),
+                                            // color: const Color(0xFFF9F9F9),
                                             child: Text(
                                               expense.itemName ?? "",
                                               style: GoogleFonts.rajdhani(
@@ -319,7 +318,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                                               vertical: 12,
                                               horizontal: 24,
                                             ),
-                                            color: const Color(0xFFF9F9F9),
+                                            // color: const Color(0xFFF9F9F9),
                                             child: Text(
                                               expense.price ?? "",
                                               style: GoogleFonts.rajdhani(
@@ -331,7 +330,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: 5),
                                     const Divider(
                                       height: 1,
                                       color: Color(0xFFE0E0E0),

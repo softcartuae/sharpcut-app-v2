@@ -26,7 +26,7 @@ Future<StaffModel?> showStaffSelectionDialog(
         backgroundColor: const Color(0xFF1E1E2C), // Dark background
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.8  ,
+          width: MediaQuery.of(context).size.width * 0.8,
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -35,12 +35,12 @@ Future<StaffModel?> showStaffSelectionDialog(
                 alignment: Alignment.center,
                 children: [
                   Align(
-                    alignment: Alignment.centerLeft,
+                    alignment: Alignment.centerRight,
                     child: IconButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      icon: const Icon(Icons.close, color: Colors.white),
                     ),
                   ),
                   Text(
