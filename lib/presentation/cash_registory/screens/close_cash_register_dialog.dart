@@ -109,9 +109,10 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Stack(
+                  alignment: Alignment.center,
                   children: [
+                    // Centered text
                     Text(
                       "CLOSE CASH REGISTER",
                       style: GoogleFonts.rajdhani(
@@ -120,53 +121,74 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Colors.white54),
+
+                    // Left icon
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close, color: Colors.white54),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
+                Builder(
+                  builder: (context) {
+                    return Text(
+                      "Opening Date: ${widget.closeRegisterDetails.openingDate}",
+                      style: GoogleFonts.rajdhani(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    );
+                  },
+                ),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Total Sales: ${widget.closeRegisterDetails.totalSales}",
-                          style: GoogleFonts.rajdhani(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
+                    Expanded(
+                      child: Text(
+                        "Opening Amount: ${widget.closeRegisterDetails.openingAmount}",
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white,
+                          fontSize: 16,
                         ),
-                        Text(
-                          "Opening Amount: ${widget.closeRegisterDetails.openingAmount}",
-                          style: GoogleFonts.rajdhani(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Builder(
-                          builder: (context) {
-                            return Text(
-                              "Opening Date: ${widget.closeRegisterDetails.openingDate}",
-                              style: GoogleFonts.rajdhani(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                      ),
                     ),
-                    Text(
-                      "Balance: ${_balance.toStringAsFixed(2)} ",
-                      style: GoogleFonts.rajdhani(
-                        color: Colors.white70,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: Text(
+                        "Total Cash Sales: ${widget.closeRegisterDetails.totalSales}",
+                        textAlign: TextAlign.end,
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Expected Amount: ${widget.closeRegisterDetails.expectedClosingAmount}",
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white70,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        "Balance: ${_balance.toStringAsFixed(2)}",
+                        textAlign: TextAlign.end,
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ],

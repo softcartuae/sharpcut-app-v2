@@ -22,11 +22,6 @@ class CuttingMastersDialog extends StatelessWidget {
     );
   }
 
-  String formatDate(String isoDate) {
-    final dateTime = DateTime.parse(isoDate).toLocal();
-    return DateFormat('dd/MM/yyyy hh:mm a').format(dateTime);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -55,7 +50,7 @@ class CuttingMastersDialog extends StatelessWidget {
     return Row(
       children: [
         const Text(
-          'Cutting Masters',
+          'Select Chair',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -188,7 +183,7 @@ class CuttingMastersDialog extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
               ),
