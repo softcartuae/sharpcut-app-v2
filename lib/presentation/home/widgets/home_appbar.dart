@@ -20,7 +20,6 @@ class _HomeAppBarState extends State<HomeAppBar> {
   @override
   void initState() {
     storeName = context.read<AuthCubit>().currentUser?.name ?? "";
-
     super.initState();
   }
 
@@ -60,7 +59,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         Row(
           children: [
             Text(
-              "VER. ON: ${Version.version}",
+              "Ver. ON-${Version.version}",
               style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 18),
             ),
           ],
