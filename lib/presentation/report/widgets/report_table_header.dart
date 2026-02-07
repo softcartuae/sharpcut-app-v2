@@ -25,6 +25,8 @@ class ReportTableHeader extends StatelessWidget {
           _buildHeaderCell("Balance", width: 80),
           _buildHeaderCell("Discount", width: 80),
           _buildHeaderCell("Staff Name", width: 100),
+          _buildHeaderCell("Status", width: 80),
+
           _buildHeaderCell("Payment", width: 80),
           _buildHeaderCell("Print", width: 60),
           // _buildHeaderCell("Invoice", width: 60),

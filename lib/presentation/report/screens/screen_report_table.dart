@@ -270,7 +270,6 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                             items: const [
                               "All",
                               "Completed",
-                              "Pending",
                               "Cancelled",
                             ],
                             onChanged: (value) {
