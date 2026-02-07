@@ -185,7 +185,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     log("finalTotal: ${subTotal + taxTotal}");
 
     setState(() {
-      _finalTotal = subTotal + taxTotal;
+      _finalTotal = widget.settlePayment.finalTotalbefore ?? 0.0;
       _calculatePaymentAndBalance();
       _calculateChange();
     });
@@ -220,7 +220,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
         netTotal - (double.tryParse(_paidController.text) ?? 0.0) - curPayment;
 
     _curPaymentController.text = curPayment.toStringAsFixed(2);
-    _balanceController.text = balance.toStringAsFixed(2);
+    _balanceController.text = balance < 0 ? "0.00" : balance.toStringAsFixed(2);
   }
 
   void _calculateChange() {

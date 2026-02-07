@@ -30,11 +30,11 @@ enum PrinterPaperSize {
   String get label {
     switch (this) {
       case PrinterPaperSize.mm58:
-        return "58 mm";
+        return "58mm (2 inch)";
       case PrinterPaperSize.mm80:
-        return "80 mm";
+        return "80mm (3 inch)";
       case PrinterPaperSize.inch4:
-        return "4 inch";
+        return "104mm (4 inch)";
     }
   }
 }

@@ -51,6 +51,7 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Header
                         Stack(

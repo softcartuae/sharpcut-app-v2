@@ -233,6 +233,7 @@ Future<void> showPasswordForValidation(
                                       child: CircularProgressIndicator(),
                                     )
                                   : Container(
+                                      height: 50,
                                       width: double.infinity,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(12),

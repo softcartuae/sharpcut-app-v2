@@ -73,6 +73,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                       state.transactions.isNotEmpty)
                                     Expanded(
                                       child: ListView.builder(
+                                        padding: EdgeInsets.zero,
                                         itemCount: state.transactions.length,
                                         itemBuilder: (context, index) {
                                           return ReportTableRow(

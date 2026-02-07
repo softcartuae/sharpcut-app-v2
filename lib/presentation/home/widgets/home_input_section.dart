@@ -34,7 +34,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage("lib/utils/images/rectangle.png"),
@@ -97,24 +97,24 @@ class _HomeInputSectionState extends State<HomeInputSection> {
               children: [
                 Row(
                   children: [
-                    Expanded(
-                      child: CustomTextField(
-                        label: "Invoice no",
-                        hint: invoiceNo,
-                        icon: Icons.receipt_long_outlined,
-                        readOnly: true,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        label: "Date",
-                        hint: date,
-                        icon: Icons.calendar_today_outlined,
-                        readOnly: true,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
+                    // Expanded(
+                    //   child: CustomTextField(
+                    //     label: "Invoice no",
+                    //     hint: invoiceNo,
+                    //     icon: Icons.receipt_long_outlined,
+                    //     readOnly: true,
+                    //   ),
+                    // ),
+                    // const SizedBox(width: 16),
+                    // Expanded(
+                    //   child: CustomTextField(
+                    //     label: "Date",
+                    //     hint: date,
+                    //     icon: Icons.calendar_today_outlined,
+                    //     readOnly: true,
+                    //   ),
+                    // ),
+                    // const SizedBox(width: 16),
                     Expanded(
                       child: CustomTextField(
                         label: "Booking Time",
@@ -123,11 +123,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                         readOnly: true,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
+                    const SizedBox(width: 16),
                     Expanded(
                       child: CustomTextField(
                         controller: _nameController,
