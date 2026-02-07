@@ -7,8 +7,8 @@ import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/data/local_storage/url_storage.dart';
 
 class ApiClient {
-  // static String changeBaseUrl = "https://app.sharpcutae.com/";
-  static String changeBaseUrl = "https://saloon.softcart.io/";
+  static String changeBaseUrl = "https://app.sharpcutae.com/";
+  // static String changeBaseUrl = "https://saloon.softcart.io/";
 
   static String baseUrl = changeBaseUrl;
 
