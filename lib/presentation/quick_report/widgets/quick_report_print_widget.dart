@@ -42,7 +42,7 @@ class QuickReportPrintWidget extends StatelessWidget {
           const Text(
             "Invoice Details - Delivered",
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -64,7 +64,7 @@ class QuickReportPrintWidget extends StatelessWidget {
           const Text(
             "Invoice Customer Details",
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -88,7 +88,7 @@ class QuickReportPrintWidget extends StatelessWidget {
           const Text(
             "Salesman Wise Details",
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -106,7 +106,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                     "Staff",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 19,
                       color: Colors.black,
                     ),
                   ),
@@ -118,7 +118,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 19,
                       color: Colors.black,
                     ),
                   ),
@@ -130,7 +130,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 19,
                       color: Colors.black,
                     ),
                   ),
@@ -142,7 +142,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                     textAlign: TextAlign.end,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 19,
                       color: Colors.black,
                     ),
                   ),
@@ -167,7 +167,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                     child: Text(
                       detail.salesmanName,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -179,7 +179,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                       detail.totalCashAmount,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 19,
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
@@ -191,7 +191,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                       detail.totalCardAmount,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 19,
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
@@ -204,7 +204,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                       textAlign: TextAlign.end,
                       style: const TextStyle(
                         color: Colors.black,
-                        fontSize: 16,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -237,7 +237,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                       "Total :${report.salesmanWiseDetails.length}",
                       style: const TextStyle(
                         color: Colors.black,
-                        fontSize: 16,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -249,7 +249,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.black,
-                        fontSize: 16,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -261,7 +261,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.black,
-                        fontSize: 16,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -273,7 +273,7 @@ class QuickReportPrintWidget extends StatelessWidget {
                       textAlign: TextAlign.end,
                       style: const TextStyle(
                         color: Colors.black,
-                        fontSize: 16,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -294,7 +294,7 @@ class QuickReportPrintWidget extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 16,
+          fontSize: 19,
           color: Colors.black,
           fontWeight: FontWeight.bold,
         ),
@@ -311,7 +311,7 @@ class QuickReportPrintWidget extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -319,7 +319,7 @@ class QuickReportPrintWidget extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -340,7 +340,7 @@ class QuickReportPrintWidget extends StatelessWidget {
               col1,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 19,
                 color: Colors.black,
               ),
             ),
@@ -352,7 +352,7 @@ class QuickReportPrintWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 19,
                 color: Colors.black,
               ),
             ),
@@ -364,7 +364,7 @@ class QuickReportPrintWidget extends StatelessWidget {
               textAlign: TextAlign.end,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 19,
                 color: Colors.black,
               ),
             ),
@@ -384,7 +384,7 @@ class QuickReportPrintWidget extends StatelessWidget {
             child: Text(
               col1,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 19,
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
@@ -396,7 +396,7 @@ class QuickReportPrintWidget extends StatelessWidget {
               col2,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 19,
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
@@ -408,7 +408,7 @@ class QuickReportPrintWidget extends StatelessWidget {
               col3,
               textAlign: TextAlign.end,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 19,
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
