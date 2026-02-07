@@ -2,7 +2,11 @@ name: Build Windows App offline
 
 on:
   push:
+<<<<<<< HEAD
     branches: ["offline_branch"]
+=======
+    branches: ["main", "master"]
+>>>>>>> 4a20b03 (added print in resettlment with staging url)
   workflow_dispatch:
 
 jobs:
