@@ -556,22 +556,22 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                         if (state.printers.isEmpty &&
                             state.status != PrintingStatus.scanning)
                           Padding(
-                            padding: const EdgeInsets.only(top: 40),
+                            padding: const EdgeInsets.only(top: 0),
                             child: Center(
                               child: Column(
                                 children: [
                                   Text(
                                     "No printers found.",
                                     style: GoogleFonts.rajdhani(
-                                      color: Colors.grey,
+                                      color: Colors.black,
                                       fontSize: 14,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    "Please connect a printer and press scan.",
+                                    "Please connect a printer and Tap scan.",
                                     style: GoogleFonts.rajdhani(
-                                      color: Colors.grey,
+                                      color: Colors.black,
                                       fontSize: 14,
                                     ),
                                   ),

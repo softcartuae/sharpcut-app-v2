@@ -34,9 +34,9 @@ class ReportTableRow extends StatelessWidget {
         children: [
           _buildDataCell("${index + 1}", width: 50),
           _buildDataCell(transaction.invoiceDate ?? "-", width: 100),
-          _buildDataCell(transaction.invoiceNo ?? "-", width: 120),
+          _buildDataCell(transaction.invoiceNo ?? "-", width: 150),
           _buildDataCell(transaction.customerNumber ?? "-", width: 100),
-          _buildDataCell(transaction.customerName ?? "-", width: 100),
+          _buildDataCell(transaction.customerName ?? "-", width: 150),
           _buildDataCell(
             transaction.finalTotal?.toStringAsFixed(2) ?? "0.00",
             width: 80,

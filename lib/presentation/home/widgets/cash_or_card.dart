@@ -87,21 +87,30 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.black),
-                onPressed: () => Navigator.of(context).pop(),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ),
-            Text(
-              "Quick Payment",
-              style: GoogleFonts.rajdhani(
-                fontSize: 24,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
+            SizedBox(
+              height: 48,
+              width: double.infinity,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Text(
+                    "Quick Payment",
+                    style: GoogleFonts.rajdhani(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.black),
+                      onPressed: () => Navigator.of(context).pop(),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),

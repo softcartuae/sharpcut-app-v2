@@ -5,6 +5,7 @@ import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:sharp_cut/version.dart';
 
 class HomeAppBar extends StatefulWidget {
   const HomeAppBar({super.key});
@@ -36,11 +37,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         // Left Section: Logo & Shop Name
         Row(
           children: [
-            Image.asset(
-              "lib/utils/images/sharp_cut.png",
-              height: 80,
-              width: 80,
-            ),
+            Image.asset("lib/utils/images/logo2.png", height: 70, width: 120),
             const SizedBox(width: 25),
             Image.asset(
               "lib/utils/images/Shop Location.png",
@@ -48,7 +45,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
               width: 25,
               color: AppColors.violetLight,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Text(
               storeName,
               style: GoogleFonts.rajdhani(
@@ -56,6 +53,15 @@ class _HomeAppBarState extends State<HomeAppBar> {
                 fontWeight: FontWeight.w500,
                 fontSize: 18,
               ),
+            ),
+          ],
+        ),
+
+        Row(
+          children: [
+            Text(
+              "VER. ON: ${Version.version}",
+              style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 18),
             ),
           ],
         ),
@@ -79,19 +85,13 @@ class _HomeAppBarState extends State<HomeAppBar> {
                 );
               },
             ),
+
             Image.asset("lib/utils/images/Calendar.png", width: 20, height: 20),
             const SizedBox(width: 8),
             Text(
               DateFormat('dd MMM yyyy').format(DateTime.now()),
-              style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 21),
+              style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 18),
             ),
-
-            const SizedBox(width: 40),
-            const CircleAvatar(
-              radius: 18,
-              backgroundImage: AssetImage("lib/utils/images/profile_pic.png"),
-            ),
-            const SizedBox(width: 12),
           ],
         ),
       ],

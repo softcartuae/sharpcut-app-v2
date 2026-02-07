@@ -2,7 +2,7 @@ name: Build Windows App
 
 on:
   push:
-    branches: ["main", "master", "windows_build"]
+    branches: ["main", "master"]
   workflow_dispatch:
 
 jobs:

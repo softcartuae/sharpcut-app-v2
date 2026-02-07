@@ -73,6 +73,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                       state.transactions.isNotEmpty)
                                     Expanded(
                                       child: ListView.builder(
+                                        padding: EdgeInsets.zero,
                                         itemCount: state.transactions.length,
                                         itemBuilder: (context, index) {
                                           return ReportTableRow(
@@ -151,7 +152,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
-                                                 finalTotalbefore: booking.finalTotalbefore,
+                                                finalTotalbefore:
+                                                    booking.finalTotalbefore,
                                                 paymentStatus:
                                                     booking.paymentStatus,
                                                 transactionId: booking.id,
@@ -233,6 +235,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                   Role.admin;
 
                                               showResettmentScreen(
+                                                booking: booking,
                                                 isAdmin: isAdmin,
                                                 balance: balenceAmount,
                                                 paidAmount: booking.totalPayment
@@ -286,7 +289,8 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
-                                                finalTotalbefore: booking.finalTotalbefore,
+                                                finalTotalbefore:
+                                                    booking.finalTotalbefore,
                                                 paymentStatus:
                                                     booking.paymentStatus,
                                                 transactionId: booking.id,

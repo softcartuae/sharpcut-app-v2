@@ -148,7 +148,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
             Text(
               "CUSTOMER TYPE DETAILS",
               style: GoogleFonts.rajdhani(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -167,7 +167,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
             Text(
               "SALESMAN WISE DETAILS",
               style: GoogleFonts.rajdhani(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -185,7 +185,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                       "Staff",
                       style: GoogleFonts.rajdhani(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 19,
                         color: Colors.black,
                       ),
                     ),
@@ -197,7 +197,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.rajdhani(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 19,
                         color: Colors.black,
                       ),
                     ),
@@ -209,7 +209,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.rajdhani(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 19,
                         color: Colors.black,
                       ),
                     ),
@@ -221,7 +221,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                       textAlign: TextAlign.end,
                       style: GoogleFonts.rajdhani(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 19,
                         color: Colors.black,
                       ),
                     ),
@@ -248,7 +248,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                       child: Text(
                         detail.salesmanName,
                         style: GoogleFonts.rajdhani(
-                          fontSize: 16,
+                          fontSize: 19,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -260,7 +260,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                         detail.totalCashAmount,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.rajdhani(
-                          fontSize: 16,
+                          fontSize: 19,
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
                         ),
@@ -272,7 +272,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                         detail.totalCardAmount,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.rajdhani(
-                          fontSize: 16,
+                          fontSize: 19,
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
                         ),
@@ -285,7 +285,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                         textAlign: TextAlign.end,
                         style: GoogleFonts.rajdhani(
                           color: Colors.black,
-                          fontSize: 16,
+                          fontSize: 19,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -318,7 +318,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                         "Total :${report.transactions!.salesmanWiseDetails.length}",
                         style: GoogleFonts.rajdhani(
                           color: Colors.black,
-                          fontSize: 16,
+                          fontSize: 19,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -330,7 +330,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.rajdhani(
                           color: Colors.black,
-                          fontSize: 16,
+                          fontSize: 19,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -342,7 +342,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.rajdhani(
                           color: Colors.black,
-                          fontSize: 16,
+                          fontSize: 19,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -354,7 +354,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
                         textAlign: TextAlign.end,
                         style: GoogleFonts.rajdhani(
                           color: Colors.black,
-                          fontSize: 16,
+                          fontSize: 19,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -392,7 +392,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
           Text(
             label,
             style: GoogleFonts.rajdhani(
-              fontSize: 19,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
@@ -400,7 +400,7 @@ class CloseRegisterPrintWidget extends StatelessWidget {
           Text(
             value,
             style: GoogleFonts.rajdhani(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: color,
             ),
