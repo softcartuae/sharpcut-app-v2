@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sharp_cut/utils/helpers/convertion.dart';
 
 class TokenStorage {
   static const String _tokenKey = 'auth_token';
@@ -18,24 +19,14 @@ class TokenStorage {
     final prefs = await SharedPreferences.getInstance();
     String? deviceId = prefs.getString(_deviceIdKey);
     if (deviceId == null) {
-      deviceId = _generateUniqueId();
+      deviceId = generateUniqueInt().toString();
       await prefs.setString(_deviceIdKey, deviceId);
     }
     return deviceId;
-  }
-
-  String _generateUniqueId() {
-    const chars =
-        'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-    return List.generate(
-      16,
-      (index) => chars[DateTime.now().microsecondsSinceEpoch % chars.length],
-    ).join();
   }
 
   Future<void> deleteToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
   }
-  
 }
