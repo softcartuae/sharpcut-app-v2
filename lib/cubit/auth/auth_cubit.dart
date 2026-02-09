@@ -12,6 +12,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
   final TokenStorage tokenStorage;
 
   ShopModel? currentUser;
+  String appVersion = "";
 
   AuthCubit({required this.authRepo, required this.tokenStorage})
     : super(AuthInitial());
@@ -46,6 +47,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
     try {
       final user = await authRepo.getUser();
       currentUser = user;
+      appVersion = await authRepo.getAppVersion();
       emit(AuthAuthenticated(user));
     } catch (e) {
       emit(AuthError(e.toString()));

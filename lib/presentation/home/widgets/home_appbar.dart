@@ -5,7 +5,6 @@ import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
-import 'package:sharp_cut/version.dart';
 
 class HomeAppBar extends StatefulWidget {
   const HomeAppBar({super.key});
@@ -30,15 +29,6 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    String modeType = "";
-    final mode = context.read<AuthCubit>().currentUser?.mode;
-
-    if (mode == "online") {
-      modeType = "ON";
-    } else if (mode == "offline") {
-      modeType = "OFF";
-    }
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -67,9 +57,30 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
         Row(
           children: [
-            Text(
-              "Ver. $modeType-${Version.version}",
-              style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 18),
+            BlocBuilder<AuthCubit, AuthCubitState>(
+              builder: (context, state) {
+                var version = context.read<AuthCubit>().appVersion;
+                if (version.isEmpty) {
+                  version = "";
+                }
+
+                String modeType = "";
+                final mode = context.read<AuthCubit>().currentUser?.mode;
+
+                if (mode == "online") {
+                  modeType = "ON";
+                } else if (mode == "offline") {
+                  modeType = "OFF";
+                }
+
+                return Text(
+                  "Ver. $modeType-$version",
+                  style: GoogleFonts.rajdhani(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                );
+              },
             ),
           ],
         ),

@@ -89,4 +89,21 @@ class AuthRepoImpl implements AuthRepo {
       await tokenStorage.deleteToken();
     }
   }
+
+  @override
+  Future<String> getAppVersion() async {
+    try {
+      final response = await ApiClient.dio.get(ApiClient.versionApi);
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map && data.containsKey('api_version')) {
+          return data['api_version'].toString();
+        }
+      }
+      return "";
+    } catch (e) {
+      log("Get app version error: $e");
+      return "";
+    }
+  }
 }
