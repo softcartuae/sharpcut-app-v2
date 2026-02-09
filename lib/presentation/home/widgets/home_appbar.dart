@@ -5,6 +5,7 @@ import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:sharp_cut/build_config.dart';
 
 class HomeAppBar extends StatefulWidget {
   const HomeAppBar({super.key});
@@ -35,7 +36,42 @@ class _HomeAppBarState extends State<HomeAppBar> {
         // Left Section: Logo & Shop Name
         Row(
           children: [
-            Image.asset("lib/utils/images/logo2.png", height: 70, width: 120),
+            GestureDetector(
+              onLongPress: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("Build Information"),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Build Date: ${BuildConfig.buildDate}"),
+                          const SizedBox(height: 8),
+                          Text("App Version: ${BuildConfig.appVersionAtBuild}"),
+                          const SizedBox(height: 8),
+                          Text("API Version: ${BuildConfig.apiVersionAtBuild}"),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("OK"),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Image.asset(
+                "lib/utils/images/logo2.png",
+                height: 70,
+                width: 120,
+              ),
+            ),
             const SizedBox(width: 25),
             Image.asset(
               "lib/utils/images/Shop Location.png",
@@ -59,7 +95,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
           children: [
             BlocBuilder<AuthCubit, AuthCubitState>(
               builder: (context, state) {
-                var version = context.read<AuthCubit>().appVersion;
+                var version = BuildConfig.appVersionAtBuild;
                 if (version.isEmpty) {
                   version = "";
                 }
