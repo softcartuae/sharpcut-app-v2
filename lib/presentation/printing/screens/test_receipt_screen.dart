@@ -15,8 +15,7 @@ class TestReceiptScreen extends StatelessWidget {
       name: 'TAJ SHALEELA SALON',
       address: 'Abu Dhabi _ U.A.E',
       vatNo: '104426133500003',
-      startTime: '09:00',
-      endTime: '22:00',
+     
     );
 
     // Dummy Cart Items

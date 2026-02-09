@@ -268,9 +268,8 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                             label: "Order Status",
                             initialValue: "All",
                             items: const [
-                              "All",
+                              // "All",
                               "Completed",
-                              "Pending",
                               "Cancelled",
                             ],
                             onChanged: (value) {

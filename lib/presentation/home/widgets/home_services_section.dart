@@ -470,7 +470,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               child: BlocBuilder<BookingCubit, BookingState>(
                 builder: (context, bookingState) {
                   final isBooked = bookingState is BookingSuccess;
-
                   return Opacity(
                     opacity: isBooked ? 1.0 : 0.5,
                     child: RepaintBoundary(
@@ -717,7 +716,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 child: BlocBuilder<BookingCubit, BookingState>(
                   builder: (context, bookingState) {
                     final isBooked = bookingState is BookingSuccess;
-
                     return ValueListenableBuilder<String>(
                       valueListenable: _selectedButtonNotifier,
                       builder: (context, selectedButton, child) {

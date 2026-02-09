@@ -36,8 +36,8 @@ class ChairModel {
       status: json['status'],
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
-      transaction: json['transaction'] != null
-          ? BookingResponseModel.fromJson(json['transaction'])
+      transaction: json['pending_transaction'] != null
+          ? BookingResponseModel.fromJson(json['pending_transaction'])
           : null,
     );
   }
@@ -52,7 +52,7 @@ class ChairModel {
       'status': status,
       'created_at': createdAt,
       'updated_at': updatedAt,
-      'transaction':
+      'pending_transaction':
           transaction, // Note: BookingResponseModel needs toJson if we want full serialization, but for now this is enough for the requirement.
     };
   }

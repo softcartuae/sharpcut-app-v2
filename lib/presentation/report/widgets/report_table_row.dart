@@ -56,6 +56,7 @@ class ReportTableRow extends StatelessWidget {
             width: 80,
           ),
           _buildDataCell(transaction.staff?.name ?? "-", width: 100),
+          _buildDataCell(transaction.status ?? "-", width: 80),
 
           _buildActionCell(
             Icons.payment,
