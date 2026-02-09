@@ -67,7 +67,6 @@ class SyncToServer {
             s['service_id'],
           );
           currencies.add(currency ?? "AED"); // Default to AED if not found
-
           amountTotals.add(s['amount_total'] ?? 0.0);
           taxes.add(s['tax'] ?? 0.0);
           subTotals.add(s['sub_total'] ?? 0.0);

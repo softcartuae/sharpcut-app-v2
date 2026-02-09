@@ -232,6 +232,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                   Role.admin;
 
                                               showResettmentScreen(
+                                                booking: booking,
                                                 isAdmin: isAdmin,
                                                 balance: balenceAmount,
                                                 paidAmount: booking.totalPayment
