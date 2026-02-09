@@ -110,7 +110,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                 }
 
                 return Text(
-                  "Ver. $modeType-$version",
+                  "Ver. $modeType",
                   style: GoogleFonts.rajdhani(
                     color: Colors.white,
                     fontSize: 18,
