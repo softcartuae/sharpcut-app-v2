@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/presentation/test/database_viewer_screen.dart';
 
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,7 +37,20 @@ class _HomeAppBarState extends State<HomeAppBar> {
         // Left Section: Logo & Shop Name
         Row(
           children: [
-            Image.asset("lib/utils/images/logo2.png", height: 70, width: 120),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => DatabaseViewerScreen(),
+                  ),
+                );
+              },
+              child: Image.asset(
+                "lib/utils/images/logo2.png",
+                height: 70,
+                width: 120,
+              ),
+            ),
             const SizedBox(width: 25),
             Image.asset(
               "lib/utils/images/Shop Location.png",

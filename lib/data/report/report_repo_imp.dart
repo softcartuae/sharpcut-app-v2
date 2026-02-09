@@ -28,12 +28,16 @@ class ReportRepoImp implements ReportRepo {
         whereArgs.add(userId);
       }
 
-      // Filter by Search Query (Customer Name or Invoice No)
-      if (searchQuery != null && searchQuery.isNotEmpty) {
+      // Filter by Search Query (Customer Name, Invoice No, Customer Number, Transaction ID)
+      if (searchQuery != null && searchQuery.trim().isNotEmpty) {
+        final query = searchQuery.trim();
         if (whereClause.isNotEmpty) whereClause += ' AND ';
-        whereClause += '(customer_name LIKE ? OR invoice_no LIKE ?)';
-        whereArgs.add('%$searchQuery%');
-        whereArgs.add('%$searchQuery%');
+        whereClause +=
+            '(customer_name LIKE ? OR invoice_no LIKE ? OR customer_number LIKE ? OR CAST(id AS TEXT) LIKE ?)';
+        whereArgs.add('%$query%');
+        whereArgs.add('%$query%');
+        whereArgs.add('%$query%');
+        whereArgs.add('%$query%');
       }
 
       // Filter by Date Range
@@ -41,11 +45,20 @@ class ReportRepoImp implements ReportRepo {
         final dates = dateRange.split(' - ');
         if (dates.length == 2) {
           if (whereClause.isNotEmpty) whereClause += ' AND ';
-          // Assuming transaction_date is stored as YYYY-MM-DD or similar string format
-          // Using string comparison for dates
-          whereClause += 'date(transaction_date) BETWEEN date(?) AND date(?)';
-          whereArgs.add(dates[0].trim());
-          whereArgs.add(dates[1].trim());
+
+          String formatDate(String d) {
+            final parts = d.trim().split('/');
+            if (parts.length == 3) {
+              return "${parts[2]}-${parts[1]}-${parts[0]}"; // yyyy-MM-dd
+            }
+            return d.trim();
+          }
+
+          // Construct YYYY-MM-DD from dd/MM/yyyy for string comparison
+          whereClause +=
+              '(substr(transaction_date, 7, 4) || "-" || substr(transaction_date, 4, 2) || "-" || substr(transaction_date, 1, 2)) BETWEEN ? AND ?';
+          whereArgs.add(formatDate(dates[0]));
+          whereArgs.add(formatDate(dates[1]));
         }
       }
 
@@ -71,7 +84,8 @@ class ReportRepoImp implements ReportRepo {
         'transactions',
         where: whereClause.isEmpty ? null : whereClause,
         whereArgs: whereArgs.isEmpty ? null : whereArgs,
-        orderBy: 'created_at DESC', // Sort by latest
+        orderBy:
+            'substr(transaction_date, 7, 4) DESC, substr(transaction_date, 4, 2) DESC, substr(transaction_date, 1, 2) DESC, substr(transaction_date, 12, 2) DESC, substr(transaction_date, 15, 2) DESC, id DESC',
       );
 
       List<BookingResponseModel> transactions = [];

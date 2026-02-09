@@ -118,9 +118,9 @@ class ChairDao {
       transactionData['details'] = servicesResult;
       transactionData['payments'] = paymentsResult;
 
-      chairData['transaction'] = transactionData;
+      chairData['pending_transaction'] = transactionData;
     } else {
-      chairData['transaction'] = null;
+      chairData['pending_transaction'] = null;
     }
 
     return chairData;

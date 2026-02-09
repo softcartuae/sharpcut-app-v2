@@ -199,13 +199,14 @@ class CuttingMastersDialog extends StatelessWidget {
                 ),
               ],
             ),
-            if (chair.liveState == LiveState.occupied.name &&
-                chair.transaction?.staff?.photo != null)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Column(
-                  children: [
+
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Column(
+                children: [
+                  if (chair.liveState == LiveState.occupied.name &&
+                      chair.transaction?.staff?.photo != null)
                     Container(
                       width: 40, // Adjust size as needed
                       height: 40,
@@ -228,7 +229,8 @@ class CuttingMastersDialog extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                  const SizedBox(height: 4),
+                  if (chair.liveState == LiveState.occupied.name)
                     Text(
                       chair.transaction!.staff?.shortname ??
                           chair.transaction!.staff!.name,
@@ -238,9 +240,9 @@ class CuttingMastersDialog extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
+                ],
               ),
+            ),
           ],
         ),
       ),

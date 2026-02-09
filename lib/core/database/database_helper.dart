@@ -411,9 +411,9 @@ class DatabaseHelper {
   Future<bool> hasData() async {
     final db = await database;
 
-    // // Check invoice settings first as it's a good indicator of setup
-    // final invoiceSettings = await db.query('invoice_settings', limit: 1);
-    // if (invoiceSettings.isNotEmpty) return true;
+    // Check invoice settings first as it's a good indicator of setup
+    final invoiceSettings = await db.query('invoice_settings', limit: 1);
+    if (invoiceSettings.isNotEmpty) return true;
 
     // Also check transactions
     final transactions = await db.query('transactions', limit: 1);

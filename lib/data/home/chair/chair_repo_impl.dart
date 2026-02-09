@@ -54,7 +54,6 @@ class ChairRepoImpl implements ChairRepo {
         final List<dynamic> adminJson = data['admins'];
 
         // 2. Parse Data
-      
 
         final staffs = usersJson
             .map((json) => StaffModel.fromJson(json, role: Role.staff))
@@ -118,7 +117,6 @@ class ChairRepoImpl implements ChairRepo {
           } catch (e) {
             log("Failed to acknowledge sync: $e");
           }
-         
 
           log(
             "Synced chairs, staff, and active transactions from API to Local DB",
@@ -152,7 +150,7 @@ class ChairRepoImpl implements ChairRepo {
           final chairWithTxn = await dbHelper.getChairWithActiveTransaction(
             chairId,
           );
-          if (chairWithTxn?["transaction"] != null) {
+          if (chairWithTxn?["pending_transaction"] != null) {
             // Force status to occupied if transaction exists
             chairWithTxn!["live_status"] = 'occupied';
             chairs.add(ChairModel.fromJson(chairWithTxn));
