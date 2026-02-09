@@ -35,7 +35,7 @@ class StaffModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'short_name': shortname};
+    return {'id': id, 'name': name, 'short_name': shortname, 'photo': photo};
   }
 }
 

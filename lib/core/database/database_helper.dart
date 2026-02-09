@@ -65,8 +65,10 @@ class DatabaseHelper {
       CREATE TABLE users (
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
+        short_name TEXT,
         password TEXT,
         role TEXT,
+        photo TEXT,
         is_synced INTEGER DEFAULT 0
       )
     ''');

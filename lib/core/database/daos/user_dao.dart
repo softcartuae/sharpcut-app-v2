@@ -14,14 +14,23 @@ class UserDao {
       for (var user in users) {
         batch.rawInsert(
           '''
-          INSERT INTO users (id, name, password, role) 
-          VALUES (?, ?, ?, ?)
+          INSERT INTO users (id, name, short_name, password, role, photo) 
+          VALUES (?, ?, ?, ?, ?, ?)
           ON CONFLICT(id) DO UPDATE SET 
             name=excluded.name, 
+            short_name=excluded.short_name,
             password=excluded.password,
-            role=excluded.role
+            role=excluded.role,
+            photo=excluded.photo
           ''',
-          [user['id'], user['name'], user['password'], user['role']],
+          [
+            user['id'],
+            user['name'],
+            user['short_name'],
+            user['password'],
+            user['role'],
+            user['photo'],
+          ],
         );
       }
       await batch.commit(noResult: true);
