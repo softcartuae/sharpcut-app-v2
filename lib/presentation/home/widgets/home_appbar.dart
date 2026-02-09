@@ -30,6 +30,15 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    String modeType = "";
+    final mode = context.read<AuthCubit>().currentUser?.mode;
+
+    if (mode == "online") {
+      modeType = "ON";
+    } else if (mode == "offline") {
+      modeType = "OFF";
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -59,7 +68,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         Row(
           children: [
             Text(
-              "Ver. ON-${Version.version}",
+              "Ver. $modeType-${Version.version}",
               style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 18),
             ),
           ],

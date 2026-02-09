@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
@@ -151,58 +152,94 @@ class CuttingMastersDialog extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Stack(
           children: [
-            const SizedBox(height: 16),
-            Expanded(
-              child: Image.asset(
-                chair.liveState == LiveState.occupied.name
-                    ? 'lib/utils/images/chair.png'
-                    : "lib/utils/images/chair-green.png",
-                fit: BoxFit.contain,
-              ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(height: 16),
+                Expanded(
+                  child: Image.asset(
+                    chair.liveState == LiveState.occupied.name
+                        ? 'lib/utils/images/chair.png'
+                        : "lib/utils/images/chair-green.png",
+                    fit: BoxFit.contain,
+                  ),
+                ),
+
+                // const SizedBox(height: 10),
+                if (chair.liveState == LiveState.occupied.name)
+                  Text(
+                    chair.transaction?.transactionDate ?? 'Unknown',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF252630), // Slightly lighter footer
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    chair.name ?? 'Unknown',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            if (chair.liveState == LiveState.occupied.name)
-              Text(
-                chair.liveState == LiveState.occupied.name
-                    ? chair.transaction?.staff?.name ?? 'Unknown'
-                    : 'Unknown',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+            if (chair.liveState == LiveState.occupied.name &&
+                chair.transaction?.staff?.photo != null)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 40, // Adjust size as needed
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: chair.transaction!.staff!.photo!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.person,
+                            size: 20,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      chair.transaction!.staff!.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            if (chair.liveState == LiveState.occupied.name)
-              Text(
-                chair.transaction?.transactionDate ?? 'Unknown',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: const BoxDecoration(
-                color: Color(0xFF252630), // Slightly lighter footer
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
-              ),
-              child: Text(
-                chair.name ?? 'Unknown',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
           ],
         ),
       ),
