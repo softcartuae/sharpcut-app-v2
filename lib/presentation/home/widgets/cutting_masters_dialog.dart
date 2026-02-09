@@ -157,7 +157,7 @@ class CuttingMastersDialog extends StatelessWidget {
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(height: 16),
+                const SizedBox(height: 30),
                 Expanded(
                   child: Image.asset(
                     chair.liveState == LiveState.occupied.name
@@ -180,7 +180,7 @@ class CuttingMastersDialog extends StatelessWidget {
                   ),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
                   decoration: const BoxDecoration(
                     color: Color(0xFF252630), // Slightly lighter footer
                     borderRadius: BorderRadius.vertical(
@@ -230,7 +230,8 @@ class CuttingMastersDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      chair.transaction!.staff!.name,
+                      chair.transaction!.staff?.shortname ??
+                          chair.transaction!.staff!.name,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,

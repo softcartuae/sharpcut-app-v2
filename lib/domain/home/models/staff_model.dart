@@ -3,6 +3,7 @@ import 'package:sharp_cut/utils/helpers/enums.dart';
 class StaffModel {
   final int id;
   final String name;
+  final String shortname;
   final Role role;
   final String? photo;
 
@@ -11,8 +12,9 @@ class StaffModel {
   StaffModel({
     required this.id,
     required this.name,
+    required this.shortname,
     this.role = Role.staff,
-   // this.profile,
+    // this.profile,
     this.photo,
   });
 
@@ -23,8 +25,9 @@ class StaffModel {
     return StaffModel(
       id: json['id'],
       name: json['name'] ?? "not available",
+      shortname: json['short_name'] ?? "not available",
       role: role,
-            photo: json['photo'],
+      photo: json['photo'],
       // profile: json['profile'] != null
       //     ? ProfileModel.fromJson(json['profile'])
       //     : null,
@@ -32,7 +35,7 @@ class StaffModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, };
+    return {'id': id, 'name': name, 'short_name': shortname};
   }
 }
 
