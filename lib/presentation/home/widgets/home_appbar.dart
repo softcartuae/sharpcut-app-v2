@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
-import 'package:sharp_cut/presentation/test/database_viewer_screen.dart';
 
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:sharp_cut/build_config.dart';
+import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
 
 class HomeAppBar extends StatefulWidget {
   const HomeAppBar({super.key});
@@ -38,11 +39,39 @@ class _HomeAppBarState extends State<HomeAppBar> {
         Row(
           children: [
             GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => DatabaseViewerScreen(),
-                  ),
+              onLongPress: () {
+                final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
+                  context.read<AuthCubit>().currentUser,
+                );
+
+                print("isNoChair: $isNoChair");
+
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("Build Information"),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Build Date: ${BuildConfig.buildDate}"),
+                          const SizedBox(height: 8),
+                          Text("App Version: ${BuildConfig.appVersionAtBuild}"),
+                          const SizedBox(height: 8),
+                          Text("API Version: ${BuildConfig.apiVersionAtBuild}"),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("OK"),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
               child: Image.asset(
@@ -72,24 +101,17 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
         Row(
           children: [
-            BlocBuilder<AuthCubit, AuthCubitState>(
-              builder: (context, state) {
-                var version = context.read<AuthCubit>().appVersion;
-                if (version.isEmpty) {
-                  version = "";
-                }
-
+            Builder(
+              builder: (context) {
                 String modeType = "";
                 final mode = context.read<AuthCubit>().currentUser?.mode;
-
-                if (mode == "online") {
-                  modeType = "ON";
-                } else if (mode == "offline") {
-                  modeType = "OFF";
-                }
+                final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
+                  context.read<AuthCubit>().currentUser,
+                );
+                modeType = findMode(mode, isNoChair);
 
                 return Text(
-                  "Ver. $modeType-$version",
+                  "Ver. $modeType-2.0",
                   style: GoogleFonts.rajdhani(
                     color: Colors.white,
                     fontSize: 18,
@@ -130,5 +152,24 @@ class _HomeAppBarState extends State<HomeAppBar> {
         ),
       ],
     );
+  }
+
+  String findMode(String? mode, bool isChair) {
+    String modeType;
+
+    switch (mode) {
+      case "online":
+        modeType = isChair ? "NON" : "ON";
+        break;
+
+      case "offline":
+        modeType = isChair ? "NOF" : "OF";
+        break;
+
+      default:
+        modeType = "";
+    }
+
+    return modeType;
   }
 }

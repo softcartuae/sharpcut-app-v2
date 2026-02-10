@@ -24,6 +24,9 @@ jobs:
       - name: Get Dependencies
         run: flutter pub get
 
+      # - name: Generate Build Config
+      #   run: dart run tool/generate_build_config.dart
+
       - name: Build Android Release APK
         run: flutter build apk --release
 
