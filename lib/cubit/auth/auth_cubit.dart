@@ -36,7 +36,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
       emit(AuthError("Something Went Wrong"));
     }
   }
-
+   
   Future<void> getUser() async {
     // If we are already loading (from login), don't emit loading again if you want to keep the flow smooth,
     // but typically it's fine. However, if called separately, we need loading.
