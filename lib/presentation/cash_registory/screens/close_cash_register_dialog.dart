@@ -12,6 +12,7 @@ import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
+import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
 
 class CloseCashRegisterDialog extends StatefulWidget {
   const CloseCashRegisterDialog({
@@ -73,6 +74,8 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
   Widget build(BuildContext context) {
     final chairCubit = context.read<ChairCubit>();
     List<StaffModel> staffList = List<StaffModel>.from(chairCubit.staffs);
+    final shop = context.read<AuthCubit>().currentUser;
+    final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
     return BlocListener<CashRegistoryCubit, CashRegistoryState>(
       listener: (context, state) {
         if (state is CashRegistoryCloseSuccess) {
@@ -240,43 +243,44 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                 const SizedBox(height: 16),
 
                 // Password Field
-                TextField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  style: GoogleFonts.rajdhani(
-                    color: Colors.white,
-                    fontSize: 18,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: "Enter Password",
-                    hintStyle: GoogleFonts.rajdhani(color: Colors.white24),
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.05),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                if (!isNoChair)
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    style: GoogleFonts.rajdhani(
+                      color: Colors.white,
+                      fontSize: 18,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: Colors.white54,
-                        size: 20,
+                    decoration: InputDecoration(
+                      hintText: "Enter Password",
+                      hintStyle: GoogleFonts.rajdhani(color: Colors.white24),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.05),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: Colors.white54,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                if (!isNoChair) const SizedBox(height: 16),
 
                 Text(
                   "Closing Amount",
@@ -352,7 +356,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                             ToastHelper.showError("Please select an admin");
                             return;
                           }
-                          if (_passwordController.text.isEmpty) {
+                          if (!isNoChair && _passwordController.text.isEmpty) {
                             ToastHelper.showError("Please enter password");
                             return;
                           }
@@ -375,7 +379,9 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                             amount: amount,
                             userId: _selectedStaff!.id,
                             role: _selectedStaff!.role,
-                            password: _passwordController.text,
+                            password: isNoChair
+                                ? "0000"
+                                : _passwordController.text,
                           );
                         },
                       ),

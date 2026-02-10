@@ -5,6 +5,9 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/chair_model.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
+import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
+import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 
 Future<StaffModel?> showStaffSelectionDialog(
@@ -62,7 +65,21 @@ Future<StaffModel?> showStaffSelectionDialog(
                 children: staffList.map((staff) {
                   return InkWell(
                     onTap: () {
-                      showPasswordDialoge(context, chair, staff);
+                      final shop = context.read<AuthCubit>().currentUser;
+                      final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
+                        shop,
+                      );
+
+                      if (isNoChair) {
+                        context.read<BookingCubit>().bookSlot(
+                          chairId: chair.id ?? 0,
+                          userId: staff.id,
+                          userPassword: "0000",
+                        );
+                        Navigator.pop(context);
+                      } else {
+                        showPasswordDialoge(context, chair, staff);
+                      }
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Container(

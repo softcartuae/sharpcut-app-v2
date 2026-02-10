@@ -7,6 +7,8 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
+import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
 
 Future<void> showPasswordForValidation(
   BuildContext context,
@@ -28,6 +30,9 @@ Future<void> showPasswordForValidation(
         (element) => showAdminToo == true ? true : element.role != Role.admin,
       )
       .toList();
+
+  final shop = context.read<AuthCubit>().currentUser;
+  final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
 
   // If preSelectedStaff is provided, try to find it in the list to ensure object equality for Dropdown
   if (preSelectedStaff != null) {
@@ -178,48 +183,50 @@ Future<void> showPasswordForValidation(
                               const SizedBox(height: 16),
 
                               // Password Field
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.white.withAlpha(77),
+                              if (!isNoChair)
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.white.withAlpha(77),
+                                    ),
                                   ),
-                                ),
-                                child: TextField(
-                                  controller: passwordController,
-                                  obscureText: obscurePassword,
-                                  style: GoogleFonts.rajdhani(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: "Enter Password",
-                                    hintStyle: GoogleFonts.rajdhani(
-                                      color: Colors.white.withAlpha(179),
+                                  child: TextField(
+                                    controller: passwordController,
+                                    obscureText: obscurePassword,
+                                    style: GoogleFonts.rajdhani(
+                                      color: Colors.white,
                                       fontSize: 16,
                                     ),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 14,
-                                    ),
-                                    suffixIcon: IconButton(
-                                      icon: Icon(
-                                        obscurePassword
-                                            ? Icons.visibility_outlined
-                                            : Icons.visibility_off_outlined,
-                                        color: Colors.white.withAlpha(128),
-                                        size: 20,
+                                    decoration: InputDecoration(
+                                      hintText: "Enter Password",
+                                      hintStyle: GoogleFonts.rajdhani(
+                                        color: Colors.white.withAlpha(179),
+                                        fontSize: 16,
                                       ),
-                                      onPressed: () {
-                                        setState(() {
-                                          obscurePassword = !obscurePassword;
-                                        });
-                                      },
+                                      border: InputBorder.none,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 14,
+                                          ),
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          obscurePassword
+                                              ? Icons.visibility_outlined
+                                              : Icons.visibility_off_outlined,
+                                          color: Colors.white.withAlpha(128),
+                                          size: 20,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            obscurePassword = !obscurePassword;
+                                          });
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
                               const SizedBox(height: 32),
 
                               // Submit Button
@@ -249,7 +256,8 @@ Future<void> showPasswordForValidation(
                                             );
                                             return;
                                           }
-                                          if (passwordController.text.isEmpty) {
+                                          if (!isNoChair &&
+                                              passwordController.text.isEmpty) {
                                             ToastHelper.showError(
                                               "Please enter password",
                                             );
@@ -263,14 +271,27 @@ Future<void> showPasswordForValidation(
                                             }
                                           }
 
-                                          context
-                                              .read<PasswordCubit>()
-                                              .validatePassword(
-                                                isAdmin: isAdmin,
-                                                password:
-                                                    passwordController.text,
-                                                userId: selectedStaff!.id,
+                                          if (isNoChair) {
+                                            Navigator.of(context).pop();
+                                            if (onSuccess != null) {
+                                              onSuccess();
+                                            }
+                                            if (onSuccessWithStaff != null &&
+                                                selectedStaff != null) {
+                                              onSuccessWithStaff(
+                                                selectedStaff!,
                                               );
+                                            }
+                                          } else {
+                                            context
+                                                .read<PasswordCubit>()
+                                                .validatePassword(
+                                                  isAdmin: isAdmin,
+                                                  password:
+                                                      passwordController.text,
+                                                  userId: selectedStaff!.id,
+                                                );
+                                          }
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.transparent,
