@@ -93,13 +93,8 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
         Row(
           children: [
-            BlocBuilder<AuthCubit, AuthCubitState>(
-              builder: (context, state) {
-                var version = BuildConfig.appVersionAtBuild;
-                if (version.isEmpty) {
-                  version = "";
-                }
-
+            Builder(
+              builder: (context) {
                 String modeType = "";
                 final mode = context.read<AuthCubit>().currentUser?.mode;
 
@@ -110,7 +105,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                 }
 
                 return Text(
-                  "Ver. $modeType",
+                  "Ver. $modeType-2.0",
                   style: GoogleFonts.rajdhani(
                     color: Colors.white,
                     fontSize: 18,

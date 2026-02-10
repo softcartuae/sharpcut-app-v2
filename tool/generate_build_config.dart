@@ -1,10 +1,11 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
 import 'package:yaml/yaml.dart';
 
 void main() async {
-  print('Generating build config...');
+  log('Generating build config...');
 
   // 1. Get App Version from pubspec.yaml
   final pubspecFile = File('pubspec.yaml');
@@ -30,10 +31,11 @@ void main() async {
       final data = response.data;
       if (data is Map && data.containsKey('api_version')) {
         apiVersion = data['api_version'].toString();
+        log("api ${apiVersion}");
       }
     }
   } catch (e) {
-    print('Failed to fetch API version: $e');
+    log('Failed to fetch API version: $e');
 
     apiVersion = 'ErrorFetching';
   }
@@ -52,5 +54,4 @@ class BuildConfig {
 ''';
 
   await outputFile.writeAsString(content);
-
 }
