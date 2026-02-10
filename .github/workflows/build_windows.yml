@@ -2,11 +2,7 @@ name: Build Windows App offline
 
 on:
   push:
-<<<<<<< HEAD
-    branches: ["offline_branch"]
-=======
-    branches: ["online_no_chair_branch"]
->>>>>>> online_no_chair_branch
+    branches: ["offline_no_chair_branch"]
   workflow_dispatch:
 
 jobs:

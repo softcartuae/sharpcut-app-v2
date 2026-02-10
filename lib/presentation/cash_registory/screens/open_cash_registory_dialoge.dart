@@ -262,7 +262,7 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
                                             cashController.text,
                                           ),
                                           password: isNoChair
-                                              ? "0000"
+                                              ? DefaultPassword.x9rQ7mK2ZL8.name
                                               : passwordController.text,
                                         );
                                   },

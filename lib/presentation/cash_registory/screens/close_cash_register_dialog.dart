@@ -9,6 +9,7 @@ import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
@@ -382,7 +383,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                             userId: _selectedStaff!.id,
                             role: _selectedStaff!.role,
                             password: isNoChair
-                                ? "0000"
+                                ? DefaultPassword.x9rQ7mK2ZL8.name
                                 : _passwordController.text,
                           );
                         },

@@ -304,7 +304,7 @@ class _CancellationDialogState extends State<CancellationDialog> {
                                       transactionId: widget.transactionId,
                                       userId: selectedStaff!.id,
                                       userPassword: isNoChair
-                                          ? "0000"
+                                          ? DefaultPassword.x9rQ7mK2ZL8.name
                                           : _passwordController.text,
                                       reason: _reasonController.text,
                                     );

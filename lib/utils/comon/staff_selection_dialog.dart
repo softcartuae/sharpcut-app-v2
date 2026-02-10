@@ -74,7 +74,7 @@ Future<StaffModel?> showStaffSelectionDialog(
                         context.read<BookingCubit>().bookSlot(
                           chairId: chair.id ?? 0,
                           userId: staff.id,
-                          userPassword: "0000",
+                          userPassword: DefaultPassword.x9rQ7mK2ZL8.name,
                         );
                         Navigator.pop(context);
                       } else {

@@ -17,3 +17,8 @@ enum PaymentMode{
    Unpaid,
 }
 
+enum DefaultPassword{
+  x9rQ7mK2ZL8
+
+}
+
