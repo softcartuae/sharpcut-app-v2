@@ -848,7 +848,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 },
                               ),
 
-                      
                             if (isBooked) const SizedBox(height: 12),
                             // QUICK PAYMENT - Disabled if NOT booked
                             if (isBooked)
@@ -1173,24 +1172,40 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               ),
                             if (isBooked) const SizedBox(height: 12),
                             if (isBooked)
-                              Opacity(
-                                opacity: isBooked ? 1.0 : 0.5,
-                                child: ActionButton(
-                                  label: "BACK",
-                                  isPrimary: selectedButton == "BACK",
-                                  onTap: !isBooked
-                                      ? null
-                                      : () {
-                                          _selectedButtonNotifier.value =
-                                              "BACK";
-                                          context
-                                              .read<BookingCubit>()
-                                              .backToInitialState();
-                                          context
-                                              .read<ServiceCubit>()
-                                              .clearCart();
-                                        },
-                                ),
+                              Builder(
+                                builder: (context) {
+                                  final shop = context
+                                      .read<AuthCubit>()
+                                      .currentUser;
+                                  final isNoChair =
+                                      CheckNoChair.checkIsThisAppNoChairOrNot(
+                                        shop,
+                                      );
+
+                                  if (isNoChair) {
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  return Opacity(
+                                    opacity: isBooked ? 1.0 : 0.5,
+                                    child: ActionButton(
+                                      label: "BACK",
+                                      isPrimary: selectedButton == "BACK",
+                                      onTap: !isBooked
+                                          ? null
+                                          : () {
+                                              _selectedButtonNotifier.value =
+                                                  "BACK";
+                                              context
+                                                  .read<BookingCubit>()
+                                                  .backToInitialState();
+                                              context
+                                                  .read<ServiceCubit>()
+                                                  .clearCart();
+                                            },
+                                    ),
+                                  );
+                                },
                               ),
                             const SizedBox(height: 12),
                             if (!isBooked)
