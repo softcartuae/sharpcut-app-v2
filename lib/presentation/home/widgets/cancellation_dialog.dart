@@ -8,6 +8,8 @@ import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
+import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
 
 class CancellationDialog extends StatefulWidget {
   final int transactionId;
@@ -107,7 +109,6 @@ class _CancellationDialogState extends State<CancellationDialog> {
                 ],
               ),
               const SizedBox(height: 32),
-
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
@@ -174,49 +175,56 @@ class _CancellationDialogState extends State<CancellationDialog> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+
+              if (!CheckNoChair.checkIsThisAppNoChairOrNot(
+                context.read<AuthCubit>().currentUser,
+              ))
+                const SizedBox(height: 16),
 
               // Password Field
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white.withAlpha(77)),
-                ),
-                child: TextField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  style: GoogleFonts.rajdhani(
-                    color: Colors.white,
-                    fontSize: 16,
+              if (!CheckNoChair.checkIsThisAppNoChairOrNot(
+                context.read<AuthCubit>().currentUser,
+              ))
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white.withAlpha(77)),
                   ),
-                  decoration: InputDecoration(
-                    hintText: "Enter Admin User Password",
-                    hintStyle: GoogleFonts.rajdhani(
-                      color: Colors.white.withAlpha(179),
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    style: GoogleFonts.rajdhani(
+                      color: Colors.white,
                       fontSize: 16,
                     ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: Colors.white.withAlpha(128),
-                        size: 20,
+                    decoration: InputDecoration(
+                      hintText: "Enter Admin User Password",
+                      hintStyle: GoogleFonts.rajdhani(
+                        color: Colors.white.withAlpha(179),
+                        fontSize: 16,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: Colors.white.withAlpha(128),
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ),
-              ),
               const SizedBox(height: 32),
 
               // Buttons
@@ -269,7 +277,16 @@ class _CancellationDialogState extends State<CancellationDialog> {
                                       return;
                                     }
 
-                                    if (_passwordController.text.isEmpty) {
+                                    final shop = context
+                                        .read<AuthCubit>()
+                                        .currentUser;
+                                    final isNoChair =
+                                        CheckNoChair.checkIsThisAppNoChairOrNot(
+                                          shop,
+                                        );
+
+                                    if (!isNoChair &&
+                                        _passwordController.text.isEmpty) {
                                       ToastHelper.showError(
                                         "Please enter password",
                                       );
@@ -286,7 +303,9 @@ class _CancellationDialogState extends State<CancellationDialog> {
                                     context.read<BookingCubit>().cancelBooking(
                                       transactionId: widget.transactionId,
                                       userId: selectedStaff!.id,
-                                      userPassword: _passwordController.text,
+                                      userPassword: isNoChair
+                                          ? "0000"
+                                          : _passwordController.text,
                                       reason: _reasonController.text,
                                     );
                                   },

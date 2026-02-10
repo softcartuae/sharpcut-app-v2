@@ -24,7 +24,6 @@ import 'package:sharp_cut/presentation/home/widgets/added_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/cash_or_card.dart';
 import 'package:sharp_cut/presentation/home/widgets/category_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/common_container.dart';
-import 'package:sharp_cut/presentation/home/widgets/cutting_masters_dialog.dart';
 import 'package:sharp_cut/presentation/home/widgets/features_bottons.dart';
 import 'package:sharp_cut/presentation/home/widgets/menu_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/search_and_menu.dart';
@@ -41,6 +40,9 @@ import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:sharp_cut/utils/helpers/icon_helper.dart';
 import 'package:sharp_cut/utils/comon/validate_password.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
+import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/booking_flow_helper.dart';
+import 'package:sharp_cut/presentation/home/widgets/cancellation_dialog.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/data/sync/sync_to_server.dart';
@@ -318,6 +320,25 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
+        BlocListener<ChairCubit, ChairState>(
+          listener: (context, state) {
+            final shop = context.read<AuthCubit>().currentUser;
+            final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+            final bookingState = context.read<BookingCubit>().state;
+
+            if (isNoChair && state is ChairSuccess && state.chairs.isNotEmpty) {
+              final chair = state.chairs.first;
+              if (chair.liveState == LiveState.occupied.name &&
+                  chair.transaction != null &&
+                  bookingState is! BookingSuccess) {
+                // Auto restore
+                context.read<BookingCubit>().restoreBooking(
+                  bookingResponse: chair.transaction!,
+                );
+              }
+            }
+          },
+        ),
         BlocListener<BookingCubit, BookingState>(
           listener: (context, state) {
             if (state is BookingSaved) {
@@ -768,10 +789,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               >(
                                 listener: (context, state) {
                                   if (state is CashRegistorOpen) {
-                                    context
-                                        .read<ChairCubit>()
-                                        .getChairsAndStaffs(forceRefresh: true);
-                                    CuttingMastersDialog.show(context);
+                                    BookingFlowHelper.handleBookingAction(
+                                      context,
+                                    );
                                   }
 
                                   if (state is CashRegistorClosed) {
@@ -805,7 +825,45 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 },
                               ),
 
-                           
+                            // CANCEL BOOKING - Visible only if Booked and No Chair
+                            if (isBooked)
+                              Builder(
+                                builder: (context) {
+                                  final shop = context
+                                      .read<AuthCubit>()
+                                      .currentUser;
+                                  final isNoChair =
+                                      CheckNoChair.checkIsThisAppNoChairOrNot(
+                                        shop,
+                                      );
+                                  if (!isNoChair) {
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 12.0),
+                                    child: ActionButton(
+                                      label: "CANCEL BOOKING",
+                                      isPrimary:
+                                          false, // Or make it red/distinguishable
+                                      onTap: () {
+                                        final bookingState = context
+                                            .read<BookingCubit>()
+                                            .state;
+                                        if (bookingState is BookingSuccess &&
+                                            bookingState.bookingResponse.id !=
+                                                null) {
+                                          CancellationDialog.show(
+                                            context,
+                                            bookingState.bookingResponse.id!,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+
                             if (isBooked) const SizedBox(height: 12),
                             // QUICK PAYMENT - Disabled if NOT booked
                             if (isBooked)
@@ -1130,24 +1188,40 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               ),
                             if (isBooked) const SizedBox(height: 12),
                             if (isBooked)
-                              Opacity(
-                                opacity: isBooked ? 1.0 : 0.5,
-                                child: ActionButton(
-                                  label: "BACK",
-                                  isPrimary: selectedButton == "BACK",
-                                  onTap: !isBooked
-                                      ? null
-                                      : () {
-                                          _selectedButtonNotifier.value =
-                                              "BACK";
-                                          context
-                                              .read<BookingCubit>()
-                                              .backToInitialState();
-                                          context
-                                              .read<ServiceCubit>()
-                                              .clearCart();
-                                        },
-                                ),
+                              Builder(
+                                builder: (context) {
+                                  final shop = context
+                                      .read<AuthCubit>()
+                                      .currentUser;
+                                  final isNoChair =
+                                      CheckNoChair.checkIsThisAppNoChairOrNot(
+                                        shop,
+                                      );
+
+                                  if (isNoChair) {
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  return Opacity(
+                                    opacity: isBooked ? 1.0 : 0.5,
+                                    child: ActionButton(
+                                      label: "BACK",
+                                      isPrimary: selectedButton == "BACK",
+                                      onTap: !isBooked
+                                          ? null
+                                          : () {
+                                              _selectedButtonNotifier.value =
+                                                  "BACK";
+                                              context
+                                                  .read<BookingCubit>()
+                                                  .backToInitialState();
+                                              context
+                                                  .read<ServiceCubit>()
+                                                  .clearCart();
+                                            },
+                                    ),
+                                  );
+                                },
                               ),
                             const SizedBox(height: 12),
                             if (!isBooked)

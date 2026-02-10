@@ -2,7 +2,11 @@ name: Build Android App offline
 
 on:
   push:
+<<<<<<< HEAD
     branches: ["offline_branch"]
+=======
+    branches: ["online_no_chair_branch"]
+>>>>>>> online_no_chair_branch
   workflow_dispatch:
 
 jobs:
@@ -23,6 +27,9 @@ jobs:
 
       - name: Get Dependencies
         run: flutter pub get
+
+      # - name: Generate Build Config
+      #   run: dart run tool/generate_build_config.dart
 
       - name: Build Android Release APK
         run: flutter build apk --release
