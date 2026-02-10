@@ -2,11 +2,7 @@ name: Build Android App offline
 
 on:
   push:
-<<<<<<< HEAD
     branches: ["offline_no_chair_branch"]
-=======
-    branches: ["offline_branch"]
->>>>>>> 5c47b8e9cb7278eb27ee74665b519fb46782842d
   workflow_dispatch:
 
 jobs:
