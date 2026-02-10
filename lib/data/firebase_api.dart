@@ -34,7 +34,7 @@ class FirebaseApi {
     final fCMToken = await _firebaseMessaging.getToken();
     debugPrint('Token: $fCMToken');
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
-
+ 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('Got a message whilst in the foreground!');
       debugPrint('Message data: ${message.data}');
