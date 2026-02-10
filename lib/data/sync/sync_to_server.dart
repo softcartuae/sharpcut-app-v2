@@ -157,7 +157,7 @@ class SyncToServer {
           "Synced ${transactionIds.length} transactions successfully.",
         );
       } else {
-        log(
+        log( 
           "Failed to sync transactions: ${response.statusCode} - ${response.statusMessage}",
         );
         return Left(
