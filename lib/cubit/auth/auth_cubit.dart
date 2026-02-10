@@ -32,13 +32,13 @@ class AuthCubit extends Cubit<AuthCubitState> {
           await getUser();
           emit(AuthLoginSuccess(r));
         },
-      );
+      );  
     } catch (e) {
       emit(AuthError("Something Went Wrong"));
     }
   }
 
-  Future<void> getUser() async {
+  Future<void> getUser() async {  
     if (state is! AuthLoading) {
       emit(AuthLoading());
     }
