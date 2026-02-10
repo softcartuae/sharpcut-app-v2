@@ -103,12 +103,11 @@ class _HomeAppBarState extends State<HomeAppBar> {
               builder: (context) {
                 String modeType = "";
                 final mode = context.read<AuthCubit>().currentUser?.mode;
+                final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
+                  context.read<AuthCubit>().currentUser,
+                );
 
-                if (mode == "online") {
-                  modeType = "ON";
-                } else if (mode == "offline") {
-                  modeType = "OFF";
-                }
+                modeType = findMode(mode, isNoChair);
 
                 return Text(
                   "Ver. $modeType-2.0",
@@ -152,5 +151,24 @@ class _HomeAppBarState extends State<HomeAppBar> {
         ),
       ],
     );
+  }
+
+  String findMode(String? mode, bool isChair) {
+    String modeType;
+
+    switch (mode) {
+      case "online":
+        modeType = isChair ? "NON" : "ON";
+        break;
+
+      case "offline":
+        modeType = isChair ? "NOF" : "OF";
+        break;
+
+      default:
+        modeType = "";
+    }
+
+    return modeType;
   }
 }
