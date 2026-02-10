@@ -133,12 +133,20 @@ class SyncToServer {
         payload.add(transactionMap);
       }
 
-      log("Sending payload to server: ${payload.length} transactions");
+      final invoiceSettings = await _dbHelper.getInvoiceSettings();
+      final invoiceCount = invoiceSettings?['count'] ?? 0;
 
+      log(
+        "Sending payload to server: ${payload.length} transactions, Invoice Count: $invoiceCount",
+      );
+      Map<String, dynamic> data = {
+        "transactions": payload,
+        "invoice_count": invoiceCount,
+      };
       // Call API
       final response = await ApiClient.dio.post(
         ApiClient.transactionsSyncPOSTapi,
-        data: payload,
+        data: data,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

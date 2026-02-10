@@ -43,7 +43,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => DatabaseViewerScreen(),
+                    builder: (context) => const DatabaseViewerScreen(),
                   ),
                 );
               },
