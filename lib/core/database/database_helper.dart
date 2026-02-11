@@ -408,13 +408,33 @@ class DatabaseHelper {
     return result;
   }
 
-  Future<bool> hasData() async {
+  Future<bool> hasChairData() async {
     final db = await database;
+    final chairs = await db.query('chairs', limit: 1);
+    if (chairs.isNotEmpty) return true;
 
-    // Check invoice settings first as it's a good indicator of setup
-    final invoiceSettings = await db.query('invoice_settings', limit: 1);
-    if (invoiceSettings.isNotEmpty) return true;
+    final users = await db.query('users', limit: 1);
+    if (users.isNotEmpty) return true;
 
+    return false;
+  }
+
+  Future<bool> hasServiceData() async {
+    final db = await database;
+    final services = await db.query('services', limit: 1);
+    if (services.isNotEmpty) return true;
+    return false;
+  }
+
+  Future<bool> hasCategoryData() async {
+    final db = await database;
+    final categories = await db.query('service_categories', limit: 1);
+    if (categories.isNotEmpty) return true;
+    return false;
+  }
+
+  Future<bool> hasTransactionData() async {
+    final db = await database;
     // Also check transactions
     final transactions = await db.query('transactions', limit: 1);
     if (transactions.isNotEmpty) return true;
