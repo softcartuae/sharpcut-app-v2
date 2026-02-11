@@ -102,6 +102,7 @@ class SyncToServer {
         }
 
         Map<String, dynamic> transactionMap = {
+
           "app_id": transaction['app_id'],
           "chair_id": transaction['chair_id'],
           "user_id": transaction['user_id'],
@@ -109,9 +110,11 @@ class SyncToServer {
               transaction['cash_register_id'], // Ensure this is sent if available
           "customer_name": transaction['customer_name'] ?? "",
           "customer_number": transaction['customer_number'] ?? "",
+
           "transaction_date": DateFormat(
             'dd/MM/yyyy hh:mm a',
           ).parse(transaction['transaction_date']).toUtc().toIso8601String(),
+
           "grand_total": transaction['grand_total'],
           "tax_total": transaction['tax_total'],
           "discount": transaction['discount'],
@@ -138,6 +141,7 @@ class SyncToServer {
           "tender_cash": tenderCash,
           "change": changes,
           "date": dates,
+
         };
         payload.add(transactionMap);
       }
