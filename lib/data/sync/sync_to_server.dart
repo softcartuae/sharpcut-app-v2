@@ -237,7 +237,7 @@ class SyncToServer {
     try {
       log("Starting transaction pull from server...");
       // Check if DB has data (if empty => first time/fresh install)
-      final hasData = await _dbHelper.hasData();
+      final hasData = await _dbHelper.hasTransactionData();
 
       if (hasData) {
         return const Right("No new transactions from server.");
