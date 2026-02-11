@@ -68,7 +68,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout() async {  
     await authRepo.logout();
     await ApiClient.resetToDefault();
     currentUser = null;
