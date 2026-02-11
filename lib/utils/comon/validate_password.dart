@@ -312,7 +312,7 @@ Future<void> showPasswordForValidation(
                                         ),
                                         child: Text(
                                           'Submit',
-                                          style: GoogleFonts.rajdhani(
+                                          style: GoogleFonts.rajdhani(  
                                             color: Colors.white,
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,

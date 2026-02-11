@@ -46,8 +46,8 @@ class BookingRepoImp implements BookingRepo {
         // Increment count in DB
         await DatabaseHelper().incrementInvoiceCount();
       } else {
-        log("Invoice settings not found");
-        return Left("Invoice settings not found");
+       final getInvoiceNo = await DatabaseHelper().generateInvoiceNumber();
+       invoiceNo = getInvoiceNo;
       }
 
       final appid = generateUniqueInt();

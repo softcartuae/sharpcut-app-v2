@@ -365,6 +365,8 @@ class DatabaseHelper {
 
   Future<void> incrementInvoiceCount() => invoiceDao.incrementInvoiceCount();
 
+  Future<String> generateInvoiceNumber() => invoiceDao.generateInvoiceNumber();
+
   // Helper
   Future<bool> isFullySynced() async {
     log("Checking if local DB is fully synced");

@@ -47,4 +47,28 @@ class InvoiceDao {
     await db.rawUpdate('UPDATE invoice_settings SET count = count + 1');
     log("Invoice count incremented");
   }
+
+  Future<String> generateInvoiceNumber() async {
+    final db = await _dbFuture;
+
+      final now = DateTime.now();
+      final year = now.year;
+      final month = now.month;
+
+      // Financial year starts in April
+      final fyStart = month >= 4 ? year : year - 1;
+      final fyEnd = fyStart + 1;
+      final currentFY = '$fyStart-$fyEnd';
+
+      db.insert('invoice_settings', {
+        'invoice_prefix': 'INV',
+        'financial_year': currentFY,
+        'count': 1,
+        'created_at': now.toIso8601String(),
+        'updated_at': now.toIso8601String(),
+      });
+
+      return 'INV/$currentFY/1';
+    
+  }
 }
