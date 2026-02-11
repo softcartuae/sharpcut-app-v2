@@ -51,11 +51,6 @@ class InvoiceDao {
   Future<String> generateInvoiceNumber() async {
     final db = await _dbFuture;
 
-    return await db.transaction((txn) async {
-      // 1. Get current settings (locked/transactional implicitly in sqlite sequential execution)
-     
-
-      // 2. Calculate Financial Year
       final now = DateTime.now();
       final year = now.year;
       final month = now.month;
@@ -65,19 +60,15 @@ class InvoiceDao {
       final fyEnd = fyStart + 1;
       final currentFY = '$fyStart-$fyEnd';
 
-      // 3. Create if not exists
-      
-        txn.insert('invoice_settings', {
-          'invoice_prefix': 'INV',
-          'financial_year': currentFY,
-          'count': 0,
-          'created_at': now.toIso8601String(),
-          'updated_at': now.toIso8601String(),
-        });
-        
-      return 'INV/$currentFY/0';
-    });
+      db.insert('invoice_settings', {
+        'invoice_prefix': 'INV',
+        'financial_year': currentFY,
+        'count': 1,
+        'created_at': now.toIso8601String(),
+        'updated_at': now.toIso8601String(),
+      });
+
+      return 'INV/$currentFY/1';
+    
   }
-
-
 }

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:sharp_cut/core/database/database_helper.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:dartz/dartz.dart';
+import 'package:intl/intl.dart';
 
 class SyncToServer {
   final DatabaseHelper _dbHelper = DatabaseHelper();
@@ -91,7 +92,13 @@ class SyncToServer {
           amounts.add(p['amount'] ?? 0.0);
           tenderCash.add(p['tender_cash'] ?? 0.0);
           changes.add(p['change'] ?? 0.0);
-          dates.add(p['date'] ?? "");
+          dates.add(
+            (p['date'] != null && p['date'].toString().isNotEmpty)
+                ? DateFormat(
+                    'dd/MM/yyyy hh:mm a',
+                  ).parse(p['date']).toUtc().toIso8601String()
+                : "",
+          );
         }
 
         Map<String, dynamic> transactionMap = {
@@ -102,7 +109,9 @@ class SyncToServer {
               transaction['cash_register_id'], // Ensure this is sent if available
           "customer_name": transaction['customer_name'] ?? "",
           "customer_number": transaction['customer_number'] ?? "",
-          "transaction_date": transaction['transaction_date'],
+          "transaction_date": DateFormat(
+            'dd/MM/yyyy hh:mm a',
+          ).parse(transaction['transaction_date']).toUtc().toIso8601String(),
           "grand_total": transaction['grand_total'],
           "tax_total": transaction['tax_total'],
           "discount": transaction['discount'],
@@ -203,8 +212,14 @@ class SyncToServer {
         "closed_by_type": register['closed_by_type'], // Might be null
         "opening_amount": register['opening_amount'],
         "closing_amount": register['closing_amount'], // Might be null
-        "opened_at": register['opened_at'],
-        "closed_at": register['closed_at'], // Might be null
+        "opened_at": DateFormat(
+          'dd/MM/yyyy hh:mm a',
+        ).parse(register['opened_at']).toUtc().toIso8601String(),
+        "closed_at": register['closed_at'] != null
+            ? DateFormat(
+                'dd/MM/yyyy hh:mm a',
+              ).parse(register['closed_at']).toUtc().toIso8601String()
+            : null, // Might be null
         "is_sync": true, // As per request body example
       };
 
