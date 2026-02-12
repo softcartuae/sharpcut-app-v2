@@ -956,59 +956,76 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                       ),
                                     ),
                                     const SizedBox(height: 10),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        ElevatedButton(
-                                          onPressed: () =>
-                                              _onSettle(alsoPrint: true),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                AppColors.violetNormal,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
+                                    BlocBuilder<BookingCubit, BookingState>(
+                                      builder: (context, state) {
+                                        final isLoading =
+                                            state is BookingLoading;
+                                        return Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: isLoading
+                                                  ? null
+                                                  : () => _onSettle(
+                                                      alsoPrint: true,
+                                                    ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: isLoading
+                                                    ? Colors.grey
+                                                    : AppColors.violetNormal,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 24,
+                                                      vertical: 12,
+                                                    ),
+                                              ),
+                                              child: Text(
+                                                "SETTLE & PRINT",
+                                                style: GoogleFonts.rajdhani(
+                                                  color: Colors.white,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
                                             ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 24,
-                                              vertical: 12,
+                                            const SizedBox(width: 20),
+                                            ElevatedButton(
+                                              onPressed: isLoading
+                                                  ? null
+                                                  : () => _onSettle(
+                                                      alsoPrint: false,
+                                                    ),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: isLoading
+                                                    ? Colors.grey
+                                                    : AppColors.violetNormal,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 24,
+                                                      vertical: 12,
+                                                    ),
+                                              ),
+                                              child: Text(
+                                                "SETTLE",
+                                                style: GoogleFonts.rajdhani(
+                                                  color: Colors.white,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                          child: Text(
-                                            "SETTLE & PRINT",
-                                            style: GoogleFonts.rajdhani(
-                                              color: Colors.white,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        ElevatedButton(
-                                          onPressed: () =>
-                                              _onSettle(alsoPrint: false),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                AppColors.violetNormal,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 24,
-                                              vertical: 12,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "SETTLE",
-                                            style: GoogleFonts.rajdhani(
-                                              color: Colors.white,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                          ],
+                                        );
+                                      },
                                     ),
                                   ],
                                 ),
