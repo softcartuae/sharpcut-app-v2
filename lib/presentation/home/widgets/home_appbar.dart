@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -106,7 +107,6 @@ class _HomeAppBarState extends State<HomeAppBar> {
                 final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
                   context.read<AuthCubit>().currentUser,
                 );
-
                 modeType = findMode(mode, isNoChair);
 
                 return Text(
