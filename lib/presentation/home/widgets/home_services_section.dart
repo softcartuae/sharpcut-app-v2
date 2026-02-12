@@ -274,6 +274,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
+                    context.read<ChairCubit>().reset();
                     context.read<AuthCubit>().logout();
                   },
                   child: const Text("Logout"),
