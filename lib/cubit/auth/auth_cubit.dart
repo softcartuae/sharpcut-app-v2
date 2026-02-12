@@ -72,4 +72,5 @@ class AuthCubit extends Cubit<AuthCubitState> {
     currentUser = null;
     emit(AuthUnauthenticated());
   }
+  
 }

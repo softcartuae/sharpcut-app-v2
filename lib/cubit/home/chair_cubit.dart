@@ -30,4 +30,12 @@ class ChairCubit extends Cubit<ChairState> {
       emit(ChairError(message: e.toString()));
     }
   }
+  
+  void reset() {
+    _cachedChairs = null;
+    _cachedStaffs = null;
+    emit(ChairInitial());
+  }
+
+
 }

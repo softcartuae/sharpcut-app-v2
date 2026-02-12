@@ -158,11 +158,11 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
     switch (mode) {
       case "online":
-        modeType = isChair ? "NON" : "ON";
+        modeType = isChair ? "NCON" : "ON";
         break;
 
       case "offline":
-        modeType = isChair ? "NOF" : "OF";
+        modeType = isChair ? "NCOF" : "OF";
         break;
 
       default:
