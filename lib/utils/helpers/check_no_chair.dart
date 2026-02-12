@@ -6,4 +6,3 @@ class CheckNoChair {
     return shop.isChair == false;
   }
 }
-
