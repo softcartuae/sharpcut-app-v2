@@ -35,7 +35,7 @@ class ChairRepoImpl implements ChairRepo {
     try {
       // 1. Try fetching from API
 
-      final hasData = await dbHelper.hasData();
+      final hasData = await dbHelper.hasChairData();
 
       Map<String, dynamic> data = {'users': true};
       if (hasData) {

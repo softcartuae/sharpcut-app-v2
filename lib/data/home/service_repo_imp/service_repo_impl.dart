@@ -13,8 +13,7 @@ class ServiceRepoImpl implements ServiceRepo {
   @override
   Future<List<CategoryModel>> getCategories() async {
     try {
-
-      final hasData = await dbHelper.hasData();
+      final hasData = await dbHelper.hasCategoryData();
 
       Map<String, dynamic> data = {};
       if (hasData) {
@@ -69,8 +68,7 @@ class ServiceRepoImpl implements ServiceRepo {
   @override
   Future<List<ServiceModel>> getServices({int? categoryId}) async {
     try {
-
-      final hasData = await dbHelper.hasData();
+      final hasData = await dbHelper.hasServiceData();
 
       Map<String, dynamic> data = {};
       if (hasData) {
