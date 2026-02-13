@@ -251,8 +251,9 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                             key: ValueKey('paid_$_filterKey'),
                             label: "Paid Status",
                             initialValue: "All",
-                            items: const ["All", "Full", "Unpaid", "Partial"],
+                            items: const ["All", "Paid", "Unpaid", "Partial"],
                             onChanged: (value) {
+                              if (value == "Paid") value = "Full";
                               context.read<ReportCubit>().updateFilter(
                                 'paid_status',
                                 value,
@@ -260,26 +261,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          flex: 2,
-                          child: ReportFilterItem(
-                            key: ValueKey('order_$_filterKey'),
-                            label: "Order Status",
-                            initialValue: "All",
-                            items: const [
-                              // "All",
-                              "Completed",
-                              "Cancelled",
-                            ],
-                            onChanged: (value) {
-                              context.read<ReportCubit>().updateFilter(
-                                'transaction_status',
-                                value,
-                              );
-                            },
-                          ),
-                        ),
+
                         const SizedBox(width: 8),
 
                         Expanded(
@@ -339,6 +321,22 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                         const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () {
+                            final cubit = context.read<ReportCubit>();
+                            cubit.updateFilter(
+                              'search_query',
+                              _searchController.text,
+                            );
+                            cubit.fetchTransactions();
+                          },
+                          child: const ReportActionButton(
+                            label: "Search",
+                            bgColor: Colors.blue,
+                            textColor: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () {
                             setState(() {
                               _searchController.clear();
                               _selectedRange = null;
@@ -363,22 +361,7 @@ class _ScreenReportTableState extends State<ScreenReportTable> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: () {
-                            final cubit = context.read<ReportCubit>();
-                            cubit.updateFilter(
-                              'search_query',
-                              _searchController.text,
-                            );
-                            cubit.fetchTransactions();
-                          },
-                          child: const ReportActionButton(
-                            label: "Search",
-                            bgColor: Colors.blue,
-                            textColor: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
+
                         IconButton(
                           onPressed: () => Navigator.of(context).pop(),
                           icon: const Icon(Icons.close, color: Colors.black),

@@ -130,7 +130,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       discount: discount,
       roundOff: 0.0,
       finalTotal: finalTotal,
-      finalTotalbefore: finalTotal + discount,
+      finalTotalbefore: finalTotal,
       serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
       quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
       rate: serviceState.cartItems.map((e) => e.service.price ?? 0.0).toList(),
@@ -169,6 +169,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         bookingTime: bookingTime ?? "--:--",
       );
     }
+
+    log("payment status ${request.paymentStatus}");
+
     context.read<BookingCubit>().quickPayment(request: request);
   }
 
@@ -334,12 +337,26 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             } else if (state is BookingPaymentSettled) {
               if (_pendingPrintData != null) {
                 final printCubit = context.read<PrintingCubit>();
+
+                final SettlePaymentRequestModel updatedData = _pendingPrintData!
+                    .request
+                    .copyWith(
+                      finalTotal: state.response.bookingResponse?.finalTotal,
+                      discount: state.response.bookingResponse?.discount,
+                      subTotalValue: state.response.bookingResponse?.subtotal,
+                      taxTotal: state.response.bookingResponse?.taxTotal,
+                      paymentStatus:
+                          state.response.bookingResponse?.paymentStatus,
+                      finalTotalbefore:
+                          state.response.bookingResponse?.finalTotalbefore,
+                    );
+
                 printCubit.printInvoice(
                   chairId: _pendingPrintData!.chairId,
                   printCount: printCubit.state.settings?.printCount.quickPayment
                       .toInt(),
                   balanceAmount: _pendingPrintData!.balanceAmount,
-                  request: _pendingPrintData!.request,
+                  request: updatedData,
                   shopData: _pendingPrintData!.shopData,
                   cartItems: _pendingPrintData!.cartItems,
                   staffName: _pendingPrintData!.staffName,
