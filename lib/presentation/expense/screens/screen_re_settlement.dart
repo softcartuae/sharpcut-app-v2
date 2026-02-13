@@ -370,6 +370,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
       tenderCash: tenders,
       change: changes,
     );
+
     String getPaymentStatus(double totalPaid, double finalTotal) {
       if (totalPaid == 0) return "unpaid";
       if (totalPaid < finalTotal) return "partial";
@@ -420,12 +421,25 @@ class _SettlementDialogState extends State<ResettlementScreen> {
             final shopData = context.read<AuthCubit>().currentUser;
             if (shopData != null) {
               final printCubit = context.read<PrintingCubit>();
+
+              final SettlePaymentRequestModel updatedData = _pendingRequest!
+                  .copyWith(
+                    finalTotal: state.response.bookingResponse?.finalTotal,
+                    discount: state.response.bookingResponse?.discount,
+                    subTotalValue: state.response.bookingResponse?.subtotal,
+                    taxTotal: state.response.bookingResponse?.taxTotal,
+                    paymentStatus:
+                        state.response.bookingResponse?.paymentStatus,
+                    finalTotalbefore:
+                        state.response.bookingResponse?.finalTotalbefore,
+                  );
+
               printCubit.printInvoice(
                 chairId: null, // Assuming null or pass if available
                 printCount: printCubit.state.settings?.printCount.settlePayment
                     .toInt(),
                 balanceAmount: double.tryParse(_balanceController.text) ?? 0.0,
-                request: _pendingRequest!,
+                request: updatedData,
                 shopData: shopData,
                 cartItems: widget.cartItems,
                 staffName: widget.staffName,

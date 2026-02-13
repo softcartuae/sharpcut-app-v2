@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
@@ -11,7 +10,6 @@ import 'package:sharp_cut/cubit/cash_registory/cash_registory_state.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit_state.dart';
-import 'package:sharp_cut/domain/booking/models/save_booking_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/presentation/cash_registory/screens/open_cash_registory_dialoge.dart';
@@ -131,7 +129,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       discount: discount,
       roundOff: 0.0,
       finalTotal: finalTotal,
-      finalTotalbefore: serviceState.total,
+      finalTotalbefore: finalTotal,
       serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
       quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
       rate: serviceState.cartItems.map((e) => e.service.price ?? 0.0).toList(),
@@ -173,6 +171,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         bookingTime: bookingTime ?? "--:--",
       );
     }
+
+    log("payment status ${request.paymentStatus}");
+
     context.read<BookingCubit>().quickPayment(request: request);
   }
 
@@ -358,15 +359,25 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               if (_pendingPrintData != null) {
                 final printCubit = context.read<PrintingCubit>();
 
-
-
+                final SettlePaymentRequestModel updatedData = _pendingPrintData!
+                    .request
+                    .copyWith(
+                      finalTotal: state.response.bookingResponse?.finalTotal,
+                      discount: state.response.bookingResponse?.discount,
+                      subTotalValue: state.response.bookingResponse?.subtotal,
+                      taxTotal: state.response.bookingResponse?.taxTotal,
+                      paymentStatus:
+                          state.response.bookingResponse?.paymentStatus,
+                      finalTotalbefore:
+                          state.response.bookingResponse?.finalTotalbefore,
+                    );
 
                 printCubit.printInvoice(
                   chairId: _pendingPrintData!.chairId,
                   printCount: printCubit.state.settings?.printCount.quickPayment
                       .toInt(),
                   balanceAmount: _pendingPrintData!.balanceAmount,
-                  request: _pendingPrintData!.request,
+                  request: updatedData,
                   shopData: _pendingPrintData!.shopData,
                   cartItems: _pendingPrintData!.cartItems,
                   staffName: _pendingPrintData!.staffName,
@@ -375,8 +386,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                   invoiceDate: state.response.bookingResponse?.invoiceDate,
                 );
                 _pendingPrintData = null;
-  
-
               }
               ToastHelper.showSuccess(state.message);
               context.read<ServiceCubit>().clearCart();

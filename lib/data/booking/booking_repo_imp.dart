@@ -207,7 +207,8 @@ class BookingRepoImp implements BookingRepo {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         if (data['success'] == true) {
-          return Right(SettlePaymentResponseModel.fromJson(data));
+          final transactiondata = data["data"];
+          return Right(SettlePaymentResponseModel.fromJson(transactiondata));
         } else {
           return Left(data['message'] ?? 'Payment settlement failed');
         }
@@ -226,8 +227,6 @@ class BookingRepoImp implements BookingRepo {
       return Left('Error settling payment: $e');
     }
   }
-
-
 
   @override
   Future<Either<String, String>> updatePaymentMode({
