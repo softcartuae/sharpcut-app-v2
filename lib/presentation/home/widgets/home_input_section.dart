@@ -53,33 +53,27 @@ class _HomeInputSectionState extends State<HomeInputSection> {
       ),
       child: BlocBuilder<BookingCubit, BookingState>(
         builder: (context, state) {
-          String invoiceNo = "Invoice no";
-          String date = "Date";
           String bookingTime = "Booking Time";
-          String customerName = "Customer Name";
-          String customerNumber = "Customer Number";
+
           String staffName = "Sales Man";
           final isBooked = state is BookingSuccess;
 
           if (state is BookingSuccess) {
             final booking = state.bookingResponse;
-            invoiceNo = booking.invoiceNo ?? "N/A";
             // Format created_at date
             if (booking.transactionDate != null) {
               bookingTime = booking.transactionDate!;
             }
 
-            customerName = booking.customerName ?? "Cash Customer";
-            customerNumber = booking.customerNumber ?? "0000000000";
             staffName = booking.staff?.name ?? "Sales Man";
           }
 
           return BlocListener<BookingCubit, BookingState>(
             listener: (context, state) {
               if (state is BookingSuccess) {
-                final name = state.bookingResponse.customerName ?? "cash";
-                final number =
-                    state.bookingResponse.customerNumber ?? "0000000000";
+                final name =
+                    state.bookingResponse.customerName ?? "Walk In Customer";
+                final number = state.bookingResponse.customerNumber ?? "";
 
                 _nameController.text = name;
                 _numberController.text = number;

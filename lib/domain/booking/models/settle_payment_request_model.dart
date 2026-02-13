@@ -55,9 +55,62 @@ class SettlePaymentRequestModel {
     this.taxTotalAfter,
   });
 
+  SettlePaymentRequestModel copyWith({
+    int? transactionId,
+    String? customerName,
+    String? customerNumber,
+    double? subTotalValue,
+    double? taxTotal,
+    String? paymentStatus,
+    double? discount,
+    double? roundOff,
+    double? finalTotal,
+    double? finalTotalbefore,
+    List<int>? serviceId,
+    List<int>? quantity,
+    List<double>? rate,
+    List<double>? taxAmount,
+    List<String>? currency,
+    List<double>? amountTotal,
+    List<double>? tax,
+    List<double>? subTotalList,
+    List<int>? isTip,
+    List<int>? collectedUserId,
+    List<String>? mode,
+    List<double>? amount,
+    List<double>? tenderCash,
+    List<double>? change,
+  }) {
+    return SettlePaymentRequestModel(
+      transactionId: transactionId ?? this.transactionId,
+      customerName: customerName ?? this.customerName,
+      customerNumber: customerNumber ?? this.customerNumber,
+      subTotalValue: subTotalValue ?? this.subTotalValue,
+      taxTotal: taxTotal ?? this.taxTotal,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      discount: discount ?? this.discount,
+      roundOff: roundOff ?? this.roundOff,
+      finalTotal: finalTotal ?? this.finalTotal,
+      finalTotalbefore: finalTotalbefore ?? this.finalTotalbefore,
+      serviceId: serviceId ?? this.serviceId,
+      quantity: quantity ?? this.quantity,
+      rate: rate ?? this.rate,
+      taxAmount: taxAmount ?? this.taxAmount,
+      currency: currency ?? this.currency,
+      amountTotal: amountTotal ?? this.amountTotal,
+      tax: tax ?? this.tax,
+      subTotalList: subTotalList ?? this.subTotalList,
+      isTip: isTip ?? this.isTip,
+      collectedUserId: collectedUserId ?? this.collectedUserId,
+      mode: mode ?? this.mode,
+      amount: amount ?? this.amount,
+      tenderCash: tenderCash ?? this.tenderCash,
+      change: change ?? this.change,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
-      
       "transaction_id": transactionId,
       "customer_name": customerName,
       "customer_number": customerNumber,

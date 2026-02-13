@@ -71,4 +71,6 @@ class InvoiceDao {
       return 'INV/$currentFY/1';
     
   }
+
 }
+

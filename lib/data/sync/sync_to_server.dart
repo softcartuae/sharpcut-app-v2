@@ -11,7 +11,7 @@ class SyncToServer {
     try {
       log("Starting transaction sync...");
 
-      // 0. Sync Cash Register if needed
+     
       final registerSyncResult = await _syncCashRegisterIfNeeded();
 
       String? registerSyncError;
@@ -22,7 +22,6 @@ class SyncToServer {
         return Left(registerSyncError!);
       }
 
-      // 1. Fetch unsynced transactions
       final transactions = await _dbHelper.getUnsyncedTransactions();
       if (transactions.isEmpty) {
         log("No unsynced transactions found.");
@@ -38,11 +37,9 @@ class SyncToServer {
         int id = transaction['id'];
         transactionIds.add(id);
 
-        // Fetch related data
         final services = await _dbHelper.getTransactionServices(id);
         final payments = await _dbHelper.getTransactionPayments(id);
 
-        // Construct lists for the payload
         List<String> detailIds = [];
         List<int> serviceIds = [];
         List<int> quantities = [];
@@ -57,13 +54,12 @@ class SyncToServer {
         for (var s in services) {
           detailIds.add(
             (s['detail_id'] ?? 0).toString(),
-          ); // Use actual detail_id
+          ); 
           serviceIds.add(s['service_id'] ?? 0);
           quantities.add(s['quantity'] ?? 0);
           rates.add(s['rate'] ?? 0.0);
           taxAmounts.add(s['tax_amount'] ?? 0.0);
 
-          // Fetch currency for service
           String? currency = await _dbHelper.getCurrencyForService(
             s['service_id'],
           );
@@ -74,7 +70,6 @@ class SyncToServer {
           isTips.add(s['is_tip'] ?? 0);
         }
 
-        // Payments
         List<String> paymentIds = [];
         List<int> collectedUserIds = [];
         List<String> modes = [];
@@ -86,7 +81,7 @@ class SyncToServer {
         for (var p in payments) {
           paymentIds.add(
             (p['payment_id'] ?? 0).toString(),
-          ); // Use actual payment_id
+          ); 
           collectedUserIds.add(p['collected_user_id'] ?? 0);
           modes.add(p['mode'] ?? "");
           amounts.add(p['amount'] ?? 0.0);
@@ -107,7 +102,7 @@ class SyncToServer {
           "chair_id": transaction['chair_id'],
           "user_id": transaction['user_id'],
           "cash_register_id":
-              transaction['cash_register_id'], // Ensure this is sent if available
+              transaction['cash_register_id'], 
           "customer_name": transaction['customer_name'] ?? "",
           "customer_number": transaction['customer_number'] ?? "",
 
@@ -211,11 +206,11 @@ class SyncToServer {
       final payload = {
         "id": register['id'],
         "opened_by": register['opened_by'],
-        "closed_by": register['closed_by'], // Might be null
+        "closed_by": register['closed_by'], 
         "opened_by_type": register['opened_by_type'],
-        "closed_by_type": register['closed_by_type'], // Might be null
+        "closed_by_type": register['closed_by_type'], 
         "opening_amount": register['opening_amount'],
-        "closing_amount": register['closing_amount'], // Might be null
+        "closing_amount": register['closing_amount'], 
         "opened_at": DateFormat(
           'dd/MM/yyyy hh:mm a',
         ).parse(register['opened_at']).toUtc().toIso8601String(),
@@ -223,8 +218,8 @@ class SyncToServer {
             ? DateFormat(
                 'dd/MM/yyyy hh:mm a',
               ).parse(register['closed_at']).toUtc().toIso8601String()
-            : null, // Might be null
-        "is_sync": true, // As per request body example
+            : null, 
+        "is_sync": true, 
       };
 
       final response = await ApiClient.dio.post(
@@ -255,7 +250,6 @@ class SyncToServer {
   Future<Either<String, String>> syncTransactionsFromServer() async {
     try {
       log("Starting transaction pull from server...");
-      // Check if DB has data (if empty => first time/fresh install)
       final hasData = await _dbHelper.hasTransactionData();
 
       if (hasData) {
