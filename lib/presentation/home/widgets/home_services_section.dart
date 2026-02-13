@@ -121,7 +121,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     log("finalTotal: $finalTotal");
     log("serviceState.total: ${serviceState.total}");
 
-    final request = SettlePaymentRequestModel(
+    SettlePaymentRequestModel request = SettlePaymentRequestModel(
       paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : "full",
       transactionId: transactionId,
       customerName: bookingFormState.customerName,
@@ -131,7 +131,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       discount: discount,
       roundOff: 0.0,
       finalTotal: finalTotal,
-      finalTotalbefore: finalTotal + discount,
+      finalTotalbefore: serviceState.total,
       serviceId: serviceState.cartItems.map((e) => e.service.id!).toList(),
       quantity: serviceState.cartItems.map((e) => e.quantity).toList(),
       rate: serviceState.cartItems.map((e) => e.service.price ?? 0.0).toList(),
@@ -157,6 +157,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       tenderCash: [0.0],
       change: [0.0],
     );
+
+    log("paymentStatus ${request.paymentStatus}");
+    log("final total before ${request.finalTotalbefore}");
 
     final shopData = context.read<AuthCubit>().currentUser;
     if (shopData != null) {
@@ -354,6 +357,10 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             } else if (state is BookingPaymentSettled) {
               if (_pendingPrintData != null) {
                 final printCubit = context.read<PrintingCubit>();
+
+
+
+
                 printCubit.printInvoice(
                   chairId: _pendingPrintData!.chairId,
                   printCount: printCubit.state.settings?.printCount.quickPayment
@@ -368,6 +375,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                   invoiceDate: state.response.bookingResponse?.invoiceDate,
                 );
                 _pendingPrintData = null;
+  
+
               }
               ToastHelper.showSuccess(state.message);
               context.read<ServiceCubit>().clearCart();

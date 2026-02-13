@@ -358,6 +358,9 @@ class _SettlementDialogState extends State<SettlementDialog> {
       return "full";
     }
 
+    log("paymentStatus ${getPaymentStatus(paid, finalTotal)}");
+    log("final total before ${widget.settlePayment.finalTotalbefore}");
+
     final request = SettlePaymentRequestModel(
       paymentStatus: getPaymentStatus(paid, finalTotal),
       transactionId: widget.settlePayment.transactionId,
