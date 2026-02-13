@@ -33,6 +33,7 @@ import 'package:sharp_cut/injection_container.dart' as di;
 
 import 'package:workmanager/workmanager.dart';
 import 'package:sharp_cut/data/sync/sync_to_server.dart';
+import 'package:sharp_cut/data/local_storage/token_storage.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -40,7 +41,12 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
+      WidgetsFlutterBinding.ensureInitialized();
       // Initialize necessary components
+      if (!di.sl.isRegistered<TokenStorage>()) {
+        di.sl.registerLazySingleton<TokenStorage>(() => TokenStorage());
+      }
+
       await ApiClient.init(); // Ensure Dio/interceptors are ready
 
       final sync = SyncToServer();
