@@ -372,6 +372,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                           state.response.bookingResponse?.finalTotalbefore,
                     );
 
+
                 printCubit.printInvoice(
                   chairId: _pendingPrintData!.chairId,
                   printCount: printCubit.state.settings?.printCount.quickPayment
