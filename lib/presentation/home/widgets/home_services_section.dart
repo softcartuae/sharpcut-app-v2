@@ -879,14 +879,14 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                               return;
                                             }
 
-                                            if (bookingFormState
-                                                .customerNumber
-                                                .isEmpty) {
-                                              ToastHelper.showError(
-                                                "Customer number is required",
-                                              );
-                                              return;
-                                            }
+                                            // if (bookingFormState
+                                            //     .customerNumber
+                                            //     .isEmpty) {
+                                            //   ToastHelper.showError(
+                                            //     "Customer number is required",
+                                            //   );
+                                            //   return;
+                                            // }
 
                                             showQuickPaymentPopup(
                                               context,

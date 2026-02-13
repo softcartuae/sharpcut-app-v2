@@ -232,8 +232,9 @@ class CuttingMastersDialog extends StatelessWidget {
                   const SizedBox(height: 4),
                   if (chair.liveState == LiveState.occupied.name)
                     Text(
-                      chair.transaction!.staff?.shortname ??
-                          chair.transaction!.staff!.name,
+                      chair.transaction?.staff?.shortname ??
+                          chair.transaction?.staff?.name ??
+                          "",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
