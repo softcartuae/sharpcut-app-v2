@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
@@ -79,6 +79,7 @@ void main() async {
         log('Firebase skipped on this device: $e');
       }
     });
+    log("main function completed successfully");
   } catch (e, stackTrace) {
     log('Initialization failed', error: e, stackTrace: stackTrace);
     runApp(
@@ -130,6 +131,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> _checkBackgroundNotification() async {
+    log("Checking background notification");
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.reload();

@@ -350,7 +350,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                           state.response.bookingResponse?.finalTotalbefore,
                     );
 
-
                 printCubit.printInvoice(
                   chairId: _pendingPrintData!.chairId,
                   printCount: printCubit.state.settings?.printCount.quickPayment
@@ -999,23 +998,23 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                 .read<BookingFormCubit>()
                                                 .state;
 
-                                            if (bookingFormState
-                                                .customerName
-                                                .isEmpty) {
-                                              ToastHelper.showError(
-                                                "Customer name is required",
-                                              );
-                                              return;
-                                            }
+                                            // if (bookingFormState
+                                            //     .customerName
+                                            //     .isEmpty) {
+                                            //   ToastHelper.showError(
+                                            //     "Customer name is required",
+                                            //   );
+                                            //   return;
+                                            // }
 
-                                            if (bookingFormState
-                                                .customerNumber
-                                                .isEmpty) {
-                                              ToastHelper.showError(
-                                                "Customer number is required",
-                                              );
-                                              return;
-                                            }
+                                            // if (bookingFormState
+                                            //     .customerNumber
+                                            //     .isEmpty) {
+                                            //   ToastHelper.showError(
+                                            //     "Customer number is required",
+                                            //   );
+                                            //   return;
+                                            // }
 
                                             showQuickPaymentPopup(
                                               context,

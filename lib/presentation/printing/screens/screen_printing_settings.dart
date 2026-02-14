@@ -64,8 +64,8 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
           return LayoutBuilder(
             builder: (context, constraints) {
               // Determine if we are on a wider screen (tablet)
-              bool isTablet = constraints.maxWidth > 600;
-              double contentWidth = isTablet ? 600 : constraints.maxWidth;
+
+              double contentWidth = constraints.maxWidth;
 
               return Center(
                 child: SizedBox(
