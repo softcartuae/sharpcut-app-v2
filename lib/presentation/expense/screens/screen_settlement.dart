@@ -310,7 +310,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     final double change = double.tryParse(_chargeController.text) ?? 0.0;
 
     // Construct lists
-    List<String> modes = [];
+    List<String> modes   = [];
     List<double> amounts = [];
     List<double> tenders = [];
     List<double> changes = [];
