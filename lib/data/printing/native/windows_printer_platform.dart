@@ -5,7 +5,6 @@ import 'package:ffi/ffi.dart';
 import 'package:win32/win32.dart';
 
 class WindowsPrinterPlatform {
-
   /// Lists all local printers using EnumPrinters.
   List<String> getPrinters() {
     final printers = <String>[];
@@ -108,5 +107,55 @@ class WindowsPrinterPlatform {
       }
     });
   }
-}
 
+  /// Gets the printer status using GetPrinter with level 2.
+  /// Returns the status bitmask.
+  Future<int> getPrinterStatus(String printerName) async {
+    return Future(() {
+      final pPrinterName = printerName.toNativeUtf16();
+      final phPrinter = calloc<HANDLE>();
+      final pCbNeeded = calloc<DWORD>();
+      final pPcReturned = calloc<DWORD>();
+
+      try {
+        // 1. Open Printer
+        if (OpenPrinter(pPrinterName, phPrinter, nullptr) == 0) {
+          return 0; // Failed to open
+        }
+
+        // 2. Get Printer Info Level 2
+        // First call to get size
+        GetPrinter(phPrinter.value, 2, nullptr, 0, pCbNeeded);
+
+        final cbNeeded = pCbNeeded.value;
+        if (cbNeeded == 0) {
+          ClosePrinter(phPrinter.value);
+          return 0;
+        }
+
+        final pPrinterInfo = calloc<Uint8>(cbNeeded);
+
+        if (GetPrinter(phPrinter.value, 2, pPrinterInfo, cbNeeded, pCbNeeded) ==
+            0) {
+          free(pPrinterInfo);
+          ClosePrinter(phPrinter.value);
+          return 0;
+        }
+
+        final info = pPrinterInfo.cast<PRINTER_INFO_2>();
+        final status = info.ref.Status;
+
+        free(pPrinterInfo);
+        ClosePrinter(phPrinter.value);
+
+        return status;
+      } finally {
+        free(pPrinterName);
+        free(phPrinter);
+        free(pCbNeeded);
+        free(pPcReturned);
+      }
+      
+    });
+  }
+}

@@ -29,6 +29,7 @@ class ChairRepoImpl implements ChairRepo {
     log("getChairsAndStaffs caaled");
     try {
       final response = await ApiClient.dio.get(
+        
         '${ApiClient.chairsApi}?users=true',
       );
 

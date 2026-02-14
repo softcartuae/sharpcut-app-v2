@@ -297,10 +297,10 @@ class _SettlementDialogState extends State<SettlementDialog> {
       return;
     }
 
-    if (_nameController.text.isEmpty) {
-      ToastHelper.showError("Please Enter Customer Name");
-      return;
-    }
+    // if (_nameController.text.isEmpty) {
+    //   ToastHelper.showError("Please Enter Customer Name");
+    //   return;
+    // }
     // Also check if totalPaid is 0? Maybe allow 0 for partial?
     // User said "settlement is like can be partially gaven".
     // So < finalTotal is allowed. > finalTotal is NOT allowed.
@@ -310,7 +310,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     final double change = double.tryParse(_chargeController.text) ?? 0.0;
 
     // Construct lists
-    List<String> modes = [];
+    List<String> modes   = [];
     List<double> amounts = [];
     List<double> tenders = [];
     List<double> changes = [];
