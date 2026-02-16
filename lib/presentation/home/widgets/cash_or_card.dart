@@ -161,8 +161,9 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 15),
+                    const SizedBox(width: 10),
                     Expanded(
+                      flex: 2,
                       child: ElevatedButton(
                         onPressed: isLoading
                             ? null
@@ -186,7 +187,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                           elevation: 0,
                         ),
                         child: Text(
-                          "Card",
+                          "Credit Card",
                           style: GoogleFonts.rajdhani(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -194,7 +195,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 15),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: isLoading

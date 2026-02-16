@@ -40,7 +40,18 @@ void main() async {
     apiVersion = 'ErrorFetching';
   }
 
-  // 4. Generate lib/build_config.dart
+  // 4. Get Git Commit Hash
+  String gitCommit = 'Unknown';
+  try {
+    final result = await Process.run('git', ['rev-parse', '--short', 'HEAD']);
+    if (result.exitCode == 0) {
+      gitCommit = result.stdout.toString().trim();
+    }
+  } catch (e) {
+    log('Failed to fetch git commit: $e');
+  }
+
+  // 5. Generate lib/build_config.dart
   final outputFile = File('lib/build_config.dart');
   final content =
       '''
@@ -50,8 +61,10 @@ class BuildConfig {
   static const String buildDate = '$buildDate';
   static const String appVersionAtBuild = '$appVersion';
   static const String apiVersionAtBuild = '$apiVersion';
+  static const String gitCommit = '$gitCommit';
 }
 ''';
 
   await outputFile.writeAsString(content);
+  log('Build config generated successfully.');
 }
