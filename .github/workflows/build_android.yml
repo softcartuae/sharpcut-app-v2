@@ -2,7 +2,7 @@ name: Build Android App
 
 on:
   push:
-    branches: ["online_no_chair_branch"]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:

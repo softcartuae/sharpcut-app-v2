@@ -2,7 +2,7 @@ name: Build Windows App
 
 on:
   push:
-    branches: ["online_no_chair_branch"]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
 
       - name: Generate Build Config
         run: dart run tool/generate_build_config.dart
-
+ 
       - name: Build Windows Release
         run: flutter build windows --release
 

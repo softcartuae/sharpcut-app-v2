@@ -24,7 +24,7 @@ class ReceiptWidget extends StatelessWidget {
   const ReceiptWidget({
     super.key,
     required this.staffName,
-    required this.invoiceNumber, 
+    required this.invoiceNumber,
     required this.bookingTime,
     required this.shopData,
     required this.request,
