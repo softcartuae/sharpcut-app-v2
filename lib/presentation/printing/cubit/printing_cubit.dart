@@ -269,7 +269,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     if (state.connectedPrinter == null) {
       final connected = await _tryAutoConnect();
       if (!connected) {
-        // ToastHelper.showError("No printer connected");
+        ToastHelper.showError("No printer connected");
         log("No printer connected");
         emit(
           state.copyWith(
