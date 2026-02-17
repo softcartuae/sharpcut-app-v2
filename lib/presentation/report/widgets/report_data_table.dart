@@ -80,16 +80,22 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                             paymentSettleFunction: () {
                                               final booking =
                                                   state.transactions[index];
+
+                                              final canEdit = booking.paymentStatus != "full";    
+
+
                                               showDialog(
                                                 context: context,
                                                 barrierDismissible: true,
                                                 builder: (context) => PaymentDetailsDialog(
+                                                  canEdit: canEdit,
                                                   booking: booking,
                                                   onEdit: (payment) {
                                                     showDialog(
                                                       context: context,
                                                       builder: (context) =>
                                                           PaymentEditDialog(
+                                                            canEdit: canEdit,
                                                             invoiceNo:
                                                                 booking
                                                                     .invoiceNo ??

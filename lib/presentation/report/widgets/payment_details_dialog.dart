@@ -5,11 +5,13 @@ import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 class PaymentDetailsDialog extends StatelessWidget {
   final BookingResponseModel booking;
   final Function(PaymentModel) onEdit;
+  final bool canEdit;
 
   const PaymentDetailsDialog({
     super.key,
     required this.booking,
     required this.onEdit,
+    required this.canEdit,
   });
 
   @override
@@ -88,15 +90,23 @@ class PaymentDetailsDialog extends StatelessWidget {
                                 ),
                                 child: Center(
                                   child: InkWell(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      onEdit(payment);
-                                    },
-                                    child: const Icon(
-                                      Icons.edit,
-                                      size: 18,
-                                      color: Colors.black87,
-                                    ),
+                                    onTap: canEdit
+                                        ? () {
+                                            Navigator.pop(context);
+                                            onEdit(payment);
+                                          }
+                                        : null,
+                                    child: canEdit
+                                        ? const Icon(
+                                            Icons.edit,
+                                            size: 18,
+                                            color: Colors.black87,
+                                          )
+                                        : const Icon(
+                                            Icons.edit_off,
+                                            size: 18,
+                                            color: Colors.black87,
+                                          ),
                                   ),
                                 ),
                               ),

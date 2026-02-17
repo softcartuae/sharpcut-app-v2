@@ -8,6 +8,7 @@ class PaymentEditDialog extends StatefulWidget {
   final double invoiceAmount;
   final String currentMode;
   final double currentAmount;
+  final bool canEdit;
   final Function(String mode, double amount) onUpdate;
 
   const PaymentEditDialog({
@@ -17,6 +18,7 @@ class PaymentEditDialog extends StatefulWidget {
     required this.currentMode,
     required this.currentAmount,
     required this.onUpdate,
+    required this.canEdit,
   });
 
   @override
