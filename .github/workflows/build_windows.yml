@@ -2,7 +2,7 @@ name: Build Windows App offline
 
 on:
   push:
-    branches: ["offline_no_chair_branch"]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -14,11 +14,11 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: "stable"  
+          channel: "stable"
           architecture: x64
 
-      # - name: Enable Windows Desktop Support
-      #   run: flutter config --enable-windows-desktop
+      - name: Enable Windows Desktop Support
+        run: flutter config --enable-windows-desktop
 
       - name: Get Dependencies
         run: flutter pub get

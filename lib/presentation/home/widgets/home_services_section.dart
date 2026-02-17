@@ -928,14 +928,14 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                 .read<BookingFormCubit>()
                                                 .state;
 
-                                            if (bookingFormState
-                                                .customerName
-                                                .isEmpty) {
-                                              ToastHelper.showError(
-                                                "Customer name is required",
-                                              );
-                                              return;
-                                            }
+                                            // if (bookingFormState
+                                            //     .customerName
+                                            //     .isEmpty) {
+                                            //   ToastHelper.showError(
+                                            //     "Customer name is required",
+                                            //   );
+                                            //   return;
+                                            // }
 
                                             // if (bookingFormState
                                             //     .customerNumber

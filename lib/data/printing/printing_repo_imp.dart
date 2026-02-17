@@ -160,8 +160,27 @@ class PrintingRepoImp implements PrintingRepo {
   @override
   Future<bool> connect(Printer printer) async {
     if (Platform.isWindows) {
-      // Windows spooler is stateless in terms of "app connection".
-      // We just assume success if we can find it, or even just always return true and fail at print time.
+      if (printer.name != null) {
+        final status = await checkPrinterStatus(printer);
+        // 0x00000080 is PRINTER_STATUS_OFFLINE
+        // 0x00000002 is PRINTER_STATUS_ERROR
+        // 0x00000200 is PRINTER_STATUS_NOT_AVAILABLE
+
+        // status of 0 means we failed to get status at all, so maybe assume connected
+        // or fail? Let's assume connected to be safe unless we explicitly get an error bit.
+
+        if (status != null && status != 0) {
+          // If Offline or Error, return false (Not Connected)
+          if ((status & 0x00000080) != 0 ||
+              (status & 0x00000002) != 0 ||
+              (status & 0x00000200) != 0) {
+            log(
+              "Windows Printer Status Check Failed. Status Code: $status (Offline/Error)",
+            );
+            return false;
+          }
+        }
+      }
       return true;
     }
 
@@ -781,5 +800,13 @@ class PrintingRepoImp implements PrintingRepo {
     // Common ESC/POS keep-alive
     final bytes = Uint8List.fromList([16, 4, 1]);
     await _printBytes(printer, bytes);
+  }
+
+  @override
+  Future<int?> checkPrinterStatus(Printer printer) async {
+    if (Platform.isWindows) {
+      return await _windowsPlatform.getPrinterStatus(printer.name ?? '');
+    }
+    return null;
   }
 }

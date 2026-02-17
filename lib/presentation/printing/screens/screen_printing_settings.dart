@@ -64,8 +64,8 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
           return LayoutBuilder(
             builder: (context, constraints) {
               // Determine if we are on a wider screen (tablet)
-              bool isTablet = constraints.maxWidth > 600;
-              double contentWidth = isTablet ? 600 : constraints.maxWidth;
+
+              double contentWidth = constraints.maxWidth;
 
               return Center(
                 child: SizedBox(
@@ -75,7 +75,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Drawer Settings Card
+                        // Drawer Settings Cardsc
                         Card(
                           color: AppColors.violetLight,
                           elevation: 2,
@@ -301,245 +301,308 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                           const SizedBox(height: 24),
                         ],
 
-                        // Scan Button (USB)
-                        Card(
-                          color: AppColors.violetLight,
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            side: const BorderSide(
-                              color: AppColors.violetLightActive,
+                        if (Platform.isWindows)
+                          Card(
+                            color: AppColors.violetLight,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: const BorderSide(
+                                color: AppColors.violetLightActive,
+                              ),
                             ),
-                          ),
-                          clipBehavior: Clip.hardEdge,
-                          child: InkWell(
-                            onTap:
-                                (state.status == PrintingStatus.scanning &&
-                                    state.scanningType != ConnectionType.USB)
-                                ? null
-                                : () {
-                                    if (state.status ==
-                                        PrintingStatus.scanning) {
-                                      context.read<PrintingCubit>().stopScan();
-                                    } else {
-                                      context.read<PrintingCubit>().startScan(
-                                        type: ConnectionType.USB,
-                                      );
-                                    }
-                                  },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (state.status == PrintingStatus.scanning &&
-                                      state.scanningType == ConnectionType.USB)
-                                    const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
+                            clipBehavior: Clip.hardEdge,
+                            child: InkWell(
+                              onTap: () {
+                                context.read<PrintingCubit>().startScan(
+                                  type: ConnectionType.USB,
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.refresh,
+                                      color: AppColors.violetNormal,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "Refresh Printers",
+                                      style: GoogleFonts.rajdhani(
                                         color: AppColors.violetNormal,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                    )
-                                  else
-                                    Icon(
-                                      Icons.usb,
-                                      color:
-                                          (state.status ==
-                                                  PrintingStatus.scanning &&
-                                              state.scanningType !=
-                                                  ConnectionType.USB)
-                                          ? Colors.grey
-                                          : AppColors.violetNormal,
                                     ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    state.status == PrintingStatus.scanning &&
-                                            state.scanningType ==
-                                                ConnectionType.USB
-                                        ? "Stop Scanning"
-                                        : "Scan for USB Printers",
-                                    style: GoogleFonts.rajdhani(
-                                      color:
-                                          (state.status ==
-                                                  PrintingStatus.scanning &&
-                                              state.scanningType !=
-                                                  ConnectionType.USB)
-                                          ? Colors.grey
-                                          : AppColors.violetNormal,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Scan Button (Bluetooth)
-                        Card(
-                          color: AppColors.violetLight,
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            side: const BorderSide(
-                              color: AppColors.violetLightActive,
+                        if (!Platform.isWindows) ...[
+                          // Scan Button (USB)
+                          Card(
+                            color: AppColors.violetLight,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: const BorderSide(
+                                color: AppColors.violetLightActive,
+                              ),
                             ),
-                          ),
-                          clipBehavior: Clip.hardEdge,
-                          child: InkWell(
-                            onTap:
-                                (state.status == PrintingStatus.scanning &&
-                                    state.scanningType != ConnectionType.BLE)
-                                ? null
-                                : () async {
-                                    if (state.status ==
-                                        PrintingStatus.scanning) {
-                                      context.read<PrintingCubit>().stopScan();
-                                    } else {
-                                      bool granted =
-                                          await _requestBluetoothPermissions();
-                                      if (granted && context.mounted) {
+                            clipBehavior: Clip.hardEdge,
+                            child: InkWell(
+                              onTap:
+                                  (state.status == PrintingStatus.scanning &&
+                                      state.scanningType != ConnectionType.USB)
+                                  ? null
+                                  : () {
+                                      if (state.status ==
+                                          PrintingStatus.scanning) {
+                                        context
+                                            .read<PrintingCubit>()
+                                            .stopScan();
+                                      } else {
                                         context.read<PrintingCubit>().startScan(
-                                          type: ConnectionType.BLE,
+                                          type: ConnectionType.USB,
                                         );
                                       }
-                                    }
-                                  },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (state.status == PrintingStatus.scanning &&
-                                      state.scanningType == ConnectionType.BLE)
-                                    const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.violetNormal,
-                                      ),
-                                    )
-                                  else
-                                    Icon(
-                                      Icons.bluetooth,
-                                      color:
-                                          (state.status ==
-                                                  PrintingStatus.scanning &&
-                                              state.scanningType !=
-                                                  ConnectionType.BLE)
-                                          ? Colors.grey
-                                          : AppColors.violetNormal,
-                                    ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    state.status == PrintingStatus.scanning &&
-                                            state.scanningType ==
-                                                ConnectionType.BLE
-                                        ? "Stop Scanning"
-                                        : "Scan for Bluetooth Printers",
-                                    style: GoogleFonts.rajdhani(
-                                      color:
-                                          (state.status ==
-                                                  PrintingStatus.scanning &&
-                                              state.scanningType !=
-                                                  ConnectionType.BLE)
-                                          ? Colors.grey
-                                          : AppColors.violetNormal,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Scan Button (Network)
-                        Card(
-                          color: AppColors.violetLight,
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            side: const BorderSide(
-                              color: AppColors.violetLightActive,
-                            ),
-                          ),
-                          clipBehavior: Clip.hardEdge,
-                          child: InkWell(
-                            onTap:
-                                (state.status == PrintingStatus.scanning &&
-                                    state.scanningType !=
-                                        ConnectionType.NETWORK)
-                                ? null
-                                : () {
+                                    },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
                                     if (state.status ==
-                                        PrintingStatus.scanning) {
-                                      context.read<PrintingCubit>().stopScan();
-                                    } else {
-                                      context.read<PrintingCubit>().startScan(
-                                        type: ConnectionType.NETWORK,
-                                      );
-                                    }
-                                  },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (state.status == PrintingStatus.scanning &&
-                                      state.scanningType ==
-                                          ConnectionType.NETWORK)
-                                    const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.violetNormal,
+                                            PrintingStatus.scanning &&
+                                        state.scanningType ==
+                                            ConnectionType.USB)
+                                      const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.violetNormal,
+                                        ),
+                                      )
+                                    else
+                                      Icon(
+                                        Icons.usb,
+                                        color:
+                                            (state.status ==
+                                                    PrintingStatus.scanning &&
+                                                state.scanningType !=
+                                                    ConnectionType.USB)
+                                            ? Colors.grey
+                                            : AppColors.violetNormal,
                                       ),
-                                    )
-                                  else
-                                    Icon(
-                                      Icons.wifi,
-                                      color:
-                                          (state.status ==
-                                                  PrintingStatus.scanning &&
-                                              state.scanningType !=
-                                                  ConnectionType.NETWORK)
-                                          ? Colors.grey
-                                          : AppColors.violetNormal,
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      state.status == PrintingStatus.scanning &&
+                                              state.scanningType ==
+                                                  ConnectionType.USB
+                                          ? "Stop Scanning"
+                                          : "Scan for USB Printers",
+                                      style: GoogleFonts.rajdhani(
+                                        color:
+                                            (state.status ==
+                                                    PrintingStatus.scanning &&
+                                                state.scanningType !=
+                                                    ConnectionType.USB)
+                                            ? Colors.grey
+                                            : AppColors.violetNormal,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    state.status == PrintingStatus.scanning &&
-                                            state.scanningType ==
-                                                ConnectionType.NETWORK
-                                        ? "Stop Scanning"
-                                        : "Scan for Network Printers",
-                                    style: GoogleFonts.rajdhani(
-                                      color:
-                                          (state.status ==
-                                                  PrintingStatus.scanning &&
-                                              state.scanningType !=
-                                                  ConnectionType.NETWORK)
-                                          ? Colors.grey
-                                          : AppColors.violetNormal,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 16),
+
+                          // Scan Button (Bluetooth)
+                          Card(
+                            color: AppColors.violetLight,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: const BorderSide(
+                                color: AppColors.violetLightActive,
+                              ),
+                            ),
+                            clipBehavior: Clip.hardEdge,
+                            child: InkWell(
+                              onTap:
+                                  (state.status == PrintingStatus.scanning &&
+                                      state.scanningType != ConnectionType.BLE)
+                                  ? null
+                                  : () async {
+                                      if (state.status ==
+                                          PrintingStatus.scanning) {
+                                        context
+                                            .read<PrintingCubit>()
+                                            .stopScan();
+                                      } else {
+                                        bool granted =
+                                            await _requestBluetoothPermissions();
+                                        if (granted && context.mounted) {
+                                          context
+                                              .read<PrintingCubit>()
+                                              .startScan(
+                                                type: ConnectionType.BLE,
+                                              );
+                                        }
+                                      }
+                                    },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (state.status ==
+                                            PrintingStatus.scanning &&
+                                        state.scanningType ==
+                                            ConnectionType.BLE)
+                                      const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.violetNormal,
+                                        ),
+                                      )
+                                    else
+                                      Icon(
+                                        Icons.bluetooth,
+                                        color:
+                                            (state.status ==
+                                                    PrintingStatus.scanning &&
+                                                state.scanningType !=
+                                                    ConnectionType.BLE)
+                                            ? Colors.grey
+                                            : AppColors.violetNormal,
+                                      ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      state.status == PrintingStatus.scanning &&
+                                              state.scanningType ==
+                                                  ConnectionType.BLE
+                                          ? "Stop Scanning"
+                                          : "Scan for Bluetooth Printers",
+                                      style: GoogleFonts.rajdhani(
+                                        color:
+                                            (state.status ==
+                                                    PrintingStatus.scanning &&
+                                                state.scanningType !=
+                                                    ConnectionType.BLE)
+                                            ? Colors.grey
+                                            : AppColors.violetNormal,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Scan Button (Network)
+                          Card(
+                            color: AppColors.violetLight,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: const BorderSide(
+                                color: AppColors.violetLightActive,
+                              ),
+                            ),
+                            clipBehavior: Clip.hardEdge,
+                            child: InkWell(
+                              onTap:
+                                  (state.status == PrintingStatus.scanning &&
+                                      state.scanningType !=
+                                          ConnectionType.NETWORK)
+                                  ? null
+                                  : () {
+                                      if (state.status ==
+                                          PrintingStatus.scanning) {
+                                        context
+                                            .read<PrintingCubit>()
+                                            .stopScan();
+                                      } else {
+                                        context.read<PrintingCubit>().startScan(
+                                          type: ConnectionType.NETWORK,
+                                        );
+                                      }
+                                    },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (state.status ==
+                                            PrintingStatus.scanning &&
+                                        state.scanningType ==
+                                            ConnectionType.NETWORK)
+                                      const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.violetNormal,
+                                        ),
+                                      )
+                                    else
+                                      Icon(
+                                        Icons.wifi,
+                                        color:
+                                            (state.status ==
+                                                    PrintingStatus.scanning &&
+                                                state.scanningType !=
+                                                    ConnectionType.NETWORK)
+                                            ? Colors.grey
+                                            : AppColors.violetNormal,
+                                      ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      state.status == PrintingStatus.scanning &&
+                                              state.scanningType ==
+                                                  ConnectionType.NETWORK
+                                          ? "Stop Scanning"
+                                          : "Scan for Network Printers",
+                                      style: GoogleFonts.rajdhani(
+                                        color:
+                                            (state.status ==
+                                                    PrintingStatus.scanning &&
+                                                state.scanningType !=
+                                                    ConnectionType.NETWORK)
+                                            ? Colors.grey
+                                            : AppColors.violetNormal,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
 
                         // Discovered Printers Header
                         Text(
@@ -561,7 +624,9 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                               child: Column(
                                 children: [
                                   Text(
-                                    "No printers found.",
+                                    Platform.isWindows
+                                        ? "No printers listed."
+                                        : "No printers found.",
                                     style: GoogleFonts.rajdhani(
                                       color: Colors.black,
                                       fontSize: 14,
@@ -569,7 +634,9 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    "Please connect a printer and Tap scan.",
+                                    Platform.isWindows
+                                        ? "Click refresh to see installed printers."
+                                        : "Please connect a printer and Tap scan.",
                                     style: GoogleFonts.rajdhani(
                                       color: Colors.black,
                                       fontSize: 14,
