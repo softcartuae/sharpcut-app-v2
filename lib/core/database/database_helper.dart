@@ -141,6 +141,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE cash_registers (
         id INTEGER PRIMARY KEY,
+        cash_register_id INTEGER NOT NULL,
         opened_by INTEGER NOT NULL,
         closed_by INTEGER,
         opened_by_type TEXT NOT NULL,

@@ -197,6 +197,7 @@ class SyncToServer {
 
       final payload = {
         "id": register['id'],
+        "cash_register_id": register['cash_register_id'],
         "opened_by": register['opened_by'],
         "closed_by": register['closed_by'],
         "opened_by_type": register['opened_by_type'],
@@ -314,12 +315,42 @@ class SyncToServer {
 
         log("Received ${data.length} cash registers from server.");
 
+        List<Map<String, dynamic>> syncedRegisters = [];
+
         for (var item in data) {
           // Force is_synced to 1 because we just got it from server
           var registerData = Map<String, dynamic>.from(item);
           registerData['is_synced'] = 1;
           registerData.remove("is_sync");
           await _dbHelper.syncCashRegister(registerData);
+
+          syncedRegisters.add({
+            "cash_register_id": item['cash_register_id'],
+            "id": item['id'],
+          });
+        }
+
+        if (syncedRegisters.isNotEmpty) {
+          try {
+            log(
+              "Sending sync acknowledgement for ${syncedRegisters.length} cash registers...",
+            );
+            final ackResponse = await ApiClient.dio.post(
+              ApiClient.cashRegistersSyncCompleteApi,
+              data: {"cash_registers": syncedRegisters},
+            );
+
+            if (ackResponse.statusCode == 200 ||
+                ackResponse.statusCode == 201) {
+              log("Cash register sync acknowledgement successful.");
+            } else {
+              log(
+                "Cash register sync acknowledgement failed: ${ackResponse.statusCode} - ${ackResponse.statusMessage}",
+              );
+            }
+          } catch (e) {
+            log("Error sending cash register sync acknowledgement: $e");
+          }
         }
 
         return Right("Pulled ${data.length} cash registers successfully.");
