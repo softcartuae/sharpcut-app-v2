@@ -108,6 +108,7 @@ class BookingRepoImp implements BookingRepo {
     } catch (e) {
       return Left('Error cancelling booking: $e');
     }
+    
   }
 
   @override
