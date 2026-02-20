@@ -92,5 +92,7 @@ class ApiClient {
   static final printQuickReportApi = "api/print/transaction-report";
   static final printCashRegisterApi = "api/print/cash-register-report";
   static final versionApi = "api/version";
-  
+
 }
+
+

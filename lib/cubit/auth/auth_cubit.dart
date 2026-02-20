@@ -35,7 +35,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
       emit(AuthError("Something Went Wrong"));
     }
   }
-   
+
   Future<void> getUser() async {
     // If we are already loading (from login), don't emit loading aga  in if you want to keep the flow smooth,
     // but typically it's fine. However, if called separately, we need loading.
@@ -46,6 +46,14 @@ class AuthCubit extends Cubit<AuthCubitState> {
     try {
       final user = await authRepo.getUser();
       currentUser = user;
+
+      if (user.mode != null) {
+        await tokenStorage.saveMode(user.mode!);
+      }
+      if (user.isChair != null) {
+        await tokenStorage.saveIsChair(user.isChair!);
+      }
+
       emit(AuthAuthenticated(user));
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -71,5 +79,4 @@ class AuthCubit extends Cubit<AuthCubitState> {
     currentUser = null;
     emit(AuthUnauthenticated());
   }
-  
 }

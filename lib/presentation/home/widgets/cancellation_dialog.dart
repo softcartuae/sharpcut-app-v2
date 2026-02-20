@@ -280,6 +280,7 @@ class _CancellationDialogState extends State<CancellationDialog> {
                                     final shop = context
                                         .read<AuthCubit>()
                                         .currentUser;
+                                        
                                     final isNoChair =
                                         CheckNoChair.checkIsThisAppNoChairOrNot(
                                           shop,
