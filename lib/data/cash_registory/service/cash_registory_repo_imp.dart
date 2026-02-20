@@ -9,6 +9,7 @@ import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart
 import 'package:sharp_cut/domain/cash_registory/models/close_register_response.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 import 'package:sharp_cut/core/utils/date_formatter.dart';
+import 'package:sharp_cut/utils/helpers/convertion.dart';
 
 class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
@@ -55,7 +56,9 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
         );
       }
 
+      final cashRegisterId = generateUniqueInt();
       final data = {
+        'cash_register_id': cashRegisterId,
         'opened_by': userId,
         'opened_by_type': role.name,
         'opening_amount': amount,

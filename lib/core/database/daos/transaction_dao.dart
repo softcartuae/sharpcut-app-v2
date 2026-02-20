@@ -500,10 +500,10 @@ class TransactionDao {
     final db = await _dbFuture;
 
     await db.transaction((txn) async {
-      // 1. Fetch Transaction Final Total
+      // 1. Fetch Transaction Final Total and Cash Register ID
       final transactionResult = await txn.query(
         'transactions',
-        columns: ['final_total'],
+        columns: ['final_total', 'cash_register_id'],
         where: 'id = ?',
         whereArgs: [transactionId],
       );
@@ -512,8 +512,28 @@ class TransactionDao {
         throw Exception("Transaction $transactionId not found");
       }
 
+      final transactionRow = transactionResult.first;
       final finalTotal =
-          (transactionResult.first['final_total'] as num?)?.toDouble() ?? 0.0;
+          (transactionRow['final_total'] as num?)?.toDouble() ?? 0.0;
+      final cashRegisterId = transactionRow['cash_register_id'] as int?;
+
+      if (cashRegisterId != null) {
+        final cashRegisterResult = await txn.query(
+          'cash_registers',
+          columns: ['closed_at'],
+          where: 'id = ?',
+          whereArgs: [cashRegisterId],
+        );
+
+        if (cashRegisterResult.isNotEmpty) {
+          final closedAt = cashRegisterResult.first['closed_at'];
+          if (closedAt != null) {
+            throw Exception(
+              "this transaction cashregister is closed cant edit ",
+            );
+          }
+        }
+      }
 
       // 2. Calculate Sum of OTHER payments
       final otherPaymentsResult = await txn.rawQuery(

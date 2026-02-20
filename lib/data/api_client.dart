@@ -49,6 +49,7 @@ class ApiClient {
   static final userExpensePostApi = "api/users/expenses";
   static final bookingsPostApi = "api/bookings";
   static final transactionsSyncPOSTapi = "api/transactions/sync";
+  static final transactionsSyncCompleteApi = "api/transactions/sync/complete";
   static final resetUserPasswordapi = "api/reset-password";
   static final resetAdminPasswordapi = "api/reset-password";
   static final shopAdminLoginapi = "api/shop-admin-login";
@@ -68,6 +69,8 @@ class ApiClient {
   static final usersAdminSyncApi = "api/users/admin/sync";
   static final usersStaffSyncApi = "api/users/staff/sync";
   static final cashRegistersSyncApi = "api/cash-registers/sync";
+  static final cashRegistersSyncCompleteApi =
+      "api/cash-registers/sync/complete";
 
   // GET API ENDPOINTS
   static final userExpenseGETapi = "api/users/expenses";
