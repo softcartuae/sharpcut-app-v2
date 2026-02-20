@@ -85,7 +85,7 @@ class ApiClient {
   static final getTotalSalesForCloseCashRegisterApi =
       "api/cash-registers/sales-total";
   static final printerSettingsApi = "api/settings";
-  static final cashRegisterLastSalesApi =
+  static final cashRegisterLastSalesApi = 
       "api/cash-registers/print-last-report";
   static final printerListApi = "api/printers/list";
   static final printInvoiceApi = "api/print/invoice";

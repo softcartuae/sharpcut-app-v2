@@ -13,6 +13,7 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
   @override
   Future<Either<String, bool>> checkCashRegisterStatus() async {
     try {
+      
       final response = await ApiClient.dio.get(ApiClient.cashRegisterCheckApi);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
