@@ -4,6 +4,8 @@ import 'package:sharp_cut/utils/helpers/convertion.dart';
 class TokenStorage {
   static const String _tokenKey = 'auth_token';
   static const String _deviceIdKey = 'device_id';
+  static const String _modeKey = 'auth_mode';
+  static const String _isChairKey = 'auth_is_chair';
 
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -23,6 +25,26 @@ class TokenStorage {
       await prefs.setString(_deviceIdKey, deviceId);
     }
     return deviceId;
+  }
+
+  Future<void> saveMode(String mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_modeKey, mode);
+  }
+
+  Future<String?> getMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_modeKey);
+  }
+
+  Future<void> saveIsChair(bool isChair) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_isChairKey, isChair);
+  }
+
+  Future<bool?> getIsChair() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_isChairKey);
   }
 
   Future<void> deleteToken() async {

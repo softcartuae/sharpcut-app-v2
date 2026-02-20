@@ -21,7 +21,15 @@ class AuthInterceptor extends Interceptor {
       options.headers['Authorization'] = 'Bearer $token';
     }
     options.headers['device-id'] = deviceId;
+    // final mode = await tokenStorage.getMode();
+    // if (mode != null) {
+    //   options.headers['mode'] = mode;
+    // }
+
+    // final isChair = await tokenStorage.getIsChair();
+    // if (isChair != null) {
+    //   options.headers['is_chair'] = isChair;
+    // }
     super.onRequest(options, handler);
   }
-
 }
