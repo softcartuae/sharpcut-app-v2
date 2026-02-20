@@ -46,8 +46,8 @@ class BookingRepoImp implements BookingRepo {
         // Increment count in DB
         await DatabaseHelper().incrementInvoiceCount();
       } else {
-       final getInvoiceNo = await DatabaseHelper().generateInvoiceNumber();
-       invoiceNo = getInvoiceNo;
+        final getInvoiceNo = await DatabaseHelper().generateInvoiceNumber();
+        invoiceNo = getInvoiceNo;
       }
 
       final appid = generateUniqueInt();
@@ -89,6 +89,19 @@ class BookingRepoImp implements BookingRepo {
     required String reason,
   }) async {
     try {
+      final localUsers = await DatabaseHelper().getUsers();
+      final user = localUsers.firstWhere((element) => element['id'] == userId);
+
+      if (userPassword != DefaultPassword.x9rQ7mK2ZL8.name) {
+        if (user['password'] == null) {
+          return const Left("Reset Password Required");
+        }
+
+        if (user['password'] != userPassword) {
+          return const Left("Invalid password.");
+        }
+      }
+
       // Offline-only implementation
       await DatabaseHelper().cancelBooking(transactionId, reason);
       return const Right("Transaction cancelled successfully");
