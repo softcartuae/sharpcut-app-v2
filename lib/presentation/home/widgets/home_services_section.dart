@@ -430,12 +430,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               }
             } else if (state is MasterSyncError) {
               ToastHelper.showError(state.message);
-            } else if (state is MasterSyncLoading) {
+            } else if (state is MasterSyncLoading ) {
               ToastHelper.showToast(
                 msg: state.message,
                 backgroundColor: Colors.orange,
               );
-            }
+            } 
           },
         ),
       ],
@@ -1280,12 +1280,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                     ),
                                                   );
                                                 } else {
-                                                  ToastHelper.showToast(
-                                                    msg:
-                                                        "Syncing data first...",
-                                                    backgroundColor:
-                                                        Colors.orange,
-                                                  );
+                                              
                                                   context
                                                       .read<MasterSyncCubit>()
                                                       .syncAll(

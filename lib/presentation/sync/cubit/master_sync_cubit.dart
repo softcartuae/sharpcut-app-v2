@@ -32,7 +32,7 @@ class MasterSyncCubit extends Cubit<MasterSyncState> {
 
       emit(MasterSyncLoading('Syncing Transactions to Server...'));
       await syncCubit.syncTransactions();
-
+      await Future.delayed(Duration(seconds: 4));
       emit(MasterSyncSuccess('All synced successfully!'));
     } catch (e) {
       emit(MasterSyncError('Failed to sync all: $e'));

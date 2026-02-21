@@ -4,6 +4,7 @@ import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
+import 'package:sharp_cut/main.dart'; // Import to use scheduleBackgroundSync
 
 part 'auth_cubit_state.dart';
 
@@ -31,7 +32,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
           await getUser();
           emit(AuthLoginSuccess(r));
         },
-      );  
+      );
     } catch (e) {
       emit(AuthError("Something Went Wrong"));
     }
@@ -54,6 +55,12 @@ class AuthCubit extends Cubit<AuthCubitState> {
         await tokenStorage.saveIsChair(user.isChair!);
       }
 
+      if (user.syncTime != null) {
+        final syncTimeInt = user.syncTime!.toInt();
+        await tokenStorage.saveSyncTime(syncTimeInt);
+        scheduleBackgroundSync(syncTimeInt);
+      }
+
       emit(AuthAuthenticated(user));
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -74,7 +81,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
     }
   }
 
-  Future<void> logout() async {  
+  Future<void> logout() async {
     await authRepo.logout();
     await ApiClient.resetToDefault();
     currentUser = null;

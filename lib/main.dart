@@ -35,30 +35,68 @@ import 'package:sharp_cut/injection_container.dart' as di;
 import 'package:workmanager/workmanager.dart';
 import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
+import 'package:sharp_cut/domain/home/chair/chair_repo.dart';
+import 'package:sharp_cut/domain/home/service/service_repo.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+Future<bool> executeBackgroundSync() async {
+  try {
+    // 1. Initialize Necessary Components for the background isolate
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // Register dependencies if they aren't already registered
+    if (!di.sl.isRegistered<TokenStorage>()) {
+      await di.init();
+    }
+    await ApiClient.init();
+
+    // 2. Fetch Repositories
+    final chairRepo = di.sl<ChairRepo>();
+    final syncToServer = di.sl<SyncToServer>();
+    final serviceRepo = di.sl<ServiceRepo>();
+
+    // 3. Execute the sync flow
+    log('Background: Performing Get Chair & Staffs Sync...');
+    await chairRepo.getChairsAndStaffs();
+
+    log('Background: Performing Server Transactions Sync...');
+    await syncToServer.syncTransactionsFromServer();
+
+    log('Background: Performing Server Cash Registers Sync...');
+    await syncToServer.syncCashRegistersFromServer();
+
+    log('Background: Performing Get Categories & Services Sync...');
+    await serviceRepo.getCategories();
+    await serviceRepo.getServices();
+
+    log('Background: Syncing Transactions to Server...');
+    await syncToServer.syncTransactionsToServer();
+
+    log('Background sync completed successfully');
+    return true;
+  } catch (e) {
+    log('Background sync failed: $e');
+    return false;
+  }
+}
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    try {
-      WidgetsFlutterBinding.ensureInitialized();
-      // Initialize necessary components
-      if (!di.sl.isRegistered<TokenStorage>()) {
-        di.sl.registerLazySingleton<TokenStorage>(() => TokenStorage());
-      }
-
-      await ApiClient.init(); // Ensure Dio/interceptors are ready
-
-      final sync = SyncToServer();
-      await sync.syncTransactionsToServer();
-      log("Background sync completed successfully");
-      return Future.value(true);
-    } catch (e) {
-      log("Background sync failed: $e");
-      return Future.value(false);
-    }
+    return await executeBackgroundSync();
   });
+}
+
+void scheduleBackgroundSync(int minutes) {
+  Workmanager().registerPeriodicTask(
+    "1",
+    "simplePeriodicTask",
+    frequency: Duration(minutes: minutes),
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
+    constraints: Constraints(networkType: NetworkType.connected),
+  );
+  log("Workmanager periodically registered with $minutes minutes frequency");
 }
 
 void main() async {
@@ -67,15 +105,13 @@ void main() async {
 
     Workmanager().initialize(callbackDispatcher);
 
-    Workmanager().registerPeriodicTask(
-      "1",
-      "simplePeriodicTask",
-      frequency: const Duration(minutes: 30),
-      constraints: Constraints(networkType: NetworkType.connected),
-    );
+    final prefs = await SharedPreferences.getInstance();
+    final syncTime = prefs.getInt('auth_sync_time') ?? 15;
+    log("syncTIme $syncTime");
+    scheduleBackgroundSync(syncTime);
 
-    // await SystemChrome.setPreferredOrientations([
-    //   DeviceOrientation.landscapeLeft,
+    // await SystemChrome.setPrefefrrredOrientations([
+    //   DeviceOrientation.landscapeLeft,sy
     //   DeviceOrientation
     //       .landscapeRight, // optional, remove if you want only upright
     // ]);

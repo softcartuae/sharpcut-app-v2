@@ -6,6 +6,7 @@ class TokenStorage {
   static const String _deviceIdKey = 'device_id';
   static const String _modeKey = 'auth_mode';
   static const String _isChairKey = 'auth_is_chair';
+  static const String _syncTimeKey = 'auth_sync_time';
 
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -45,6 +46,16 @@ class TokenStorage {
   Future<bool?> getIsChair() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_isChairKey);
+  }
+
+  Future<void> saveSyncTime(int minutes) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_syncTimeKey, minutes);
+  }
+
+  Future<int> getSyncTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_syncTimeKey) ?? 15; // Default to 30 mins
   }
 
   Future<void> deleteToken() async {
