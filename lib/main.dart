@@ -4,6 +4,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 
 import 'package:sharp_cut/data/api_client.dart';
+import 'package:sharp_cut/firebase_options.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
@@ -72,7 +73,9 @@ void main() async {
 
     Future.microtask(() async {
       try {
-        await Firebase.initializeApp();
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
         await FirebaseApi().initNotifications();
         log("Firebase initilazation completed successfully");
       } catch (e) {
