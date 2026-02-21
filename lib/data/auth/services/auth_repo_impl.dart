@@ -40,6 +40,7 @@ class AuthRepoImpl implements AuthRepo {
       final response = await ApiClient.dio.post(
         ApiClient.loginApi,
         data: {
+          "mode": "offline",
           "license_no": licenseNo,
           "device_token": token,
           "device_id": deviceId,
@@ -102,9 +103,10 @@ class AuthRepoImpl implements AuthRepo {
       }
     } catch (e) {
       log("Failed to fetch invoice settings: $e");
+    }
+  }
 
-    }}
-      @override
+  @override
   Future<String> getAppVersion() async {
     try {
       final response = await ApiClient.dio.get(ApiClient.versionApi);

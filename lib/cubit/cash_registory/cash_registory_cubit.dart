@@ -19,7 +19,7 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
       },
       (isOpen) {
         if (isOpen) {
-          emit(CashRegistorOpen("Register is open"));
+          emit(CashRegistoryAddError("Register is open"));
         } else {
           // We don't necessarily need an error state here if we just want to return false,
           // but keeping the flow consistent. The UI will handle the boolean return.

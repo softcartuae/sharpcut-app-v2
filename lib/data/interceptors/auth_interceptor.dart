@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class AuthInterceptor extends Interceptor {
   final TokenStorage tokenStorage;
@@ -22,17 +23,28 @@ class AuthInterceptor extends Interceptor {
     }
     options.headers['device-id'] = deviceId;
 
+    final mode = await tokenStorage.getMode();
+    if (mode != null) {
+      options.headers['mode'] = mode;
+    }
 
-    // final mode = await tokenStorage.getMode();
-    // if (mode != null) {
-    //   options.headers['mode'] = mode;
-    // }
+    final isChair = await tokenStorage.getIsChair();
+    if (isChair != null) {
+      options.headers['is_chair'] = !isChair;
+    }
 
-    // final isChair = await tokenStorage.getIsChair();
-    // if (isChair != null) {
-    //   options.headers['is_chair'] = isChair;
-    // }
-    
     super.onRequest(options, handler);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    if (err.response?.statusCode == 498) {
+      final data = err.response?.data;
+      final message = (data is Map && data['message'] != null)
+          ? data['message'].toString()
+          : 'Session expired or invalid token';
+      ToastHelper.showError(message);
+    }
+    super.onError(err, handler);
   }
 }
