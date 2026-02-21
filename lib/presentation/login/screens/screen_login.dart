@@ -456,7 +456,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
                         text: 'API Version: ${BuildConfig.apiVersionAtBuild}\n',
                       ),
                       TextSpan(text: 'Git Commit: ${BuildConfig.gitCommit}\n'),
-                      TextSpan(text: 'Environment: ${_getEnvironment()}'),
+                      TextSpan(text: 'Environment: ${_getEnvironment()}\n'),
                       TextSpan(text: 'Mode: "Online'),
                     ],
                   ),
