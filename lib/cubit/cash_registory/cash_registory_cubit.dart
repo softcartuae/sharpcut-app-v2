@@ -14,7 +14,7 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
     final result = await cashRegistoryRepo.checkCashRegisterStatus();
     return result.fold(
       (error) {
-        emit(CashRegistorClosed(error));
+        emit(CashRegistoryAddError(error));
         return false;
       },
       (isOpen) {

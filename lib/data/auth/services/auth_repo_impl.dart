@@ -39,6 +39,7 @@ class AuthRepoImpl implements AuthRepo {
       final response = await ApiClient.dio.post(
         ApiClient.loginApi,
         data: {
+          "mode": "online",
           "license_no": licenseNo,
           "device_token": token,
           "device_os": deviceOs,
@@ -52,6 +53,7 @@ class AuthRepoImpl implements AuthRepo {
         return Left("Login failed: ${response.statusMessage}");
       }
     } catch (e) {
+      log(e.toString());
       if (e is DioException) {
         if (e.response != null && e.response?.data != null) {
           final data = e.response?.data;
