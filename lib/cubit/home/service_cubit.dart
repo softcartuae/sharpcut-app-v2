@@ -8,7 +8,7 @@ class ServiceCubit extends Cubit<ServiceState> {
   final ServiceRepo serviceRepo;
   ServiceCubit({required this.serviceRepo}) : super(ServiceStateInitial());
 
-  void getCategories() async {
+  Future<void> getCategories() async {
     emit(ServiceStateLoading());
     try {
       final categories = await serviceRepo.getCategories();

@@ -14,12 +14,12 @@ class CashRegistoryCubit extends Cubit<CashRegistoryState> {
     final result = await cashRegistoryRepo.checkCashRegisterStatus();
     return result.fold(
       (error) {
-        emit(CashRegistorClosed(error));
+        emit(CashRegistoryAddError(error));
         return false;
       },
       (isOpen) {
         if (isOpen) {
-          emit(CashRegistoryAddError("Register is open"));
+          emit(CashRegistorOpen("Register is open"));
         } else {
           // We don't necessarily need an error state here if we just want to return false,
           // but keeping the flow consistent. The UI will handle the boolean return.

@@ -38,6 +38,7 @@ import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart
 import 'package:sharp_cut/data/cash_registory/service/cash_registory_repo_imp.dart';
 import 'package:sharp_cut/core/database/database_helper.dart';
 import 'package:sharp_cut/presentation/sync/cubit/sync_cubit.dart';
+import 'package:sharp_cut/presentation/sync/cubit/master_sync_cubit.dart';
 import 'package:sharp_cut/data/sync/sync_to_server.dart';
 
 final sl = GetIt.instance;
@@ -82,6 +83,10 @@ Future<void> init() async {
 
   sl.registerFactory<SyncCubit>(
     () => SyncCubit(syncToServer: sl<SyncToServer>()),
+  );
+
+  sl.registerFactory<MasterSyncCubit>(
+    () => MasterSyncCubit(syncToServer: sl<SyncToServer>()),
   );
 
   // Repositories

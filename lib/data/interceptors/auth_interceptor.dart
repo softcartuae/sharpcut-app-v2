@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
@@ -39,6 +41,7 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (err.response?.statusCode == 498) {
+     
       final data = err.response?.data;
       final message = (data is Map && data['message'] != null)
           ? data['message'].toString()

@@ -47,6 +47,8 @@ import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/presentation/sync/cubit/sync_cubit.dart';
+import 'package:sharp_cut/presentation/sync/cubit/master_sync_cubit.dart';
+import 'package:sharp_cut/presentation/sync/cubit/master_sync_state.dart';
 
 class HomeServicesSection extends StatefulWidget {
   const HomeServicesSection({super.key});
@@ -416,9 +418,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             }
           },
         ),
-        BlocListener<SyncCubit, SyncState>(
+        BlocListener<MasterSyncCubit, MasterSyncState>(
           listener: (context, state) {
-            if (state is SyncSuccess) {
+            if (state is MasterSyncSuccess) {
               ToastHelper.showSuccess(state.message);
               if (_selectedButtonNotifier.value == "REPORT") {
                 Navigator.push(
@@ -426,8 +428,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                   MaterialPageRoute(builder: (context) => ScreenQuickReport()),
                 );
               }
-            } else if (state is SyncError) {
+            } else if (state is MasterSyncError) {
               ToastHelper.showError(state.message);
+            } else if (state is MasterSyncLoading) {
+              ToastHelper.showToast(
+                msg: state.message,
+                backgroundColor: Colors.orange,
+              );
             }
           },
         ),
@@ -1243,13 +1250,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               ),
                             const SizedBox(height: 12),
                             if (!isBooked)
-                              BlocBuilder<SyncCubit, SyncState>(
+                              BlocBuilder<MasterSyncCubit, MasterSyncState>(
                                 builder: (context, state) {
                                   return ActionButton(
                                     label: "REPORT",
                                     isPrimary: selectedButton == "REPORT",
                                     isLoading:
-                                        state is SyncLoading &&
+                                        state is MasterSyncLoading &&
                                         selectedButton == "REPORT",
                                     onTap: isBooked
                                         ? null
@@ -1280,8 +1287,17 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                         Colors.orange,
                                                   );
                                                   context
-                                                      .read<SyncCubit>()
-                                                      .syncTransactions();
+                                                      .read<MasterSyncCubit>()
+                                                      .syncAll(
+                                                        chairCubit: context
+                                                            .read<ChairCubit>(),
+                                                        serviceCubit: context
+                                                            .read<
+                                                              ServiceCubit
+                                                            >(),
+                                                        syncCubit: context
+                                                            .read<SyncCubit>(),
+                                                      );
                                                 }
                                               },
                                             );
@@ -1345,12 +1361,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               ),
                             const SizedBox(height: 12),
                             if (!isBooked)
-                              BlocBuilder<SyncCubit, SyncState>(
+                              BlocBuilder<MasterSyncCubit, MasterSyncState>(
                                 builder: (context, state) {
                                   return ActionButton(
                                     isLoading:
                                         selectedButton == "SYNC" &&
-                                        state is SyncLoading,
+                                        state is MasterSyncLoading,
                                     label: "SYNC",
                                     isPrimary: selectedButton == "SYNC",
                                     onTap: isBooked
@@ -1359,8 +1375,15 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             _selectedButtonNotifier.value =
                                                 "SYNC";
                                             context
-                                                .read<SyncCubit>()
-                                                .syncTransactions();
+                                                .read<MasterSyncCubit>()
+                                                .syncAll(
+                                                  chairCubit: context
+                                                      .read<ChairCubit>(),
+                                                  serviceCubit: context
+                                                      .read<ServiceCubit>(),
+                                                  syncCubit: context
+                                                      .read<SyncCubit>(),
+                                                );
                                           },
                                   );
                                 },

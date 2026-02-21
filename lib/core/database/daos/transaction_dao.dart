@@ -291,6 +291,18 @@ class TransactionDao {
     });
   }
 
+  Map<String, dynamic> _sanitizeDbData(Map<String, dynamic> data) {
+    final sanitized = <String, dynamic>{};
+    data.forEach((key, value) {
+      if (value is bool) {
+        sanitized[key] = value ? 1 : 0;
+      } else {
+        sanitized[key] = value;
+      }
+    });
+    return sanitized;
+  }
+
   /// Sync a transaction from API to Local DB
   Future<void> syncTransaction({
     required Map<String, dynamic> transactionData,
@@ -305,7 +317,7 @@ class TransactionDao {
       // 1. Upsert Transaction
       await txn.insert(
         'transactions',
-        transactionData,
+        _sanitizeDbData(transactionData),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
@@ -330,7 +342,10 @@ class TransactionDao {
         if (serviceData['updated_at'] == null) {
           serviceData['updated_at'] = DateFormatter.now();
         }
-        serviceBatch.insert('transaction_services', serviceData);
+        serviceBatch.insert(
+          'transaction_services',
+          _sanitizeDbData(serviceData),
+        );
       }
       await serviceBatch.commit(noResult: true);
 
@@ -354,7 +369,10 @@ class TransactionDao {
         if (paymentData['updated_at'] == null) {
           paymentData['updated_at'] = DateFormatter.now();
         }
-        paymentBatch.insert('transaction_payments', paymentData);
+        paymentBatch.insert(
+          'transaction_payments',
+          _sanitizeDbData(paymentData),
+        );
       }
       await paymentBatch.commit(noResult: true);
     });

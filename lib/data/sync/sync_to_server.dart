@@ -245,11 +245,16 @@ class SyncToServer {
       log("Starting transaction pull from server...");
       final hasData = await _dbHelper.hasTransactionData();
 
+      Map<String, dynamic> data = {};
+
       if (hasData) {
-        return const Right("No new transactions from server.");
+        data['is_synced'] = 0;
       }
 
-      final response = await ApiClient.dio.get(ApiClient.transactionsGETApi);
+      final response = await ApiClient.dio.get(
+        ApiClient.transactionsGETApi,
+        queryParameters: data,
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
