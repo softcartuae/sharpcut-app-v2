@@ -416,8 +416,8 @@ class DatabaseHelper {
     final chairs = await db.query('chairs', limit: 1);
     if (chairs.isNotEmpty) return true;
 
-    final users = await db.query('users', limit: 1);
-    if (users.isNotEmpty) return true;
+    // final users = await db.query('users', limit: 1);
+    // if (users.isNotEmpty) return true;
 
     return false;
   }

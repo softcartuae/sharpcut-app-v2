@@ -48,6 +48,7 @@ class ChairRepoImpl implements ChairRepo {
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
+        
         final data = response.data['data'];
         final List<dynamic> chairsJson = data['chairs'];
         final List<dynamic> usersJson = data['users'];
