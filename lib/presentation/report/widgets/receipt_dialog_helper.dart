@@ -18,7 +18,9 @@ void showReceiptDialog(
           ?.where((detail) => detail.service != null)
           .map(
             (detail) => CartItemModel(
-              service: detail.service!,
+              service: detail.service!.copyWith(
+                charge: detail.rate ?? detail.service!.charge,
+              ),
               quantity: detail.quantity ?? 1,
             ),
           )

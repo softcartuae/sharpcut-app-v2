@@ -429,6 +429,8 @@ class PrintingCubit extends Cubit<PrintingState> {
   bool _shouldOpenDrawer(SettlePaymentRequestModel request) {
     if (state.settings == null) return false;
 
+    if (request.paymentStatus?.toLowerCase() == 'unpaid') return false;
+
     if (request.mode != null) {
       if (state.settings!.openDrawer.cash &&
           request.mode!.any((m) => m.toLowerCase().contains('cash'))) {

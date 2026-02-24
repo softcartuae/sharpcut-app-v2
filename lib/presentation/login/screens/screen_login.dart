@@ -457,7 +457,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
                       ),
                       TextSpan(text: 'Git Commit: ${BuildConfig.gitCommit}\n'),
                       TextSpan(text: 'Environment: ${_getEnvironment()}\n'),
-                      TextSpan(text: 'Mode: "Online'),
+                      TextSpan(text: 'Mode: Online'),
                     ],
                   ),
                   child: const Icon(Icons.info_outline, color: Colors.grey),

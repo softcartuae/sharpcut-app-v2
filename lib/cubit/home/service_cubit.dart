@@ -51,22 +51,31 @@ class ServiceCubit extends Cubit<ServiceState> {
   void addToCart(ServiceModel service) {
     final currentState = state;
     if (currentState is ServiceStateSuccess) {
-      final existingItemIndex = currentState.cartItems.indexWhere(
-        (item) => item.service.id == service.id,
-      );
-
       List<CartItemModel> updatedCart;
-      if (existingItemIndex != -1) {
-        // Item already exists, increment quantity
-        updatedCart = List.from(currentState.cartItems);
-        final existingItem = updatedCart[existingItemIndex];
-        updatedCart[existingItemIndex] = existingItem.copyWith(
-          quantity: existingItem.quantity + 1,
-        );
-      } else {
-        // Add new item
+
+      if (service.isTip == 1) {
+        // Remove existing tip if any
         updatedCart = List.from(currentState.cartItems)
-          ..add(CartItemModel(service: service));
+          ..removeWhere((item) => item.service.isTip == 1);
+        // Add the new tip
+        updatedCart.add(CartItemModel(service: service));
+      } else {
+        final existingItemIndex = currentState.cartItems.indexWhere(
+          (item) => item.service.id == service.id,
+        );
+
+        if (existingItemIndex != -1) {
+          // Item already exists, increment quantity
+          updatedCart = List.from(currentState.cartItems);
+          final existingItem = updatedCart[existingItemIndex];
+          updatedCart[existingItemIndex] = existingItem.copyWith(
+            quantity: existingItem.quantity + 1,
+          );
+        } else {
+          // Add new item
+          updatedCart = List.from(currentState.cartItems)
+            ..add(CartItemModel(service: service));
+        }
       }
 
       emit(currentState.copyWith(cartItems: updatedCart));
