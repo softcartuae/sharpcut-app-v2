@@ -15,6 +15,7 @@ class ApiClient {
     ..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
 
   static Future<void> init() async {
+
     log("Base URL: $baseUrl");
     final urlStorage = UrlStorage();
     final details = await urlStorage.getConnectionDetails();
@@ -37,10 +38,12 @@ class ApiClient {
   }
 
   static Future<void> resetToDefault() async {
+    
     baseUrl = baseUrl;
     dio.options.baseUrl = baseUrl;
     final urlStorage = UrlStorage();
     await urlStorage.clearConnectionDetails();
+
   }
 
   //POST API ENDPOINTS

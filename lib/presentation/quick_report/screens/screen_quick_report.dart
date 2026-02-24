@@ -402,7 +402,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                         } else if (state is QuickReportError) {
                           return Center(
                             child: Text(
-                              "Something went wrong",
+                              state.message,
                               style: const TextStyle(color: Colors.black),
                             ),
                           );

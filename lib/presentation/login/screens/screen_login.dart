@@ -384,6 +384,8 @@ class _ScreenLoginState extends State<ScreenLogin> {
                                               await ApiClient.resetToDefault();
                                             }
 
+                                            
+
                                             if (context.mounted) {
                                               context.read<AuthCubit>().login(
                                                 _licenseController.text.trim(),
