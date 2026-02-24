@@ -137,8 +137,16 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                         (
                                                           detail,
                                                         ) => CartItemModel(
-                                                          service:
-                                                              detail.service!,
+                                                          service: detail
+                                                              .service!
+                                                              .copyWith(
+                                                                charge:
+                                                                    detail
+                                                                        .rate ??
+                                                                    detail
+                                                                        .service!
+                                                                        .charge,
+                                                              ),
                                                           quantity:
                                                               detail.quantity ??
                                                               1,
@@ -268,8 +276,16 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                         (
                                                           detail,
                                                         ) => CartItemModel(
-                                                          service:
-                                                              detail.service!,
+                                                          service: detail
+                                                              .service!
+                                                              .copyWith(
+                                                                charge:
+                                                                    detail
+                                                                        .rate ??
+                                                                    detail
+                                                                        .service!
+                                                                        .charge,
+                                                              ),
                                                           quantity:
                                                               detail.quantity ??
                                                               1,

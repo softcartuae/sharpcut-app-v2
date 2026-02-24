@@ -198,6 +198,7 @@ class PrintingCubit extends Cubit<PrintingState> {
     emit(state.copyWith(status: PrintingStatus.printing));
     try {
       final bool openDrawer = _shouldOpenDrawer(request);
+      log("open drawer $openDrawer");
       await _printingRepo.printInvoice(
         chairId: chairId,
         printer: state.connectedPrinter!,
@@ -428,6 +429,8 @@ class PrintingCubit extends Cubit<PrintingState> {
 
   bool _shouldOpenDrawer(SettlePaymentRequestModel request) {
     if (state.settings == null) return false;
+
+    if (request.paymentStatus?.toLowerCase() == 'unpaid') return false;
 
     if (request.mode != null) {
       if (state.settings!.openDrawer.cash &&

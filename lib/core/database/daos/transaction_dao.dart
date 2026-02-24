@@ -263,7 +263,7 @@ class TransactionDao {
 
       // 5. Determine Payment Status
       String newPaymentStatus = 'partial';
-      if (newTotalPayment >= finalTotal) {
+      if ((newTotalPayment + newDiscount + 0.01) >= finalTotal) {
         newPaymentStatus = 'full';
       }
 

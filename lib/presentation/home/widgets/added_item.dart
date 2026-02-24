@@ -66,27 +66,28 @@ class AddedItem extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      InkWell(
-                        onTap: onIncrement,
-                        child: const Icon(
-                          Icons.arrow_drop_up,
-                          color: Colors.white,
-                          size: 16,
+                  if (item.service.isTip != 1)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        InkWell(
+                          onTap: onIncrement,
+                          child: const Icon(
+                            Icons.arrow_drop_up,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ),
-                      ),
-                      InkWell(
-                        onTap: onDecrement,
-                        child: const Icon(
-                          Icons.arrow_drop_down,
-                          color: Colors.white,
-                          size: 16,
+                        InkWell(
+                          onTap: onDecrement,
+                          child: const Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                 ],
               ),
               const SizedBox(width: 32),
