@@ -11,11 +11,15 @@ class ApiClient {
   static String developmentBaseUrl = "https://saloon.softcart.io/";
   static String baseUrl = developmentBaseUrl;
 
-  static final dio = Dio(BaseOptions(baseUrl: baseUrl))
-    ..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
+  static final dio = Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: Duration(seconds: 10),
+      sendTimeout: Duration(seconds: 10),
+    ),
+  )..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
 
   static Future<void> init() async {
-
     log("Base URL: $baseUrl");
     final urlStorage = UrlStorage();
     final details = await urlStorage.getConnectionDetails();
@@ -25,7 +29,7 @@ class ApiClient {
     if (ip != null && ip.isNotEmpty && port != null && port.isNotEmpty) {
       baseUrl = "http://$ip:$port/";
     } else {
-      baseUrl = baseUrl;
+      baseUrl = developmentBaseUrl;
     }
     dio.options.baseUrl = baseUrl;
   }
@@ -38,12 +42,11 @@ class ApiClient {
   }
 
   static Future<void> resetToDefault() async {
-    
-    baseUrl = baseUrl;
+    // reset to default
+    baseUrl = developmentBaseUrl;
     dio.options.baseUrl = baseUrl;
     final urlStorage = UrlStorage();
     await urlStorage.clearConnectionDetails();
-
   }
 
   //POST API ENDPOINTS

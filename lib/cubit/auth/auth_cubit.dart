@@ -16,10 +16,10 @@ class AuthCubit extends Cubit<AuthCubitState> {
   AuthCubit({required this.authRepo, required this.tokenStorage})
     : super(AuthInitial());
 
-  Future<void> login(String licenseNo) async {
+  Future<void> login(String pin) async {
     emit(AuthLoading());
     try {
-      final result = await authRepo.login(licenseNo);
+      final result = await authRepo.login(pin);
       result.fold(
         (l) {
           emit(AuthError(l));

@@ -10,11 +10,15 @@ class QuickReportCubit extends Cubit<QuickReportState> {
   Future<void> fetchQuickReport({String? dateRange, int? userId}) async {
     emit(QuickReportLoading());
     try {
-      final report = await _quickReportRepo.getQuickReport(
+      final result = await _quickReportRepo.getQuickReport(
         dateRange: dateRange,
         userId: userId,
       );
-      emit(QuickReportLoaded(report));
+
+      result.fold(
+        (error) => emit(QuickReportError(error)),
+        (report) => emit(QuickReportLoaded(report)),
+      );
     } catch (e) {
       emit(QuickReportError(e.toString()));
     }
