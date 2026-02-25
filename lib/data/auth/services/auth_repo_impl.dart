@@ -15,7 +15,7 @@ class AuthRepoImpl implements AuthRepo {
 
   AuthRepoImpl({required this.tokenStorage});
   @override
-  Future<Either<String, String>> login(String licenseNo) async {
+  Future<Either<String, String>> login(String pin) async {
     try {
       String? token;
 
@@ -41,7 +41,7 @@ class AuthRepoImpl implements AuthRepo {
         ApiClient.loginApi,
         data: {
           "mode": "offline",
-          "license_no": licenseNo,
+          "pin": pin,
           "device_token": token,
           "device_id": deviceId,
           "device_os": deviceOs,
@@ -61,6 +61,34 @@ class AuthRepoImpl implements AuthRepo {
           if (data is Map && data.containsKey('message')) {
             return Left(data['message']);
           }
+        }
+
+        //  SSL Handshake error (date/time issue)
+        if (e.error is HandshakeException) {
+          return Left(
+            "Secure connection failed. Please check your phone date and time settings.",
+          );
+        }
+
+        switch (e.type) {
+          case DioExceptionType.badCertificate:
+            return Left(
+              "Secure connection failed. Please check your phone date and time.",
+            );
+
+          case DioExceptionType.connectionError:
+            if (e.error is HandshakeException) {
+              return Left(
+                "Secure connection failed. Please check your phone date and time.",
+              );
+            }
+            return Left("No internet connection.");
+
+          case DioExceptionType.connectionTimeout:
+            return Left("Unable to connect to server.");
+
+          default:
+            return Left("Something went wrong.");
         }
       }
       return Left("Login error: ${e.toString()}");

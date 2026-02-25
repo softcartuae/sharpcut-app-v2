@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/quick_report/service/quick_report_service.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
@@ -9,7 +10,7 @@ class QuickReportRepoImp implements QuickReportRepo {
   QuickReportRepoImp(this._quickReportService);
 
   @override
-  Future<QuickReportModel> getQuickReport({
+  Future<Either<String, QuickReportModel>> getQuickReport({
     String? dateRange,
     int? userId,
   }) async {
@@ -21,14 +22,22 @@ class QuickReportRepoImp implements QuickReportRepo {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data["data"];
-        return QuickReportModel.fromJson(data);
+        return Right(QuickReportModel.fromJson(data));
       } else {
-        throw Exception(response.data['message']);
+        return Left(
+          response.data['message']?.toString() ?? 'Something went wrong',
+        );
       }
     } on DioException catch (e) {
-      throw Exception(e.message);
+      if (e.response != null && e.response?.data != null) {
+        final data = e.response?.data;
+        if (data is Map && data.containsKey('message')) {
+          return Left(data['message'].toString());
+        }
+      }
+      return Left(e.message ?? 'Network error');
     } catch (e) {
-      throw Exception(e.toString());
+      return Left(e.toString());
     }
   }
 }

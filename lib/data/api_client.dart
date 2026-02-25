@@ -9,10 +9,15 @@ import 'package:sharp_cut/data/local_storage/url_storage.dart';
 class ApiClient {
   static String productionBaseUrl = "https://app.sharpcutae.com/";
   static String developmentBaseUrl = "https://saloon.softcart.io/";
-  static String baseUrl = developmentBaseUrl;
+  static String baseUrl = productionBaseUrl;
 
-  static final dio = Dio(BaseOptions(baseUrl: baseUrl))
-    ..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
+  static final dio = Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      sendTimeout: const Duration(seconds: 10),
+    ),
+  )..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
 
   static Future<void> init() async {
     log("Base URL: $baseUrl");
@@ -24,7 +29,7 @@ class ApiClient {
     if (ip != null && ip.isNotEmpty && port != null && port.isNotEmpty) {
       baseUrl = "http://$ip:$port/";
     } else {
-      baseUrl = baseUrl;
+      baseUrl = productionBaseUrl;
     }
     dio.options.baseUrl = baseUrl;
   }
@@ -37,8 +42,8 @@ class ApiClient {
   }
 
   static Future<void> resetToDefault() async {
-    baseUrl = baseUrl;
-    dio.options.baseUrl = baseUrl;
+    baseUrl = productionBaseUrl;
+    dio.options.baseUrl = productionBaseUrl;
     final urlStorage = UrlStorage();
     await urlStorage.clearConnectionDetails();
   }

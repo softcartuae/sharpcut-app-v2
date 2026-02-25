@@ -19,7 +19,7 @@ class ScreenLogin extends StatefulWidget {
 
 class _ScreenLoginState extends State<ScreenLogin> {
   bool _isPasswordVisible = false;
-  final TextEditingController _licenseController = TextEditingController();
+  final TextEditingController _pinController = TextEditingController();
   final TextEditingController _ipController = TextEditingController();
   final TextEditingController _portController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -44,7 +44,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
 
   @override
   void dispose() {
-    _licenseController.dispose();
+    _pinController.dispose();
     _ipController.dispose();
     _portController.dispose();
     super.dispose();
@@ -144,7 +144,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
                               ),
                               const SizedBox(height: 32),
                               const Text(
-                                'Licence Key',
+                                'PIN',
                                 style: TextStyle(
                                   color: Colors.grey,
                                   fontSize: 14,
@@ -152,12 +152,12 @@ class _ScreenLoginState extends State<ScreenLogin> {
                               ),
                               const SizedBox(height: 8),
                               TextFormField(
-                                controller: _licenseController,
+                                controller: _pinController,
                                 obscureText: !_isPasswordVisible,
                                 style: const TextStyle(color: Colors.white),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return 'License key cannot be empty';
+                                    return 'PIN cannot be empty';
                                   }
                                   return null;
                                 },
@@ -386,7 +386,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
 
                                             if (context.mounted) {
                                               context.read<AuthCubit>().login(
-                                                _licenseController.text.trim(),
+                                                _pinController.text.trim(),
                                               );
                                             }
                                           }

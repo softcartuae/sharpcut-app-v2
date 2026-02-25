@@ -21,7 +21,7 @@ void main() async {
   // 3. Fetch API Version
   // Note: hardcoding the URL here as per the plan/existing code knowledge
   // Ideally this could be shared but for a tool script it's safer to be standalone or read from a config
-  final apiVersionUrl = 'https://saloon.softcart.io/api/version';
+  final apiVersionUrl = 'https://app.sharpcutae.com/api/version';
   String apiVersion = 'Unknown';
 
   try {
@@ -31,7 +31,7 @@ void main() async {
       final data = response.data;
       if (data is Map && data.containsKey('api_version')) {
         apiVersion = data['api_version'].toString();
-        log("api ${apiVersion}");
+        log("api $apiVersion");
       }
     }
   } catch (e) {
