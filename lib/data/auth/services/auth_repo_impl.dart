@@ -81,7 +81,7 @@ class AuthRepoImpl implements AuthRepo {
                 "Secure connection failed. Please check your phone date and time.",
               );
             }
-            return Left("No internet connection.");
+            return Left("Connection Error");
 
           case DioExceptionType.connectionTimeout:
             return Left("Unable to connect to server.");

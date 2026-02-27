@@ -235,6 +235,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             text: "Print Register Report",
           ),
         ),
+        PopupMenuItem(
+          value: 7,
+          child: MenuItem(
+            icon: Icons.point_of_sale_outlined,
+            text: "Open Drawer",
+          ),
+        ),
       ],
     );
 
@@ -315,6 +322,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               ],
             ),
           );
+          break;
+        case 7:
+          context.read<PrintingCubit>().openDrawer();
           break;
       }
     }
