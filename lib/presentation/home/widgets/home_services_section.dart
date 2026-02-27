@@ -49,6 +49,7 @@ import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/presentation/sync/cubit/sync_cubit.dart';
 import 'package:sharp_cut/presentation/sync/cubit/master_sync_cubit.dart';
 import 'package:sharp_cut/presentation/sync/cubit/master_sync_state.dart';
+import 'package:sharp_cut/presentation/test/database_viewer_screen.dart';
 
 class HomeServicesSection extends StatefulWidget {
   const HomeServicesSection({super.key});
@@ -237,6 +238,17 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             text: "Print Register Report",
           ),
         ),
+        PopupMenuItem(
+          value: 7,
+          child: MenuItem(
+            icon: Icons.point_of_sale_outlined,
+            text: "Open Drawer",
+          ),
+        ),
+        PopupMenuItem(
+          value: 8,
+          child: MenuItem(icon: Icons.storage, text: "Local DB"),
+        ),
       ],
     );
 
@@ -315,6 +327,17 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                   child: const Text("Print"),
                 ),
               ],
+            ),
+          );
+          break;
+        case 7:
+          context.read<PrintingCubit>().openDrawer();
+          break;
+        case 8:
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const DatabaseViewerScreen(),
             ),
           );
           break;
@@ -430,12 +453,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               }
             } else if (state is MasterSyncError) {
               ToastHelper.showError(state.message);
-            } else if (state is MasterSyncLoading ) {
+            } else if (state is MasterSyncLoading) {
               ToastHelper.showToast(
                 msg: state.message,
                 backgroundColor: Colors.orange,
               );
-            } 
+            }
           },
         ),
       ],
@@ -1280,7 +1303,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                     ),
                                                   );
                                                 } else {
-                                              
                                                   context
                                                       .read<MasterSyncCubit>()
                                                       .syncAll(
