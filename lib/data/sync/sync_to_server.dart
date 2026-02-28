@@ -92,6 +92,7 @@ class SyncToServer {
         }
 
         Map<String, dynamic> transactionMap = {
+          
           "app_id": transaction['app_id'],
           "chair_id": transaction['chair_id'],
           "user_id": transaction['user_id'],
@@ -108,6 +109,28 @@ class SyncToServer {
           "discount": transaction['discount'],
           "round_off": transaction['round_off'],
           "final_total": transaction['final_total'],
+          "final_total_before": transaction['final_total_before'],
+          "grand_total_after": transaction['grand_total_after'] != null
+              ? double.parse(
+                  double.parse(
+                    transaction['grand_total_after'].toString(),
+                  ).toStringAsFixed(2),
+                )
+              : null,
+          "tax_total_after": transaction['tax_total_after'] != null
+              ? double.parse(
+                  double.parse(
+                    transaction['tax_total_after'].toString(),
+                  ).toStringAsFixed(2),
+                )
+              : null,
+          "final_total_after": transaction['final_total_after'] != null
+              ? double.parse(
+                  double.parse(
+                    transaction['final_total_after'].toString(),
+                  ).toStringAsFixed(2),
+                )
+              : null,
           "invoice_no": transaction['invoice_no'],
           "invoice_date": transaction['invoice_date'],
           "status": transaction['status'],

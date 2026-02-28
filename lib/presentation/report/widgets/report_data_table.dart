@@ -254,6 +254,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                     booking.invoiceNo,
                                                 cartItems: cartItems,
                                               );
+                                              
                                             },
                                             printTheInvoice: () {
                                               final ShopModel? shopData =

@@ -310,7 +310,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     final double change = double.tryParse(_chargeController.text) ?? 0.0;
 
     // Construct lists
-    List<String> modes   = [];
+    List<String> modes = [];
     List<double> amounts = [];
     List<double> tenders = [];
     List<double> changes = [];
@@ -352,14 +352,18 @@ class _SettlementDialogState extends State<SettlementDialog> {
     log("discount : $discount");
     log("finalTotal : $finalTotal");
 
-    String getPaymentStatus(double totalPaid, double finalTotal) {
-      if (totalPaid == 0) return "unpaid";
-      if (totalPaid < finalTotal) return "partial";
-      return "full";
+    String getPaymentStatus(
+      double totalPaid,
+      double discountAmt,
+      double finalTotal,
+    ) {
+      if (totalPaid == 0 && discountAmt == 0) return "unpaid";
+      if ((totalPaid + discountAmt + 0.01) >= finalTotal) return "full";
+      return "partial";
     }
 
     final request = SettlePaymentRequestModel(
-      paymentStatus: getPaymentStatus(paid, finalTotal),
+      paymentStatus: getPaymentStatus(paid, discount, finalTotal),
       transactionId: widget.settlePayment.transactionId,
       customerName: _nameController.text,
       customerNumber: _mobileController.text,

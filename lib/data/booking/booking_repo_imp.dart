@@ -34,22 +34,6 @@ class BookingRepoImp implements BookingRepo {
         }
       }
 
-      // Fetch invoice settings
-      final invoiceSettings = await DatabaseHelper().getInvoiceSettings();
-      String invoiceNo;
-      if (invoiceSettings != null) {
-        final prefix = invoiceSettings['invoice_prefix'];
-        final year = invoiceSettings['financial_year'];
-        final count = (invoiceSettings['count'] as int) + 1;
-        invoiceNo = "$prefix/$year/$count";
-
-        // Increment count in DB
-        await DatabaseHelper().incrementInvoiceCount();
-      } else {
-        final getInvoiceNo = await DatabaseHelper().generateInvoiceNumber();
-        invoiceNo = getInvoiceNo;
-      }
-
       final appid = generateUniqueInt();
 
       // Fetch last open cash register
@@ -62,8 +46,8 @@ class BookingRepoImp implements BookingRepo {
         'cash_register_id': cashRegisterId,
         'transaction_date': DateFormatter.now(),
         'status': 'Pending',
-        'invoice_no': invoiceNo,
-        'invoice_date': DateFormatter.dateonly(DateTime.now()),
+        'invoice_no': null, // Defer to settlement
+        'invoice_date': null, // Defer to settlement
         'app_id': appid,
         'grand_total': 0.0,
         'tax_total': 0.0,
@@ -108,7 +92,6 @@ class BookingRepoImp implements BookingRepo {
     } catch (e) {
       return Left('Error cancelling booking: $e');
     }
-    
   }
 
   @override

@@ -181,8 +181,8 @@ class DatabaseHelper {
         tax_total_after REAL,
         final_total_after REAL,
         final_total_before REAL,
-        invoice_no TEXT NOT NULL,
-        invoice_date TEXT NOT NULL,
+        invoice_no TEXT,
+        invoice_date TEXT,
         status TEXT NOT NULL,
         cancellation_reason TEXT,
         is_updated INTEGER DEFAULT 0,
@@ -387,6 +387,7 @@ class DatabaseHelper {
       whereArgs: [0],
       limit: 1,
     );
+
     if (transactionsResult.isNotEmpty) return false;
 
     return true;

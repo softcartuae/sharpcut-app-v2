@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:sqflite/sqflite.dart';
+import 'package:sharp_cut/core/database/database_helper.dart';
 import 'package:sharp_cut/core/utils/date_formatter.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
@@ -51,6 +52,37 @@ class TransactionDao {
   Future<void> settlePayment(SettlePaymentRequestModel request) async {
     log("Settling payment for transaction ${request.transactionId}");
     final db = await _dbFuture;
+
+    // Retrieve the transaction to check its current invoice_no
+    final transactionResult = await db.query(
+      'transactions',
+      columns: ['invoice_no'],
+      where: 'id = ?',
+      whereArgs: [request.transactionId],
+    );
+
+    String? newInvoiceNo;
+    String? newInvoiceDate;
+
+    if (transactionResult.isNotEmpty) {
+      final currentInvoiceNo = transactionResult.first['invoice_no'] as String?;
+      if (currentInvoiceNo == null) {
+        final invoiceSettings = await DatabaseHelper().getInvoiceSettings();
+        if (invoiceSettings != null) {
+          final prefix = invoiceSettings['invoice_prefix'];
+          final year = invoiceSettings['financial_year'];
+          final count = (invoiceSettings['count'] as int) + 1;
+          newInvoiceNo = "$prefix/$year/$count";
+
+          // Increment count in DB
+          await DatabaseHelper().incrementInvoiceCount();
+        } else {
+          newInvoiceNo = await DatabaseHelper().generateInvoiceNumber();
+        }
+        newInvoiceDate = DateFormatter.dateonly(DateTime.now());
+      }
+    }
+
     await db.transaction((txn) async {
       // Calculate Tax and Grand Total after Discount
       final double finalTotal = request.finalTotal ?? 0.0;
@@ -78,6 +110,7 @@ class TransactionDao {
         'round_off': request.roundOff,
         'final_total': request.finalTotal,
         'final_total_before': request.finalTotalbefore ?? request.finalTotal,
+        'final_total_after': netTotal,
         'grand_total_after': grandTotalAfter,
         'tax_total_after': taxTotalAfter,
         'total_payment':
@@ -85,6 +118,8 @@ class TransactionDao {
         'updated_at': DateFormatter.now(),
         'end_time': DateFormatter.now(),
         'is_synced': 0,
+        if (newInvoiceNo != null) 'invoice_no': newInvoiceNo,
+        if (newInvoiceDate != null) 'invoice_date': newInvoiceDate,
       };
 
       await txn.update(
@@ -273,6 +308,7 @@ class TransactionDao {
         'total_payment': newTotalPayment,
         'payment_status': newPaymentStatus,
         'updated_at': DateFormatter.now(),
+        'final_total_after': netTotal,
         if (newGrandTotalAfter != null) 'grand_total_after': newGrandTotalAfter,
         if (newTaxTotalAfter != null) 'tax_total_after': newTaxTotalAfter,
         'is_synced': 0,
@@ -288,6 +324,7 @@ class TransactionDao {
       log(
         "Resettled transaction ${request.transactionId}. New Final: $finalTotal, Paid: $newTotalPayment, Status: $newPaymentStatus",
       );
+      
     });
   }
 
