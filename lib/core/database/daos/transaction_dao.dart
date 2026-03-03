@@ -324,7 +324,6 @@ class TransactionDao {
       log(
         "Resettled transaction ${request.transactionId}. New Final: $finalTotal, Paid: $newTotalPayment, Status: $newPaymentStatus",
       );
-      
     });
   }
 
@@ -350,6 +349,19 @@ class TransactionDao {
     final db = await _dbFuture;
     await db.transaction((txn) async {
       final transactionId = transactionData['id'];
+
+      // Check for discount and update totals accordingly
+      final discount = (transactionData['discount'] as num?)?.toDouble() ?? 0.0;
+      if (discount > 0) {
+        transactionData['final_total_after'] = transactionData['final_total'];
+        transactionData['final_total'] = transactionData['final_total_before'];
+
+        transactionData['tax_total_after'] = transactionData['tax_total'];
+        transactionData['tax_total'] = transactionData['tax_total_before'];
+
+        transactionData['grand_total_after'] = transactionData['grand_total'];
+        transactionData['grand_total'] = transactionData['grand_total_before'];
+      }
 
       // 1. Upsert Transaction
       await txn.insert(

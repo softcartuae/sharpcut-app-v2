@@ -398,6 +398,7 @@ class ReceiptWidget extends StatelessWidget {
               'Sub Total - المجموع الفرعي',
               (request.finalTotalbefore ?? 0).toStringAsFixed(2),
             ),
+            
             _buildTotalRow(
               'Discount - الخصم',
               (request.discount ?? 0).toStringAsFixed(2),
