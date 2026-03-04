@@ -32,7 +32,7 @@ class ScreenSearch extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
+                       SizedBox(
                         height: 80,
                         width: double.infinity,
                         child: Stack(

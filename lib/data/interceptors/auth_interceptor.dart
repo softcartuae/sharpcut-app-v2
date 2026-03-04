@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
@@ -30,6 +31,8 @@ class AuthInterceptor extends Interceptor {
     if (isChair != null) {
       options.headers['is-chair'] = isChair;
     }
+
+    options.headers['X-API-Version'] = ApiClient.apiVersion;
 
     super.onRequest(options, handler);
   }

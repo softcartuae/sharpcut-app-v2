@@ -7,6 +7,7 @@ import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/data/local_storage/url_storage.dart';
 
 class ApiClient {
+  static int apiVersion = 2;
   static String productionBaseUrl = "https://app.sharpcutae.com/";
   static String developmentBaseUrl = "https://saloon.softcart.io/";
   static String baseUrl = productionBaseUrl;
