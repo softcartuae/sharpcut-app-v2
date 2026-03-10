@@ -444,9 +444,6 @@ class PrintingCubit extends Cubit<PrintingState> {
     return false;
   }
 
-  // Removed old loadPrinterSettings and savePrinterSettings as they are now handled via API
-  // and integrated into loadPrinterSettings and updatePrinterSettings above.
-
   Future<void> openDrawer() async {
     if (state.connectedPrinter == null) {
       final connected = await _tryAutoConnect();
