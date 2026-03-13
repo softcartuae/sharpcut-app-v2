@@ -529,6 +529,14 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                   child: CircularProgressIndicator(),
                                 );
                               }
+
+                              if (state.services.isEmpty) {
+                                return const Center(
+                                  child: Text(
+                                    "No services found ,You Have to add services in Dashboard",
+                                  ),
+                                );
+                              }
                               return GridView.builder(
                                 padding: EdgeInsets.zero,
                                 gridDelegate:

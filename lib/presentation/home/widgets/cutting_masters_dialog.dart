@@ -83,7 +83,7 @@ class CuttingMastersDialog extends StatelessWidget {
           if (state.chairs.isEmpty) {
             return const Center(
               child: Text(
-                'No chairs available',
+                'No chairs available, You have to add chairs in Dashboard',
                 style: TextStyle(fontSize: 18, color: Colors.black),
               ),
             );
