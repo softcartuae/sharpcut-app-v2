@@ -22,7 +22,16 @@ class MasterSyncCubit extends Cubit<MasterSyncState> {
       await chairCubit.getChairsAndStaffs(forceRefresh: true);
 
       emit(MasterSyncLoading('Performing Server Transactions Sync...'));
-      await _syncToServer.syncTransactionsFromServer();
+      final result = await _syncToServer.syncTransactionsFromServer();
+
+      if (result.isLeft()) {
+        emit(
+          MasterSyncError(
+            'Failed to sync transactions. Check Your Internet Connection',
+          ),
+        );
+        return;
+      }
 
       emit(MasterSyncLoading('Performing Server Cash Registers Sync...'));
       await _syncToServer.syncCashRegistersFromServer();
@@ -35,7 +44,9 @@ class MasterSyncCubit extends Cubit<MasterSyncState> {
       await Future.delayed(Duration(seconds: 4));
       emit(MasterSyncSuccess('All synced successfully!'));
     } catch (e) {
-      emit(MasterSyncError('Failed to sync all: $e'));
+      emit(
+        MasterSyncError('Failed to sync all: Check Your Internet Connection'),
+      );
     }
   }
 }

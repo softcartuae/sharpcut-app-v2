@@ -92,7 +92,6 @@ class SyncToServer {
         }
 
         Map<String, dynamic> transactionMap = {
-          
           "app_id": transaction['app_id'],
           "chair_id": transaction['chair_id'],
           "user_id": transaction['user_id'],
@@ -204,6 +203,8 @@ class SyncToServer {
 
   Future<Either<String, bool>> _syncCashRegisterIfNeeded() async {
     try {
+
+      
       final register = await _dbHelper.getLastOpenCashRegister();
       if (register == null) {
         log("No open cash register found. Nothing to sync.");
@@ -289,10 +290,30 @@ class SyncToServer {
         log("Received transactions from server.");
 
         List<Map<String, dynamic>> syncedTransactions = [];
+        List<Map<String, dynamic>> syncedTransactionDetails = [];
+        List<Map<String, dynamic>> syncedPayments = [];
 
         for (var item in data) {
           await _processTransaction(item);
           syncedTransactions.add({"app_id": item['app_id'], "id": item['id']});
+
+          if (item['details'] != null) {
+            for (var detail in item['details']) {
+              syncedTransactionDetails.add({
+                "id": detail['id'],
+                "detail_id": detail['detail_id'],
+              });
+            }
+          }
+
+          if (item['payments'] != null) {
+            for (var payment in item['payments']) {
+              syncedPayments.add({
+                "id": payment['id'],
+                "payment_id": payment['payment_id'],
+              });
+            }
+          }
         }
 
         if (syncedTransactions.isNotEmpty) {
@@ -302,7 +323,11 @@ class SyncToServer {
             );
             final ackResponse = await ApiClient.dio.post(
               ApiClient.transactionsSyncCompleteApi,
-              data: {"transactions": syncedTransactions},
+              data: {
+                "transactions": syncedTransactions,
+                "transaction_details": syncedTransactionDetails,
+                "payments": syncedPayments,
+              },
             );
 
             if (ackResponse.statusCode == 200 ||
@@ -395,15 +420,21 @@ class SyncToServer {
     try {
       // Extract details (services) and payments
       final details =
-          (transactionMap['details'] as List<dynamic>?)
-              ?.map((e) => e as Map<String, dynamic>)
-              .toList() ??
+          (transactionMap['details'] as List<dynamic>?)?.map((e) {
+            final map = Map<String, dynamic>.from(e as Map<String, dynamic>);
+            map['is_synced'] = 1;
+            map.remove("is_sync");
+            return map;
+          }).toList() ??
           [];
 
       final payments =
-          (transactionMap['payments'] as List<dynamic>?)
-              ?.map((e) => e as Map<String, dynamic>)
-              .toList() ??
+          (transactionMap['payments'] as List<dynamic>?)?.map((e) {
+            final map = Map<String, dynamic>.from(e as Map<String, dynamic>);
+            map.remove("is_sync");
+            map['is_synced'] = 1;
+            return map;
+          }).toList() ??
           [];
 
       // Prepare transaction data for DB (remove nested lists/objects)

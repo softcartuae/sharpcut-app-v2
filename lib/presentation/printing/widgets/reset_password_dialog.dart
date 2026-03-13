@@ -274,6 +274,21 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
           _selectedUserType = userTypes.first;
         }
 
+        if (state is ChairSuccess && userTypes.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              "staffs are empty you have to add in dashboard",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.rajdhani(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          );
+        }
+
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(

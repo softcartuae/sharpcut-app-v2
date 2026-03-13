@@ -7,6 +7,7 @@ class TokenStorage {
   static const String _modeKey = 'auth_mode';
   static const String _isChairKey = 'auth_is_chair';
   static const String _syncTimeKey = 'auth_sync_time';
+  static const String _shopModelKey = 'auth_shop_model';
 
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -58,8 +59,22 @@ class TokenStorage {
     return prefs.getInt(_syncTimeKey) ?? 15; // Default to 30 mins
   }
 
+  Future<void> saveShopModel(String shopModelJson) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_shopModelKey, shopModelJson);
+  }
+
+  Future<String?> getShopModel() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_shopModelKey);
+  }
+
   Future<void> deleteToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
+    await prefs.remove(_modeKey);
+    await prefs.remove(_isChairKey);
+    await prefs.remove(_syncTimeKey);
+    await prefs.remove(_shopModelKey);
   }
 }

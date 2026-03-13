@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -101,12 +102,22 @@ class AuthRepoImpl implements AuthRepo {
       final response = await ApiClient.dio.get(ApiClient.authentcatedUserApi);
 
       if (response.statusCode == 200) {
-        return ShopModel.fromJson(response.data);
+        final shopModel = ShopModel.fromJson(response.data);
+        // Cache the user for offline access
+        await tokenStorage.saveShopModel(jsonEncode(shopModel.toJson()));
+        return shopModel;
       } else {
         throw Exception("Failed to get user: ${response.statusMessage}");
       }
     } catch (e) {
-      throw Exception("Get user error: $e");
+      log("Get user error (attempting offline fallback): $e");
+      // Fallback to cached user
+      final cachedUserStr = await tokenStorage.getShopModel();
+      if (cachedUserStr != null) {
+        final Map<String, dynamic> cachedUserJson = jsonDecode(cachedUserStr);
+        return ShopModel.fromJson(cachedUserJson);
+      }
+      throw Exception("Get user error and no cached user found: $e");
     }
   }
 

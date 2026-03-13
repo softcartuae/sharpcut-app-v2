@@ -216,6 +216,7 @@ class DatabaseHelper {
         created_at TEXT,
         updated_at TEXT,
         deleted_at TEXT,
+        is_synced INTEGER DEFAULT 0,
         FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE ON UPDATE CASCADE
       )
     ''');
@@ -234,6 +235,7 @@ class DatabaseHelper {
         date TEXT NOT NULL,
         created_at TEXT,
         updated_at TEXT,
+        is_synced INTEGER DEFAULT 0,
         FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE ON UPDATE CASCADE
       )
     ''');

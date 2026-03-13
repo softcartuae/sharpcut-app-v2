@@ -45,7 +45,9 @@ class ShopModel {
       'description': description,
       'address': address,
       'vat_no': vatNo,
+      'mode': mode,
       'is_chair': isChair,
+      'sync_time': syncTime,
     };
   }
 }

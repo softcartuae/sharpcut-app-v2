@@ -71,7 +71,11 @@ class AuthCubit extends Cubit<AuthCubitState> {
     try {
       final token = await tokenStorage.getToken();
       if (token != null) {
-        await authRepo.getInvoiceSettings();
+        try {
+          await authRepo.getInvoiceSettings();
+        } on Exception catch (e) {
+          // TODO
+        }
         await getUser();
       } else {
         emit(AuthUnauthenticated());

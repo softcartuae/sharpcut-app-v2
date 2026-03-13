@@ -7,8 +7,8 @@ import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/data/local_storage/url_storage.dart';
 
 class ApiClient {
-  static String productionBaseUrl = "https://app.sharpcutae.com/";
-  static String developmentBaseUrl = "https://saloon.softcart.io/";
+  static String productionBaseUrl = "https://app.sharpcutae.com/api/v2/";
+  static String developmentBaseUrl = "https://saloon.softcart.io/api/v2/";
   static String baseUrl = developmentBaseUrl;
 
   static final dio = Dio(
@@ -27,7 +27,7 @@ class ApiClient {
     final port = details['port'];
 
     if (ip != null && ip.isNotEmpty && port != null && port.isNotEmpty) {
-      baseUrl = "http://$ip:$port/";
+      baseUrl = "http://$ip:$port/api/v2/";
     } else {
       baseUrl = developmentBaseUrl;
     }
@@ -35,7 +35,7 @@ class ApiClient {
   }
 
   static Future<void> setConnectionDetails(String ip, String port) async {
-    baseUrl = "http://$ip:$port/";
+    baseUrl = "http://$ip:$port/api/v2/";
     dio.options.baseUrl = baseUrl;
     final urlStorage = UrlStorage();
     await urlStorage.saveConnectionDetails(ip, port);
@@ -49,60 +49,58 @@ class ApiClient {
   }
 
   //POST API ENDPOINTS
-  static final loginApi = "api/login";
-  static final logoutApi = "api/logout";
-  static final userExpensePostApi = "api/users/expenses";
-  static final bookingsPostApi = "api/bookings";
-  static final transactionsSyncPOSTapi = "api/transactions/sync";
-  static final transactionsSyncCompleteApi = "api/transactions/sync/complete";
-  static final resetUserPasswordapi = "api/reset-password";
-  static final resetAdminPasswordapi = "api/reset-password";
-  static final shopAdminLoginapi = "api/shop-admin-login";
-  static final invoiceSettingsPOSTApi = "api/invoice-settings";
-  static final slotBookingChairApi = "api/transactions/book-slot";
-  static final cancelBookingApi = "api/transactions/cancel";
-  static final validatePassword = "api/users/validate-password";
-  static final validatePasswordAdminUser = "api/shop-admins/validate-password";
-  static final saveBookingApi = "api/transactions/save-booking";
-  static final settlePayment = "api/transactions/settle-payment";
-  static final quickPayment = "api/transactions/quick-payment";
-  static final reSettlementPayment = "api/transactions/payment";
-  static final updatePaymentMode = "api/transactions/payment";
-  static final chairsSyncApi = "api/chairs/sync";
-  static final serviceCategoriesSyncApi = "api/service-categories/sync";
-  static final servicesSyncApi = "api/services/sync";
-  static final usersAdminSyncApi = "api/users/admin/sync";
-  static final usersStaffSyncApi = "api/users/staff/sync";
-  static final cashRegistersSyncApi = "api/cash-registers/sync";
-  static final cashRegistersSyncCompleteApi =
-      "api/cash-registers/sync/complete";
+  static final loginApi = "login";
+  static final logoutApi = "logout";
+  static final userExpensePostApi = "users/expenses";
+  static final bookingsPostApi = "bookings";
+  static final transactionsSyncPOSTapi = "transactions/sync";
+  static final transactionsSyncCompleteApi = "transactions/sync/complete";
+  static final resetUserPasswordapi = "reset-password";
+  static final resetAdminPasswordapi = "reset-password";
+  static final shopAdminLoginapi = "shop-admin-login";
+  static final invoiceSettingsPOSTApi = "invoice-settings";
+  static final slotBookingChairApi = "transactions/book-slot";
+  static final cancelBookingApi = "transactions/cancel";
+  static final validatePassword = "users/validate-password";
+  static final validatePasswordAdminUser = "shop-admins/validate-password";
+  static final saveBookingApi = "transactions/save-booking";
+  static final settlePayment = "transactions/settle-payment";
+  static final quickPayment = "transactions/quick-payment";
+  static final reSettlementPayment = "transactions/payment";
+  static final updatePaymentMode = "transactions/payment";
+  static final chairsSyncApi = "chairs/sync";
+  static final serviceCategoriesSyncApi = "service-categories/sync";
+  static final servicesSyncApi = "services/sync";
+  static final usersAdminSyncApi = "users/admin/sync";
+  static final usersStaffSyncApi = "users/staff/sync";
+  static final cashRegistersSyncApi = "cash-registers/sync";
+  static final cashRegistersSyncCompleteApi = "cash-registers/sync/complete";
 
   // GET API ENDPOINTS
-  static final userExpenseGETapi = "api/users/expenses";
-  static final transactionsGETApi = "api/transactions";
-  static final authentcatedUserApi = "api/shop";
-  static final chairsApi = "api/chairs";
-  static final serviceCategoriesApi = "api/service-categories";
-  static final servicesApi = "api/services";
-  static final invoiceSettingsApi = "api/invoice-settings";
-  static final shopadminsApi = "api/shop-admins";
-  static final serviceByCategorieId = "api/services";
-  static final allUsers = "api/users";
-  static final resetPasswordUsers = "api/reset-password/users";
-  static final quickReportapi = '/api/transactions/report';
-  static final cashRegistersGetApi = "api/cash-registers";
-  static final cashRegisterCheckApi = "api/cash-registers/check";
-  static final openCashRegisterApi = "api/cash-registers/open";
-  static final closeCashRegisterApi = "api/cash-registers/close";
-  static final searchinvoiceApi = '/api/transactions/search';
+  static final userExpenseGETapi = "users/expenses";
+  static final transactionsGETApi = "transactions";
+  static final authentcatedUserApi = "shop";
+  static final chairsApi = "chairs";
+  static final serviceCategoriesApi = "service-categories";
+  static final servicesApi = "services";
+  static final invoiceSettingsApi = "invoice-settings";
+  static final shopadminsApi = "shop-admins";
+  static final serviceByCategorieId = "services";
+  static final allUsers = "users";
+  static final resetPasswordUsers = "reset-password/users";
+  static final quickReportapi = 'transactions/report';
+  static final cashRegistersGetApi = "cash-registers";
+  static final cashRegisterCheckApi = "cash-registers/check";
+  static final openCashRegisterApi = "cash-registers/open";
+  static final closeCashRegisterApi = "cash-registers/close";
+  static final searchinvoiceApi = 'transactions/search';
   static final getTotalSalesForCloseCashRegisterApi =
-      "api/cash-registers/sales-total";
-  static final printerSettingsApi = "api/settings";
-  static final cashRegisterLastSalesApi =
-      "api/cash-registers/print-last-report";
-  static final printerListApi = "api/printers/list";
-  static final printInvoiceApi = "api/print/invoice";
-  static final printQuickReportApi = "api/print/transaction-report";
-  static final printCashRegisterApi = "api/print/cash-register-report";
-  static final versionApi = "api/version";
+      "cash-registers/sales-total";
+  static final printerSettingsApi = "settings";
+  static final cashRegisterLastSalesApi = "cash-registers/print-last-report";
+  static final printerListApi = "printers/list";
+  static final printInvoiceApi = "print/invoice";
+  static final printQuickReportApi = "print/transaction-report";
+  static final printCashRegisterApi = "print/cash-register-report";
+  static final versionApi = "version";
 }

@@ -58,63 +58,71 @@ Future<StaffModel?> showStaffSelectionDialog(
                 ],
               ),
               const SizedBox(height: 32),
-              Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                alignment: WrapAlignment.center,
-                children: staffList.map((staff) {
-                  return InkWell(
-                    onTap: () {
-                      final shop = context.read<AuthCubit>().currentUser;
-                      final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
-                        shop,
-                      );
+              if (staffList.isEmpty)
+                Text(
+                  "staffs are empty you have to add in dashboard",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.rajdhani(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                )
+              else
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  alignment: WrapAlignment.center,
+                  children: staffList.map((staff) {
+                    return InkWell(
+                      onTap: () {
+                        final shop = context.read<AuthCubit>().currentUser;
+                        final isNoChair =
+                            CheckNoChair.checkIsThisAppNoChairOrNot(shop);
 
-                      if (isNoChair) {
-                        context.read<BookingCubit>().bookSlot(
-                          chairId: chair.id ?? 0,
-                          userId: staff.id,
-                          userPassword: DefaultPassword.x9rQ7mK2ZL8.name,
-                        );
-                        Navigator.pop(context);
-                      } else {
-                        showPasswordDialoge(context, chair, staff);
-                      }
-                      
-
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      width: 140,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            staff.name.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.rajdhani(
+                        if (isNoChair) {
+                          context.read<BookingCubit>().bookSlot(
+                            chairId: chair.id ?? 0,
+                            userId: staff.id,
+                            userPassword: DefaultPassword.x9rQ7mK2ZL8.name,
+                          );
+                          Navigator.pop(context);
+                        } else {
+                          showPasswordDialoge(context, chair, staff);
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        width: 140,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.person,
                               color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
+                              size: 28,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 8),
+                            Text(
+                              staff.name.toUpperCase(),
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.rajdhani(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
+                    );
+                  }).toList(),
+                ),
               const SizedBox(height: 16),
             ],
           ),

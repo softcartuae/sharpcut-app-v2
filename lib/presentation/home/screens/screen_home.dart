@@ -18,39 +18,94 @@ class ScreenHome extends StatefulWidget {
 }
 
 class _ScreenHomeState extends State<ScreenHome> {
+  final ValueNotifier<bool> _isSyncing = ValueNotifier(false);
+
   @override
   void initState() {
     super.initState();
     context.read<ChairCubit>().getChairsAndStaffs();
-    SyncToServer().syncTransactionsFromServer();
-    SyncToServer().syncCashRegistersFromServer();
+    _performInitialSync();
+  }
+
+  Future<void> _performInitialSync() async {
+    _isSyncing.value = true;
+    try {
+      await SyncToServer().syncTransactionsFromServer();
+      await SyncToServer().syncCashRegistersFromServer();
+    } finally {
+      if (mounted) {
+        _isSyncing.value = false;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _isSyncing.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<BookingCubit, BookingState>(
-        listener: (context, state) {
-          if (state is BookingCancelled || state is BookingInitial) {
-            context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
+      body: Stack(
+        children: [
+          BlocListener<BookingCubit, BookingState>(
+            listener: (context, state) {
+              if (state is BookingCancelled || state is BookingInitial) {
+                context.read<ChairCubit>().getChairsAndStaffs(
+                  forceRefresh: true,
+                );
 
-            context.read<ServiceCubit>().clearCart();
-          }
-        },
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 39.0, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                HomeAppBar(),
-                HomeInputSection(),
-                SizedBox(height: 15),
-                HomeServicesSection(),
-              ],
+                context.read<ServiceCubit>().clearCart();
+              }
+            },
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 39.0,
+                  vertical: 10,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    HomeAppBar(),
+                    HomeInputSection(),
+                    SizedBox(height: 15),
+                    HomeServicesSection(),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+          ValueListenableBuilder<bool>(
+            valueListenable: _isSyncing,
+            builder: (context, isSyncing, child) {
+              if (!isSyncing) return const SizedBox.shrink();
+
+              return Container(
+                color: Colors.black54,
+                child: const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(color: Colors.white),
+                      SizedBox(height: 16),
+                      Text(
+                        'Syncing data...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
