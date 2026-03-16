@@ -71,8 +71,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
           return BlocListener<BookingCubit, BookingState>(
             listener: (context, state) {
               if (state is BookingSuccess) {
-                final name =
-                    state.bookingResponse.customerName ?? "Walk In Customer";
+                final name = "";
                 final number = state.bookingResponse.customerNumber ?? "";
 
                 _nameController.text = name;

@@ -9,6 +9,7 @@ class ReportTableRow extends StatelessWidget {
   final VoidCallback printTheInvoice;
   final VoidCallback paymentSettleFunction;
   final VoidCallback onBalanceTap;
+  final VoidCallback onCustomerNameTap;
 
   const ReportTableRow({
     super.key,
@@ -18,6 +19,7 @@ class ReportTableRow extends StatelessWidget {
     required this.printTheInvoice,
     required this.paymentSettleFunction,
     required this.onBalanceTap,
+    required this.onCustomerNameTap,
   });
 
   @override
@@ -36,7 +38,11 @@ class ReportTableRow extends StatelessWidget {
           _buildDataCell(transaction.invoiceDate ?? "-", width: 100),
           _buildDataCell(transaction.invoiceNo ?? "-", width: 150),
           _buildDataCell(transaction.customerNumber ?? "-", width: 100),
-          _buildDataCell(transaction.customerName ?? "-", width: 150),
+          _buildDataCell(
+            transaction.customerName ?? "-",
+            width: 150,
+            onTap: onCustomerNameTap,
+          ),
           _buildDataCell(
             transaction.finalTotal?.toStringAsFixed(2) ?? "0.00",
             width: 80,

@@ -119,18 +119,15 @@ class ReceiptWidget extends StatelessWidget {
               label1: 'Print Date',
               subLabel1: 'تاريخ الطباعة',
               value1: _formatDate(DateTime.now()),
-              label2: 'Customer',
-              subLabel2: 'اسم العميل',
-              value2: request.customerName ?? 'Cash Customer',
+              label2: 'Chair No',
+              subLabel2: 'رقم الكرسي',
+              value2: chairId?.toString() ?? '',
             ),
             const SizedBox(height: 4),
             _buildDetailRow(
-              label1: 'Chair No',
-              subLabel1: 'رقم الكرسي',
-              value1: chairId?.toString() ?? '', // Placeholder or from request
-              label2: 'Staff',
-              subLabel2: 'النادل',
-              value2: staffName ?? 'Unknown', // Placeholder or from request
+              label1: 'Staff',
+              subLabel1: 'النادل',
+              value1: staffName ?? 'Unknown',
             ),
             const SizedBox(height: 4),
             Row(
@@ -185,6 +182,56 @@ class ReceiptWidget extends StatelessWidget {
                       color: Colors.black,
                     ),
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Customer',
+                          style: GoogleFonts.marcellus(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          'اسم العميل',
+                          style: GoogleFonts.marcellus(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      ' : ',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        request.customerName ?? '',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -398,7 +445,6 @@ class ReceiptWidget extends StatelessWidget {
               'Sub Total - المجموع الفرعي',
               (request.finalTotalbefore ?? 0).toStringAsFixed(2),
             ),
-            
             _buildTotalRow(
               'Discount - الخصم',
               (request.discount ?? 0).toStringAsFixed(2),
@@ -409,7 +455,10 @@ class ReceiptWidget extends StatelessWidget {
               (request.subTotalValue ?? 0).toStringAsFixed(2),
             ),
 
-         
+            // _buildTotalRow(
+            //   'Incl VAT - المجموع شامل الضريبة',
+            //   (request.finalTotal ?? 0).toStringAsFixed(2),
+            // ), // Assuming final total is incl VAT
             _buildTotalRow(
               'VAT (5%) Amount - قيمة الضريبة',
               (request.taxTotal ?? 0).toStringAsFixed(2),

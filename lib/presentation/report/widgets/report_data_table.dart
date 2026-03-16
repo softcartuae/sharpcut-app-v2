@@ -5,6 +5,7 @@ import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
+import 'package:sharp_cut/presentation/report/widgets/edit_customer_name_dialog.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
@@ -255,6 +256,25 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 cartItems: cartItems,
                                               );
                                               
+                                            },
+                                             onCustomerNameTap: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return EditCustomerNameDialog(
+                                                    booking: state.transactions[index],
+                                                    currentName:
+                                                        state
+                                                            .transactions[index]
+                                                            .customerName ??
+                                                        "",
+                                                    onSave: (newName) {
+                                                      
+                                                       
+                                                    },
+                                                  );
+                                                },
+                                              );
                                             },
                                             printTheInvoice: () {
                                               final ShopModel? shopData =
