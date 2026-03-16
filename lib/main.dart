@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:sharp_cut/cubit/booking/customer_search_cubit.dart';
 
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/data/firebase_api.dart';
@@ -141,6 +142,7 @@ void main() async {
             BlocProvider(create: (_) => di.sl<CashRegistoryCubit>()),
             BlocProvider(create: (_) => di.sl<SyncCubit>()),
             BlocProvider(create: (_) => di.sl<MasterSyncCubit>()),
+            BlocProvider(create: (_) => di.sl<CustomerSearchCubit>()),
           ],
           child: MyApp(),
         ), // Wrap your app

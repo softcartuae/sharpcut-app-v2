@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/core/utils/date_formatter.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
+import 'package:sharp_cut/domain/booking/models/customer_suggestion_model.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
@@ -179,6 +180,39 @@ class BookingRepoImp implements BookingRepo {
     } catch (e) {
       log('Error updating payment: $e');
       return Left(e.toString().replaceAll("Exception: ", ""));
+    }
+  }
+
+
+    @override
+  Future<Either<String, String>> updateCustomerDetails({
+    required int transactionId,
+    required String customerName,
+    required String customerNumber,
+  }) async {
+    try {
+      await DatabaseHelper().updateCustomerDetails(
+        transactionId: transactionId,
+        customerName: customerName,
+        customerNumber: customerNumber,
+      );
+      return const Right("Customer details updated successfully");
+    } catch (e) {
+      return Left('Error updating customer details: $e');
+    }
+  }
+
+
+  @override
+  Future<Either<String, List<CustomerSuggestionModel>>> searchCustomer({
+    String? name,
+    String? number,
+  }) async {
+    try {
+      final customers = await DatabaseHelper().searchCustomers(name, number);
+      return Right(customers);
+    } catch (e) {
+      return Left(e.toString());
     }
   }
 }

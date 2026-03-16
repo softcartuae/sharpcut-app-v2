@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/cubit/booking/customer_search_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
@@ -67,6 +68,9 @@ Future<void> init() async {
     () => ExpenseCubit(expenseRepo: sl<ExpenseRepo>()),
   );
 
+  sl.registerFactory<CustomerSearchCubit>(
+    () => CustomerSearchCubit(sl<BookingRepo>()),
+  );
   sl.registerFactory<BookingFormCubit>(() => BookingFormCubit());
 
   sl.registerFactory<PrintingCubit>(() => PrintingCubit(sl<PrintingRepo>()));

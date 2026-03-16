@@ -4,6 +4,7 @@ import 'package:sharp_cut/core/database/database_helper.dart';
 import 'package:sharp_cut/core/utils/date_formatter.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
+import 'package:sharp_cut/domain/booking/models/customer_suggestion_model.dart';
 import 'package:sharp_cut/utils/helpers/convertion.dart';
 
 class TransactionDao {
@@ -482,8 +483,8 @@ class TransactionDao {
     final db = await _dbFuture;
     final result = await db.query(
       'transactions',
-      where: 'status = ? AND cash_register_id = ?',
-      whereArgs: ['Pending', cashRegisterId],
+      where: 'LOWER(status) = ? AND cash_register_id = ?',
+      whereArgs: ['pending', cashRegisterId],
       limit: 1,
     );
     return result.isNotEmpty;
@@ -494,7 +495,7 @@ class TransactionDao {
     final db = await _dbFuture;
     return await db.query(
       'transactions',
-      where: 'is_synced = ? AND status = ?',
+      where: 'is_synced = ? AND LOWER(status) = ?',
       whereArgs: [0, 'completed'],
     );
   }
@@ -672,7 +673,7 @@ class TransactionDao {
         tp.amount
       FROM transactions t
       LEFT JOIN transaction_payments tp ON t.id = tp.transaction_id
-      WHERE t.created_at >= ? AND t.created_at <= ? AND t.status = 'completed'
+      WHERE t.created_at >= ? AND t.created_at <= ? AND LOWER(t.status) = 'completed'
       ''',
       [openedAt, closedAt],
     );
@@ -725,7 +726,7 @@ class TransactionDao {
     final transactionsResult = await db.rawQuery(
       '''
       SELECT * FROM transactions 
-      WHERE created_at >= ? AND status = 'completed' AND cash_register_id = ?
+      WHERE created_at >= ? AND LOWER(status) = 'completed' AND cash_register_id = ?
       ''',
       [openedAt, registerId],
     );
@@ -863,5 +864,63 @@ class TransactionDao {
         'salesman_total_count': salesmanDetails.length,
       },
     };
+  }
+
+  Future<List<CustomerSuggestionModel>> searchCustomers(
+    String? name,
+    String? number,
+  ) async {
+    final db = await _dbFuture;
+    String? query;
+    List<String> args = [];
+
+    if (name != null && name.isNotEmpty) {
+      query = "customer_name LIKE ?";
+      args.add('%$name%');
+    }
+
+    if (number != null && number.isNotEmpty) {
+      if (query != null) {
+        query += " OR customer_number LIKE ?";
+      } else {
+        query = "customer_number LIKE ?";
+      }
+      args.add('%$number%');
+    }
+
+    if (query == null) return [];
+
+    final result = await db.query(
+      'transactions',
+      distinct: true,
+      columns: ['customer_name', 'customer_number'],
+      where: query,
+      whereArgs: args,
+      limit: 20,
+    );
+
+    return result
+        .map((json) => CustomerSuggestionModel.fromJson(json))
+        .toList();
+  }
+
+  Future<void> updateCustomerDetails({
+    required int transactionId,
+    required String customerName,
+    required String customerNumber,
+  }) async {
+    log("Updating customer details for transaction $transactionId");
+    final db = await _dbFuture;
+    await db.update(
+      'transactions',
+      {
+        'customer_name': customerName,
+        'customer_number': customerNumber,
+        'updated_at': DateFormatter.now(),
+        'is_synced': 0,
+      },
+      where: 'id = ?',
+      whereArgs: [transactionId],
+    );
   }
 }

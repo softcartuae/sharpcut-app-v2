@@ -4,7 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
+import 'package:sharp_cut/cubit/booking/customer_search_cubit.dart';
+import 'package:sharp_cut/cubit/booking/customer_search_state.dart';
+import 'package:sharp_cut/domain/booking/models/customer_suggestion_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
+import 'package:sharp_cut/presentation/home/widgets/lib/presentation/home/widgets/customer_suggestions_overlay.dart';
 
 class HomeInputSection extends StatefulWidget {
   const HomeInputSection({super.key});
@@ -16,6 +20,9 @@ class HomeInputSection extends StatefulWidget {
 class _HomeInputSectionState extends State<HomeInputSection> {
   late TextEditingController _nameController;
   late TextEditingController _numberController;
+  final FocusNode _nameFocusNode = FocusNode();
+  final FocusNode _numberFocusNode = FocusNode();
+  bool _isSelectionInProgress = false;
 
   @override
   void initState() {
@@ -28,6 +35,8 @@ class _HomeInputSectionState extends State<HomeInputSection> {
   void dispose() {
     _nameController.dispose();
     _numberController.dispose();
+    _nameFocusNode.dispose();
+    _numberFocusNode.dispose();
     super.dispose();
   }
 
@@ -90,24 +99,6 @@ class _HomeInputSectionState extends State<HomeInputSection> {
               children: [
                 Row(
                   children: [
-                    // Expanded(
-                    //   child: CustomTextField(
-                    //     label: "Invoice no",
-                    //     hint: invoiceNo,
-                    //     icon: Icons.receipt_long_outlined,
-                    //     readOnly: true,
-                    //   ),
-                    // ),
-                    // const SizedBox(width: 16),
-                    // Expanded(
-                    //   child: CustomTextField(
-                    //     label: "Date",
-                    //     hint: date,
-                    //     icon: Icons.calendar_today_outlined,
-                    //     readOnly: true,
-                    //   ),
-                    // ),
-                    // const SizedBox(width: 16),
                     Expanded(
                       child: CustomTextField(
                         label: "Booking Time",
@@ -118,38 +109,180 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: CustomTextField(
-                        controller: _nameController,
-                        readOnly: isBooked == true ? false : true,
-                        label: "Customer Name",
-                        hint: "Customer Name",
-                        icon: Icons.person_outline,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'[a-zA-Z\s]'),
-                          ),
-                          LengthLimitingTextInputFormatter(15),
-                        ],
-                        onChanged: (value) {
-                          context.read<BookingFormCubit>().updateName(value);
+                      child: RawAutocomplete<CustomerSuggestionModel>(
+                        focusNode: _nameFocusNode,
+                        textEditingController: _nameController,
+                        optionsBuilder:
+                            (TextEditingValue textEditingValue) async {
+                              if (_isSelectionInProgress ||
+                                  textEditingValue.text.length < 3) {
+                                return const Iterable<
+                                  CustomerSuggestionModel
+                                >.empty();
+                              }
+
+                              // Debounce for 500ms
+                              await Future.delayed(
+                                const Duration(milliseconds: 500),
+                              );
+                              if (textEditingValue.text !=
+                                      _nameController.text ||
+                                  _isSelectionInProgress) {
+                                return const Iterable<
+                                  CustomerSuggestionModel
+                                >.empty();
+                              }
+
+                              await context
+                                  .read<CustomerSearchCubit>()
+                                  .searchCustomer(name: textEditingValue.text);
+                              final searchState = context
+                                  .read<CustomerSearchCubit>()
+                                  .state;
+                              if (searchState is CustomerSearchSuccess) {
+                                return searchState.suggestions;
+                              }
+                              return const Iterable<
+                                CustomerSuggestionModel
+                              >.empty();
+                            },
+                        onSelected: (CustomerSuggestionModel suggestion) {
+                          setState(() {
+                            _isSelectionInProgress = true;
+                          });
+                          _nameController.text = suggestion.customerName;
+                          _numberController.text = suggestion.customerNumber;
+                          context.read<BookingFormCubit>().setInitialData(
+                            name: suggestion.customerName,
+                            number: suggestion.customerNumber,
+                          );
+                          context.read<CustomerSearchCubit>().reset();
+
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            if (mounted) {
+                              setState(() {
+                                _isSelectionInProgress = false;
+                              });
+                            }
+                          });
+                        },
+                        fieldViewBuilder:
+                            (context, controller, focusNode, onFieldSubmitted) {
+                              return CustomTextField(
+                                controller: controller,
+                                focusNode: focusNode,
+                                readOnly: isBooked == true ? false : true,
+                                label: "Customer Name",
+                                hint: "Customer Name",
+                                icon: Icons.person_outline,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'[a-zA-Z\s]'),
+                                  ),
+                                  LengthLimitingTextInputFormatter(30),
+                                ],
+                                onChanged: (value) {
+                                  context.read<BookingFormCubit>().updateName(
+                                    value,
+                                  );
+                                },
+                              );
+                            },
+                        optionsViewBuilder: (context, onSelected, options) {
+                          return CustomerSuggestionsOverlay(
+                            options: options,
+                            onSelected: onSelected,
+                          );
                         },
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: CustomTextField(
-                        controller: _numberController,
-                        label: "Customer Number",
-                        hint: "Customer Number",
-                        icon: Icons.phone_outlined, // Placeholder icon
-                        readOnly: isBooked == true ? false : true,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(15),
-                        ],
-                        onChanged: (value) {
-                          context.read<BookingFormCubit>().updateNumber(value);
+                      child: RawAutocomplete<CustomerSuggestionModel>(
+                        focusNode: _numberFocusNode,
+                        textEditingController: _numberController,
+                        optionsBuilder:
+                            (TextEditingValue textEditingValue) async {
+                              if (_isSelectionInProgress ||
+                                  textEditingValue.text.length < 3) {
+                                return const Iterable<
+                                  CustomerSuggestionModel
+                                >.empty();
+                              }
+
+                              // Debounce for 500ms
+                              await Future.delayed(
+                                const Duration(milliseconds: 500),
+                              );
+                              if (textEditingValue.text !=
+                                      _numberController.text ||
+                                  _isSelectionInProgress) {
+                                return const Iterable<
+                                  CustomerSuggestionModel
+                                >.empty();
+                              }
+
+                              await context
+                                  .read<CustomerSearchCubit>()
+                                  .searchCustomer(
+                                    number: textEditingValue.text,
+                                  );
+                              final searchState = context
+                                  .read<CustomerSearchCubit>()
+                                  .state;
+                              if (searchState is CustomerSearchSuccess) {
+                                return searchState.suggestions;
+                              }
+                              return const Iterable<
+                                CustomerSuggestionModel
+                              >.empty();
+                            },
+                        onSelected: (CustomerSuggestionModel suggestion) {
+                          setState(() {
+                            _isSelectionInProgress = true;
+                          });
+                          _nameController.text = suggestion.customerName;
+                          _numberController.text = suggestion.customerNumber;
+                          context.read<BookingFormCubit>().setInitialData(
+                            name: suggestion.customerName,
+                            number: suggestion.customerNumber,
+                          );
+                          context.read<CustomerSearchCubit>().reset();
+
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            if (mounted) {
+                              setState(() {
+                                _isSelectionInProgress = false;
+                              });
+                            }
+                          });
+                        },
+                        fieldViewBuilder:
+                            (context, controller, focusNode, onFieldSubmitted) {
+                              return CustomTextField(
+                                controller: controller,
+                                focusNode: focusNode,
+                                readOnly: isBooked == true ? false : true,
+                                label: "Customer Number",
+                                hint: "Customer Number",
+                                icon: Icons.phone_outlined,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(15),
+                                ],
+                                onChanged: (value) {
+                                  context.read<BookingFormCubit>().updateNumber(
+                                    value,
+                                  );
+                                },
+                              );
+                            },
+                        optionsViewBuilder: (context, onSelected, options) {
+                          return CustomerSuggestionsOverlay(
+                            options: options,
+                            onSelected: onSelected,
+                          );
                         },
                       ),
                     ),

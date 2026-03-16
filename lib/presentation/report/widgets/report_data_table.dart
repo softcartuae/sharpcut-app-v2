@@ -258,19 +258,32 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                               
                                             },
                                             onCustomerNameTap: () {
-                                              showDialog(
+                                            showDialog(
                                                 context: context,
                                                 builder: (context) {
+                                                  final transaction =
+                                                      state.transactions[index];
                                                   return EditCustomerNameDialog(
-                                                    booking: state.transactions[index],
+                                                    booking: transaction,
                                                     currentName:
-                                                        state
-                                                            .transactions[index]
+                                                        transaction
                                                             .customerName ??
                                                         "",
-                                                    onSave: (newName) {
-                                                      
-                                                       
+                                                    currentNumber:
+                                                        transaction
+                                                            .customerNumber ??
+                                                        "",
+                                                    onSave: (newName, newNumber) {
+                                                      context
+                                                          .read<BookingCubit>()
+                                                          .updateCustomerDetails(
+                                                            booking:
+                                                                transaction,
+                                                            customerName:
+                                                                newName,
+                                                            customerNumber:
+                                                                newNumber,
+                                                          );
                                                     },
                                                   );
                                                 },

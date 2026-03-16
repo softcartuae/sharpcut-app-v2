@@ -12,6 +12,7 @@ import 'package:sharp_cut/core/database/daos/service_dao.dart';
 import 'package:sharp_cut/core/database/daos/transaction_dao.dart';
 import 'package:sharp_cut/core/database/daos/cash_register_dao.dart';
 import 'package:sharp_cut/core/database/daos/invoice_dao.dart';
+import 'package:sharp_cut/domain/booking/models/customer_suggestion_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -371,6 +372,21 @@ class DatabaseHelper {
   Future<void> incrementInvoiceCount() => invoiceDao.incrementInvoiceCount();
 
   Future<String> generateInvoiceNumber() => invoiceDao.generateInvoiceNumber();
+
+  Future<List<CustomerSuggestionModel>> searchCustomers(
+    String? name,
+    String? number,
+  ) => transactionDao.searchCustomers(name, number);
+
+  Future<void> updateCustomerDetails({
+    required int transactionId,
+    required String customerName,
+    required String customerNumber,
+  }) => transactionDao.updateCustomerDetails(
+    transactionId: transactionId,
+    customerName: customerName,
+    customerNumber: customerNumber,
+  );
 
   // Helper
   Future<bool> isFullySynced() async {
