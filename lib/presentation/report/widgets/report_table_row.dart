@@ -41,7 +41,7 @@ class ReportTableRow extends StatelessWidget {
           _buildDataCell(
             transaction.customerName ?? "-",
             width: 150,
-            onTap: onCustomerNameTap,
+              onTap: onCustomerNameTap,
           ),
           _buildDataCell(
             transaction.finalTotal?.toStringAsFixed(2) ?? "0.00",
