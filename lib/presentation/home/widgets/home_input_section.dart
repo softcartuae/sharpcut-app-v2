@@ -71,8 +71,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
           return BlocListener<BookingCubit, BookingState>(
             listener: (context, state) {
               if (state is BookingSuccess) {
-                final name =
-                    state.bookingResponse.customerName ?? "Walk-in Customer";
+                final name = "";
                 final number = state.bookingResponse.customerNumber ?? "";
 
                 _nameController.text = name;
@@ -91,24 +90,6 @@ class _HomeInputSectionState extends State<HomeInputSection> {
               children: [
                 Row(
                   children: [
-                    // Expanded(
-                    //   child: CustomTextField(
-                    //     label: "Invoice no",
-                    //     hint: invoiceNo,
-                    //     icon: Icons.receipt_long_outlined,
-                    //     readOnly: true,
-                    //   ),
-                    // ),
-                    // const SizedBox(width: 16),
-                    // Expanded(
-                    //   child: CustomTextField(
-                    //     label: "Date",
-                    //     hint: date,
-                    //     icon: Icons.calendar_today_outlined,
-                    //     readOnly: true,
-                    //   ),
-                    // ),
-                    // const SizedBox(width: 16),
                     Expanded(
                       child: CustomTextField(
                         label: "Booking Time",
@@ -129,7 +110,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                           FilteringTextInputFormatter.allow(
                             RegExp(r'[a-zA-Z\s]'),
                           ),
-                          LengthLimitingTextInputFormatter(15),
+                          LengthLimitingTextInputFormatter(30),
                         ],
                         onChanged: (value) {
                           context.read<BookingFormCubit>().updateName(value);

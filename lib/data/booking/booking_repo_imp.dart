@@ -37,7 +37,7 @@ class BookingRepoImp implements BookingRepo {
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 409) {
-        return Left("This chair is already booked");
+        return Left(e.response!.data['message']);
       }
 
       if (e.response != null && e.response!.data != null) {

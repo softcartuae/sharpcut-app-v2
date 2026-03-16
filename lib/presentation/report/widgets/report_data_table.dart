@@ -20,6 +20,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/presentation/report/widgets/receipt_dialog_helper.dart';
 import 'package:sharp_cut/presentation/report/widgets/payment_details_dialog.dart';
 import 'package:sharp_cut/presentation/report/widgets/paymentedit_dialoge.dart';
+import 'package:sharp_cut/presentation/report/widgets/edit_customer_name_dialog.dart';
 
 class ReportDataTable extends StatefulWidget {
   const ReportDataTable({super.key, this.staff});
@@ -140,9 +141,15 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                         (
                                                           detail,
                                                         ) => CartItemModel(
-                                                          service:
-                                                              detail.service!.copyWith(
-                                                                charge: detail.rate ?? detail.service!.charge,
+                                                          service: detail
+                                                              .service!
+                                                              .copyWith(
+                                                                charge:
+                                                                    detail
+                                                                        .rate ??
+                                                                    detail
+                                                                        .service!
+                                                                        .charge,
                                                               ),
                                                           quantity:
                                                               detail.quantity ??
@@ -252,6 +259,25 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                 cartItems: cartItems,
                                               );
                                             },
+                                            onCustomerNameTap: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return EditCustomerNameDialog(
+                                                    booking: state.transactions[index],
+                                                    currentName:
+                                                        state
+                                                            .transactions[index]
+                                                            .customerName ??
+                                                        "",
+                                                    onSave: (newName) {
+                                                      
+                                                       
+                                                    },
+                                                  );
+                                                },
+                                              );
+                                            },
                                             printTheInvoice: () {
                                               final ShopModel? shopData =
                                                   context
@@ -273,9 +299,15 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                         (
                                                           detail,
                                                         ) => CartItemModel(
-                                                          service:
-                                                              detail.service!.copyWith(
-                                                                charge: detail.rate ?? detail.service!.charge,
+                                                          service: detail
+                                                              .service!
+                                                              .copyWith(
+                                                                charge:
+                                                                    detail
+                                                                        .rate ??
+                                                                    detail
+                                                                        .service!
+                                                                        .charge,
                                                               ),
                                                           quantity:
                                                               detail.quantity ??
