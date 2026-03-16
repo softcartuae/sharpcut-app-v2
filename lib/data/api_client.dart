@@ -55,6 +55,7 @@ class ApiClient {
   static final userExpensePostApi = "users/expenses";
   static final bookingsPostApi = "bookings";
   static final transactionsPOSTapi = "transactions";
+  static final updateCustomerDetailsApi = "transactions/update-customer";
   static final transactionsSYNCPOSTapi = "transactions";
   static final resetUserPasswordapi = "reset-password";
   static final resetAdminPasswordapi = "reset-password";
@@ -69,6 +70,7 @@ class ApiClient {
   static final quickPayment = "transactions/quick-payment";
   static final reSettlementPayment = "transactions/payment";
   static final updatePaymentMode = "transactions/payment";
+  static final searchCustomerApi = "transactions/search-customer";
 
   // GET API ENDPOINTS
   static final userExpenseGETapi = "users/expenses";

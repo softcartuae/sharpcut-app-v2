@@ -5,6 +5,7 @@ import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
+import 'package:sharp_cut/domain/booking/models/customer_suggestion_model.dart';
 
 class BookingRepoImp implements BookingRepo {
   @override
@@ -250,6 +251,78 @@ class BookingRepoImp implements BookingRepo {
       return Left('Error updating payment: ${e.message}');
     } catch (e) {
       return Left('Error updating payment: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, String>> updateCustomerDetails({
+    required int transactionId,
+    required String customerName,
+    required String customerNumber,
+  }) async {
+    try {
+      final body = {
+        'customer_name': customerName,
+        'customer_number': customerNumber,
+      };
+      await ApiClient.dio.post(
+        "${ApiClient.transactionsPOSTapi}/$transactionId/update-customer",
+        data: body,
+      );
+      return const Right("Customer details updated successfully");
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        final data = e.response!.data;
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return Left(data['message']);
+        }
+      }
+      return Left('Error updating customer details: ${e.message}');
+    } catch (e) {
+      return Left('Error updating customer details: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, List<CustomerSuggestionModel>>> searchCustomer({
+    String? name,
+    String? number,
+  }) async {
+    try {
+      final body = name != null
+          ? {'customer_name': name}
+          : {'customer_number': number};
+
+      final response = await ApiClient.dio.post(
+        ApiClient.searchCustomerApi,
+        data: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true) {
+          final List suggestions = data['data'];
+          return Right(
+            suggestions
+                .map((e) => CustomerSuggestionModel.fromJson(e))
+                .toList(),
+          );
+        } else {
+          return Left(data['message'] ?? 'Search failed');
+        }
+      } else {
+        return Left('Failed to search: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        final data = e.response!.data;
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return Left(data['message']);
+        }
+      }
+      return Left('Error searching: ${e.message}');
+    } catch (e) {
+      return Left('Error searching: $e');
     }
   }
 }

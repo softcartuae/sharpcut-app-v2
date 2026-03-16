@@ -294,7 +294,7 @@ class PrintingRepoImp implements PrintingRepo {
         ),
       );
 
-      double estimatedHeight = 1350 + (cartItems.length * 100.0);
+      double estimatedHeight = 1400 + (cartItems.length * 100.0);
 
       final ScreenshotController screenshotController = ScreenshotController();
       final Uint8List capturedImage = await screenshotController

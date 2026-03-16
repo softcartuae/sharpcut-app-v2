@@ -14,6 +14,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final Function(String)? onChanged;
+  final FocusNode? focusNode;
 
   const CustomTextField({
     super.key,
@@ -25,6 +26,7 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.keyboardType,
     this.inputFormatters,
+    this.focusNode,
   });
 
   @override
@@ -57,6 +59,7 @@ class CustomTextField extends StatelessWidget {
                 onChanged: onChanged,
                 readOnly: readOnly,
                 controller: controller,
+                focusNode: focusNode,
                 keyboardType: keyboardType,
                 inputFormatters: inputFormatters,
                 style: GoogleFonts.rajdhani(color: Colors.white),

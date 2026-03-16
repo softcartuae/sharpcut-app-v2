@@ -18,6 +18,7 @@ import 'package:sharp_cut/data/booking/booking_repo_imp.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
+import 'package:sharp_cut/cubit/booking/customer_search_cubit.dart';
 
 import 'package:sharp_cut/data/expenses/expense_repo_impl.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
@@ -76,6 +77,9 @@ Future<void> init() async {
 
   sl.registerFactory<CashRegistoryCubit>(
     () => CashRegistoryCubit(cashRegistoryRepo: sl<CashRegistoryRepo>()),
+  );
+  sl.registerFactory<CustomerSearchCubit>(
+    () => CustomerSearchCubit(sl<BookingRepo>()),
   );
 
   // Repositories

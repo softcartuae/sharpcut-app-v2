@@ -142,6 +142,28 @@ class BookingCubit extends Cubit<BookingState> {
     );
   }
 
+  Future<void> updateCustomerDetails({
+    required BookingResponseModel booking,
+    required String customerName,
+    required String customerNumber,
+  }) async {
+    emit(BookingLoading());
+    final result = await bookingRepo.updateCustomerDetails(
+      transactionId: booking.id!,
+      customerName: customerName,
+      customerNumber: customerNumber,
+    );
+    result.fold(
+      (error) => emit(BookingError(message: error)),
+      (message) => emit(
+        BookingPaymentSettled(
+          message: message,
+          response: SettlePaymentResponseModel(success: true, message: message),
+        ),
+      ),
+    );
+  }
+
   void backToInitialState() {
     emit(BookingInitial());
   }
