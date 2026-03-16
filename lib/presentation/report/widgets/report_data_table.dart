@@ -257,7 +257,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                               );
                                               
                                             },
-                                             onCustomerNameTap: () {
+                                            onCustomerNameTap: () {
                                               showDialog(
                                                 context: context,
                                                 builder: (context) {
