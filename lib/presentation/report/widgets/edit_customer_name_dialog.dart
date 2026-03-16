@@ -40,7 +40,7 @@ class _EditCustomerNameDialogState extends State<EditCustomerNameDialog> {
         controller: _nameController,
         decoration: const InputDecoration(
           labelText: 'Customer Name',
-          border: const OutlineInputBorder(),
+          border:  OutlineInputBorder(),
         ),
       ),
       actions: [
