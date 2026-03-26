@@ -265,4 +265,5 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       home: SplashScreen(),
     );
   }
+  
 }

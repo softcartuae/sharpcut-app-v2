@@ -10,6 +10,7 @@ import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final TokenStorage tokenStorage;
@@ -138,7 +139,13 @@ class AuthRepoImpl implements AuthRepo {
       final response = await ApiClient.dio.get(ApiClient.invoiceSettingsApi);
       if (response.statusCode == 200 && response.data['success'] == true) {
         final settings = response.data['data'];
-        await DatabaseHelper().saveInvoiceSettings(settings);
+        if (settings != null) {
+          await DatabaseHelper().saveInvoiceSettings(settings);
+        } else {
+          ToastHelper.showError(
+            "Invoice settings not found, You Have to add it in Dashboard then restart the App",
+          );
+        }
       }
     } catch (e) {
       log("Failed to fetch invoice settings: $e");

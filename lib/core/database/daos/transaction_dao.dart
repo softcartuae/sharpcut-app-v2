@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:dartz/dartz.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sharp_cut/core/database/database_helper.dart';
 import 'package:sharp_cut/core/utils/date_formatter.dart';
@@ -50,7 +51,9 @@ class TransactionDao {
   }
 
   /// Settle payment for a booking
-  Future<void> settlePayment(SettlePaymentRequestModel request) async {
+  Future<Either<String, void>> settlePayment(
+    SettlePaymentRequestModel request,
+  ) async {
     log("Settling payment for transaction ${request.transactionId}");
     final db = await _dbFuture;
 
@@ -78,13 +81,16 @@ class TransactionDao {
           // Increment count in DB
           await DatabaseHelper().incrementInvoiceCount();
         } else {
-          newInvoiceNo = await DatabaseHelper().generateInvoiceNumber();
+          return const Left(
+            "Invoice settings not found, You Have to add it in Dashboard Then restart the App",
+          );
+          // newInvoiceNo = await DatabaseHelper().generateInvoiceNumber();
         }
         newInvoiceDate = DateFormatter.dateonly(DateTime.now());
       }
     }
 
-    await db.transaction((txn) async {
+    return await db.transaction((txn) async {
       // Calculate Tax and Grand Total after Discount
       final double finalTotal = request.finalTotal ?? 0.0;
       final double discount = request.discount ?? 0.0;
@@ -212,6 +218,7 @@ class TransactionDao {
       log(
         "Inserted payments and services for transaction ${request.transactionId}",
       );
+      return Right(null);
     });
   }
 

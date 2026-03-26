@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dartz/dartz.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
@@ -278,8 +279,9 @@ class DatabaseHelper {
     List<Map<String, dynamic>> services,
   ) => transactionDao.createBooking(transactionData, services);
 
-  Future<void> settlePayment(SettlePaymentRequestModel request) =>
-      transactionDao.settlePayment(request);
+  Future<Either<String, void>> settlePayment(
+    SettlePaymentRequestModel request,
+  ) => transactionDao.settlePayment(request);
 
   Future<void> reSettlePayment(ResettleModel request) =>
       transactionDao.reSettlePayment(request);

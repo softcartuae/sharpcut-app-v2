@@ -101,7 +101,11 @@ class BookingRepoImp implements BookingRepo {
   ) async {
     try {
       // Offline-only implementation
-      await DatabaseHelper().settlePayment(request);
+      final result = await DatabaseHelper().settlePayment(request);
+      if (result.isLeft()) {
+        log(result.fold((l) => l, (r) => "Failed to settle payment"));
+        return Left(result.fold((l) => l, (r) => "Failed to settle payment"));
+      }
 
       final transactionData = await DatabaseHelper().getBookingDetails(
         request.transactionId!,
@@ -183,8 +187,7 @@ class BookingRepoImp implements BookingRepo {
     }
   }
 
-
-    @override
+  @override
   Future<Either<String, String>> updateCustomerDetails({
     required int transactionId,
     required String customerName,
@@ -201,7 +204,6 @@ class BookingRepoImp implements BookingRepo {
       return Left('Error updating customer details: $e');
     }
   }
-
 
   @override
   Future<Either<String, List<CustomerSuggestionModel>>> searchCustomer({
