@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
+import 'package:sharp_cut/domain/pusher/pusher_repo.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/core/utils/date_formatter.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
@@ -13,6 +15,10 @@ import 'package:sharp_cut/utils/helpers/convertion.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class BookingRepoImp implements BookingRepo {
+  final PusherRepo _pusherRepo;
+
+  BookingRepoImp({required PusherRepo pusherRepo}) : _pusherRepo = pusherRepo;
+
   @override
   Future<Either<String, String>> bookSlot({
     required int chairId,
@@ -59,6 +65,10 @@ class BookingRepoImp implements BookingRepo {
       };
 
       await DatabaseHelper().createBooking(transactionData, []);
+
+      // Trigger Pusher notification (fire-and-forget)
+      unawaited(_pusherRepo.notifyChairUpdate());
+
       return const Right("Booking successful");
     } catch (e) {
       log('Error booking slot: $e');
@@ -89,6 +99,10 @@ class BookingRepoImp implements BookingRepo {
 
       // Offline-only implementation
       await DatabaseHelper().cancelBooking(transactionId, reason);
+
+      // Trigger Pusher notification
+      unawaited(_pusherRepo.notifyChairUpdate());
+
       return const Right("Transaction cancelled successfully");
     } catch (e) {
       return Left('Error cancelling booking: $e');
@@ -115,6 +129,9 @@ class BookingRepoImp implements BookingRepo {
       if (transactionData != null) {
         bookingResponse = BookingResponseModel.fromJson(transactionData);
       }
+
+      // Trigger Pusher notification
+      unawaited(_pusherRepo.notifyChairUpdate());
 
       return Right(
         SettlePaymentResponseModel(
@@ -153,6 +170,9 @@ class BookingRepoImp implements BookingRepo {
       if (transactionData != null) {
         bookingResponse = BookingResponseModel.fromJson(transactionData);
       }
+
+      // Trigger Pusher notification
+      unawaited(_pusherRepo.notifyChairUpdate());
 
       return Right(
         SettlePaymentResponseModel(

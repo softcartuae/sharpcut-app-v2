@@ -5,11 +5,13 @@ import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/presentation/sync/cubit/master_sync_state.dart';
 import 'package:sharp_cut/presentation/sync/cubit/sync_cubit.dart';
 
+import 'package:sharp_cut/injection_container.dart';
+
 class MasterSyncCubit extends Cubit<MasterSyncState> {
   final SyncToServer _syncToServer;
 
   MasterSyncCubit({SyncToServer? syncToServer})
-    : _syncToServer = syncToServer ?? SyncToServer(),
+    : _syncToServer = syncToServer ?? sl<SyncToServer>(),
       super(MasterSyncInitial());
 
   Future<void> syncAll({

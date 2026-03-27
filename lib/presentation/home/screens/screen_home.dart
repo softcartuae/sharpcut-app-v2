@@ -4,6 +4,7 @@ import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_input_section.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_services_section.dart';
+import 'package:sharp_cut/injection_container.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
@@ -30,8 +31,8 @@ class _ScreenHomeState extends State<ScreenHome> {
   Future<void> _performInitialSync() async {
     _isSyncing.value = true;
     try {
-      await SyncToServer().syncTransactionsFromServer();
-      await SyncToServer().syncCashRegistersFromServer();
+      await sl<SyncToServer>().syncTransactionsFromServer();
+      await sl<SyncToServer>().syncCashRegistersFromServer();
     } finally {
       if (mounted) {
         _isSyncing.value = false;

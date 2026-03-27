@@ -256,6 +256,8 @@ class DatabaseHelper {
   Future<void> insertChairs(List<Map<String, dynamic>> chairs) =>
       chairDao.insertChairs(chairs);
   Future<List<Map<String, dynamic>>> getChairs() => chairDao.getChairs();
+  Future<List<Map<String, dynamic>>> getChairsWithStatus() =>
+      chairDao.getChairsWithStatus();
   Future<Map<String, dynamic>?> getChairWithActiveTransaction(int chairId) =>
       chairDao.getChairWithActiveTransaction(chairId);
   Future<int?> getShopIdForChair(int chairId) =>
@@ -405,8 +407,8 @@ class DatabaseHelper {
 
     final transactionsResult = await db.query(
       'transactions',
-      where: 'is_synced = ?',
-      whereArgs: [0],
+      where: 'is_synced = ? AND LOWER(status) = ?',
+      whereArgs: [0, 'completed'],
       limit: 1,
     );
 

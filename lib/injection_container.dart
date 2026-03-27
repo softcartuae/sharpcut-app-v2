@@ -42,6 +42,9 @@ import 'package:sharp_cut/presentation/sync/cubit/sync_cubit.dart';
 import 'package:sharp_cut/presentation/sync/cubit/master_sync_cubit.dart';
 import 'package:sharp_cut/data/sync/sync_to_server.dart';
 
+import 'package:sharp_cut/domain/pusher/pusher_repo.dart';
+import 'package:sharp_cut/data/pusher/pusher_repo_impl.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -107,7 +110,9 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<PasswordRepo>(() => PasswordRepoImp());
   sl.registerLazySingleton<TokenStorage>(() => TokenStorage());
-  sl.registerLazySingleton<BookingRepo>(() => BookingRepoImp());
+  sl.registerLazySingleton<BookingRepo>(
+    () => BookingRepoImp(pusherRepo: sl<PusherRepo>()),
+  );
   sl.registerLazySingleton<ExpenseRepo>(() => ExpenseRepoImpl());
   sl.registerLazySingleton<PrintingRepo>(
     () => PrintingRepoImp(PrintingService()),
@@ -120,4 +125,8 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<CashRegistoryRepo>(() => CashRegistoryRepoImp());
   sl.registerLazySingleton<SyncToServer>(() => SyncToServer());
+
+  sl.registerLazySingleton<PusherRepo>(
+    () => PusherRepoImpl(dbHelper: sl<DatabaseHelper>()),
+  );
 }

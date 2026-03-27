@@ -109,7 +109,11 @@ class TransactionDao {
       final updateData = {
         'status': "completed",
         'payment_status': request.paymentStatus,
-        'customer_name': request.customerName,
+        'customer_name':
+            (request.customerName == null ||
+                request.customerName!.trim().isEmpty)
+            ? "Walk-in Customer"
+            : request.customerName,
         'customer_number': request.customerNumber,
         'grand_total': request.subTotalValue,
         'tax_total': request.taxTotal,

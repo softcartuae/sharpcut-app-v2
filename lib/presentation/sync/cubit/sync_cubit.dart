@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/data/sync/sync_to_server.dart';
+import 'package:sharp_cut/injection_container.dart';
 
 part 'sync_state.dart';
 
@@ -7,7 +8,7 @@ class SyncCubit extends Cubit<SyncState> {
   final SyncToServer _syncToServer;
 
   SyncCubit({SyncToServer? syncToServer})
-    : _syncToServer = syncToServer ?? SyncToServer(),
+    : _syncToServer = syncToServer ?? sl<SyncToServer>(),
       super(SyncInitial());
 
   Future<void> syncTransactions() async {

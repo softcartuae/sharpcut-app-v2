@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 // import 'package:sharp_cut/core/database/database_helper.dart';
 
@@ -34,10 +35,12 @@ import 'package:sharp_cut/firebase_push/firebase_push_service.dart';
 import 'package:sharp_cut/injection_container.dart' as di;
 
 import 'package:workmanager/workmanager.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/domain/home/chair/chair_repo.dart';
 import 'package:sharp_cut/domain/home/service/service_repo.dart';
+import 'package:sharp_cut/domain/pusher/pusher_repo.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -75,6 +78,7 @@ Future<bool> executeBackgroundSync() async {
     await syncToServer.syncTransactionsToServer();
 
     log('Background sync completed successfully');
+    unawaited(di.sl<PusherRepo>().notifyChairUpdate());
     return true;
   } catch (e) {
     log('Background sync failed: $e');
@@ -119,6 +123,16 @@ void main() async {
 
     await di.init();
     await ApiClient.init();
+
+    // Listen for internet restoration to trigger instant Pusher updates
+    Connectivity().onConnectivityChanged.listen((results) {
+      if (results.any((r) => r != ConnectivityResult.none)) {
+        log(
+          "Connectivity: Internet restored. Triggering Pusher notification...",
+        );
+        unawaited(di.sl<PusherRepo>().notifyChairUpdate());
+      }
+    });
 
     Bloc.observer = SimpleBlocObserver();
     runApp(
@@ -265,5 +279,4 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       home: SplashScreen(),
     );
   }
-  
 }

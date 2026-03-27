@@ -126,6 +126,30 @@ class ChairDao {
     return chairData;
   }
 
+  Future<List<Map<String, dynamic>>> getChairsWithStatus() async {
+    log("Fetching chairs with status from database");
+    final db = await _dbFuture;
+
+    // Join chairs with their active pending transactions and the associated user
+    final result = await db.rawQuery('''
+      SELECT 
+          c.id AS chair_id,
+          c.name AS chair,
+          t.user_id,
+          t.transaction_date AS booking_time,
+          u.name AS user_name,
+          u.photo AS user_photo,
+          t.status AS transaction_status
+      FROM chairs c
+      LEFT JOIN transactions t ON t.chair_id = c.id AND t.status = 'Pending'
+      LEFT JOIN users u ON u.id = t.user_id
+      ORDER BY c.position ASC
+    ''');
+
+    log("Fetched ${result.length} chairs with status");
+    return result;
+  }
+
   Future<int?> getShopIdForChair(int chairId) async {
     final db = await _dbFuture;
     final result = await db.query(

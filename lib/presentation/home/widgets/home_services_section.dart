@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:sharp_cut/injection_container.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -1294,7 +1295,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             _selectedButtonNotifier.value =
                                                 "REPORT";
                                             final isSynced =
-                                                await SyncToServer()
+                                                await sl<SyncToServer>()
                                                     .isFullySynced();
                                             isSynced.fold(
                                               (l) => ToastHelper.showError(
@@ -1359,7 +1360,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             _selectedButtonNotifier.value =
                                                 "CLOSE REGISTER";
                                             final isSynced =
-                                                await SyncToServer()
+                                                await sl<SyncToServer>()
                                                     .isFullySynced();
                                             isSynced.fold(
                                               (l) => ToastHelper.showError(

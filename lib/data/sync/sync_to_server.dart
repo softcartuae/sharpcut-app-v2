@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:sharp_cut/core/database/database_helper.dart';
 import 'package:sharp_cut/data/api_client.dart';
-import 'package:dartz/dartz.dart';
 import 'package:intl/intl.dart';
+import 'package:dartz/dartz.dart';
 
 class SyncToServer {
   final DatabaseHelper _dbHelper = DatabaseHelper();
+
+  SyncToServer();
 
   Future<Either<String, String>> syncTransactionsToServer() async {
     try {
@@ -175,6 +178,7 @@ class SyncToServer {
         // Mark as synced
         await _dbHelper.markTransactionsAsSynced(transactionIds);
         log("Synced ${transactionIds.length} transactions successfully.");
+
         return Right(
           "Synced ${transactionIds.length} transactions successfully.",
         );
@@ -203,8 +207,6 @@ class SyncToServer {
 
   Future<Either<String, bool>> _syncCashRegisterIfNeeded() async {
     try {
-
-      
       final register = await _dbHelper.getLastOpenCashRegister();
       if (register == null) {
         log("No open cash register found. Nothing to sync.");

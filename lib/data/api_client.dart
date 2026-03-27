@@ -56,7 +56,7 @@ class ApiClient {
   static final transactionsSyncPOSTapi = "transactions/sync";
   static final transactionsSyncCompleteApi = "transactions/sync/complete";
   static final resetUserPasswordapi = "reset-password";
-  static final resetAdminPasswordapi = "reset-password";
+  static final resetAdminPasswordapi = "reset-admin-password";
   static final shopAdminLoginapi = "shop-admin-login";
   static final invoiceSettingsPOSTApi = "invoice-settings";
   static final slotBookingChairApi = "transactions/book-slot";
@@ -75,6 +75,7 @@ class ApiClient {
   static final usersStaffSyncApi = "users/staff/sync";
   static final cashRegistersSyncApi = "cash-registers/sync";
   static final cashRegistersSyncCompleteApi = "cash-registers/sync/complete";
+  static final pusherNotifyApi = "bookings/offline";
 
   // GET API ENDPOINTS
   static final userExpenseGETapi = "users/expenses";
