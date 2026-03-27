@@ -26,6 +26,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
         },
         (r) async {
           await tokenStorage.saveToken(r);
+          
           // Fetch user immediately after login
           await getUser();
           emit(AuthLoginSuccess(r));

@@ -26,8 +26,8 @@ class _EditCustomerNameDialogState extends State<EditCustomerNameDialog> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.currentName);
-    _numberController = TextEditingController(text: widget.currentNumber);
+    _nameController = TextEditingController(text: "");
+    _numberController = TextEditingController(text: "");
   }
 
   @override

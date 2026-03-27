@@ -78,6 +78,7 @@ Future<void> init() async {
   sl.registerFactory<CashRegistoryCubit>(
     () => CashRegistoryCubit(cashRegistoryRepo: sl<CashRegistoryRepo>()),
   );
+
   sl.registerFactory<CustomerSearchCubit>(
     () => CustomerSearchCubit(sl<BookingRepo>()),
   );
@@ -86,6 +87,7 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthRepo>(
     () => AuthRepoImpl(tokenStorage: sl<TokenStorage>()),
   );
+  
   sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
   sl.registerLazySingleton<ChairRepo>(() => ChairRepoImpl());
   sl.registerLazySingleton<PasswordRepo>(() => PasswordRepoImp());

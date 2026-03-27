@@ -9,7 +9,7 @@ import 'package:sharp_cut/data/local_storage/url_storage.dart';
 class ApiClient {
   static String productionBaseUrl = "https://app.sharpcutae.com/api/v2/";
   static String developmentBaseUrl = "https://saloon.softcart.io/api/v2/";
-  static String baseUrl = developmentBaseUrl;
+  static String baseUrl = productionBaseUrl;
 
   static final dio = Dio(
     BaseOptions(
@@ -29,7 +29,7 @@ class ApiClient {
     if (ip != null && ip.isNotEmpty && port != null && port.isNotEmpty) {
       baseUrl = "http://$ip:$port/api/v2/";
     } else {
-      baseUrl = developmentBaseUrl;
+      baseUrl = productionBaseUrl;
     }
     dio.options.baseUrl = baseUrl;
   }
@@ -43,7 +43,7 @@ class ApiClient {
 
   static Future<void> resetToDefault() async {
     // reset to default
-    baseUrl = developmentBaseUrl;
+    baseUrl = productionBaseUrl;
     dio.options.baseUrl = baseUrl;
     final urlStorage = UrlStorage();
     await urlStorage.clearConnectionDetails();

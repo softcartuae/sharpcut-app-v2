@@ -14,7 +14,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          channel: "stable"  
+          channel: "stable"
           architecture: x64
 
       - name: Enable Windows Desktop Support
@@ -25,7 +25,7 @@ jobs:
 
       - name: Generate Build Config
         run: dart run tool/generate_build_config.dart
- 
+
       - name: Build Windows Release
         run: flutter build windows --release
 

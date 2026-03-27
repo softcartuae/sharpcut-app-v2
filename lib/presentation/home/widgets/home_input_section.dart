@@ -8,8 +8,7 @@ import 'package:sharp_cut/presentation/home/widgets/custom_text_field.dart';
 import 'package:sharp_cut/domain/booking/models/customer_suggestion_model.dart';
 import 'package:sharp_cut/cubit/booking/customer_search_cubit.dart';
 import 'package:sharp_cut/cubit/booking/customer_search_state.dart';
-import 'dart:ui';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/presentation/home/widgets/customer_suggestions_overlay.dart';
 
 class HomeInputSection extends StatefulWidget {
   const HomeInputSection({super.key});
@@ -180,7 +179,7 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                                   FilteringTextInputFormatter.allow(
                                     RegExp(r'[a-zA-Z\s]'),
                                   ),
-                                  LengthLimitingTextInputFormatter(30),
+                                  LengthLimitingTextInputFormatter(50),
                                 ],
                                 onChanged: (value) {
                                   context.read<BookingFormCubit>().updateName(
@@ -190,7 +189,10 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                               );
                             },
                         optionsViewBuilder: (context, onSelected, options) {
-                          return _buildSuggestionsOverlay(options, onSelected);
+                          return CustomerSuggestionsOverlay(
+                            options: options,
+                            onSelected: onSelected,
+                          );
                         },
                       ),
                     ),
@@ -277,7 +279,10 @@ class _HomeInputSectionState extends State<HomeInputSection> {
                               );
                             },
                         optionsViewBuilder: (context, onSelected, options) {
-                          return _buildSuggestionsOverlay(options, onSelected);
+                          return CustomerSuggestionsOverlay(
+                            options: options,
+                            onSelected: onSelected,
+                          );
                         },
                       ),
                     ),
@@ -296,81 +301,6 @@ class _HomeInputSectionState extends State<HomeInputSection> {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildSuggestionsOverlay(
-    Iterable<CustomerSuggestionModel> options,
-    AutocompleteOnSelected<CustomerSuggestionModel> onSelected,
-  ) {
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Material(
-        color: Colors.transparent,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              width: 300,
-              constraints: const BoxConstraints(maxHeight: 250),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
-              ),
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final CustomerSuggestionModel option = options.elementAt(
-                    index,
-                  );
-                  return InkWell(
-                    onTap: () => onSelected(option),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        border: index != options.length - 1
-                            ? Border(
-                                bottom: BorderSide(
-                                  color: Colors.white.withOpacity(0.05),
-                                ),
-                              )
-                            : null,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            option.customerName,
-                            style: GoogleFonts.rajdhani(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            option.customerNumber,
-                            style: GoogleFonts.rajdhani(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
