@@ -49,7 +49,7 @@ void main() async {
     Bloc.observer = SimpleBlocObserver();
     runApp(
       DevicePreview(
-        enabled: true,
+        enabled: false,
         builder: (context) => MultiBlocProvider(
           providers: [
             BlocProvider(create: (_) => di.sl<ServiceCubit>()),

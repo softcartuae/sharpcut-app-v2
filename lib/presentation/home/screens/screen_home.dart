@@ -25,6 +25,23 @@ class _ScreenHomeState extends State<ScreenHome> {
 
   @override
   Widget build(BuildContext context) {
+    final isWindows = Theme.of(context).platform == TargetPlatform.windows;
+
+    Widget content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 39.0, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const HomeAppBar(),
+          const HomeInputSection(),
+          const SizedBox(height: 15),
+          isWindows
+              ? const Expanded(child: HomeServicesSection())
+              : const HomeServicesSection(),
+        ],
+      ),
+    );
+
     return Scaffold(
       body: BlocListener<BookingCubit, BookingState>(
         listener: (context, state) {
@@ -34,20 +51,7 @@ class _ScreenHomeState extends State<ScreenHome> {
             context.read<ServiceCubit>().clearCart();
           }
         },
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 39.0, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                HomeAppBar(),
-                HomeInputSection(),
-                SizedBox(height: 15),
-                HomeServicesSection(),
-              ],
-            ),
-          ),
-        ),
+        child: isWindows ? content : SingleChildScrollView(child: content),
       ),
     );
   }

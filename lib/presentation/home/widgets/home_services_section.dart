@@ -332,6 +332,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final isWindows = Theme.of(context).platform == TargetPlatform.windows;
     return MultiBlocListener(
       listeners: [
         BlocListener<ChairCubit, ChairState>(
@@ -428,7 +429,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         ),
       ],
       child: SizedBox(
-        height: 450, // Fixed height for now, can be flexible later
+        height: isWindows ? null : 450, // Fixed height for mobile, expanded for Windows
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
