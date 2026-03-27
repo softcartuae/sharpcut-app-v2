@@ -429,7 +429,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         ),
       ],
       child: SizedBox(
-        height: isWindows ? null : 450, // Fixed height for mobile, expanded for Windows
+        height: isWindows
+            ? null
+            : 450, // Fixed height for mobile, expanded for Windows
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
