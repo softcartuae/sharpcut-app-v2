@@ -2,7 +2,7 @@ name: Build Windows App
 
 on:
   push:
-    branches: ["online_merged_branch"]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:

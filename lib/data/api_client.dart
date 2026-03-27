@@ -58,7 +58,7 @@ class ApiClient {
   static final updateCustomerDetailsApi = "transactions/update-customer";
   static final transactionsSYNCPOSTapi = "transactions";
   static final resetUserPasswordapi = "reset-password";
-  static final resetAdminPasswordapi = "reset-password";
+  static final resetAdminPasswordapi = "reset-admin-password";
   static final shopAdminLoginapi = "shop-admin-login";
   static final invoiceSettingsPOSTApi = "invoice-settings";
   static final slotBookingChairApi = "transactions/book-slot";
