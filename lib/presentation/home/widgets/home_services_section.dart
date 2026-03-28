@@ -37,7 +37,6 @@ import 'package:sharp_cut/presentation/quick_report/screens/screen_quick_report.
 import 'package:sharp_cut/presentation/home/widgets/tip_dialoge.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
-
 import 'package:sharp_cut/utils/helpers/icon_helper.dart';
 import 'package:sharp_cut/utils/comon/validate_password.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
@@ -254,6 +253,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     );
 
     if (selectedValue != null && mounted) {
+
       switch (selectedValue) {
         case 1:
           ResetPasswordDialog.show(
@@ -343,11 +343,14 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           );
           break;
       }
+      
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isWindows = Theme.of(context).platform == TargetPlatform.windows;
+
     return MultiBlocListener(
       listeners: [
         BlocListener<ChairCubit, ChairState>(
@@ -464,7 +467,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         ),
       ],
       child: SizedBox(
-        height: 450, // Fixed height for now, can be flexible later
+        height: isWindows
+            ? null
+            : 450, // Fixed height for mobile, expanded for Windows
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
