@@ -128,4 +128,35 @@ class ServiceCubit extends Cubit<ServiceState> {
       emit(currentState.copyWith(cartItems: items));
     }
   }
+
+  void updateCharge(CartItemModel item, double newCharge) {
+    final currentState = state;
+    if (currentState is ServiceStateSuccess) {
+      final index = currentState.cartItems.indexWhere(
+        (cartItem) => cartItem.service.id == item.service.id,
+      );
+
+      if (index != -1) {
+        final updatedCart = List<CartItemModel>.from(currentState.cartItems);
+        final currentItem = updatedCart[index];
+
+        final taxPercentage = currentItem.service.taxPercentage ?? 0;
+        final beforeTax = double.parse(
+          (newCharge * 100 / (100 + taxPercentage)).toStringAsFixed(2),
+        );
+        final taxAmount = double.parse(
+          (newCharge - beforeTax).toStringAsFixed(2),
+        );
+
+        updatedCart[index] = currentItem.copyWith(
+          service: currentItem.service.copyWith(
+            charge: newCharge,
+            unitTax: taxAmount,
+            beforeVat: beforeTax,
+          ),
+        );
+        emit(currentState.copyWith(cartItems: updatedCart));
+      }
+    }
+  }
 }

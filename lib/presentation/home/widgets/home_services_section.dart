@@ -566,6 +566,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                         showDialog(
                                           context: context,
                                           builder: (context) => TipDialog(
+                                            
                                             onTipSelected: (amount) {
                                               final taxPercentage =
                                                   service.taxPercentage ?? 0;
@@ -684,6 +685,19 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               itemBuilder: (context, index) {
                                 final item = state.cartItems[index];
                                 return AddedItem(
+                                  onEditCharge: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => TipDialog(
+                                        title: "EDIT CHARGE",
+                                        onTipSelected: (amount) {
+                                          context
+                                              .read<ServiceCubit>()
+                                              .updateCharge(item, amount);
+                                        },
+                                      ),
+                                    );
+                                  },
                                   item: item,
                                   onIncrement: () {
                                     context.read<ServiceCubit>().updateQuantity(
@@ -761,6 +775,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                 child: BlocBuilder<BookingCubit, BookingState>(
                   builder: (context, bookingState) {
                     final isBooked = bookingState is BookingSuccess;
+
                     return ValueListenableBuilder<String>(
                       valueListenable: _selectedButtonNotifier,
                       builder: (context, selectedButton, child) {

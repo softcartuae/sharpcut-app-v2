@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 
 class TipDialog extends StatefulWidget {
   final Function(double) onTipSelected;
+  final String title;
 
-  const TipDialog({super.key, required this.onTipSelected});
+  const TipDialog({super.key, required this.onTipSelected, this.title = "TIP"});
 
   @override
   State<TipDialog> createState() => _TipDialogState();
@@ -53,9 +54,9 @@ class _TipDialogState extends State<TipDialog> {
                 ),
               ],
             ),
-            const Text(
-              'TIP',
-              style: TextStyle(
+            Text(
+              widget.title,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w300,
                 color: Colors.black,

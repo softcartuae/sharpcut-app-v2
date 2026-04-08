@@ -11,6 +11,7 @@ class AddedItem extends StatelessWidget {
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onRemove;
+  final VoidCallback onEditCharge;
 
   const AddedItem({
     super.key,
@@ -18,6 +19,7 @@ class AddedItem extends StatelessWidget {
     required this.onIncrement,
     required this.onDecrement,
     required this.onRemove,
+    required this.onEditCharge,
   });
 
   @override
@@ -92,9 +94,12 @@ class AddedItem extends StatelessWidget {
                 ],
               ),
               const SizedBox(width: 32),
-              Text(
-                "\$${item.service.charge ?? "0"}",
-                style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 18),
+              InkWell(
+                onTap: onEditCharge,
+                child: Text(
+                  "\$${item.service.charge ?? "0"}",
+                  style: GoogleFonts.rajdhani(color: Colors.white, fontSize: 18),
+                ),
               ),
               const SizedBox(width: 24),
               InkWell(
