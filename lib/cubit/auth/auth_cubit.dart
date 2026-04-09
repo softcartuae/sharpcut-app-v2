@@ -11,7 +11,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
   final AuthRepo authRepo;
   final TokenStorage tokenStorage;
 
-  ShopModel? currentUser;
+  ShopModel? currentShop;
 
   AuthCubit({required this.authRepo, required this.tokenStorage})
     : super(AuthInitial());
@@ -26,7 +26,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
         },
         (r) async {
           await tokenStorage.saveToken(r);
-          
+
           // Fetch user immediately after login
           await getUser();
           emit(AuthLoginSuccess(r));
@@ -46,7 +46,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
 
     try {
       final user = await authRepo.getUser();
-      currentUser = user;
+      currentShop = user;
 
       if (user.mode != null) {
         await tokenStorage.saveMode(user.mode!);
@@ -77,7 +77,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
   Future<void> logout() async {
     await authRepo.logout();
     await ApiClient.resetToDefault();
-    currentUser = null;
+    currentShop = null;
     emit(AuthUnauthenticated());
   }
 }

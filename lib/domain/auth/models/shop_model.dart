@@ -6,6 +6,7 @@ class ShopModel {
   final String? vatNo;
   final String? mode;
   final bool? isChair;
+  final bool isChargeOrServiceCanEdit;
 
   ShopModel({
     this.id,
@@ -14,12 +15,14 @@ class ShopModel {
     this.address,
     this.mode,
     this.vatNo,
+    required this.isChargeOrServiceCanEdit,
     this.isChair,
   });
 
   factory ShopModel.fromJson(Map<String, dynamic> json) {
     return ShopModel(
       id: json['id'],
+      isChargeOrServiceCanEdit: json['is_service_price_editable'] ?? false,
       name: json['name'],
       description: json['description'],
       address: json['address'],

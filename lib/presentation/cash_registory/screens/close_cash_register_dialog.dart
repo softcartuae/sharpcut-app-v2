@@ -74,7 +74,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
   Widget build(BuildContext context) {
     final chairCubit = context.read<ChairCubit>();
     List<StaffModel> staffList = List<StaffModel>.from(chairCubit.staffs);
-    final shop = context.read<AuthCubit>().currentUser;
+    final shop = context.read<AuthCubit>().currentShop;
     final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
     return BlocListener<CashRegistoryCubit, CashRegistoryState>(
       listener: (context, state) {
@@ -83,7 +83,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
           ToastHelper.showSuccess(state.response.message);
           final report = state.response.report;
           if (report != null) {
-            final ShopModel? shop = context.read<AuthCubit>().currentUser;
+            final ShopModel? shop = context.read<AuthCubit>().currentShop;
             if (shop != null) {
               context.read<PrintingCubit>().printCloseRegisterReport(
                 report: report,

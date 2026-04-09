@@ -177,13 +177,13 @@ class _CancellationDialogState extends State<CancellationDialog> {
               ),
 
               if (!CheckNoChair.checkIsThisAppNoChairOrNot(
-                context.read<AuthCubit>().currentUser,
+                context.read<AuthCubit>().currentShop,
               ))
                 const SizedBox(height: 16),
 
               // Password Field
               if (!CheckNoChair.checkIsThisAppNoChairOrNot(
-                context.read<AuthCubit>().currentUser,
+                context.read<AuthCubit>().currentShop,
               ))
                 Container(
                   decoration: BoxDecoration(
@@ -279,8 +279,8 @@ class _CancellationDialogState extends State<CancellationDialog> {
 
                                     final shop = context
                                         .read<AuthCubit>()
-                                        .currentUser;
-                                        
+                                        .currentShop;
+
                                     final isNoChair =
                                         CheckNoChair.checkIsThisAppNoChairOrNot(
                                           shop,

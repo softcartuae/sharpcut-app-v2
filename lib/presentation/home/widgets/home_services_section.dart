@@ -159,7 +159,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     log("paymentStatus ${request.paymentStatus}");
     log("final total before ${request.finalTotalbefore}");
 
-    final shopData = context.read<AuthCubit>().currentUser;
+    final shopData = context.read<AuthCubit>().currentShop;
     if (shopData != null) {
       _pendingPrintData = _PendingPrintData(
         chairId: chairId,
@@ -337,7 +337,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       listeners: [
         BlocListener<ChairCubit, ChairState>(
           listener: (context, state) {
-            final shop = context.read<AuthCubit>().currentUser;
+            final shop = context.read<AuthCubit>().currentShop;
             final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
             final bookingState = context.read<BookingCubit>().state;
 
@@ -410,7 +410,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         BlocListener<CashRegistoryCubit, CashRegistoryState>(
           listener: (context, state) {
             if (state is CashRegistoryReportLoaded) {
-              final shop = context.read<AuthCubit>().currentUser;
+              final shop = context.read<AuthCubit>().currentShop;
               if (shop != null) {
                 final printCubit = context.read<PrintingCubit>();
                 printCubit.printCloseRegisterReport(
@@ -566,7 +566,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                         showDialog(
                                           context: context,
                                           builder: (context) => TipDialog(
-                                            
                                             onTipSelected: (amount) {
                                               final taxPercentage =
                                                   service.taxPercentage ?? 0;
@@ -686,6 +685,19 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 final item = state.cartItems[index];
                                 return AddedItem(
                                   onEditCharge: () {
+                                    
+                                    final shop = context
+                                        .read<AuthCubit>()
+                                        .currentShop;
+                                    final canEdit =
+                                        CheckNoChair.checkShopCanEditServiceOrCharge(
+                                          shop,
+                                        );
+
+                                    if (!canEdit) {
+                                      return;
+                                    }
+
                                     showDialog(
                                       context: context,
                                       builder: (context) => TipDialog(
@@ -870,7 +882,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 builder: (context) {
                                   final shop = context
                                       .read<AuthCubit>()
-                                      .currentUser;
+                                      .currentShop;
                                   final isNoChair =
                                       CheckNoChair.checkIsThisAppNoChairOrNot(
                                         shop,
@@ -948,24 +960,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             final bookingFormState = context
                                                 .read<BookingFormCubit>()
                                                 .state;
-
-                                            // if (bookingFormState
-                                            //     .customerName
-                                            //     .isEmpty) {
-                                            //   ToastHelper.showError(
-                                            //     "Customer name is required",
-                                            //   );
-                                            //   return;
-                                            // }
-
-                                            // if (bookingFormState
-                                            //     .customerNumber
-                                            //     .isEmpty) {
-                                            //   ToastHelper.showError(
-                                            //     "Customer number is required",
-                                            //   );
-                                            //   return;
-                                            // }
 
                                             showQuickPaymentPopup(
                                               context,
@@ -1231,7 +1225,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 builder: (context) {
                                   final shop = context
                                       .read<AuthCubit>()
-                                      .currentUser;
+                                      .currentShop;
                                   final isNoChair =
                                       CheckNoChair.checkIsThisAppNoChairOrNot(
                                         shop,

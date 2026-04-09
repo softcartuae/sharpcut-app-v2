@@ -295,7 +295,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                               final ShopModel? shopData =
                                                   context
                                                       .read<AuthCubit>()
-                                                      .currentUser;
+                                                      .currentShop;
 
                                               final booking =
                                                   state.transactions[index];
@@ -447,7 +447,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                               final ShopModel? shopData =
                                                   context
                                                       .read<AuthCubit>()
-                                                      .currentUser;
+                                                      .currentShop;
 
                                               if (shopData != null) {
                                                 showReceiptDialog(

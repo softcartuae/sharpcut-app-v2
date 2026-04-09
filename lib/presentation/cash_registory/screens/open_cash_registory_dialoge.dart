@@ -23,7 +23,7 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
   final chairCubit = context.read<ChairCubit>();
   List<StaffModel> staffListAll = List<StaffModel>.from(chairCubit.staffs);
   List<StaffModel> staffList = staffListAll;
-  final shop = context.read<AuthCubit>().currentUser;
+  final shop = context.read<AuthCubit>().currentShop;
   final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
 
   return showDialog(
