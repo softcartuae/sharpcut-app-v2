@@ -12,6 +12,7 @@ class TestReceiptScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Dummy Shop Data
     final dummyShop = ShopModel(
+      isChargeOrServiceCanEdit: true,
       name: 'TAJ SHALEELA SALON',
       address: 'Abu Dhabi _ U.A.E',
       vatNo: '104426133500003',

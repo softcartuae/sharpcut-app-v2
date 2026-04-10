@@ -5,4 +5,9 @@ class CheckNoChair {
     if (shop == null) return false;
     return shop.isChair == false;
   }
+
+    static bool checkShopCanEditServiceOrCharge(ShopModel? shop) {
+    if (shop == null) return false;
+    return shop.isChargeOrServiceCanEdit == true;
+  }
 }

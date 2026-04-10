@@ -418,7 +418,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
       listener: (context, state) {
         if (state is BookingPaymentSettled) {
           if (_shouldPrint && _pendingRequest != null) {
-            final shopData = context.read<AuthCubit>().currentUser;
+            final shopData = context.read<AuthCubit>().currentShop;
             if (shopData != null) {
               final printCubit = context.read<PrintingCubit>();
 

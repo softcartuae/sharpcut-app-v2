@@ -255,10 +255,9 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                     booking.invoiceNo,
                                                 cartItems: cartItems,
                                               );
-                                              
                                             },
                                             onCustomerNameTap: () {
-                                            showDialog(
+                                              showDialog(
                                                 context: context,
                                                 builder: (context) {
                                                   final transaction =
@@ -293,7 +292,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                               final ShopModel? shopData =
                                                   context
                                                       .read<AuthCubit>()
-                                                      .currentUser;
+                                                      .currentShop;
 
                                               final booking =
                                                   state.transactions[index];
@@ -445,7 +444,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                               final ShopModel? shopData =
                                                   context
                                                       .read<AuthCubit>()
-                                                      .currentUser;
+                                                      .currentShop;
 
                                               if (shopData != null) {
                                                 showReceiptDialog(

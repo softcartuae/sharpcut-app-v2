@@ -7,6 +7,8 @@ class ShopModel {
   final String? mode;
   final bool? isChair;
   final num? syncTime;
+  final bool isChargeOrServiceCanEdit;
+
 
   ShopModel({
     this.id,
@@ -17,6 +19,7 @@ class ShopModel {
     this.vatNo,
     this.isChair,
     this.syncTime,
+    required this.isChargeOrServiceCanEdit,
   });
 
   factory ShopModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +30,7 @@ class ShopModel {
     }
 
     return ShopModel(
+      isChargeOrServiceCanEdit: json['is_service_price_editable'] ?? false,
       id: json['id'],
       name: json['name'],
       description: json['description'],

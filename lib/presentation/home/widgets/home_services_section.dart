@@ -162,7 +162,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       change: [0.0],
     );
 
-    final shopData = context.read<AuthCubit>().currentUser;
+    final shopData = context.read<AuthCubit>().currentShop;
     if (shopData != null) {
       _pendingPrintData = _PendingPrintData(
         chairId: chairId,
@@ -253,7 +253,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     );
 
     if (selectedValue != null && mounted) {
-
       switch (selectedValue) {
         case 1:
           ResetPasswordDialog.show(
@@ -343,7 +342,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
           );
           break;
       }
-      
     }
   }
 
@@ -355,7 +353,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       listeners: [
         BlocListener<ChairCubit, ChairState>(
           listener: (context, state) {
-            final shop = context.read<AuthCubit>().currentUser;
+            final shop = context.read<AuthCubit>().currentShop;
             final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
             final bookingState = context.read<BookingCubit>().state;
 
@@ -428,7 +426,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         BlocListener<CashRegistoryCubit, CashRegistoryState>(
           listener: (context, state) {
             if (state is CashRegistoryReportLoaded) {
-              final shop = context.read<AuthCubit>().currentUser;
+              final shop = context.read<AuthCubit>().currentShop;
               if (shop != null) {
                 final printCubit = context.read<PrintingCubit>();
                 printCubit.printCloseRegisterReport(
@@ -721,6 +719,31 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                               itemBuilder: (context, index) {
                                 final item = state.cartItems[index];
                                 return AddedItem(
+                                  onEditCharge: () {
+                                    final shop = context
+                                        .read<AuthCubit>()
+                                        .currentShop;
+                                    final canEdit =
+                                        CheckNoChair.checkShopCanEditServiceOrCharge(
+                                          shop,
+                                        );
+
+                                    if (!canEdit) {
+                                      return;
+                                    }
+
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => TipDialog(
+                                        title: "EDIT CHARGE",
+                                        onTipSelected: (amount) {
+                                          context
+                                              .read<ServiceCubit>()
+                                              .updateCharge(item, amount);
+                                        },
+                                      ),
+                                    );
+                                  },
                                   item: item,
                                   onIncrement: () {
                                     context.read<ServiceCubit>().updateQuantity(
@@ -892,7 +915,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 builder: (context) {
                                   final shop = context
                                       .read<AuthCubit>()
-                                      .currentUser;
+                                      .currentShop;
                                   final isNoChair =
                                       CheckNoChair.checkIsThisAppNoChairOrNot(
                                         shop,
@@ -1253,7 +1276,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 builder: (context) {
                                   final shop = context
                                       .read<AuthCubit>()
-                                      .currentUser;
+                                      .currentShop;
                                   final isNoChair =
                                       CheckNoChair.checkIsThisAppNoChairOrNot(
                                         shop,
