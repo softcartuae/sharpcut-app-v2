@@ -8,6 +8,7 @@ class ShopModel {
   final bool? isChair;
   final num? syncTime;
   final bool isChargeOrServiceCanEdit;
+    final bool isVatIncluded;
 
 
   ShopModel({
@@ -19,6 +20,8 @@ class ShopModel {
     this.vatNo,
     this.isChair,
     this.syncTime,
+    required this.isVatIncluded,
+
     required this.isChargeOrServiceCanEdit,
   });
 
@@ -30,6 +33,8 @@ class ShopModel {
     }
 
     return ShopModel(
+      isVatIncluded: json['is_vat'] ?? false,
+
       isChargeOrServiceCanEdit: json['is_service_price_editable'] ?? false,
       id: json['id'],
       name: json['name'],

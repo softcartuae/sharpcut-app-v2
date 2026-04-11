@@ -78,7 +78,10 @@ class ReceiptWidget extends StatelessWidget {
               ),
 
             // TRN
-            if (shopData.vatNo != null)
+            if (shopData.vatNo != null &&
+                (shopData.isVatIncluded == true) &&
+                request.taxTotal != null &&
+                request.taxTotal! > 0)
               Text(
                 'TRN: ${shopData.vatNo}',
                 textAlign: TextAlign.center,
@@ -93,10 +96,12 @@ class ReceiptWidget extends StatelessWidget {
 
             Builder(
               builder: (context) {
-                String taxInvoiceText = 'TAX INVOICE - فاتورة ضريبية';
+                String taxInvoiceText = 'INVOICE - فاتورة';
 
-                if (shopData.vatNo == null || shopData.vatNo!.isEmpty) {
-                  taxInvoiceText = 'INVOICE - فاتورة';
+                if ((shopData.isVatIncluded == true) &&
+                    request.taxTotal != null &&
+                    request.taxTotal! > 0) {
+                  taxInvoiceText = 'TAX INVOICE - فاتورة ضريبية';
                 }
 
                 return Text(
@@ -459,14 +464,17 @@ class ReceiptWidget extends StatelessWidget {
               'Discount - الخصم',
               (request.discount ?? 0).toStringAsFixed(2),
             ),
-
-            if (shopData.vatNo != null && shopData.vatNo!.isNotEmpty)
+            if ((shopData.isVatIncluded == true) &&
+                request.taxTotal != null &&
+                request.taxTotal! > 0)
               _buildTotalRow(
                 'Before VAT - المجموع قبل الضريبة',
                 (request.subTotalValue ?? 0).toStringAsFixed(2),
               ),
 
-            if (shopData.vatNo != null && shopData.vatNo!.isNotEmpty)
+            if ((shopData.isVatIncluded == true) &&
+                request.taxTotal != null &&
+                request.taxTotal! > 0)
               _buildTotalRow(
                 'VAT (5%) Amount - قيمة الضريبة',
                 (request.taxTotal ?? 0).toStringAsFixed(2),
