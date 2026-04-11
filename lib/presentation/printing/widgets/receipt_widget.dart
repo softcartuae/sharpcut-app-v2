@@ -78,7 +78,10 @@ class ReceiptWidget extends StatelessWidget {
               ),
 
             // TRN
-            if (shopData.vatNo != null)
+            if (shopData.vatNo != null &&
+                (shopData.isVatIncluded == true) &&
+                request.taxTotal != null &&
+                request.taxTotal! > 0)
               Text(
                 'TRN: ${shopData.vatNo}',
                 textAlign: TextAlign.center,
@@ -91,14 +94,26 @@ class ReceiptWidget extends StatelessWidget {
 
             const SizedBox(height: 4),
 
-            Text(
-              'TAX INVOICE - فاتورة ضريبية',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.marcellus(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+            Builder(
+              builder: (context) {
+                String taxInvoiceText = 'INVOICE - فاتورة';
+
+                if ((shopData.isVatIncluded == true) &&
+                    request.taxTotal != null &&
+                    request.taxTotal! > 0) {
+                  taxInvoiceText = 'TAX INVOICE - فاتورة ضريبية';
+                }
+
+                return Text(
+                  taxInvoiceText,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.marcellus(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                );
+              },
             ),
 
             Container(height: 1.5, color: Colors.black),
@@ -450,19 +465,21 @@ class ReceiptWidget extends StatelessWidget {
               (request.discount ?? 0).toStringAsFixed(2),
             ),
 
-            _buildTotalRow(
-              'Before VAT - المجموع قبل الضريبة',
-              (request.subTotalValue ?? 0).toStringAsFixed(2),
-            ),
+            if ((shopData.isVatIncluded == true) &&
+                request.taxTotal != null &&
+                request.taxTotal! > 0)
+              _buildTotalRow(
+                'Before VAT - المجموع قبل الضريبة',
+                (request.subTotalValue ?? 0).toStringAsFixed(2),
+              ),
 
-            // _buildTotalRow(
-            //   'Incl VAT - المجموع شامل الضريبة',
-            //   (request.finalTotal ?? 0).toStringAsFixed(2),
-            // ), // Assuming final total is incl VAT
-            _buildTotalRow(
-              'VAT (5%) Amount - قيمة الضريبة',
-              (request.taxTotal ?? 0).toStringAsFixed(2),
-            ),
+            if ((shopData.isVatIncluded == true) &&
+                request.taxTotal != null &&
+                request.taxTotal! > 0)
+              _buildTotalRow(
+                'VAT (5%) Amount - قيمة الضريبة',
+                (request.taxTotal ?? 0).toStringAsFixed(2),
+              ),
 
             _buildTotalRow(
               increesFontSize: true,

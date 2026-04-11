@@ -137,6 +137,7 @@ class ServiceCubit extends Cubit<ServiceState> {
       );
 
       if (index != -1) {
+        
         final updatedCart = List<CartItemModel>.from(currentState.cartItems);
         final currentItem = updatedCart[index];
 

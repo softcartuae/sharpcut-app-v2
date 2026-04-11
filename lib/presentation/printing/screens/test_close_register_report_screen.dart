@@ -12,6 +12,7 @@ class TestCloseRegisterReportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dummyShop = ShopModel(
+      isVatIncluded: true,
       isChargeOrServiceCanEdit: false,
       name: 'TAJ SHALEELA SALON',
       address: 'Abu Dhabi _ U.A.E',
