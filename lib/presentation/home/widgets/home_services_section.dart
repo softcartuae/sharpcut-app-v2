@@ -15,6 +15,7 @@ import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/presentation/cash_registory/screens/open_cash_registory_dialoge.dart';
 import 'package:sharp_cut/presentation/cash_registory/screens/close_cash_register_dialog.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_expense.dart';
+import 'package:sharp_cut/presentation/shop_expense/screens/screen_shop_expense.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_settlement.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_search.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
@@ -685,7 +686,6 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 final item = state.cartItems[index];
                                 return AddedItem(
                                   onEditCharge: () {
-                                    
                                     final shop = context
                                         .read<AuthCubit>()
                                         .currentShop;
@@ -1186,6 +1186,38 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   .chairId,
                                             );
                                           }
+                                        },
+                                ),
+                              ),
+                            if (!isBooked) const SizedBox(height: 12),
+                            if (!isBooked)
+                              Opacity(
+                                opacity: isBooked ? 0.5 : 1.0,
+                                child: ActionButton(
+                                  label: "SHOP EXPENSE",
+                                  isPrimary: selectedButton == "SHOP EXPENSE",
+                                  onTap: isBooked
+                                      ? null
+                                      : () {
+                                          _selectedButtonNotifier.value =
+                                              "SHOP EXPENSE";
+                                          showPasswordForValidation(
+                                            showAdminToo: false,
+                                            isAdminOnly: true,
+                                            context,
+                                            false,
+                                            onSuccessWithStaff: (staff) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ScreenShopExpense(
+                                                        staff: staff,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                          );
                                         },
                                 ),
                               ),

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:sharp_cut/cubit/shop_expenses/shop_expense_cubit.dart';
 
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/firebase_options.dart';
@@ -67,6 +68,7 @@ void main() async {
             BlocProvider(create: (_) => di.sl<QuickReportCubit>()),
             BlocProvider(create: (_) => di.sl<CashRegistoryCubit>()),
             BlocProvider(create: (_) => di.sl<CustomerSearchCubit>()),
+            BlocProvider(create: (_) => di.sl<ShopExpenseCubit>()),
           ],
           child: MyApp(),
         ), // Wrap your app

@@ -39,6 +39,10 @@ import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
 import 'package:sharp_cut/domain/cash_registory/service/cash_registory_repo.dart';
 import 'package:sharp_cut/data/cash_registory/service/cash_registory_repo_imp.dart';
 
+import 'package:sharp_cut/cubit/shop_expenses/shop_expense_cubit.dart';
+import 'package:sharp_cut/domain/shop_expenses/shop_expense_repo.dart';
+import 'package:sharp_cut/data/shop_expenses/shop_expense_repo_impl.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -83,11 +87,15 @@ Future<void> init() async {
     () => CustomerSearchCubit(sl<BookingRepo>()),
   );
 
+  sl.registerFactory<ShopExpenseCubit>(
+    () => ShopExpenseCubit(shopExpenseRepo: sl<ShopExpenseRepo>()),
+  );
+
   // Repositories
   sl.registerLazySingleton<AuthRepo>(
     () => AuthRepoImpl(tokenStorage: sl<TokenStorage>()),
   );
-  
+
   sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
   sl.registerLazySingleton<ChairRepo>(() => ChairRepoImpl());
   sl.registerLazySingleton<PasswordRepo>(() => PasswordRepoImp());
@@ -102,4 +110,5 @@ Future<void> init() async {
     () => QuickReportRepoImp(QuickReportService()),
   );
   sl.registerLazySingleton<CashRegistoryRepo>(() => CashRegistoryRepoImp());
+  sl.registerLazySingleton<ShopExpenseRepo>(() => ShopExpenseRepoImpl());
 }

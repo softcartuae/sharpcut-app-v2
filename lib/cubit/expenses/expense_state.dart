@@ -18,6 +18,22 @@ class ExpenseError extends ExpenseState {
   ExpenseError({required this.message});
 }
 
+class ExpenseDeleting extends ExpenseState {}
+
+class ExpenseDeleted extends ExpenseState {
+  final String message;
+
+  ExpenseDeleted({required this.message});
+}
+
+class ExpenseUpdating extends ExpenseState {}
+
+class ExpenseUpdated extends ExpenseState {
+  final String message;
+
+  ExpenseUpdated({required this.message});
+}
+
 class ExpenseSubmitting extends ExpenseState {}
 
 class ExpenseSubmitted extends ExpenseState {

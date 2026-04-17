@@ -53,6 +53,7 @@ class ApiClient {
   static final loginApi = "login";
   static final logoutApi = "logout";
   static final userExpensePostApi = "users/expenses";
+  static final shopExpensePostApi = "shop-expenses";
   static final bookingsPostApi = "bookings";
   static final transactionsPOSTapi = "transactions";
   static final updateCustomerDetailsApi = "transactions/update-customer";
@@ -74,6 +75,7 @@ class ApiClient {
 
   // GET API ENDPOINTS
   static final userExpenseGETapi = "users/expenses";
+  static final shopExpenseGETapi = "shop-expenses";
   static final transactionsGETApi = "transactions";
   static final authentcatedUserApi = "shop";
   static final chairsApi = "chairs";

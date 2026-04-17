@@ -106,4 +106,60 @@ class ExpenseRepoImpl implements ExpenseRepo {
       return Left('Error saving expense: $e');
     }
   }
+
+  @override
+  Future<Either<String, String>> deleteExpense({required int id}) async {
+    try {
+      final response = await ApiClient.dio.delete(
+        "${ApiClient.userExpenseGETapi}/$id",
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        final data = response.data;
+        return Right(data['message'] ?? 'Expense Deleted Successfully');
+      } else {
+        return Left('Failed to delete expense: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        final data = e.response!.data;
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return Left(data['message']);
+        }
+      }
+      return Left('Error deleting expense: ${e.message}');
+    } catch (e) {
+      return Left('Error deleting expense: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, String>> updateExpense({
+    required int id,
+    required Map<String, dynamic> data,
+  }) async {
+    try {
+      final response = await ApiClient.dio.put(
+        "${ApiClient.userExpenseGETapi}/$id",
+        data: data,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return Right(data['message'] ?? 'Expense Updated Successfully');
+      } else {
+        return Left('Failed to update expense: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        final data = e.response!.data;
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return Left(data['message']);
+        }
+      }
+      return Left('Error updating expense: ${e.message}');
+    } catch (e) {
+      return Left('Error updating expense: $e');
+    }
+  }
 }

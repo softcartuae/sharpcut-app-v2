@@ -556,6 +556,7 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
 
           // Rows
           ...report.salesmanWiseDetails.map((detail) {
+            
             final double cash = double.tryParse(detail.totalCashAmount) ?? 0.0;
             final double card = double.tryParse(detail.totalCardAmount) ?? 0.0;
             final double total = cash + card;

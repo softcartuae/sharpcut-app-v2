@@ -30,4 +30,26 @@ class ExpenseCubit extends Cubit<ExpenseState> {
       (message) => emit(ExpenseSubmitted(message: message)),
     );
   }
+
+  Future<void> deleteExpense({required int id, required int userId}) async {
+    emit(ExpenseDeleting());
+    final result = await expenseRepo.deleteExpense(id: id);
+    result.fold((error) => emit(ExpenseError(message: error)), (message) {
+      emit(ExpenseDeleted(message: message));
+      getExpensesBySpecificUser(userId: userId);
+    });
+  }
+
+  Future<void> updateExpense({
+    required int id,
+    required int userId,
+    required Map<String, dynamic> data,
+  }) async {
+    emit(ExpenseUpdating());
+    final result = await expenseRepo.updateExpense(id: id, data: data);
+    result.fold((error) => emit(ExpenseError(message: error)), (message) {
+      emit(ExpenseUpdated(message: message));
+      getExpensesBySpecificUser(userId: userId);
+    });
+  }
 }
