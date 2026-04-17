@@ -14,6 +14,7 @@ Future<void> showPasswordForValidation(
   BuildContext context,
   bool isAdmin, {
   bool showAdminToo = false,
+  bool isAdminOnly = false,
   StaffModel? preSelectedStaff,
   VoidCallback? onSuccess,
   Function(StaffModel)? onSuccessWithStaff,
@@ -27,7 +28,11 @@ Future<void> showPasswordForValidation(
   List<StaffModel> staffListAll = List<StaffModel>.from(chairCubit.staffs);
   List<StaffModel> staffList = staffListAll
       .where(
-        (element) => showAdminToo == true ? true : element.role != Role.admin,
+        (element) => showAdminToo == true
+            ? true
+            : isAdminOnly == true
+            ? element.role == Role.admin
+            : element.role != Role.admin,
       )
       .toList();
 
@@ -101,7 +106,9 @@ Future<void> showPasswordForValidation(
                                     ),
                                   )
                                 : Text(
-                                    showAdminToo == true
+                                    isAdminOnly == true
+                                        ? "Select Admin"
+                                        : showAdminToo == true
                                         ? "Select User"
                                         : "Select Staff",
                                     textAlign: TextAlign.center,
@@ -163,7 +170,9 @@ Future<void> showPasswordForValidation(
                                               });
                                             },
                                       hint: Text(
-                                        showAdminToo == true
+                                        isAdminOnly == true
+                                            ? "Select Admin"
+                                            : showAdminToo == true
                                             ? "Select User"
                                             : "Select Staff",
                                         style: GoogleFonts.rajdhani(
@@ -269,7 +278,8 @@ Future<void> showPasswordForValidation(
                                             return;
                                           }
                                           // if show admin too is true and selected staff is admin then set isAdmin to true
-                                          if (showAdminToo == true) {
+                                          if (showAdminToo == true ||
+                                              isAdminOnly == true) {
                                             if (selectedStaff?.role ==
                                                 Role.admin) {
                                               isAdmin = true;

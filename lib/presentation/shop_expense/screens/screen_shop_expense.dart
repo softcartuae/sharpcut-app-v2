@@ -1,41 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
-import 'package:sharp_cut/cubit/expenses/expense_state.dart';
+import 'package:sharp_cut/cubit/shop_expenses/shop_expense_cubit.dart';
+import 'package:sharp_cut/cubit/shop_expenses/shop_expense_state.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
-import 'package:sharp_cut/presentation/expense/screens/screen_add_expense.dart';
-import 'package:sharp_cut/presentation/expense/widgets/delete_expense_dialog.dart';
-import 'package:sharp_cut/presentation/expense/widgets/edit_expense_dialog.dart';
-import 'package:sharp_cut/utils/helpers/toast_helper.dart';
+import 'package:sharp_cut/presentation/shop_expense/screens/screen_add_shop_expense.dart';
+import 'package:sharp_cut/presentation/shop_expense/widgets/delete_shop_expense_dialog.dart';
+import 'package:sharp_cut/presentation/shop_expense/widgets/edit_shop_expense_dialog.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart' show ToastHelper;
 
-class ScreenExpense extends StatefulWidget {
+class ScreenShopExpense extends StatefulWidget {
   final StaffModel staff;
-  const ScreenExpense({super.key, required this.staff});
+  const ScreenShopExpense({super.key, required this.staff});
 
   @override
-  State<ScreenExpense> createState() => _ScreenExpenseState();
+  State<ScreenShopExpense> createState() => _ScreenShopExpenseState();
 }
 
-class _ScreenExpenseState extends State<ScreenExpense> {
+class _ScreenShopExpenseState extends State<ScreenShopExpense> {
   @override
   void initState() {
     super.initState();
-    context.read<ExpenseCubit>().getExpensesBySpecificUser(
-      userId: widget.staff.id,
+    context.read<ShopExpenseCubit>().getShopExpensesByStaff(
+      staffId: widget.staff.id,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ExpenseCubit, ExpenseState>(
+    return BlocListener<ShopExpenseCubit, ShopExpenseState>(
       listener: (context, state) {
-        if (state is ExpenseDeleted) {
+        if (state is ShopExpenseDeleted) {
           ToastHelper.showSuccess(state.message);
-        } else if (state is ExpenseUpdated) {
+        } else if (state is ShopExpenseUpdated) {
           ToastHelper.showSuccess(state.message);
-        } else if (state is ExpenseError) {
+        } else if (state is ShopExpenseError) {
           ToastHelper.showError(state.message);
         }
       },
@@ -63,7 +63,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "EXPENSE",
+                              "SHOP EXPENSE",
                               style: GoogleFonts.rajdhani(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -123,16 +123,17 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                                 final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        ScreenAddExpense(staff: widget.staff),
+                                    builder: (context) => ScreenAddShopExpense(
+                                      staff: widget.staff,
+                                    ),
                                   ),
                                 );
 
                                 if (result == true && context.mounted) {
                                   context
-                                      .read<ExpenseCubit>()
-                                      .getExpensesBySpecificUser(
-                                        userId: widget.staff.id,
+                                      .read<ShopExpenseCubit>()
+                                      .getShopExpensesByStaff(
+                                        staffId: widget.staff.id,
                                       );
                                 }
                               },
@@ -220,13 +221,13 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                       ),
                       const SizedBox(height: 12),
                       Expanded(
-                        child: BlocBuilder<ExpenseCubit, ExpenseState>(
+                        child: BlocBuilder<ShopExpenseCubit, ShopExpenseState>(
                           builder: (context, state) {
-                            if (state is ExpenseLoading) {
+                            if (state is ShopExpenseLoading) {
                               return const Center(
                                 child: CircularProgressIndicator(),
                               );
-                            } else if (state is ExpenseError) {
+                            } else if (state is ShopExpenseError) {
                               return Center(
                                 child: Text(
                                   state.message,
@@ -236,7 +237,7 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                                   ),
                                 ),
                               );
-                            } else if (state is ExpenseLoaded) {
+                            } else if (state is ShopExpenseLoaded) {
                               if (state.expenses.isEmpty) {
                                 return Center(
                                   child: Text(
@@ -320,9 +321,9 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                                               showDialog(
                                                 context: context,
                                                 builder: (context) =>
-                                                    EditExpenseDialog(
+                                                    EditShopExpenseDialog(
                                                       expense: expense,
-                                                      userId: widget.staff.id,
+                                                      staffId: widget.staff.id,
                                                     ),
                                               );
                                             },
@@ -337,9 +338,9 @@ class _ScreenExpenseState extends State<ScreenExpense> {
                                               showDialog(
                                                 context: context,
                                                 builder: (context) =>
-                                                    DeleteExpenseDialog(
+                                                    DeleteShopExpenseDialog(
                                                       expenseId: expense.id!,
-                                                      userId: widget.staff.id,
+                                                      staffId: widget.staff.id,
                                                     ),
                                               );
                                             },

@@ -45,6 +45,10 @@ import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/domain/pusher/pusher_repo.dart';
 import 'package:sharp_cut/data/pusher/pusher_repo_impl.dart';
 
+import 'package:sharp_cut/cubit/shop_expenses/shop_expense_cubit.dart';
+import 'package:sharp_cut/domain/shop_expenses/shop_expense_repo.dart';
+import 'package:sharp_cut/data/shop_expenses/shop_expense_repo_impl.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
@@ -96,6 +100,10 @@ Future<void> init() async {
     () => MasterSyncCubit(syncToServer: sl<SyncToServer>()),
   );
 
+  sl.registerFactory<ShopExpenseCubit>(
+    () => ShopExpenseCubit(shopExpenseRepo: sl<ShopExpenseRepo>()),
+  );
+
   // Repositories
   sl.registerLazySingleton<DatabaseHelper>(() => DatabaseHelper());
 
@@ -129,4 +137,5 @@ Future<void> init() async {
   sl.registerLazySingleton<PusherRepo>(
     () => PusherRepoImpl(dbHelper: sl<DatabaseHelper>()),
   );
+  sl.registerLazySingleton<ShopExpenseRepo>(() => ShopExpenseRepoImpl());
 }

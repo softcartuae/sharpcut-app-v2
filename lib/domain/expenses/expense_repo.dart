@@ -10,4 +10,9 @@ abstract class ExpenseRepo {
     required int userId,
     required List<Map<String, dynamic>> items,
   });
+  Future<Either<String, String>> deleteExpense({required int id});
+  Future<Either<String, String>> updateExpense({
+    required int id,
+    required Map<String, dynamic> data,
+  });
 }
