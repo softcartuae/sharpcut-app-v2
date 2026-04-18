@@ -9,6 +9,8 @@ class TestQuickReportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Dummy Quick Report Data
     final dummyReport = QuickReportModel(
+            expenseDetails: ExpenseDetailsModel(totalShopExpense: 0, totalUserExpense: 9),
+
       salonName: 'TAJ SHALEELA SALON',
       branch: 'Abu Dhabi Branch',
       dateRange: '01/01/2026 - 03/01/2026',

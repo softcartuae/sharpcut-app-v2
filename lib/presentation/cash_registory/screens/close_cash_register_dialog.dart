@@ -177,6 +177,30 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                   children: [
                     Expanded(
                       child: Text(
+                        "Shop Exp: ${widget.closeRegisterDetails.expenseDetails.totalShopExpense}",
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        "User Exp: ${widget.closeRegisterDetails.expenseDetails.totalUserExpense}",
+                        textAlign: TextAlign.end,
+                        style: GoogleFonts.rajdhani(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
                         "Expected Amount: ${widget.closeRegisterDetails.expectedClosingAmount}",
                         style: GoogleFonts.rajdhani(
                           color: Colors.white70,
