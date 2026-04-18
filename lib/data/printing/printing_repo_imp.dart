@@ -383,7 +383,7 @@ class PrintingRepoImp implements PrintingRepo {
     // Calculate estimated height
     // Base height ~ 1000 + items
     double estimatedHeight =
-        1000 +
+        1200 + // Increased from 1000 to accommodate Expenses section
         (report.salesmanWiseDetails.length * 40.0) +
         (report.invoiceDetails.length * 40.0);
 
@@ -497,7 +497,8 @@ class PrintingRepoImp implements PrintingRepo {
 
     // Calculate estimated height
     // Base height ~ 1000 + items
-    double estimatedHeight = 1500;
+    double estimatedHeight =
+        1900; // Increased from 1700 to accommodate Expenses section
     if (report.transactions != null) {
       estimatedHeight +=
           (report.transactions!.salesmanWiseDetails.length * 40.0) +

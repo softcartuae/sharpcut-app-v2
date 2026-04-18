@@ -165,6 +165,27 @@ class CloseRegisterPrintWidget extends StatelessWidget {
             const Divider(color: Colors.black),
             const SizedBox(height: 2),
             Text(
+              "EXPENSE DETAILS",
+              style: GoogleFonts.rajdhani(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            _buildDetailRow(
+              "Shop Expense",
+              report.transactions!.expenseDetails.totalShopExpense
+                  .toStringAsFixed(2),
+            ),
+            _buildDetailRow(
+              "User Expense",
+              report.transactions!.expenseDetails.totalUserExpense
+                  .toStringAsFixed(2),
+            ),
+            const SizedBox(height: 2),
+            const Divider(color: Colors.black),
+            const SizedBox(height: 2),
+            Text(
               "SALESMAN WISE DETAILS",
               style: GoogleFonts.rajdhani(
                 fontSize: 22,

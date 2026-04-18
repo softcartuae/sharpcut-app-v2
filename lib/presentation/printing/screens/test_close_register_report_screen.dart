@@ -21,6 +21,7 @@ class TestCloseRegisterReportScreen extends StatelessWidget {
 
     // Dummy Transaction Report Data (QuickReportModel)
     final dummyTransactionReport = QuickReportModel(
+      expenseDetails: ExpenseDetailsModel(totalShopExpense: 0, totalUserExpense: 9),
       salonName: "TAJ SHALEELA Salon test1",
       branch: "MAIN",
       dateRange: "14/01/2026 - 14/01/2026",

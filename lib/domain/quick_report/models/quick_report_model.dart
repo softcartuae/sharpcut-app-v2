@@ -11,6 +11,7 @@ class QuickReportModel {
   final List<SalesmanWiseDetail> salesmanWiseDetails;
   final num salesmanTotalAmount;
   final num salesmanTotalCount;
+  final ExpenseDetailsModel expenseDetails;
 
   QuickReportModel({
     required this.salonName,
@@ -25,6 +26,7 @@ class QuickReportModel {
     required this.salesmanWiseDetails,
     required this.salesmanTotalAmount,
     required this.salesmanTotalCount,
+    required this.expenseDetails,
   });
 
   factory QuickReportModel.fromJson(Map<String, dynamic> json) {
@@ -52,6 +54,26 @@ class QuickReportModel {
       salesmanTotalAmount:
           json['salesman_totals']?['salesman_total_amount'] ?? 0,
       salesmanTotalCount: json['salesman_totals']?['salesman_total_count'] ?? 0,
+      expenseDetails: ExpenseDetailsModel.fromJson(
+        json['expense_details'] ?? {},
+      ),
+    );
+  }
+}
+
+class ExpenseDetailsModel {
+  final num totalShopExpense;
+  final num totalUserExpense;
+
+  ExpenseDetailsModel({
+    required this.totalShopExpense,
+    required this.totalUserExpense,
+  });
+
+  factory ExpenseDetailsModel.fromJson(Map<String, dynamic> json) {
+    return ExpenseDetailsModel(
+      totalShopExpense: json['total_shop_expense'] ?? 0,
+      totalUserExpense: json['total_user_expense'] ?? 0,
     );
   }
 }

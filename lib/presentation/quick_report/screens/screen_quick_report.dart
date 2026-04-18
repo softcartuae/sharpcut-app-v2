@@ -556,7 +556,6 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
 
           // Rows
           ...report.salesmanWiseDetails.map((detail) {
-            
             final double cash = double.tryParse(detail.totalCashAmount) ?? 0.0;
             final double card = double.tryParse(detail.totalCardAmount) ?? 0.0;
             final double total = cash + card;
@@ -683,6 +682,29 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                 ],
               );
             },
+          ),
+          const SizedBox(height: 16),
+          // Expenses Section
+          Text(
+            "Expenses",
+            style: GoogleFonts.rajdhani(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const Divider(color: Colors.black, thickness: 1.5),
+          const TableHeader("Type", "", "Amount"),
+          const Divider(color: Colors.grey, thickness: 0.5),
+          QuickReportTableRow(
+            "Total Shop Expense",
+            "",
+            report.expenseDetails.totalShopExpense.toStringAsFixed(2),
+          ),
+          QuickReportTableRow(
+            "Total User Expense",
+            "",
+            report.expenseDetails.totalUserExpense.toStringAsFixed(2),
           ),
         ],
       ),

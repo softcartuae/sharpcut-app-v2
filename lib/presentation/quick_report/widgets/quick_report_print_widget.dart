@@ -283,6 +283,29 @@ class QuickReportPrintWidget extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
+          // Expenses Section
+          const Text(
+            "Expenses",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const Divider(color: Colors.black, thickness: 1.5),
+          _buildTableHeader("Type", "", "Amount"),
+          const Divider(color: Colors.grey, thickness: 0.5),
+          _buildTableRow(
+            "Total Shop Expense",
+            "",
+            report.expenseDetails.totalShopExpense.toStringAsFixed(2),
+          ),
+          _buildTableRow(
+            "Total User Expense",
+            "",
+            report.expenseDetails.totalUserExpense.toStringAsFixed(2),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );

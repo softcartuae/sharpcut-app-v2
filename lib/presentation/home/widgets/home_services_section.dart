@@ -44,6 +44,7 @@ import 'package:sharp_cut/utils/helpers/booking_flow_helper.dart';
 import 'package:sharp_cut/presentation/home/widgets/cancellation_dialog.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/presentation/home/widgets/expandable_expense_button.dart';
 
 class HomeServicesSection extends StatefulWidget {
   const HomeServicesSection({super.key});
@@ -1225,77 +1226,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             },
                                     ),
                                   ),
-                                if (!isBooked && isShowShopExpenses)
-                                  const SizedBox(height: 12),
-                                if (!isBooked && isShowShopExpenses)
-                                  Opacity(
-                                    opacity: isBooked ? 0.5 : 1.0,
-                                    child: ActionButton(
-                                      label: "SHOP EXPENSE",
-                                      isPrimary:
-                                          selectedButton == "SHOP EXPENSE",
-                                      onTap: isBooked
-                                          ? null
-                                          : () {
-                                              _selectedButtonNotifier.value =
-                                                  "SHOP EXPENSE";
-                                              showPasswordForValidation(
-                                                showAdminToo: false,
-                                                isAdminOnly: true,
-                                                context,
-                                                false,
-                                                onSuccessWithStaff: (staff) {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          ScreenShopExpense(
-                                                            staff: staff,
-                                                          ),
-                                                    ),
-                                                  );
-                                                },
-                                              );
-                                            },
-                                    ),
-                                  ),
-                                if (!isBooked && isShowUserExpenses)
-                                  const SizedBox(height: 12),
-                                if (!isBooked && isShowUserExpenses)
-                                  Builder(
-                                    builder: (context) {
-                                      return Opacity(
-                                        opacity: isBooked ? 0.5 : 1.0,
-                                        child: ActionButton(
-                                          label: "STAFF EXPENSE",
-                                          isPrimary:
-                                              selectedButton == "STAFF EXPENSE",
-                                          onTap: isBooked
-                                              ? null
-                                              : () {
-                                                  _selectedButtonNotifier
-                                                          .value =
-                                                      "STAFF EXPENSE";
-                                                  showPasswordForValidation(
-                                                    context,
-                                                    false,
-                                                    onSuccessWithStaff: (staff) {
-                                                      Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              ScreenExpense(
-                                                                staff: staff,
-                                                              ),
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                },
-                                        ),
-                                      );
-                                    },
-                                  ),
+
                                 if (isBooked) const SizedBox(height: 12),
                                 if (isBooked)
                                   Builder(
@@ -1394,6 +1325,51 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                       );
                                     },
                                   ),
+                                if (!isBooked &&
+                                    (isShowShopExpenses || isShowUserExpenses))
+                                  const SizedBox(height: 12),
+                                ExpandableExpenseButton(
+                                  isBooked: isBooked,
+                                  selectedButton: selectedButton,
+                                  isShowShopExpenses: isShowShopExpenses,
+                                  isShowUserExpenses: isShowUserExpenses,
+                                  onTapShop: () {
+                                    _selectedButtonNotifier.value =
+                                        "SHOP EXPENSE";
+                                    showPasswordForValidation(
+                                      showAdminToo: false,
+                                      isAdminOnly: true,
+                                      context,
+                                      false,
+                                      onSuccessWithStaff: (staff) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ScreenShopExpense(staff: staff),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  onTapStaff: () {
+                                    _selectedButtonNotifier.value =
+                                        "STAFF EXPENSE";
+                                    showPasswordForValidation(
+                                      context,
+                                      false,
+                                      onSuccessWithStaff: (staff) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ScreenExpense(staff: staff),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
                               ],
                             );
                           },
