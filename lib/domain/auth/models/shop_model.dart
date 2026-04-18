@@ -8,7 +8,10 @@ class ShopModel {
   final bool? isChair;
   final num? syncTime;
   final bool isChargeOrServiceCanEdit;
-    final bool isVatIncluded;
+  final bool isVatIncluded;
+   final bool isShopExpenses;
+  final bool isUserExpenses;
+
 
 
   ShopModel({
@@ -21,6 +24,8 @@ class ShopModel {
     this.isChair,
     this.syncTime,
     required this.isVatIncluded,
+       this.isShopExpenses = false,
+    this.isUserExpenses = false,
 
     required this.isChargeOrServiceCanEdit,
   });
@@ -34,6 +39,8 @@ class ShopModel {
 
     return ShopModel(
       isVatIncluded: json['is_vat'] ?? false,
+       isShopExpenses: json['is_shop_expenses'] ?? false,
+      isUserExpenses: json['is_user_expenses'] ?? false,
 
       isChargeOrServiceCanEdit: json['is_service_price_editable'] ?? false,
       id: json['id'],
@@ -57,6 +64,8 @@ class ShopModel {
       'mode': mode,
       'is_chair': isChair,
       'sync_time': syncTime,
+          'is_shop_expenses': isShopExpenses,
+      'is_user_expenses': isUserExpenses,
     };
   }
 }
