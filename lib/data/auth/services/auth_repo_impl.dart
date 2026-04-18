@@ -34,6 +34,8 @@ class AuthRepoImpl implements AuthRepo {
         deviceOs = 'ios';
       } else if (Platform.isWindows) {
         deviceOs = 'windows';
+      } else if (Platform.isLinux) {
+        deviceOs = 'windows';
       }
 
       final response = await ApiClient.dio.post(
