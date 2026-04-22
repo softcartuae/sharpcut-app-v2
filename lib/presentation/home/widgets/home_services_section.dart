@@ -1347,6 +1347,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                 if (isBooked)
                                   Builder(
                                     builder: (context) {
+                                      
                                       final shop = context
                                           .read<AuthCubit>()
                                           .currentShop;
