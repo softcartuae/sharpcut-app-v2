@@ -38,6 +38,7 @@ abstract class BookingRepo {
     required String mode,
     required double amount,
   });
+  
     Future<Either<String, String>> updateCustomerDetails({
     required int transactionId,
     required String customerName,
