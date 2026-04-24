@@ -79,8 +79,10 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                         itemBuilder: (context, index) {
                                           return ReportTableRow(
                                             paymentSettleFunction: () {
+
                                               final booking =
                                                   state.transactions[index];
+                                                  
                                               showDialog(
                                                 context: context,
                                                 barrierDismissible: true,

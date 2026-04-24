@@ -58,6 +58,21 @@ class CashRegisterDao {
     );
   }
 
+  Future<Map<String, dynamic>?> getLatestRegisterID() async {
+   log("Fetching last  cash register");
+    final db = await _dbFuture;
+    final result = await db.query(
+      'cash_registers',
+      orderBy: 'created_at DESC',
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return result.first;
+    }
+    return null;
+  }
+
   Future<Map<String, dynamic>?> getLastOpenCashRegister() async {
     log("Fetching last open cash register");
     final db = await _dbFuture;

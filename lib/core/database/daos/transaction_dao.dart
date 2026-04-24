@@ -90,6 +90,10 @@ class TransactionDao {
       }
     }
 
+    // Fetch last register BEFORE starting transaction to avoid deadlock
+    final cashRegister = await DatabaseHelper().getLatestRegisterID();
+    final cashRegisterId = cashRegister?['id'] as int?;
+
     return await db.transaction((txn) async {
       // Calculate Tax and Grand Total after Discount
       final double finalTotal = request.finalTotal ?? 0.0;
@@ -139,7 +143,6 @@ class TransactionDao {
         where: 'id = ?',
         whereArgs: [request.transactionId],
       );
-
       log("Updated transaction ${request.transactionId} status");
 
       // 2. Insert Payments
@@ -148,6 +151,7 @@ class TransactionDao {
         for (int i = 0; i < request.mode!.length; i++) {
           final paymentData = {
             'transaction_id': request.transactionId,
+            'cash_register_id': cashRegisterId,
             'mode': request.mode![i],
             'amount': request.amount![i],
             'tender_cash':
@@ -231,6 +235,10 @@ class TransactionDao {
   Future<void> reSettlePayment(ResettleModel request) async {
     log("Re-settling payment for transaction ${request.transactionId}");
     final db = await _dbFuture;
+    // Fetch last register BEFORE starting transaction to avoid deadlock
+    final cashRegister = await DatabaseHelper().getLatestRegisterID();
+    final cashRegisterId = cashRegister?['id'] as int?;
+
     await db.transaction((txn) async {
       // 1. Fetch current transaction details
       final transactionResult = await txn.query(
@@ -276,6 +284,7 @@ class TransactionDao {
         for (int i = 0; i < request.mode!.length; i++) {
           final paymentData = {
             'transaction_id': request.transactionId,
+            'cash_register_id': cashRegisterId,
             'mode': request.mode![i],
             'amount': request.amount![i],
             'tender_cash':
@@ -305,6 +314,7 @@ class TransactionDao {
         'SELECT SUM(amount) as total FROM transaction_payments WHERE transaction_id = ?',
         [request.transactionId],
       );
+
       final newTotalPayment =
           (paymentSumResult.first['total'] as num?)?.toDouble() ?? 0.0;
 
@@ -576,13 +586,16 @@ class TransactionDao {
     log(
       "Updating payment $paymentId for transaction $transactionId. New Mode: $mode, New Amount: $amount",
     );
+    final latestRegister = await DatabaseHelper().getLatestRegisterID();
+    final latestRegisterId = latestRegister?['id'] as int?;
+
     final db = await _dbFuture;
 
     await db.transaction((txn) async {
-      // 1. Fetch Transaction Final Total and Cash Register ID
+      // 1. Fetch Transaction Final Total
       final transactionResult = await txn.query(
         'transactions',
-        columns: ['final_total', 'cash_register_id'],
+        columns: ['final_total'],
         where: 'id = ?',
         whereArgs: [transactionId],
       );
@@ -594,24 +607,29 @@ class TransactionDao {
       final transactionRow = transactionResult.first;
       final finalTotal =
           (transactionRow['final_total'] as num?)?.toDouble() ?? 0.0;
-      final cashRegisterId = transactionRow['cash_register_id'] as int?;
 
-      if (cashRegisterId != null) {
-        final cashRegisterResult = await txn.query(
-          'cash_registers',
-          columns: ['closed_at'],
-          where: 'id = ?',
-          whereArgs: [cashRegisterId],
+      // 1.a. Get payment's cash_register_id
+      final paymentResult = await txn.query(
+        'transaction_payments',
+        columns: ['cash_register_id'],
+        where: 'id = ?',
+        whereArgs: [paymentId],
+      );
+
+      if (paymentResult.isEmpty) {
+        throw Exception("Payment $paymentId not found");
+      }
+
+      final paymentCashRegisterId =
+          paymentResult.first['cash_register_id'] as int?;
+
+      // 1.b. Get latest cash_register_id
+
+      // 1.c. Compare
+      if (paymentCashRegisterId != latestRegisterId) {
+        throw Exception(
+          "this transaction cashregister is closed or not the current one, can't edit",
         );
-
-        if (cashRegisterResult.isNotEmpty) {
-          final closedAt = cashRegisterResult.first['closed_at'];
-          if (closedAt != null) {
-            throw Exception(
-              "this transaction cashregister is closed cant edit ",
-            );
-          }
-        }
       }
 
       // 2. Calculate Sum of OTHER payments

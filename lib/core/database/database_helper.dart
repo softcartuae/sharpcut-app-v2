@@ -228,6 +228,7 @@ class DatabaseHelper {
       CREATE TABLE transaction_payments (
         id INTEGER PRIMARY KEY,
         transaction_id INTEGER NOT NULL,
+        cash_register_id INTEGER,
         payment_id INTEGER,
         collected_user_id INTEGER,
         mode TEXT NOT NULL,
@@ -359,6 +360,9 @@ class DatabaseHelper {
 
   Future<Map<String, dynamic>?> getLastOpenCashRegister() =>
       cashRegisterDao.getLastOpenCashRegister();
+
+  Future<Map<String, dynamic>?> getLatestRegisterID() =>
+      cashRegisterDao.getLatestRegisterID();
 
   Future<Map<String, dynamic>?> getLastClosedCashRegister() =>
       cashRegisterDao.getLastClosedCashRegister();
