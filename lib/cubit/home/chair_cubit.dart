@@ -21,6 +21,7 @@ class ChairCubit extends Cubit<ChairState> {
     }
 
     emit(ChairLoading());
+
     try {
       final result = await chairRepo.getChairsAndStaffs();
       _cachedChairs = result.chairs;
@@ -29,6 +30,7 @@ class ChairCubit extends Cubit<ChairState> {
     } catch (e) {
       emit(ChairError(message: e.toString()));
     }
+    
   }
 
   void reset() {

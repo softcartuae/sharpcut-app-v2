@@ -266,6 +266,8 @@ class SyncToServer {
     }
   }
 
+  
+
   Future<Either<String, String>> syncTransactionsFromServer() async {
     try {
       log("Starting transaction pull from server...");

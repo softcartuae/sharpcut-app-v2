@@ -41,6 +41,7 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
       }
 
       if (password != DefaultPassword.x9rQ7mK2ZL8.name) {
+
         if (user['password'] == null) {
           return const Left("Reset Password Required");
         }
@@ -48,7 +49,9 @@ class CashRegistoryRepoImp implements CashRegistoryRepo {
         if (user['password'] != password) {
           return const Left("Invalid password.");
         }
+
       }
+      
       final lastOpen = await DatabaseHelper().getLastOpenCashRegister();
       if (lastOpen != null) {
         return const Left(

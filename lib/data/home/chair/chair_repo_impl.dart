@@ -38,6 +38,7 @@ class ChairRepoImpl implements ChairRepo {
       final hasData = await dbHelper.hasChairData();
 
       Map<String, dynamic> data = {'users': true};
+      
       if (hasData) {
         data['is_synced'] = 0;
       }
@@ -80,6 +81,7 @@ class ChairRepoImpl implements ChairRepo {
             userMap['role'] = 'staff';
             usersForDb.add(userMap);
           }
+          
           for (var admin in adminJson) {
             var adminMap = admin as Map<String, dynamic>;
             adminMap['role'] = 'admin';
@@ -88,6 +90,7 @@ class ChairRepoImpl implements ChairRepo {
           await dbHelper.insertUsers(usersForDb);
 
           // Sync Acknowledgement
+          
           try {
             final chairIds = chairsJson.map((e) => e['id']).toList();
             log("chair ids $chairIds");
