@@ -29,3 +29,4 @@ class CustomerSearchCubit extends Cubit<CustomerSearchState> {
     emit(CustomerSearchInitial());
   }
 }
+

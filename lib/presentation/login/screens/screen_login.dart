@@ -18,6 +18,7 @@ class ScreenLogin extends StatefulWidget {
 }
 
 class _ScreenLoginState extends State<ScreenLogin> {
+  
   bool _isPasswordVisible = false;
   final TextEditingController _pinController = TextEditingController();
   final TextEditingController _ipController = TextEditingController();
@@ -478,4 +479,5 @@ class _ScreenLoginState extends State<ScreenLogin> {
     }
     return 'Custom: ${ApiClient.baseUrl}';
   }
+
 }

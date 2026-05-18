@@ -484,6 +484,29 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
             report.cardCustomerAmount,
           ),
           const SizedBox(height: 16),
+          // Expenses Section
+          Text(
+            "Expenses",
+            style: GoogleFonts.rajdhani(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const Divider(color: Colors.black, thickness: 1.5),
+          const TableHeader("Type", "", "Amount"),
+          const Divider(color: Colors.grey, thickness: 0.5),
+          QuickReportTableRow(
+            "Total Shop Expense",
+            "",
+            report.expenseDetails.totalShopExpense.toStringAsFixed(2),
+          ),
+          QuickReportTableRow(
+            "Total User Expense",
+            "",
+            report.expenseDetails.totalUserExpense.toStringAsFixed(2),
+          ),
+          const SizedBox(height: 16),
           const Divider(color: Colors.grey, thickness: 0.5),
 
           // Salesman Wise Details
@@ -682,29 +705,6 @@ class _ScreenQuickReportState extends State<ScreenQuickReport> {
                 ],
               );
             },
-          ),
-          const SizedBox(height: 16),
-          // Expenses Section
-          Text(
-            "Expenses",
-            style: GoogleFonts.rajdhani(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const Divider(color: Colors.black, thickness: 1.5),
-          const TableHeader("Type", "", "Amount"),
-          const Divider(color: Colors.grey, thickness: 0.5),
-          QuickReportTableRow(
-            "Total Shop Expense",
-            "",
-            report.expenseDetails.totalShopExpense.toStringAsFixed(2),
-          ),
-          QuickReportTableRow(
-            "Total User Expense",
-            "",
-            report.expenseDetails.totalUserExpense.toStringAsFixed(2),
           ),
         ],
       ),

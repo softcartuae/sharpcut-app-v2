@@ -91,4 +91,6 @@ abstract class PrintingRepo {
   Future<void> clearLastConnectedPrinter();
   Future<void> sendHeartbeat(Printer printer);
   Future<int?> checkPrinterStatus(Printer printer);
+
+  
 }
