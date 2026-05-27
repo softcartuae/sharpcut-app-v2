@@ -175,7 +175,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'Spark Cut',
+      title: 'Sharpcut',
       theme: appTheme,
       builder: (context, child) {
         return BlocListener<AuthCubit, AuthCubitState>(
