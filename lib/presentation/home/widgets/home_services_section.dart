@@ -92,6 +92,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     BuildContext context,
     int? transactionId,
     int? userId,
+    
     ServiceStateSuccess serviceState,
     BookingFormState bookingFormState,
     String paymentMode,
@@ -125,6 +126,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
     SettlePaymentRequestModel request = SettlePaymentRequestModel(
       paymentStatus: paymentMode == PaymentMode.Unpaid.name ? "unpaid" : "full",
       transactionId: transactionId,
+      onlineBookingId: onlineBookingId,
       customerName: bookingFormState.customerName,
       customerNumber: bookingFormState.customerNumber,
       subTotalValue: serviceState.subTotal,
@@ -988,15 +990,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
                                                 int? transactionId;
                                                 int? userId;
-                                                if (bookingState
-                                                    is BookingSuccess) {
-                                                  transactionId = bookingState
-                                                      .bookingResponse
-                                                      .id;
-                                                  userId = bookingState
-                                                      .bookingResponse
-                                                      .userId;
-                                                }
+                                                int? onlineBookingId;
+                                                transactionId = bookingState
+                                                    .bookingResponse
+                                                    .id;
+                                                userId = bookingState
+                                                    .bookingResponse
+                                                    .userId;
 
                                                 final bookingFormState = context
                                                     .read<BookingFormCubit>()
@@ -1119,15 +1119,16 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
                                                 int? transactionId;
                                                 int? userId;
-                                                if (bookingState
-                                                    is BookingSuccess) {
-                                                  transactionId = bookingState
-                                                      .bookingResponse
-                                                      .id;
-                                                  userId = bookingState
-                                                      .bookingResponse
-                                                      .userId;
-                                                }
+                                                int? onlineBookingId;
+                                                transactionId = bookingState
+                                                    .bookingResponse
+                                                    .id;
+                                                userId = bookingState
+                                                    .bookingResponse
+                                                    .userId;
+                                                onlineBookingId = bookingState
+                                                    .bookingResponse
+                                                    .onlineBookingId;
 
                                                 final bookingFormState = context
                                                     .read<BookingFormCubit>()
@@ -1138,6 +1139,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   finalTotalbefore:
                                                       serviceState.total + 0,
                                                   transactionId: transactionId,
+                                                  onlineBookingId: onlineBookingId,
                                                   customerName: bookingFormState
                                                       .customerName,
                                                   customerNumber:

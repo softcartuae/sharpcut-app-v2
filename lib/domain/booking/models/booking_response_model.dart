@@ -4,6 +4,7 @@ import 'package:sharp_cut/utils/helpers/convertion.dart';
 
 class BookingResponseModel {
   final int? id;
+  final int? onlineBookingId;
   final String? appId;
   final int? chairId;
   final int? userId;
@@ -28,6 +29,7 @@ class BookingResponseModel {
 
   BookingResponseModel({
     this.id,
+    this.onlineBookingId,
     this.appId,
     this.chairId,
     this.userId,
@@ -54,6 +56,7 @@ class BookingResponseModel {
   factory BookingResponseModel.fromJson(Map<String, dynamic> json) {
     return BookingResponseModel(
       id: json['id'],
+      onlineBookingId: json['online_booking_id'],
       staff: json['user'] != null ? StaffModel.fromJson(json['user']) : null,
       appId: json['app_id'],
       chairId: json['chair_id'],
