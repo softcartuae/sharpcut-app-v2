@@ -11,6 +11,7 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit_state.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
+import 'package:sharp_cut/domain/home/models/service_model.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/presentation/cash_registory/screens/open_cash_registory_dialoge.dart';
 import 'package:sharp_cut/presentation/cash_registory/screens/close_cash_register_dialog.dart';
@@ -409,6 +410,26 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               // Optionally clear cart or reset state
             } else if (state is BookingSuccess) {
               context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
+
+              final details = state.bookingResponse.details;
+              if (details != null && details.isNotEmpty) {
+                // 1. Convert BookingDetail list into CartItemModel list
+                final restoredCartItems = details.map((detail) {
+                  return CartItemModel(
+                    service: detail.service ??
+                        ServiceModel(
+                          id: detail.id,
+                          charge: detail.rate,
+                        ),
+                    quantity: detail.quantity ?? 1,
+                  );
+                }).toList();
+
+                // 2. Pre-fill cart on Home Screen!
+                context.read<ServiceCubit>().setCart(restoredCartItems);
+              } else {
+                context.read<ServiceCubit>().clearCart();
+              }
             }
           },
         ),
