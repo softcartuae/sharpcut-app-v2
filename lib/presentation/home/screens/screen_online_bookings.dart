@@ -7,6 +7,7 @@ import 'package:sharp_cut/cubit/online_booking/online_booking_cubit.dart';
 import 'package:sharp_cut/cubit/online_booking/online_booking_state.dart';
 import 'package:sharp_cut/domain/booking/models/online_booking_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/cutting_masters_dialog.dart';
+import 'package:sharp_cut/presentation/home/widgets/online_booking_shimmer_loading.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 
 class ScreenOnlineBookings extends StatefulWidget {
@@ -77,11 +78,7 @@ class _ScreenOnlineBookingsState extends State<ScreenOnlineBookings> {
       body: BlocBuilder<OnlineBookingCubit, OnlineBookingState>(
         builder: (context, state) {
           if (state is OnlineBookingLoading) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.violetNormal,
-              ),
-            );
+            return const OnlineBookingShimmerLoading();
           }
 
           if (state is OnlineBookingError) {
@@ -162,13 +159,8 @@ class _ScreenOnlineBookingsState extends State<ScreenOnlineBookings> {
                 itemBuilder: (context, index) {
                   if (index >= state.bookings.length) {
                     return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.violetNormal,
-                          strokeWidth: 2,
-                        ),
-                      ),
+                      padding: EdgeInsets.only(bottom: 16),
+                      child: OnlineBookingCardShimmer(),
                     );
                   }
 

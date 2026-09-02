@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
@@ -118,11 +119,9 @@ class CuttingMastersDialog extends StatelessWidget {
             StaffModel? preSelectedStaff;
 
             if (onlineBooking!.stylistId != null) {
-              try {
-                preSelectedStaff = staffList.firstWhere(
-                  (s) => s.id == onlineBooking!.stylistId,
-                );
-              } catch (_) {}
+              preSelectedStaff = staffList.firstWhereOrNull(
+                (s) => s.id == onlineBooking!.stylistId,
+              );
             }
 
             if (preSelectedStaff != null) {
