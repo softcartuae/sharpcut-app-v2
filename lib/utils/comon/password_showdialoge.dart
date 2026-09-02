@@ -12,8 +12,9 @@ import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 Future<void> showPasswordDialoge(
   BuildContext context,
   ChairModel chair,
-  StaffModel staff,
-) {
+  StaffModel staff, {
+  int? onlineBookingId,
+}) {
   final TextEditingController passwordController = TextEditingController();
   bool obscurePassword = true;
 
@@ -145,6 +146,7 @@ Future<void> showPasswordDialoge(
                                     chairId: chair.id ?? 0,
                                     userId: staff.id,
                                     userPassword: passwordController.text,
+                                    onlineBookingId: onlineBookingId,
                                   );
                                 },
                           style: ElevatedButton.styleFrom(

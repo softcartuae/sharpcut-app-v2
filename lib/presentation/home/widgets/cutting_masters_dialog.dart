@@ -11,14 +11,20 @@ import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/presentation/home/widgets/cancellation_dialog.dart';
 import 'package:sharp_cut/presentation/home/widgets/services_or_cancel_dialog.dart';
 
-class CuttingMastersDialog extends StatelessWidget {
-  const CuttingMastersDialog({super.key});
+import 'package:sharp_cut/domain/booking/models/online_booking_model.dart';
+import 'package:sharp_cut/domain/home/models/staff_model.dart';
+import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
 
-  static void show(BuildContext context) {
+class CuttingMastersDialog extends StatelessWidget {
+  final OnlineBookingModel? onlineBooking;
+
+  const CuttingMastersDialog({super.key, this.onlineBooking});
+
+  static void show(BuildContext context, {OnlineBookingModel? onlineBooking}) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const CuttingMastersDialog(),
+      builder: (context) => CuttingMastersDialog(onlineBooking: onlineBooking),
     );
   }
 
@@ -106,7 +112,36 @@ class CuttingMastersDialog extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         if (chair.liveState != LiveState.occupied.name) {
-          showStaffSelectionDialog(context, chair);
+          if (onlineBooking != null) {
+            final chairCubit = context.read<ChairCubit>();
+            final staffList = chairCubit.staffs;
+            StaffModel? preSelectedStaff;
+
+            if (onlineBooking!.stylistId != null) {
+              try {
+                preSelectedStaff = staffList.firstWhere(
+                  (s) => s.id == onlineBooking!.stylistId,
+                );
+              } catch (_) {}
+            }
+
+            if (preSelectedStaff != null) {
+              showPasswordDialoge(
+                context,
+                chair,
+                preSelectedStaff,
+                onlineBookingId: onlineBooking!.id,
+              );
+            } else {
+              showStaffSelectionDialog(
+                context,
+                chair,
+                onlineBookingId: onlineBooking!.id,
+              );
+            }
+          } else {
+            showStaffSelectionDialog(context, chair);
+          }
         } else {
           final result = await ServicesOrCancelDialog.show(context);
           if (!context.mounted) return;

@@ -15,12 +15,14 @@ class BookingCubit extends Cubit<BookingState> {
     required int chairId,
     required int userId,
     required String userPassword,
+    int? onlineBookingId,
   }) async {
     emit(BookingLoading());
     final result = await bookingRepo.bookSlot(
       chairId: chairId,
       userId: userId,
       userPassword: userPassword,
+      onlineBookingId: onlineBookingId,
     );
     result.fold(
       (error) => emit(BookingError(message: error)),

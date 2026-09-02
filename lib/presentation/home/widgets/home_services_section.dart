@@ -17,6 +17,7 @@ import 'package:sharp_cut/presentation/cash_registory/screens/close_cash_registe
 import 'package:sharp_cut/presentation/expense/screens/screen_expense.dart';
 import 'package:sharp_cut/presentation/shop_expense/screens/screen_shop_expense.dart';
 import 'package:sharp_cut/presentation/expense/screens/screen_settlement.dart';
+import 'package:sharp_cut/presentation/home/screens/screen_online_bookings.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_search.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
 import 'package:sharp_cut/presentation/home/widgets/added_item.dart';
@@ -889,6 +890,25 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                       );
                                     },
                                   ),
+
+                                // ONLINE BOOKINGS BUTTON
+                                const SizedBox(height: 12),
+                                ActionButton(
+                                  label: "ONLINE BOOKINGS",
+                                  isPrimary:
+                                      selectedButton == "ONLINE BOOKINGS",
+                                  onTap: () {
+                                    _selectedButtonNotifier.value =
+                                        "ONLINE BOOKINGS";
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ScreenOnlineBookings(),
+                                      ),
+                                    );
+                                  },
+                                ),
 
                                 // CANCEL BOOKING - Visible only if Booked and No Chair
                                 if (isBooked)

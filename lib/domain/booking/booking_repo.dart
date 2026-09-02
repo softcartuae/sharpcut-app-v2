@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:sharp_cut/domain/booking/models/online_booking_model.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
@@ -9,6 +10,7 @@ abstract class BookingRepo {
     required int chairId,
     required int userId,
     required String userPassword,
+    int? onlineBookingId,
   });
 
   Future<Either<String, String>> cancelBooking({
@@ -48,4 +50,10 @@ abstract class BookingRepo {
     String? name,
     String? number,
   });
+
+  Future<Either<String, List<OnlineBookingModel>>> getOnlineBookings({
+    int page = 1,
+    int perPage = 10,
+  });
 }
+

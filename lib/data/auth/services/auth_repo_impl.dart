@@ -43,7 +43,7 @@ class AuthRepoImpl implements AuthRepo {
         data: {
           "mode": "online",
           "pin": pin,
-          "device_token": token,
+          "device_token": null,
           "device_os": deviceOs,
         },
       );

@@ -1,5 +1,6 @@
 class SettlePaymentRequestModel {
   final int? transactionId;
+  final int? onlineBookingId;
   final String? customerName;
   final String? customerNumber;
   final double? subTotalValue;
@@ -28,6 +29,7 @@ class SettlePaymentRequestModel {
     required this.finalTotalbefore,
     this.paymentStatus,
     this.transactionId,
+    this.onlineBookingId,
     this.customerName,
     this.customerNumber,
     this.subTotalValue,
@@ -53,6 +55,7 @@ class SettlePaymentRequestModel {
 
   SettlePaymentRequestModel copyWith({
     int? transactionId,
+    int? onlineBookingId,
     String? customerName,
     String? customerNumber,
     double? subTotalValue,
@@ -79,6 +82,7 @@ class SettlePaymentRequestModel {
   }) {
     return SettlePaymentRequestModel(
       transactionId: transactionId ?? this.transactionId,
+      onlineBookingId: onlineBookingId ?? this.onlineBookingId,
       customerName: customerName ?? this.customerName,
       customerNumber: customerNumber ?? this.customerNumber,
       subTotalValue: subTotalValue ?? this.subTotalValue,
@@ -108,6 +112,7 @@ class SettlePaymentRequestModel {
   Map<String, dynamic> toJson() {
     return {
       "transaction_id": transactionId,
+      "online_booking_id": onlineBookingId,
       "customer_name": customerName,
       "customer_number": customerNumber,
       "grand_total": subTotalValue,

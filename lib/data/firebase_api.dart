@@ -35,6 +35,10 @@ class FirebaseApi {
     debugPrint('Token: $fCMToken');
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
+    _firebaseMessaging.onTokenRefresh.listen((newToken) {
+      debugPrint('FCM Token Refreshed: $newToken');
+    });
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('Got a message whilst in the foreground!');
       debugPrint('Message data: ${message.data}');

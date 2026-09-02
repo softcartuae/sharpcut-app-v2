@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/data/api_client.dart';
+import 'package:sharp_cut/domain/booking/models/online_booking_model.dart';
 import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
@@ -13,11 +14,14 @@ class BookingRepoImp implements BookingRepo {
     required int chairId,
     required int userId,
     required String userPassword,
+    int? onlineBookingId,
   }) async {
-    final body = {
+    final body = <String, dynamic>{
       "chair_id": chairId,
       "user_id": userId,
       "user_password": userPassword,
+      "mode" : onlineBookingId != null ? "app" : "shop",
+      "online_booking_id": onlineBookingId,
     };
 
     try {
@@ -325,4 +329,45 @@ class BookingRepoImp implements BookingRepo {
       return Left('Error searching: $e');
     }
   }
+
+  @override
+  Future<Either<String, List<OnlineBookingModel>>> getOnlineBookings({
+    int page = 1,
+    int perPage = 10,
+  }) async {
+    try {
+      final response = await ApiClient.dio.get(
+        ApiClient.bookingsPostApi,
+        queryParameters: {
+          'page': page,
+          'per_page': perPage,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final List list = data['data'];
+          final bookings =
+              list.map((e) => OnlineBookingModel.fromJson(e)).toList();
+          return Right(bookings);
+        } else {
+          return Left(data['message'] ?? 'Failed to fetch online bookings');
+        }
+      } else {
+        return Left('Failed to fetch online bookings: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        final data = e.response!.data;
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return Left(data['message']);
+        }
+      }
+      return Left('Error fetching online bookings: ${e.message}');
+    } catch (e) {
+      return Left('Error fetching online bookings: $e');
+    }
+  }
 }
+

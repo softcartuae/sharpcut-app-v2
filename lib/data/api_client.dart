@@ -20,6 +20,7 @@ class ApiClient {
   )..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
 
   static Future<void> init() async {
+    
     log("Base URL: $baseUrl");
     final urlStorage = UrlStorage();
     final details = await urlStorage.getConnectionDetails();
@@ -32,13 +33,16 @@ class ApiClient {
       baseUrl = developmentBaseUrl;
     }
     dio.options.baseUrl = baseUrl;
+    
   }
 
   static Future<void> setConnectionDetails(String ip, String port) async {
+
     baseUrl = "http://$ip:$port/api/v2/";
     dio.options.baseUrl = baseUrl;
     final urlStorage = UrlStorage();
     await urlStorage.saveConnectionDetails(ip, port);
+
   }
 
   static Future<void> resetToDefault() async {
@@ -47,6 +51,7 @@ class ApiClient {
     dio.options.baseUrl = baseUrl;
     final urlStorage = UrlStorage();
     await urlStorage.clearConnectionDetails();
+
   }
 
   //POST API ENDPOINTS
@@ -100,6 +105,4 @@ class ApiClient {
   static final printQuickReportApi = "print/transaction-report";
   static final printCashRegisterApi = "print/cash-register-report";
   static final versionApi = "version";
-
-  
 }

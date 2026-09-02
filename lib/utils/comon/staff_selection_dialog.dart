@@ -12,8 +12,9 @@ import 'package:sharp_cut/utils/helpers/enums.dart';
 
 Future<StaffModel?> showStaffSelectionDialog(
   BuildContext context,
-  ChairModel chair,
-) {
+  ChairModel chair, {
+  int? onlineBookingId,
+}) {
   // Fetch staffs from ChairCubit
   final chairCubit = context.read<ChairCubit>();
   List<StaffModel> staffListAll = List<StaffModel>.from(chairCubit.staffs);
@@ -85,10 +86,16 @@ Future<StaffModel?> showStaffSelectionDialog(
                             chairId: chair.id ?? 0,
                             userId: staff.id,
                             userPassword: "0000",
+                            onlineBookingId: onlineBookingId,
                           );
                           Navigator.pop(context);
                         } else {
-                          showPasswordDialoge(context, chair, staff);
+                          showPasswordDialoge(
+                            context,
+                            chair,
+                            staff,
+                            onlineBookingId: onlineBookingId,
+                          );
                         }
                       },
                       borderRadius: BorderRadius.circular(12),
