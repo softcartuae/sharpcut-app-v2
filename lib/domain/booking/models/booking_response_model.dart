@@ -18,6 +18,7 @@ class BookingResponseModel {
   final String? createdAt;
   final StaffModel? staff;
   final List<BookingDetail>? details;
+  final List<CustomerBookingService>? customerBookingServices;
   final double? subtotal;
   final double? taxTotal;
   final double? finalTotal;
@@ -42,6 +43,7 @@ class BookingResponseModel {
     this.createdAt,
     this.staff,
     this.details,
+    this.customerBookingServices,
     this.subtotal,
     this.taxTotal,
     this.finalTotal,
@@ -81,6 +83,11 @@ class BookingResponseModel {
                 .map((e) => BookingDetail.fromJson(e))
                 .toList()
           : null,
+      customerBookingServices: json['customer_booking_services'] != null
+          ? (json['customer_booking_services'] as List)
+                .map((e) => CustomerBookingService.fromJson(e))
+                .toList()
+          : null,
       payments: json['payments'] != null
           ? (json['payments'] as List)
                 .map((e) => PaymentModel.fromJson(e))
@@ -114,6 +121,41 @@ class BookingDetail {
       service: json['service'] != null
           ? ServiceModel.fromJson(json['service'])
           : null,
+    );
+  }
+}
+
+class CustomerBookingService {
+  final int? id;
+  final int? customerBookingId;
+  final int? serviceId;
+  final String? name;
+  final int? quantity;
+  final double? rate;
+  final String? createdAt;
+  final String? updatedAt;
+
+  CustomerBookingService({
+    this.id,
+    this.customerBookingId,
+    this.serviceId,
+    this.name,
+    this.quantity,
+    this.rate,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory CustomerBookingService.fromJson(Map<String, dynamic> json) {
+    return CustomerBookingService(
+      id: json['id'],
+      customerBookingId: json['customer_booking_id'],
+      serviceId: json['service_id'],
+      name: json['name'],
+      quantity: json['quantity'],
+      rate: toDouble(json['rate']),
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
     );
   }
 }

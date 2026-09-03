@@ -303,14 +303,20 @@ class BookingRepoImp implements BookingRepo {
   Future<Either<String, List<OnlineBookingModel>>> getOnlineBookings({
     int page = 1,
     int perPage = 10,
+    String? phoneNumber,
   }) async {
     try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'per_page': perPage,
+      };
+      if (phoneNumber != null && phoneNumber.trim().isNotEmpty) {
+        queryParams['phone_number'] = phoneNumber.trim();
+      }
+
       final response = await ApiClient.dio.get(
         ApiClient.bookingsPostApi,
-        queryParameters: {
-          'page': page,
-          'per_page': perPage,
-        },
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

@@ -7,25 +7,48 @@ class OnlineBookingCubit extends Cubit<OnlineBookingState> {
   final BookingRepo bookingRepo;
   int _currentPage = 1;
   final int _perPage = 15;
+  String? _phoneNumber;
   List<OnlineBookingModel> _allBookings = [];
 
   OnlineBookingCubit({required this.bookingRepo})
       : super(OnlineBookingInitial());
 
-  Future<void> fetchOnlineBookings({int page = 1, bool isRefresh = true}) async {
+  Future<void> fetchOnlineBookings({
+    int page = 1,
+    bool isRefresh = true,
+    String? phoneNumber,
+  }) async {
+    if (phoneNumber != null) {
+      _phoneNumber = phoneNumber;
+    }
+
     if (isRefresh) {
       _currentPage = 1;
-      _allBookings = [];
-      emit(OnlineBookingLoading());
+      if (state is OnlineBookingLoaded &&
+          (state as OnlineBookingLoaded).bookings.isNotEmpty) {
+        // Keep current loaded list visible while refreshing in background
+        emit((state as OnlineBookingLoaded).copyWith(isRefreshing: true));
+      } else {
+        // First load or empty: emit full loading shimmer state
+        _allBookings = [];
+        emit(OnlineBookingLoading());
+      }
     }
 
     final result = await bookingRepo.getOnlineBookings(
       page: page,
       perPage: _perPage,
+      phoneNumber: _phoneNumber,
     );
 
     result.fold(
-      (error) => emit(OnlineBookingError(message: error)),
+      (error) {
+        if (state is OnlineBookingLoaded) {
+          emit((state as OnlineBookingLoaded).copyWith(isRefreshing: false));
+        } else {
+          emit(OnlineBookingError(message: error));
+        }
+      },
       (newBookings) {
         if (isRefresh) {
           _allBookings = newBookings;
@@ -38,6 +61,7 @@ class OnlineBookingCubit extends Cubit<OnlineBookingState> {
             bookings: List.from(_allBookings),
             page: _currentPage,
             hasMore: newBookings.length >= _perPage,
+            isRefreshing: false,
           ),
         );
       },
@@ -47,10 +71,12 @@ class OnlineBookingCubit extends Cubit<OnlineBookingState> {
   Future<void> loadMoreOnlineBookings() async {
     if (state is OnlineBookingLoaded) {
       final currentState = state as OnlineBookingLoaded;
-      if (!currentState.hasMore) return;
-      await fetchOnlineBookings(page: _currentPage + 1, isRefresh: false);
+      if (!currentState.hasMore || currentState.isRefreshing) return;
+      await fetchOnlineBookings(
+        page: _currentPage + 1,
+        isRefresh: false,
+        phoneNumber: _phoneNumber,
+      );
     }
   }
-  
-
 }

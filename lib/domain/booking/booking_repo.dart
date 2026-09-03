@@ -54,6 +54,7 @@ abstract class BookingRepo {
   Future<Either<String, List<OnlineBookingModel>>> getOnlineBookings({
     int page = 1,
     int perPage = 10,
+    String? phoneNumber,
   });
 }
 

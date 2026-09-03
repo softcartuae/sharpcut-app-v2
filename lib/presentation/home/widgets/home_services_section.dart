@@ -411,19 +411,24 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             } else if (state is BookingSuccess) {
               context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
 
-              final details = state.bookingResponse.details;
-              if (details != null && details.isNotEmpty) {
+              final customerBookingServices = state.bookingResponse.customerBookingServices;
+              log("customerBookingServices: ${customerBookingServices?.length}");
+              if (customerBookingServices != null && customerBookingServices.isNotEmpty) {
                 // 1. Convert BookingDetail list into CartItemModel list
-                final restoredCartItems = details.map((detail) {
+                final restoredCartItems = customerBookingServices.map((service) {
                   return CartItemModel(
-                    service: detail.service ??
+                    service: 
                         ServiceModel(
-                          id: detail.id,
-                          charge: detail.rate,
+                          
+                          name: service.name,
+                          id: service.id,
+                          charge: service.rate,
                         ),
-                    quantity: detail.quantity ?? 1,
+                    quantity: service.quantity ?? 1,
                   );
                 }).toList();
+
+                log("restoredCartItems: ${restoredCartItems.length}");
 
                 // 2. Pre-fill cart on Home Screen!
                 context.read<ServiceCubit>().setCart(restoredCartItems);
