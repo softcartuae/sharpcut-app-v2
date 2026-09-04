@@ -95,7 +95,13 @@ class FirebaseApi {
     await _initLocalNotifications();
 
     final fCMToken = await _firebaseMessaging.getToken();
-    debugPrint('Token: $fCMToken');
+    log('''
+==================================================
+🔥 FCM TOKEN FOR FIREBASE CONSOLE TEST:
+$fCMToken
+==================================================''');
+    print('🔥 FCM TOKEN: $fCMToken');
+
     if (fCMToken != null) {
       await sl<AuthRepo>().refreshDeviceToken(fCMToken);
     }
