@@ -95,11 +95,13 @@ class OnlineCustomerModel {
   final int? id;
   final String? name;
   final String? phoneNumber;
+  final String? profilePhoto;
 
   OnlineCustomerModel({
     this.id,
     this.name,
     this.phoneNumber,
+    this.profilePhoto,
   });
 
   factory OnlineCustomerModel.fromJson(Map<String, dynamic> json) {
@@ -107,6 +109,7 @@ class OnlineCustomerModel {
       id: json['id'],
       name: json['name'],
       phoneNumber: json['phone_number'],
+      profilePhoto: json['profile_photo'],
     );
   }
 }

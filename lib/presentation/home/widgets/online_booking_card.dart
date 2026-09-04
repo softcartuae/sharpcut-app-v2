@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -58,25 +59,26 @@ class OnlineBookingCard extends StatelessWidget {
                 Container(
                   width: 32,
                   height: 32,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.violetNormal,
-                        AppColors.violetDark,
-                      ],
+                    border: Border.all(
+                      color: AppColors.borderLight,
+                      width: 1,
                     ),
                   ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    (customer?.name?.isNotEmpty == true)
-                        ? customer!.name![0].toUpperCase()
-                        : "C",
-                    style: GoogleFonts.rajdhani(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
+                  child: ClipOval(
+                    child: (customer?.profilePhoto != null &&
+                            customer!.profilePhoto!.trim().isNotEmpty)
+                        ? CachedNetworkImage(
+                            imageUrl: customer.profilePhoto!.trim(),
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                CustomerAvatarFallback(customerName: customer.name),
+                          )
+                        : CustomerAvatarFallback(customerName: customer?.name),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -482,6 +484,38 @@ class OnlineBookingServicesDialog extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class CustomerAvatarFallback extends StatelessWidget {
+  final String? customerName;
+
+  const CustomerAvatarFallback({super.key, this.customerName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            AppColors.violetNormal,
+            AppColors.violetDark,
+          ],
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        (customerName != null && customerName!.trim().isNotEmpty)
+            ? customerName!.trim()[0].toUpperCase()
+            : "C",
+        style: GoogleFonts.rajdhani(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
         ),
       ),
     );
