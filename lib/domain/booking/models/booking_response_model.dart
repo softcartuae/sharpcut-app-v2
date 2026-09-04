@@ -132,6 +132,10 @@ class CustomerBookingService {
   final String? name;
   final int? quantity;
   final double? rate;
+  final double? beforeVat;
+
+    final double? taxPercentage;
+  final double? unitTax;
   final String? createdAt;
   final String? updatedAt;
 
@@ -140,6 +144,9 @@ class CustomerBookingService {
     this.customerBookingId,
     this.serviceId,
     this.name,
+      this.taxPercentage,
+    this.unitTax,
+    this.beforeVat,
     this.quantity,
     this.rate,
     this.createdAt,
@@ -153,6 +160,9 @@ class CustomerBookingService {
       serviceId: json['service_id'],
       name: json['name'],
       quantity: json['quantity'],
+       beforeVat: toDouble(json['before_vat']),
+        taxPercentage: toDouble(json['tax_percentage']),
+      unitTax: toDouble(json['unit_tax']),
       rate: toDouble(json['rate']),
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],

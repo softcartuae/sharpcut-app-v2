@@ -26,8 +26,42 @@ class AppColors {
   static const Color redDarker = Color(0xFF451E19);
 
   // Green Palette
-  static const Color greenNormal = Color(
-    0xFF2E7D32,
-  ); // Adjust as needed to match image
+  static const Color greenNormal = Color(0xFF2E7D32);
   static const Color greenLight = Color(0xFF4CAF50);
+
+  // Light Mode Palette
+  static const Color scaffoldLight = Color(0xFFF8FAFC);
+  static const Color surfaceLight = Colors.white;
+  static const Color headerLight = Color(0xFFEEF2F6);
+  static const Color borderLight = Color(0xFFE2E8F0);
+  static const Color borderMediumLight = Color(0xFFCBD5E1);
+  static const Color chipLight = Color(0xFFF1F5F9);
+
+  // Text Light Palette
+  static const Color textPrimaryLight = Color(0xFF0F172A);
+  static const Color textSecondaryLight = Color(0xFF64748B);
+  static const Color textMutedLight = Color(0xFF94A3B8);
+  static const Color textHeaderLight = Color(0xFF475569);
+  static const Color textBodyLight = Color(0xFF334155);
+
+  // Status Badge Colors (Light Theme)
+  static const Color statusConfirmedBg = Color(0xFFDCFCE7);
+  static const Color statusConfirmedBorder = Color(0xFF86EFAC);
+  static const Color statusConfirmedText = Color(0xFF15803D);
+
+  static const Color statusCancelledBg = Color(0xFFFEE2E2);
+  static const Color statusCancelledBorder = Color(0xFFFCA5A5);
+  static const Color statusCancelledText = Color(0xFFB91C1C);
+
+  static const Color statusRescheduledBg = Color(0xFFFFEDD5);
+  static const Color statusRescheduledBorder = Color(0xFFFDBA74);
+  static const Color statusRescheduledText = Color(0xFFC2410C);
+
+  static const Color statusPendingBg = Color(0xFFF3E8FF);
+  static const Color statusPendingBorder = Color(0xFFD8B4FE);
+  static const Color statusPendingText = Color(0xFF6B21A8);
+
+  // Shimmer Colors (Light Theme)
+  static const Color shimmerBaseLight = Color(0xFFE2E8F0);
+  static const Color shimmerHighlightLight = Color(0xFFF8FAFC);
 }

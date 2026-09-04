@@ -47,6 +47,7 @@ import 'package:sharp_cut/presentation/home/widgets/cancellation_dialog.dart';
 import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/presentation/home/widgets/expandable_expense_button.dart';
+import 'package:sharp_cut/presentation/home/widgets/expandable_online_booking_button.dart';
 
 class HomeServicesSection extends StatefulWidget {
   const HomeServicesSection({super.key});
@@ -419,9 +420,11 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                   return CartItemModel(
                     service: 
                         ServiceModel(
-                          
+                          beforeVat: service.beforeVat,
+                          unitTax: service.unitTax,
+                          taxPercentage: service.taxPercentage,
                           name: service.name,
-                          id: service.id,
+                          id: service.serviceId,
                           charge: service.rate,
                         ),
                     quantity: service.quantity ?? 1,
@@ -921,13 +924,10 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
                                 // ONLINE BOOKINGS BUTTON
                                 const SizedBox(height: 12),
-                                ActionButton(
-                                  label: "ONLINE BOOKINGS",
-                                  isPrimary:
-                                      selectedButton == "ONLINE BOOKINGS",
-                                  onTap: () {
-                                    _selectedButtonNotifier.value =
-                                        "ONLINE BOOKINGS";
+                                ExpandableOnlineBookingButton(
+                                  selectedButton: selectedButton,
+                                  onTapHistory: () {
+                                    _selectedButtonNotifier.value = "HISTORY";
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -935,6 +935,10 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             const ScreenOnlineBookings(),
                                       ),
                                     );
+                                  },
+                                  onTapStaffWise: () {
+                                    _selectedButtonNotifier.value =
+                                        "STAFF WISE";
                                   },
                                 ),
 

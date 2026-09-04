@@ -106,3 +106,6 @@ class ApiClient {
   static final printCashRegisterApi = "print/cash-register-report";
   static final versionApi = "version";
 }
+
+
+
