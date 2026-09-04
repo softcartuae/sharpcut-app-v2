@@ -11,6 +11,7 @@ import 'package:sharp_cut/presentation/home/widgets/online_booking_date_filter_d
 import 'package:sharp_cut/presentation/home/widgets/online_booking_shimmer_loading.dart';
 import 'package:sharp_cut/presentation/home/widgets/online_booking_table_header.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
+import 'package:sharp_cut/utils/helpers/app_scroll_behavior.dart';
 
 class ScreenOnlineBookings extends StatefulWidget {
   const ScreenOnlineBookings({super.key});
@@ -21,6 +22,7 @@ class ScreenOnlineBookings extends StatefulWidget {
 
 class _ScreenOnlineBookingsState extends State<ScreenOnlineBookings> {
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _horizontalScrollController = ScrollController();
   final TextEditingController _phoneSearchController = TextEditingController();
   Timer? _debounceTimer;
 
@@ -38,6 +40,7 @@ class _ScreenOnlineBookingsState extends State<ScreenOnlineBookings> {
     _debounceTimer?.cancel();
     _phoneSearchController.dispose();
     _scrollController.dispose();
+    _horizontalScrollController.dispose();
     super.dispose();
   }
 
@@ -213,18 +216,24 @@ class _ScreenOnlineBookingsState extends State<ScreenOnlineBookings> {
             ),
             const SizedBox(height: 2),
 
-            // Tabular View for Tablet / POS (Light Theme)
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final double tableWidth =
-                      constraints.maxWidth < 950 ? 950 : constraints.maxWidth;
+                      constraints.maxWidth < 1000 ? 1000 : constraints.maxWidth;
 
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: SizedBox(
-                      width: tableWidth,
-                      child: Column(
+                  return ScrollConfiguration(
+                    behavior: AppScrollBehavior(),
+                    child: Scrollbar(
+                      controller: _horizontalScrollController,
+                      thumbVisibility: true,
+                      trackVisibility: true,
+                      child: SingleChildScrollView(
+                        controller: _horizontalScrollController,
+                        scrollDirection: Axis.horizontal,
+                        child: SizedBox(
+                          width: tableWidth,
+                          child: Column(
                         children: [
                           const Padding(
                             padding: EdgeInsets.symmetric(
@@ -385,10 +394,12 @@ class _ScreenOnlineBookingsState extends State<ScreenOnlineBookings> {
                         ],
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
           ],
         ),
       ),

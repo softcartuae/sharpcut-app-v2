@@ -57,6 +57,7 @@ class ApiClient {
   //POST API ENDPOINTS
   static final loginApi = "login";
   static final logoutApi = "logout";
+  static final refreshDeviceTokenApi = "refresh-device-token";
   static final userExpensePostApi = "users/expenses";
   static final shopExpensePostApi = "shop-expenses";
   static final bookingsPostApi = "bookings";
@@ -79,6 +80,7 @@ class ApiClient {
   static final searchCustomerApi = "transactions/search-customer";
 
   // GET API ENDPOINTS
+  static final bookingsTodayApi = "bookings/today";
   static final userExpenseGETapi = "users/expenses";
   static final shopExpenseGETapi = "shop-expenses";
   static final transactionsGETApi = "transactions";

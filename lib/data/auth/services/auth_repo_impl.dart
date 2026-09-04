@@ -43,7 +43,7 @@ class AuthRepoImpl implements AuthRepo {
         data: {
           "mode": "online",
           "pin": pin,
-          "device_token": null,
+          "device_token": token,
           "device_os": deviceOs,
         },
       );
@@ -136,6 +136,36 @@ class AuthRepoImpl implements AuthRepo {
     } catch (e) {
       log("Get app version error: $e");
       return "";
+    }
+  }
+
+  @override
+  Future<Either<String, void>> refreshDeviceToken(String deviceToken) async {
+    try {
+      final response = await ApiClient.dio.post(
+        ApiClient.refreshDeviceTokenApi,
+        data: {
+          "device_token": deviceToken,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        log("Device token refreshed successfully");
+        return const Right(null);
+      } else {
+        return Left("Failed to refresh device token: ${response.statusMessage}");
+      }
+    } catch (e) {
+      log("Refresh device token error: $e");
+      if (e is DioException) {
+        if (e.response != null && e.response?.data != null) {
+          final data = e.response?.data;
+          if (data is Map && data.containsKey('message')) {
+            return Left(data['message']);
+          }
+        }
+      }
+      return Left("Error refreshing device token: $e");
     }
   }
 }

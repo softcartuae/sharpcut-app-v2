@@ -6,4 +6,5 @@ abstract class AuthRepo {
   Future<ShopModel> getUser();
   Future<String> getAppVersion();
   Future<void> logout();
+  Future<Either<String, void>> refreshDeviceToken(String deviceToken);
 }

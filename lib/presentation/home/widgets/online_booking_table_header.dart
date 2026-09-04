@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 
 class OnlineBookingTableHeader extends StatelessWidget {
-  const OnlineBookingTableHeader({super.key});
+    final bool staffwise;
+
+  const OnlineBookingTableHeader({super.key,this.staffwise = false});
 
   @override
   Widget build(BuildContext context) {
@@ -16,11 +18,11 @@ class OnlineBookingTableHeader extends StatelessWidget {
           color: AppColors.borderLight,
         ),
       ),
-      child: const Row(
+      child:  Row(
         children: [
           TableHeaderCell(label: "CUSTOMER", flex: 3),
           TableHeaderCell(label: "DATE & TIME", flex: 3),
-          TableHeaderCell(label: "STYLIST", flex: 2),
+        if(staffwise == false)   TableHeaderCell(label: "STYLIST", flex: 2),
           TableHeaderCell(label: "SERVICES", flex: 3),
           TableHeaderCell(label: "TOTAL", flex: 2),
           TableHeaderCell(

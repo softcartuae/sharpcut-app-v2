@@ -20,6 +20,7 @@ import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
 import 'package:sharp_cut/cubit/booking/customer_search_cubit.dart';
 import 'package:sharp_cut/cubit/online_booking/online_booking_cubit.dart';
+import 'package:sharp_cut/cubit/staff_wise_booking/staff_wise_booking_cubit.dart';
 import 'package:sharp_cut/presentation/splash/screens/splash_screen.dart';
 import 'package:sharp_cut/utils/simple_bloc_observer.dart';
 
@@ -71,6 +72,7 @@ void main() async {
             BlocProvider(create: (_) => di.sl<CustomerSearchCubit>()),
             BlocProvider(create: (_) => di.sl<ShopExpenseCubit>()),
             BlocProvider(create: (_) => di.sl<OnlineBookingCubit>()),
+            BlocProvider(create: (_) => di.sl<StaffWiseBookingCubit>()),
           ],
           child: MyApp(),
         ), // Wrap your app
@@ -155,7 +157,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         if (mounted) {
           // Use the navigatorKey context or the current context if available
           final context = navigatorKey.currentContext;
-          if (context != null) {
+          if (context != null && context.mounted) {
             FirebasePushService.callingApiAndChangeStateByPushNotification(
               message,
               context,

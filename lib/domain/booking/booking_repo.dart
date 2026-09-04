@@ -4,6 +4,7 @@ import 'package:sharp_cut/domain/booking/models/rebooking_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/customer_suggestion_model.dart';
+import 'package:sharp_cut/domain/booking/models/staff_wise_booking_model.dart';
 
 abstract class BookingRepo {
   Future<Either<String, String>> bookSlot({
@@ -57,6 +58,14 @@ abstract class BookingRepo {
     String? phoneNumber,
     String? date,
     String? status,
+  });
+
+  Future<Either<String, StaffWiseBookingResponseModel>> getStaffWiseOnlineBookings({
+    int page = 1,
+    int perPage = 10,
+    String? date,
+    String? status,
+    String? search,
   });
 }
 

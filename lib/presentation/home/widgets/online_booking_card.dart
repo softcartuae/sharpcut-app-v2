@@ -4,11 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:sharp_cut/domain/booking/models/online_booking_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/cutting_masters_dialog.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class OnlineBookingCard extends StatelessWidget {
   final OnlineBookingModel booking;
+  final bool staffwise;
 
-  const OnlineBookingCard({super.key, required this.booking});
+  const OnlineBookingCard({super.key, required this.booking ,this.staffwise = false});
 
   String _formatBookingTime(String? timeStr) {
     if (timeStr == null || timeStr.isEmpty) return "N/A";
@@ -142,7 +144,7 @@ class OnlineBookingCard extends StatelessWidget {
           const SizedBox(width: 8),
 
           // 3. STYLIST (flex: 2)
-          Expanded(
+      if(staffwise == false)    Expanded(
             flex: 2,
             child: Row(
               children: [
@@ -364,33 +366,11 @@ class OnlineBookingStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor;
-    Color borderColor;
-    Color textColor;
-
-    switch (status.toLowerCase()) {
-      case 'confirmed':
-      case 'completed':
-        bgColor = AppColors.statusConfirmedBg;
-        borderColor = AppColors.statusConfirmedBorder;
-        textColor = AppColors.statusConfirmedText;
-        break;
-      case 'cancelled':
-        bgColor = AppColors.statusCancelledBg;
-        borderColor = AppColors.statusCancelledBorder;
-        textColor = AppColors.statusCancelledText;
-        break;
-      case 'rescheduled':
-        bgColor = AppColors.statusRescheduledBg;
-        borderColor = AppColors.statusRescheduledBorder;
-        textColor = AppColors.statusRescheduledText;
-        break;
-      default:
-        bgColor = AppColors.statusPendingBg;
-        borderColor = AppColors.statusPendingBorder;
-        textColor = AppColors.statusPendingText;
-        break;
-    }
+    final statusEnum = OnlineBookingStatus.fromString(status);
+    final bgColor = statusEnum?.bgColor ?? AppColors.statusPendingBg;
+    final borderColor = statusEnum?.borderColor ?? AppColors.statusPendingBorder;
+    final textColor = statusEnum?.textColor ?? AppColors.statusPendingText;
+    final labelText = statusEnum?.label ?? status.toUpperCase();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -403,7 +383,7 @@ class OnlineBookingStatusChip extends StatelessWidget {
         ),
       ),
       child: Text(
-        status.toUpperCase(),
+        labelText,
         style: GoogleFonts.rajdhani(
           color: textColor,
           fontWeight: FontWeight.bold,

@@ -48,6 +48,7 @@ import 'package:sharp_cut/cubit/booking/booking_form_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/presentation/home/widgets/expandable_expense_button.dart';
 import 'package:sharp_cut/presentation/home/widgets/expandable_online_booking_button.dart';
+import 'package:sharp_cut/presentation/home/screens/screen_staff_wise_bookings.dart';
 
 class HomeServicesSection extends StatefulWidget {
   const HomeServicesSection({super.key});
@@ -923,8 +924,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                   ),
 
                                 // ONLINE BOOKINGS BUTTON
-                                const SizedBox(height: 12),
-                                ExpandableOnlineBookingButton(
+                             if (!isBooked)       const SizedBox(height: 12),
+                             if (!isBooked)         ExpandableOnlineBookingButton(
                                   selectedButton: selectedButton,
                                   onTapHistory: () {
                                     _selectedButtonNotifier.value = "HISTORY";
@@ -939,6 +940,13 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                   onTapStaffWise: () {
                                     _selectedButtonNotifier.value =
                                         "STAFF WISE";
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ScreenStaffWiseBookings(),
+                                      ),
+                                    );
                                   },
                                 ),
 

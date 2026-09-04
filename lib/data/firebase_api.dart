@@ -3,7 +3,9 @@ import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
 import 'package:sharp_cut/firebase_push/firebase_push_service.dart';
+import 'package:sharp_cut/injection_container.dart';
 import 'package:sharp_cut/main.dart';
 
 import 'dart:convert';
@@ -33,10 +35,14 @@ class FirebaseApi {
     await _firebaseMessaging.requestPermission();
     final fCMToken = await _firebaseMessaging.getToken();
     debugPrint('Token: $fCMToken');
+    if (fCMToken != null) {
+      await sl<AuthRepo>().refreshDeviceToken(fCMToken);
+    }
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
-    _firebaseMessaging.onTokenRefresh.listen((newToken) {
+    _firebaseMessaging.onTokenRefresh.listen((newToken) async {
       debugPrint('FCM Token Refreshed: $newToken');
+      await sl<AuthRepo>().refreshDeviceToken(newToken);
     });
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
