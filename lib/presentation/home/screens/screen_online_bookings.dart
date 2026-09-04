@@ -7,6 +7,7 @@ import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/cubit/online_booking/online_booking_cubit.dart';
 import 'package:sharp_cut/cubit/online_booking/online_booking_state.dart';
 import 'package:sharp_cut/presentation/home/widgets/online_booking_card.dart';
+import 'package:sharp_cut/presentation/home/widgets/online_booking_date_filter_dropdown.dart';
 import 'package:sharp_cut/presentation/home/widgets/online_booking_shimmer_loading.dart';
 import 'package:sharp_cut/presentation/home/widgets/online_booking_table_header.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
@@ -107,69 +108,107 @@ class _ScreenOnlineBookingsState extends State<ScreenOnlineBookings> {
         },
         child: Column(
           children: [
-            // Phone Number Filter Input Field
+            // Filter Bar: Phone Search & Date Filter Dropdown
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Container(
-                height: 46,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: AppColors.borderMediumLight,
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceLight,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppColors.borderMediumLight,
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.02),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _phoneSearchController,
+                        builder: (context, value, child) {
+                          return TextField(
+                            controller: _phoneSearchController,
+                            keyboardType: TextInputType.phone,
+                            style: GoogleFonts.rajdhani(
+                              color: AppColors.textPrimaryLight,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            onChanged: _onSearchChanged,
+                            decoration: InputDecoration(
+                              hintText:
+                                  "Filter by phone number (e.g. +971500000)...",
+                              hintStyle: GoogleFonts.rajdhani(
+                                color: AppColors.textMutedLight,
+                                fontSize: 14,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.search,
+                                color: AppColors.violetNormal,
+                                size: 20,
+                              ),
+                              suffixIcon: value.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(
+                                        Icons.clear,
+                                        color: AppColors.textSecondaryLight,
+                                        size: 18,
+                                      ),
+                                      onPressed: () {
+                                        _phoneSearchController.clear();
+                                        _onSearchChanged('');
+                                      },
+                                    )
+                                  : null,
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ],
-                ),
-                child: ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: _phoneSearchController,
-                  builder: (context, value, child) {
-                    return TextField(
-                      controller: _phoneSearchController,
-                      keyboardType: TextInputType.phone,
-                      style: GoogleFonts.rajdhani(
-                        color: AppColors.textPrimaryLight,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      onChanged: _onSearchChanged,
-                      decoration: InputDecoration(
-                        hintText: "Filter by phone number (e.g. +971500000)...",
-                        hintStyle: GoogleFonts.rajdhani(
-                          color: AppColors.textMutedLight,
-                          fontSize: 14,
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.search,
-                          color: AppColors.violetNormal,
-                          size: 20,
-                        ),
-                        suffixIcon: value.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(
-                                  Icons.clear,
-                                  color: AppColors.textSecondaryLight,
-                                  size: 18,
-                                ),
-                                onPressed: () {
-                                  _phoneSearchController.clear();
-                                  _onSearchChanged('');
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    );
-                  },
-                ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Date Filter Dropdown (ALL DATES, TODAY, YESTERDAY, CUSTOM DATE)
+                  BlocBuilder<OnlineBookingCubit, OnlineBookingState>(
+                    builder: (context, state) {
+                      return OnlineBookingDateFilterDropdown(
+                        activeDateFilter:
+                            context.read<OnlineBookingCubit>().currentDateFilter,
+                        onDateFilterChanged: (newDateStr) {
+                          if (newDateStr == null) {
+                            context
+                                .read<OnlineBookingCubit>()
+                                .fetchOnlineBookings(
+                                  isRefresh: true,
+                                  phoneNumber: _phoneSearchController.text,
+                                  clearDate: true,
+                                );
+                          } else {
+                            context
+                                .read<OnlineBookingCubit>()
+                                .fetchOnlineBookings(
+                                  isRefresh: true,
+                                  phoneNumber: _phoneSearchController.text,
+                                  date: newDateStr,
+                                );
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 2),

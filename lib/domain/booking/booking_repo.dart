@@ -55,6 +55,8 @@ abstract class BookingRepo {
     int page = 1,
     int perPage = 10,
     String? phoneNumber,
+    String? date,
+    String? status,
   });
 }
 

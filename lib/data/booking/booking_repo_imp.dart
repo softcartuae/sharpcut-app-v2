@@ -304,6 +304,8 @@ class BookingRepoImp implements BookingRepo {
     int page = 1,
     int perPage = 10,
     String? phoneNumber,
+    String? date,
+    String? status,
   }) async {
     try {
       final queryParams = <String, dynamic>{
@@ -312,6 +314,12 @@ class BookingRepoImp implements BookingRepo {
       };
       if (phoneNumber != null && phoneNumber.trim().isNotEmpty) {
         queryParams['phone_number'] = phoneNumber.trim();
+      }
+      if (date != null && date.trim().isNotEmpty) {
+        queryParams['date'] = date.trim();
+      }
+      if (status != null && status.trim().isNotEmpty) {
+        queryParams['status'] = status.trim();
       }
 
       final response = await ApiClient.dio.get(

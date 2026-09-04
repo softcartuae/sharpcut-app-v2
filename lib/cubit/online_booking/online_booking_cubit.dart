@@ -8,18 +8,39 @@ class OnlineBookingCubit extends Cubit<OnlineBookingState> {
   int _currentPage = 1;
   final int _perPage = 15;
   String? _phoneNumber;
+  String? _date;
+  String? _status;
   List<OnlineBookingModel> _allBookings = [];
 
   OnlineBookingCubit({required this.bookingRepo})
       : super(OnlineBookingInitial());
 
+  String? get currentDateFilter => _date;
+  String? get currentStatusFilter => _status;
+
   Future<void> fetchOnlineBookings({
     int page = 1,
     bool isRefresh = true,
     String? phoneNumber,
+    String? date,
+    bool clearDate = false,
+    String? status,
+    bool clearStatus = false,
   }) async {
     if (phoneNumber != null) {
       _phoneNumber = phoneNumber;
+    }
+
+    if (clearDate) {
+      _date = null;
+    } else if (date != null) {
+      _date = date;
+    }
+
+    if (clearStatus) {
+      _status = null;
+    } else if (status != null) {
+      _status = status;
     }
 
     if (isRefresh) {
@@ -39,6 +60,8 @@ class OnlineBookingCubit extends Cubit<OnlineBookingState> {
       page: page,
       perPage: _perPage,
       phoneNumber: _phoneNumber,
+      date: _date,
+      status: _status,
     );
 
     result.fold(
@@ -76,6 +99,8 @@ class OnlineBookingCubit extends Cubit<OnlineBookingState> {
         page: _currentPage + 1,
         isRefresh: false,
         phoneNumber: _phoneNumber,
+        date: _date,
+        status: _status,
       );
     }
   }
