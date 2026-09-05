@@ -43,7 +43,7 @@ class FirebaseApi {
   );
 
   Future<void> _initLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@drawable/ic_notification');
     const iosSettings = DarwinInitializationSettings();
     const settings = InitializationSettings(
       android: androidSettings,
@@ -71,7 +71,7 @@ class FirebaseApi {
           _androidChannel.id,
           _androidChannel.name,
           channelDescription: _androidChannel.description,
-          icon: '@mipmap/ic_launcher',
+          icon: '@drawable/ic_notification',
           importance: Importance.max,
           priority: Priority.high,
         ),
@@ -94,17 +94,8 @@ class FirebaseApi {
     );
     await _initLocalNotifications();
 
-    final fCMToken = await _firebaseMessaging.getToken();
-    log('''
-==================================================
-🔥 FCM TOKEN FOR FIREBASE CONSOLE TEST:
-$fCMToken
-==================================================''');
-    print('🔥 FCM TOKEN: $fCMToken');
 
-    if (fCMToken != null) {
-      await sl<AuthRepo>().refreshDeviceToken(fCMToken);
-    }
+  
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
     _firebaseMessaging.onTokenRefresh.listen((newToken) async {
@@ -114,7 +105,7 @@ $fCMToken
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       log('Got a message whilst in the foreground!');
-      log('Message data: ${message.data}');
+   
 
       // Show system notification banner in foreground
       showLocalNotification(message);

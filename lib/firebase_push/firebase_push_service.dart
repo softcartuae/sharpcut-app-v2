@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
@@ -14,10 +13,10 @@ class FirebasePushService {
     RemoteMessage message,
     BuildContext? context,
   ) async {
+
     final messageData = message.data;
     final type = messageData['type'];
-    log("type: $type");
-
+   
     ServiceCubit serviceCubit;
     ChairCubit chairCubit;
 
