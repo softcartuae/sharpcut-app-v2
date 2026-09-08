@@ -12,6 +12,8 @@ Future<void> showQuickPaymentPopup(
   required double total,
   required double discount,
   required double grandTotal,
+  double? walletAmount,
+  Function(double discount)? onWalletSelected,
 }) async {
   return showDialog(
     context: context,
@@ -23,6 +25,8 @@ Future<void> showQuickPaymentPopup(
         onCashSelected: onCashSelected,
         onCreditCardSelected: onCreditCardSelected,
         onUnPaid: onUnPaid,
+        walletAmount: walletAmount,
+        onWalletSelected: onWalletSelected,
       );
     },
   );
@@ -34,6 +38,8 @@ class QuickPaymentDialog extends StatefulWidget {
   final Function(double discount) onCashSelected;
   final Function(double discount) onCreditCardSelected;
   final Function(double discount) onUnPaid;
+  final double? walletAmount;
+  final Function(double discount)? onWalletSelected;
 
   const QuickPaymentDialog({
     super.key,
@@ -42,6 +48,8 @@ class QuickPaymentDialog extends StatefulWidget {
     required this.onCashSelected,
     required this.onCreditCardSelected,
     required this.onUnPaid,
+    this.walletAmount,
+    this.onWalletSelected,
   });
 
   @override
@@ -81,6 +89,11 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final bool showWallet =
+        widget.walletAmount != null &&
+        widget.onWalletSelected != null &&
+        widget.walletAmount! >= _uiGrandTotal;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       backgroundColor: const Color(0xFFF3E5F5),
@@ -117,14 +130,27 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
               ),
             ),
             const SizedBox(height: 20),
-            _buildReadOnlyField("Total :", widget.total.toStringAsFixed(2)),
-            const SizedBox(height: 10),
-            _buildEditableField("Discount :", _discountController),
-            const SizedBox(height: 10),
-            _buildReadOnlyField(
-              "Grand Total :",
-              _uiGrandTotal.toStringAsFixed(2),
+            QuickPaymentReadOnlyField(
+              label: "Total :",
+              value: widget.total.toStringAsFixed(2),
             ),
+            const SizedBox(height: 10),
+            QuickPaymentEditableField(
+              label: "Discount :",
+              controller: _discountController,
+            ),
+            const SizedBox(height: 10),
+            QuickPaymentReadOnlyField(
+              label: "Grand Total :",
+              value: _uiGrandTotal.toStringAsFixed(2),
+            ),
+            if (showWallet) ...[
+              const SizedBox(height: 10),
+              QuickPaymentReadOnlyField(
+                label: "Wallet :",
+                value: widget.walletAmount!.toStringAsFixed(2),
+              ),
+            ],
             const SizedBox(height: 30),
             BlocBuilder<BookingCubit, BookingState>(
               builder: (context, state) {
@@ -197,36 +223,73 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                                Navigator.of(context).pop();
-                                final discount =
-                                    double.tryParse(_discountController.text) ??
-                                    0.0;
-                                widget.onUnPaid(discount);
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isLoading
-                              ? Colors.grey
-                              : Colors.white,
-                          foregroundColor: Colors.black87,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          "Unpaid",
-                          style: GoogleFonts.rajdhani(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      child: showWallet
+                          ? ElevatedButton(
+                              onPressed: isLoading
+                                  ? null
+                                  : () {
+                                      Navigator.of(context).pop();
+                                      final discount =
+                                          double.tryParse(
+                                            _discountController.text,
+                                          ) ??
+                                          0.0;
+                                      widget.onWalletSelected!(discount);
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isLoading
+                                    ? Colors.grey
+                                    : const Color(0xFF8E24AA),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                              ),
+                              child: Text(
+                                "Wallet",
+                                style: GoogleFonts.rajdhani(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          : ElevatedButton(
+                              onPressed: isLoading
+                                  ? null
+                                  : () {
+                                      Navigator.of(context).pop();
+                                      final discount =
+                                          double.tryParse(
+                                            _discountController.text,
+                                          ) ??
+                                          0.0;
+                                      widget.onUnPaid(discount);
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isLoading
+                                    ? Colors.grey
+                                    : Colors.white,
+                                foregroundColor: Colors.black87,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  side: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                "Unpaid",
+                                style: GoogleFonts.rajdhani(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                     ),
                   ],
                 );
@@ -237,8 +300,20 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
       ),
     );
   }
+}
 
-  Widget _buildReadOnlyField(String label, String value) {
+class QuickPaymentReadOnlyField extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const QuickPaymentReadOnlyField({
+    super.key,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         SizedBox(
@@ -264,8 +339,20 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
       ],
     );
   }
+}
 
-  Widget _buildEditableField(String label, TextEditingController controller) {
+class QuickPaymentEditableField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+
+  const QuickPaymentEditableField({
+    super.key,
+    required this.label,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         SizedBox(

@@ -53,20 +53,7 @@ class BookingCubit extends Cubit<BookingState> {
     );
   }
 
-  // Future<void> saveBooking({required SaveBookingRequestModel request}) async {
-  //   // emit(BookingLoading());
-  //   final result = await bookingRepo.saveBooking(request);
-  //   result.fold(
-  //     (error) {
-  //       emit(BookingError(message: error));
-  //       ToastHelper.showError(error);
-  //     },
-  //     (message) {
-  //       emit(BookingInitial());
-  //       ToastHelper.showSuccess(message);
-  //     },
-  //   );
-  // }
+
 
   Future<void> quickPayment({
     required SettlePaymentRequestModel request,

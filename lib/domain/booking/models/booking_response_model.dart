@@ -1,6 +1,15 @@
-import 'package:sharp_cut/domain/home/models/service_model.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/helpers/convertion.dart';
+
+import 'booking_detail_model.dart';
+import 'customer_booking_service_model.dart';
+import 'customer_model.dart';
+import 'payment_model.dart';
+
+export 'booking_detail_model.dart';
+export 'customer_booking_service_model.dart';
+export 'customer_model.dart';
+export 'payment_model.dart';
 
 class BookingResponseModel {
   final int? id;
@@ -10,6 +19,7 @@ class BookingResponseModel {
   final int? userId;
   final String? customerName;
   final String? customerNumber;
+  final CustomerModel? customer;
   final String? transactionDate;
   final String? invoiceNo;
   final String? invoiceDate;
@@ -36,6 +46,7 @@ class BookingResponseModel {
     this.userId,
     this.customerName,
     this.customerNumber,
+    this.customer,
     this.transactionDate,
     this.invoiceNo,
     this.invoiceDate,
@@ -56,6 +67,91 @@ class BookingResponseModel {
   });
 
   factory BookingResponseModel.fromJson(Map<String, dynamic> json) {
+
+     var json1 = {
+  "id": 101,
+  "online_booking_id": 25,
+  "app_id": 1001,
+  "chair_id": 1,
+  "user_id": 10,
+  "customer_name": "John Doe",
+  "customer_number": "+971501234567",
+  "customer": {
+    "id": 5,
+    "firebase_uid": "uid_abc123",
+    "phone_number": "+971501111111",
+    "name": "John Doe",
+    "email": "[EMAIL_ADDRESS]",
+    "gender": "male",
+    "wallet": 250.00,
+    "discount": null,
+    "valid_up_to": null,
+    "address": "Dubai, UAE"
+  },
+  "transaction_date": "2026-09-07 18:00:00",
+  "invoice_no": "INV-2026-0056",
+  "invoice_date": "2026-09-07",
+  "status": "completed",
+  "discount": 0.00,
+  "created_at": "2026-09-07T18:30:00.000000Z",
+  "user": {
+    "id": 10,
+    "shop_id": 1001,
+    "first_name": "Alice",
+    "last_name": "Smith",
+    "email": "[EMAIL_ADDRESS]",
+    "phone": "+971509876543",
+    "status": 1,
+    "profile_pic": "https://example.com/images/alice.jpg"
+  },
+  "details": [
+    {
+      "id": 201,
+      "service": {
+        "id": 3,
+        "name": "Men's Haircut",
+        "image": "https://example.com/images/haircut.jpg",
+        "duration": 45,
+        "price": 120.00
+      },
+      "quantity": 1,
+      "rate": 120.00,
+      "amount_total": 120.00
+    }
+  ],
+  "customer_booking_services": [
+    {
+      "id": 401,
+      "customer_booking_id": 101,
+      "service_id": 3,
+      "name": "Men's Haircut",
+      "quantity": 1,
+      "rate": 120.00,
+      "before_vat": 120.00,
+      "tax_percentage": 5.0,
+      "unit_tax": 6.00,
+      "created_at": "2026-09-07T18:30:00.000000Z",
+      "updated_at": "2026-09-07T18:30:00.000000Z"
+    }
+  ],
+  "grand_total": 120.00,
+  "tax_total": 6.00,
+  "final_total": 126.00,
+  "total_payment": 126.00,
+  "payment_status": "paid",
+  "end_time": "2026-09-07 18:45:00",
+  "payments": [
+    {
+      "id": 301,
+      "mode": "cash",
+      "amount": 126.00,
+      "date": "2026-09-07"
+    }
+  ]
+};
+
+
+ 
     return BookingResponseModel(
       id: json['id'],
       onlineBookingId: json['online_booking_id'],
@@ -65,6 +161,9 @@ class BookingResponseModel {
       userId: json['user_id'],
       customerName: json['customer_name'],
       customerNumber: json['customer_number'],
+      customer: json1['customer'] != null
+          ? CustomerModel.fromJson(json1['customer'] as Map<String, dynamic>)
+          : null,
       transactionDate: json['transaction_date'],
       invoiceNo: json['invoice_no'],
       invoiceDate: json['invoice_date'],
@@ -93,97 +192,6 @@ class BookingResponseModel {
                 .map((e) => PaymentModel.fromJson(e))
                 .toList()
           : null,
-    );
-  }
-}
-
-class BookingDetail {
-  final int? id;
-  final ServiceModel? service;
-  final int? quantity;
-  final double? rate;
-  final double? amountTotal;
-
-  BookingDetail({
-    this.id,
-    this.service,
-    this.quantity,
-    this.rate,
-    this.amountTotal,
-  });
-
-  factory BookingDetail.fromJson(Map<String, dynamic> json) {
-    return BookingDetail(
-      id: json['id'],
-      quantity: json['quantity'],
-      rate: toDouble(json['rate']),
-      amountTotal: toDouble(json['amount_total']),
-      service: json['service'] != null
-          ? ServiceModel.fromJson(json['service'])
-          : null,
-    );
-  }
-}
-
-class CustomerBookingService {
-  final int? id;
-  final int? customerBookingId;
-  final int? serviceId;
-  final String? name;
-  final int? quantity;
-  final double? rate;
-  final double? beforeVat;
-
-    final double? taxPercentage;
-  final double? unitTax;
-  final String? createdAt;
-  final String? updatedAt;
-
-  CustomerBookingService({
-    this.id,
-    this.customerBookingId,
-    this.serviceId,
-    this.name,
-      this.taxPercentage,
-    this.unitTax,
-    this.beforeVat,
-    this.quantity,
-    this.rate,
-    this.createdAt,
-    this.updatedAt,
-  });
-
-  factory CustomerBookingService.fromJson(Map<String, dynamic> json) {
-    return CustomerBookingService(
-      id: json['id'],
-      customerBookingId: json['customer_booking_id'],
-      serviceId: json['service_id'],
-      name: json['name'],
-      quantity: json['quantity'],
-       beforeVat: toDouble(json['before_vat']),
-        taxPercentage: toDouble(json['tax_percentage']),
-      unitTax: toDouble(json['unit_tax']),
-      rate: toDouble(json['rate']),
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-    );
-  }
-}
-
-class PaymentModel {
-  final int? id;
-  final String? mode;
-  final double? amount;
-  final String? date;
-
-  PaymentModel({this.id, this.mode, this.amount, this.date});
-
-  factory PaymentModel.fromJson(Map<String, dynamic> json) {
-    return PaymentModel(
-      id: json['id'],
-      mode: json['mode'],
-      amount: toDouble(json['amount']),
-      date: json['date'],
     );
   }
 }

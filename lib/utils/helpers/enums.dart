@@ -18,6 +18,8 @@ enum PaymentMode {
   Card,
   // ignore: constant_identifier_names
   Unpaid,
+  // ignore: constant_identifier_names
+  Wallet,
 }
 
 enum OnlineBookingStatus {

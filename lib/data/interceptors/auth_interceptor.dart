@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
@@ -18,6 +20,7 @@ class AuthInterceptor extends Interceptor {
     // Get token and set Authorization header if available
     final token = await tokenStorage.getToken();
     if (token != null) {
+      log('Authorization: Bearer $token');
       options.headers['Authorization'] = 'Bearer $token';
     }
 

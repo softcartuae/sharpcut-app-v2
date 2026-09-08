@@ -1040,6 +1040,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                     .read<BookingFormCubit>()
                                                     .state;
 
+                                                final double? walletAmount =
+                                                    bookingState
+                                                        .bookingResponse
+                                                        .customer
+                                                        ?.wallet;
+
                                                 showQuickPaymentPopup(
                                                   context,
                                                   (discount) {
@@ -1094,6 +1100,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                     );
                                                   },
                                                   (discount) {
+                                                    // Unpaid Selected
                                                     _settlePayment(
                                                       context,
                                                       transactionId,
@@ -1122,6 +1129,33 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                   discount: 0.0,
                                                   grandTotal:
                                                       serviceState.subTotal,
+                                                  walletAmount: walletAmount,
+                                                  onWalletSelected: (discount) {
+                                                    // Wallet Selected
+                                                    _settlePayment(
+                                                      context,
+                                                      transactionId,
+                                                      userId,
+                                                      onlineBookingId,
+                                                      serviceState,
+                                                      bookingFormState,
+                                                      PaymentMode.Wallet.name,
+
+                                                      bookingState
+                                                          .bookingResponse
+                                                          .staff
+                                                          ?.name,
+                                                      bookingState
+                                                          .bookingResponse
+                                                          .transactionDate,
+
+                                                      discount,
+                                                      serviceState.total,
+                                                      bookingState
+                                                          .bookingResponse
+                                                          .chairId,
+                                                    );
+                                                  },
                                                 );
                                               }
                                             },
@@ -1271,6 +1305,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                 showSettlementDialog(
                                                   context,
                                                   settlePayment: request,
+                                                  customer: bookingState
+                                                      .bookingResponse
+                                                      .customer,
                                                   staffName: bookingState
                                                       .bookingResponse
                                                       .staff
