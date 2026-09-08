@@ -7,6 +7,7 @@ import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/cubit/online_booking/online_booking_cubit.dart';
 import 'package:sharp_cut/cubit/online_booking/online_booking_state.dart';
 import 'package:sharp_cut/presentation/home/widgets/online_booking_card.dart';
+import 'package:sharp_cut/presentation/home/widgets/online_booking_card_shimmer.dart';
 import 'package:sharp_cut/presentation/home/widgets/online_booking_date_filter_dropdown.dart';
 import 'package:sharp_cut/presentation/home/widgets/online_booking_shimmer_loading.dart';
 import 'package:sharp_cut/presentation/home/widgets/online_booking_table_header.dart';

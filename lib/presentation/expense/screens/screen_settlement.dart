@@ -306,7 +306,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
     final double availableWallet = widget.customer?.wallet ?? 0.0;
     if (walletAmount > availableWallet) {
       ToastHelper.showError(
-        "Wallet amount cannot exceed available balance (AED ${availableWallet.toStringAsFixed(2)})",
+        "Wallet amount cannot exceed available balance ${availableWallet.toStringAsFixed(2)})",
       );
       return;
     }
@@ -644,7 +644,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                         });
                                       },
                                       child: PaymentModeCard(
-                                        title: "Credit Card",
+                                        title: "Card",
                                         amount: _cardAmountController.text,
                                         color1: _isCardSelected
                                             ? AppColors.violetNormal
@@ -677,7 +677,7 @@ class _SettlementDialogState extends State<SettlementDialog> {
                                       },
                                       child: PaymentModeCard(
                                         title:
-                                            "Wallet (AED ${(widget.customer?.wallet ?? 0.0).toStringAsFixed(2)})",
+                                            "Wallet ${(widget.customer?.wallet ?? 0.0).toStringAsFixed(2)})",
                                         amount: _walletAmountController.text,
                                         color1: _isWalletSelected
                                             ? AppColors.violetNormal

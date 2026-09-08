@@ -388,6 +388,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     }
 
     final ResettleModel resettleModel = ResettleModel(
+      onlineBookingId: widget.settlePayment.onlineBookingId,
       discount: discount,
       transactionId: widget.settlePayment.transactionId,
       collectedUserId:
@@ -412,6 +413,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
     // Create a SettlePaymentRequestModel for printing purposes
     _pendingRequest = SettlePaymentRequestModel(
+      onlineBookingId: widget.settlePayment.onlineBookingId,
       finalTotalbefore: widget.settlePayment.finalTotalbefore,
       paymentStatus: getPaymentStatus(
         theAmountGoingToPayTotaly,
@@ -667,7 +669,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                         });
                                       },
                                       child: PaymentModeCard(
-                                        title: "Credit Card",
+                                        title: "Card",
                                         amount: _cardAmountController.text,
                                         color1: _isCardSelected
                                             ? AppColors.violetNormal

@@ -119,6 +119,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                                     paymentId:
                                                                         payment
                                                                             .id!,
+                                                               
                                                                     mode: mode,
                                                                     amount:
                                                                         amount,
@@ -165,6 +166,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
+                                                onlineBookingId: booking.onlineBookingId,
                                                 finalTotalbefore:
                                                     booking.finalTotalbefore,
                                                 paymentStatus:
@@ -342,6 +344,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
 
                                               SettlePaymentRequestModel
                                               request = SettlePaymentRequestModel(
+                                                onlineBookingId: booking.onlineBookingId,
                                                 finalTotalbefore:
                                                     booking.finalTotalbefore,
                                                 paymentStatus:

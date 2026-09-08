@@ -1028,7 +1028,12 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
 
                                                 int? transactionId;
                                                 int? userId;
-                                                int? onlineBookingId;
+                                                int? onlineBookingId =bookingState
+                                                    .bookingResponse
+                                                    .onlineBookingId;
+                                                userId = bookingState
+                                                    .bookingResponse
+                                                    .userId;;
                                                 transactionId = bookingState
                                                     .bookingResponse
                                                     .id;

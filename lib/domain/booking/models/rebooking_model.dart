@@ -1,5 +1,6 @@
 class ResettleModel {
   final int? transactionId;
+  final int? onlineBookingId;
   final List<int>? collectedUserId;
   final List<String>? mode;
   final List<double>? amount;
@@ -9,6 +10,7 @@ class ResettleModel {
 
   ResettleModel({
     this.discount,
+    this.onlineBookingId,
     this.transactionId,
     this.collectedUserId,
     this.mode,
@@ -19,6 +21,7 @@ class ResettleModel {
 
   Map<String, dynamic> toJson() {
     return {
+      "online_booking_id": onlineBookingId,
       "transaction_id": transactionId,
       "collected_user_id": collectedUserId,
       "mode": mode,

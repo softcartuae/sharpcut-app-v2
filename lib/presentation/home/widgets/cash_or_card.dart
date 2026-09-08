@@ -215,7 +215,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                           elevation: 0,
                         ),
                         child: Text(
-                          "Credit Card",
+                          "Card",
                           style: GoogleFonts.rajdhani(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
