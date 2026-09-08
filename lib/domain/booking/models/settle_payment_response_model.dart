@@ -1,5 +1,4 @@
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
-import 'package:sharp_cut/utils/helpers/convertion.dart';
 
 class SettlePaymentResponseModel {
   final bool? success;

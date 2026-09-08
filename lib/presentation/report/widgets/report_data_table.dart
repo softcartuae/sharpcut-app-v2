@@ -106,6 +106,10 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                                                 payment
                                                                     .amount ??
                                                                 0.0,
+                                                            availableWalletBalance:
+                                                                booking.customer
+                                                                    ?.wallet ??
+                                                                0.0,
                                                             onUpdate: (mode, amount) {
                                                               context
                                                                   .read<

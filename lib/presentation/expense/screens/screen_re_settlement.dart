@@ -134,11 +134,15 @@ class _SettlementDialogState extends State<ResettlementScreen> {
   final TextEditingController _cardAmountController = TextEditingController(
     text: "",
   );
+  final TextEditingController _walletAmountController = TextEditingController(
+    text: "",
+  );
 
   bool _splitPayment = false;
   // Track selected modes. If split is off, only one is true.
   bool _isCashSelected = true;
   bool _isCardSelected = false;
+  bool _isWalletSelected = false;
 
   double _finalTotal = 0.0;
   SettlePaymentRequestModel? _pendingRequest;
@@ -181,6 +185,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
         ? ""
         : (widget.balance).toStringAsFixed(2);
     _cardAmountController.text = "";
+    _walletAmountController.text = "";
 
     // Grand total display at the bottom usually matches final total
     _calculateFinalTotal();
@@ -204,6 +209,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
   void _calculatePaymentAndBalance() {
     double cashAmount = 0.0;
     double cardAmount = 0.0;
+    double walletAmount = 0.0;
 
     if (_splitPayment) {
       if (_isCashSelected) {
@@ -212,15 +218,20 @@ class _SettlementDialogState extends State<ResettlementScreen> {
       if (_isCardSelected) {
         cardAmount = double.tryParse(_cardAmountController.text) ?? 0.0;
       }
+      if (_isWalletSelected) {
+        walletAmount = double.tryParse(_walletAmountController.text) ?? 0.0;
+      }
     } else {
       final double amount = double.tryParse(_amountController.text) ?? 0.0;
       if (_isCashSelected) {
         cashAmount = amount;
-      } else {
+      } else if (_isCardSelected) {
         cardAmount = amount;
+      } else if (_isWalletSelected) {
+        walletAmount = amount;
       }
     }
-    final double curPayment = cashAmount + cardAmount;
+    final double curPayment = cashAmount + cardAmount + walletAmount;
     final double discount = double.tryParse(_discountController.text) ?? 0.0;
 
     // Balance is based on Net Total (Gross - Discount)
@@ -264,6 +275,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     _balanceController.dispose();
     _cashAmountController.dispose();
     _cardAmountController.dispose();
+    _walletAmountController.dispose();
     super.dispose();
   }
 
@@ -273,6 +285,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
 
     double cashAmount = 0.0;
     double cardAmount = 0.0;
+    double walletAmount = 0.0;
 
     if (_splitPayment) {
       if (_isCashSelected) {
@@ -281,18 +294,31 @@ class _SettlementDialogState extends State<ResettlementScreen> {
       if (_isCardSelected) {
         cardAmount = double.tryParse(_cardAmountController.text) ?? 0.0;
       }
+      if (_isWalletSelected) {
+        walletAmount = double.tryParse(_walletAmountController.text) ?? 0.0;
+      }
     } else {
       final double amount = double.tryParse(_amountController.text) ?? 0.0;
       if (_isCashSelected) {
         cashAmount = amount;
-      } else {
+      } else if (_isCardSelected) {
         cardAmount = amount;
+      } else if (_isWalletSelected) {
+        walletAmount = amount;
       }
+    }
+
+    final double availableWallet = widget.booking.customer?.wallet ?? 0.0;
+    if (walletAmount > availableWallet) {
+      ToastHelper.showError(
+        "Wallet amount cannot exceed available balance (AED ${availableWallet.toStringAsFixed(2)})",
+      );
+      return;
     }
 
     final alreadyPaid = double.tryParse(_paidController.text) ?? 0.0;
 
-    final double totalPaid = cashAmount + cardAmount;
+    final double totalPaid = cashAmount + cardAmount + walletAmount;
     // total going to paid
     final double theAmountGoingToPayTotaly = totalPaid + alreadyPaid;
 
@@ -307,10 +333,6 @@ class _SettlementDialogState extends State<ResettlementScreen> {
       ToastHelper.showError("Please Enter Customer Name");
       return;
     }
-
-    // Also check if totalPaid is 0? Maybe allow 0 for partial?
-    // User said "settlement is like can be partially gaven".
-    // So < finalTotal is allowed. > finalTotal is NOT allowed.
 
     final double tenderCash =
         double.tryParse(_tenderCashController.text) ?? 0.0;
@@ -337,8 +359,14 @@ class _SettlementDialogState extends State<ResettlementScreen> {
       changes.add(0.0);
     }
 
+    if (walletAmount != 0 || (_splitPayment && _isWalletSelected)) {
+      modes.add("Wallet");
+      amounts.add(walletAmount);
+      tenders.add(walletAmount);
+      changes.add(0.0);
+    }
+
     // If nothing selected/entered but we need to send something?
-    // If totalPaid is 0, maybe we still send the modes with 0?
     if (modes.isEmpty) {
       // Fallback to selected mode with 0
       if (_isCashSelected) {
@@ -346,8 +374,13 @@ class _SettlementDialogState extends State<ResettlementScreen> {
         amounts.add(0.0);
         tenders.add(0.0);
         changes.add(0.0);
-      } else {
+      } else if (_isCardSelected) {
         modes.add("Card");
+        amounts.add(0.0);
+        tenders.add(0.0);
+        changes.add(0.0);
+      } else {
+        modes.add("Wallet");
         amounts.add(0.0);
         tenders.add(0.0);
         changes.add(0.0);
@@ -502,7 +535,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                           SettlementTimeContainer(
                             label: "Time Starts",
                             time: widget.bookingTime != null
-                                ? widget.bookingTime!
+                                ? (widget.bookingTime!)
                                 : "--:--",
                           ),
                           const Spacer(),
@@ -517,7 +550,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
 
                       // Customer Details Section
                       Row(
@@ -586,15 +619,16 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                       onTap: () {
                                         setState(() {
                                           if (_splitPayment) {
-                                            // If trying to deselect Cash, check if Card is selected
                                             if (_isCashSelected &&
-                                                !_isCardSelected) {
-                                              return; // Don't allow deselecting the last one
+                                                !_isCardSelected &&
+                                                !_isWalletSelected) {
+                                              return;
                                             }
                                             _isCashSelected = !_isCashSelected;
                                           } else {
                                             _isCashSelected = true;
                                             _isCardSelected = false;
+                                            _isWalletSelected = false;
                                           }
                                           _calculatePaymentAndBalance();
                                           _calculateChange();
@@ -617,15 +651,16 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                       onTap: () {
                                         setState(() {
                                           if (_splitPayment) {
-                                            // If trying to deselect Card, check if Cash is selected
                                             if (_isCardSelected &&
-                                                !_isCashSelected) {
-                                              return; // Don't allow deselecting the last one
+                                                !_isCashSelected &&
+                                                !_isWalletSelected) {
+                                              return;
                                             }
                                             _isCardSelected = !_isCardSelected;
                                           } else {
                                             _isCardSelected = true;
                                             _isCashSelected = false;
+                                            _isWalletSelected = false;
                                           }
                                           _calculatePaymentAndBalance();
                                           _calculateChange();
@@ -638,6 +673,39 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                             ? AppColors.violetNormal
                                             : Colors.white10,
                                         color2: _isCardSelected
+                                            ? AppColors.redNormal
+                                            : Colors.transparent,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    // Wallet Card
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          if (_splitPayment) {
+                                            if (_isWalletSelected &&
+                                                !_isCashSelected &&
+                                                !_isCardSelected) {
+                                              return;
+                                            }
+                                            _isWalletSelected = !_isWalletSelected;
+                                          } else {
+                                            _isWalletSelected = true;
+                                            _isCashSelected = false;
+                                            _isCardSelected = false;
+                                          }
+                                          _calculatePaymentAndBalance();
+                                          _calculateChange();
+                                        });
+                                      },
+                                      child: PaymentModeCard(
+                                        title:
+                                            "Wallet (AED ${(widget.booking.customer?.wallet ?? 0.0).toStringAsFixed(2)})",
+                                        amount: _walletAmountController.text,
+                                        color1: _isWalletSelected
+                                            ? AppColors.violetNormal
+                                            : Colors.white10,
+                                        color2: _isWalletSelected
                                             ? AppColors.redNormal
                                             : Colors.transparent,
                                       ),
@@ -687,11 +755,10 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                                     value: _splitPayment,
                                                     onChanged: (val) => setState(() {
                                                       _splitPayment = val;
-                                                      // Reset selections when toggling split
                                                       if (!_splitPayment) {
                                                         _isCashSelected = true;
                                                         _isCardSelected = false;
-                                                        // Reset amounts?
+                                                        _isWalletSelected = false;
                                                         _amountController.text =
                                                             (widget
                                                                         .settlePayment
@@ -701,15 +768,14 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                                                   2,
                                                                 );
                                                       } else {
-                                                        // If turning on split, maybe select both?
-                                                        // Or keep current selection.
-                                                        // Let's default to Cash selected, Card unselected but available.
-                                                        // Initialize controllers
                                                         _cashAmountController
                                                                 .text =
                                                             _amountController
                                                                 .text;
                                                         _cardAmountController
+                                                                .text =
+                                                            "";
+                                                        _walletAmountController
                                                                 .text =
                                                             "";
                                                       }
@@ -736,9 +802,6 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                                   ? _cashAmountController
                                                   : _amountController,
                                               onChanged: (val) {
-                                                // If split is off, sync _amountController to _cashAmountController for display?
-                                                // Actually, if split is off, we use _amountController in _onSettle.
-                                                // But for consistent display in the card, we might want to update it.
                                                 setState(() {
                                                   if (!_splitPayment) {
                                                     _cashAmountController.text =
@@ -818,6 +881,49 @@ class _SettlementDialogState extends State<ResettlementScreen> {
                                                 setState(() {
                                                   if (!_splitPayment) {
                                                     _cardAmountController.text =
+                                                        val;
+                                                  }
+                                                  _calculatePaymentAndBalance();
+                                                });
+                                              },
+                                              keyboardType:
+                                                  const TextInputType.numberWithOptions(
+                                                    decimal: true,
+                                                  ),
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.allow(
+                                                  RegExp(r'^\d*\.?\d{0,2}'),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 8),
+                                          ],
+
+                                          if (_isWalletSelected) ...[
+                                            SettlementLabelInput(
+                                              label: _splitPayment
+                                                  ? "Wallet Amount"
+                                                  : "Amount",
+                                              controller: _splitPayment
+                                                  ? _walletAmountController
+                                                  : _amountController,
+                                              onChanged: (val) {
+                                                final double enteredWallet =
+                                                    double.tryParse(val) ?? 0.0;
+                                                final double availableWallet =
+                                                    widget.booking.customer
+                                                        ?.wallet ??
+                                                    0.0;
+                                                if (enteredWallet >
+                                                    availableWallet) {
+                                                  ToastHelper.showError(
+                                                    "Wallet amount cannot exceed available balance (AED ${availableWallet.toStringAsFixed(2)})",
+                                                  );
+                                                }
+                                                setState(() {
+                                                  if (!_splitPayment) {
+                                                    _walletAmountController
+                                                            .text =
                                                         val;
                                                   }
                                                   _calculatePaymentAndBalance();

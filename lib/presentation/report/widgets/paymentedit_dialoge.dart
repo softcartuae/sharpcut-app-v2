@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class PaymentEditDialog extends StatefulWidget {
   final String invoiceNo;
   final double invoiceAmount;
   final String currentMode;
   final double currentAmount;
+  final double availableWalletBalance;
   final Function(String mode, double amount) onUpdate;
 
   const PaymentEditDialog({
@@ -16,6 +18,7 @@ class PaymentEditDialog extends StatefulWidget {
     required this.invoiceAmount,
     required this.currentMode,
     required this.currentAmount,
+    this.availableWalletBalance = 0.0,
     required this.onUpdate,
   });
 
@@ -29,15 +32,13 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
   final List<String> paymentModes = [
     PaymentMode.Cash.name,
     PaymentMode.Card.name,
+    PaymentMode.Wallet.name,
   ];
 
   @override
   void initState() {
     super.initState();
     selectedMode = widget.currentMode;
-    // Ensure the mode is in the list, if not default to Cash or add it?
-    // For now, let's assume the backend returns standard modes.
-    // If not, we might want to handle that, but let's stick to the list for now.
     if (!paymentModes.contains(selectedMode)) {
       if (paymentModes.any(
         (element) => element.toLowerCase() == selectedMode.toLowerCase(),
@@ -82,12 +83,19 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
               ),
             ),
             const SizedBox(height: 24),
-            _buildInfoRow('Invoice No :', widget.invoiceNo),
+            PaymentEditInfoRow(label: 'Invoice No :', value: widget.invoiceNo),
             const SizedBox(height: 12),
-            _buildInfoRow(
-              'Invoice Amount :',
-              widget.invoiceAmount.toStringAsFixed(2),
+            PaymentEditInfoRow(
+              label: 'Invoice Amount :',
+              value: widget.invoiceAmount.toStringAsFixed(2),
             ),
+            if (selectedMode == PaymentMode.Wallet.name) ...[
+              const SizedBox(height: 12),
+              PaymentEditInfoRow(
+                label: 'Wallet Balance :',
+                value: 'AED ${widget.availableWalletBalance.toStringAsFixed(2)}',
+              ),
+            ],
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -176,7 +184,7 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
                     color: const Color(0xFFF2EFF8),
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Text(
-                      '0.0', // Label as per design, though it looks like a range indicator or label
+                      '0.0',
                       style: GoogleFonts.rajdhani(
                         fontSize: 12,
                         color: Colors.black,
@@ -206,6 +214,21 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
                   onPressed: () {
                     final amount =
                         double.tryParse(amountController.text) ?? 0.0;
+                    if (selectedMode == PaymentMode.Wallet.name) {
+                      final double alreadyUsedWallet =
+                          (widget.currentMode.toLowerCase() == 'wallet')
+                              ? widget.currentAmount
+                              : 0.0;
+                      final double effectiveMaxWallet =
+                          widget.availableWalletBalance + alreadyUsedWallet;
+
+                      if (amount > effectiveMaxWallet) {
+                        ToastHelper.showError(
+                          "Wallet amount cannot exceed available balance (AED ${effectiveMaxWallet.toStringAsFixed(2)})",
+                        );
+                        return;
+                      }
+                    }
                     widget.onUpdate(selectedMode, amount);
                     Navigator.pop(context);
                   },
@@ -238,8 +261,20 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
       ),
     );
   }
+}
 
-  Widget _buildInfoRow(String label, String value) {
+class PaymentEditInfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const PaymentEditInfoRow({
+    super.key,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
