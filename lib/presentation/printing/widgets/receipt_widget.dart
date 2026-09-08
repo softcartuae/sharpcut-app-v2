@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/domain/auth/models/shop_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
+import 'package:sharp_cut/presentation/printing/widgets/dashed_line.dart';
 import 'dart:ui' as ui;
 
 class ReceiptWidget extends StatelessWidget {
@@ -677,33 +678,5 @@ class ReceiptWidget extends StatelessWidget {
   String _formatDate(DateTime? date) {
     if (date == null) return '';
     return DateFormat('dd/MM/yyyy').format(date);
-  }
-}
-
-class DashedLine extends StatelessWidget {
-  final Color color;
-  const DashedLine({super.key, this.color = Colors.black});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final boxWidth = constraints.constrainWidth();
-        const dashWidth = 5.0;
-        final dashHeight = 1.0;
-        final dashCount = (boxWidth / (2 * dashWidth)).floor();
-        return Flex(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          direction: Axis.horizontal,
-          children: List.generate(dashCount, (_) {
-            return SizedBox(
-              width: dashWidth,
-              height: dashHeight,
-              child: DecoratedBox(decoration: BoxDecoration(color: color)),
-            );
-          }),
-        );
-      },
-    );
   }
 }

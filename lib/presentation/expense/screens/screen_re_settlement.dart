@@ -311,7 +311,7 @@ class _SettlementDialogState extends State<ResettlementScreen> {
     final double availableWallet = widget.booking.customer?.wallet ?? 0.0;
     if (walletAmount > availableWallet) {
       ToastHelper.showError(
-        "Wallet amount cannot exceed available balance (AED ${availableWallet.toStringAsFixed(2)})",
+        "Wallet amount cannot exceed available balance ${availableWallet.toStringAsFixed(2)})",
       );
       return;
     }

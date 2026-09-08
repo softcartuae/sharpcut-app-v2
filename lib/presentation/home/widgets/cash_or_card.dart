@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
+import 'package:sharp_cut/presentation/home/widgets/quick_payment_editable_field.dart';
+import 'package:sharp_cut/presentation/home/widgets/quick_payment_read_only_field.dart';
 
 Future<void> showQuickPaymentPopup(
   BuildContext context,
@@ -298,96 +300,6 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class QuickPaymentReadOnlyField extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const QuickPaymentReadOnlyField({
-    super.key,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: GoogleFonts.rajdhani(fontSize: 16, color: Colors.black87),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              value,
-              style: GoogleFonts.rajdhani(fontSize: 16, color: Colors.black87),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class QuickPaymentEditableField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-
-  const QuickPaymentEditableField({
-    super.key,
-    required this.label,
-    required this.controller,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: GoogleFonts.rajdhani(fontSize: 16, color: Colors.black87),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: TextField(
-              controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              style: GoogleFonts.rajdhani(fontSize: 16, color: Colors.black87),
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                hintText: "0.0",
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                isDense: true,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

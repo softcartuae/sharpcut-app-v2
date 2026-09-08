@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sharp_cut/presentation/report/widgets/payment_edit_info_row.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
@@ -38,6 +39,7 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
   @override
   void initState() {
     super.initState();
+    
     selectedMode = widget.currentMode;
     if (!paymentModes.contains(selectedMode)) {
       if (paymentModes.any(
@@ -54,6 +56,7 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
     amountController = TextEditingController(
       text: widget.currentAmount.toString(),
     );
+
   }
 
   @override
@@ -93,7 +96,7 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
               const SizedBox(height: 12),
               PaymentEditInfoRow(
                 label: 'Wallet Balance :',
-                value: 'AED ${widget.availableWalletBalance.toStringAsFixed(2)}',
+                value: widget.availableWalletBalance.toStringAsFixed(2),
               ),
             ],
             const SizedBox(height: 24),
@@ -259,42 +262,6 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class PaymentEditInfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const PaymentEditInfoRow({
-    super.key,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.rajdhani(
-            fontSize: 16,
-            color: Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Text(
-          value,
-          style: GoogleFonts.rajdhani(
-            fontSize: 16,
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }

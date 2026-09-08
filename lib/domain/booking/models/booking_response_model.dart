@@ -67,90 +67,6 @@ class BookingResponseModel {
   });
 
   factory BookingResponseModel.fromJson(Map<String, dynamic> json) {
-
-     var json1 = {
-  "id": 101,
-  "online_booking_id": 25,
-  "app_id": 1001,
-  "chair_id": 1,
-  "user_id": 10,
-  "customer_name": "John Doe",
-  "customer_number": "+971501234567",
-  "customer": {
-    "id": 5,
-    "firebase_uid": "uid_abc123",
-    "phone_number": "+971501111111",
-    "name": "John Doe",
-    "email": "[EMAIL_ADDRESS]",
-    "gender": "male",
-    "wallet": 250.00,
-    "discount": null,
-    "valid_up_to": null,
-    "address": "Dubai, UAE"
-  },
-  "transaction_date": "2026-09-07 18:00:00",
-  "invoice_no": "INV-2026-0056",
-  "invoice_date": "2026-09-07",
-  "status": "completed",
-  "discount": 0.00,
-  "created_at": "2026-09-07T18:30:00.000000Z",
-  "user": {
-    "id": 10,
-    "shop_id": 1001,
-    "first_name": "Alice",
-    "last_name": "Smith",
-    "email": "[EMAIL_ADDRESS]",
-    "phone": "+971509876543",
-    "status": 1,
-    "profile_pic": "https://example.com/images/alice.jpg"
-  },
-  "details": [
-    {
-      "id": 201,
-      "service": {
-        "id": 3,
-        "name": "Men's Haircut",
-        "image": "https://example.com/images/haircut.jpg",
-        "duration": 45,
-        "price": 120.00
-      },
-      "quantity": 1,
-      "rate": 120.00,
-      "amount_total": 120.00
-    }
-  ],
-  "customer_booking_services": [
-    {
-      "id": 401,
-      "customer_booking_id": 101,
-      "service_id": 3,
-      "name": "Men's Haircut",
-      "quantity": 1,
-      "rate": 120.00,
-      "before_vat": 120.00,
-      "tax_percentage": 5.0,
-      "unit_tax": 6.00,
-      "created_at": "2026-09-07T18:30:00.000000Z",
-      "updated_at": "2026-09-07T18:30:00.000000Z"
-    }
-  ],
-  "grand_total": 120.00,
-  "tax_total": 6.00,
-  "final_total": 126.00,
-  "total_payment": 126.00,
-  "payment_status": "paid",
-  "end_time": "2026-09-07 18:45:00",
-  "payments": [
-    {
-      "id": 301,
-      "mode": "cash",
-      "amount": 126.00,
-      "date": "2026-09-07"
-    }
-  ]
-};
-
-
  
     return BookingResponseModel(
       id: json['id'],
@@ -161,8 +77,8 @@ class BookingResponseModel {
       userId: json['user_id'],
       customerName: json['customer_name'],
       customerNumber: json['customer_number'],
-      customer: json1['customer'] != null
-          ? CustomerModel.fromJson(json1['customer'] as Map<String, dynamic>)
+      customer: json['customer'] != null
+          ? CustomerModel.fromJson(json['customer'] as Map<String, dynamic>)
           : null,
       transactionDate: json['transaction_date'],
       invoiceNo: json['invoice_no'],
