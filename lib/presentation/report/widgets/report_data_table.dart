@@ -1,26 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
-import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
-
-import 'package:sharp_cut/domain/auth/models/shop_model.dart';
-import 'package:sharp_cut/domain/home/models/staff_model.dart';
-import 'package:sharp_cut/utils/helpers/enums.dart';
-import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
-import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
-import 'package:sharp_cut/presentation/expense/screens/screen_re_settlement.dart';
-import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
-
-import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
-import 'package:sharp_cut/presentation/report/widgets/report_table_header.dart';
-import 'package:sharp_cut/presentation/report/widgets/report_table_row.dart';
-
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:sharp_cut/presentation/report/widgets/receipt_dialog_helper.dart';
-import 'package:sharp_cut/presentation/report/widgets/payment_details_dialog.dart';
-import 'package:sharp_cut/presentation/report/widgets/paymentedit_dialoge.dart';
-import 'package:sharp_cut/presentation/report/widgets/edit_customer_name_dialog.dart';
+import 'package:sharp_cut/domain/home/models/staff_model.dart';
+import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
+import 'package:sharp_cut/presentation/report/widgets/report_dialog_helper.dart';
+import 'package:sharp_cut/presentation/report/widgets/report_table_header.dart';
+import 'package:sharp_cut/presentation/report/widgets/report_table_row.dart';
 
 class ReportDataTable extends StatefulWidget {
   const ReportDataTable({super.key, this.staff});
@@ -33,11 +19,28 @@ class ReportDataTable extends StatefulWidget {
 
 class _ReportDataTableState extends State<ReportDataTable> {
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _verticalScrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _verticalScrollController.addListener(_onScroll);
+  }
 
   @override
   void dispose() {
+    _verticalScrollController.removeListener(_onScroll);
+    _verticalScrollController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_verticalScrollController.hasClients &&
+        _verticalScrollController.position.pixels >=
+            _verticalScrollController.position.maxScrollExtent - 200) {
+      context.read<ReportCubit>().fetchMoreTransactions();
+    }
   }
 
   @override
@@ -74,399 +77,64 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                       state.transactions.isNotEmpty)
                                     Expanded(
                                       child: ListView.builder(
+                                        controller: _verticalScrollController,
                                         padding: EdgeInsets.zero,
-                                        itemCount: state.transactions.length,
+                                        itemCount: state.transactions.length +
+                                            (state.isLoadingMore ? 1 : 0),
                                         itemBuilder: (context, index) {
-                                          return ReportTableRow(
-                                            paymentSettleFunction: () {
-                                              final booking =
-                                                  state.transactions[index];
-                                              showDialog(
-                                                context: context,
-                                                barrierDismissible: true,
-                                                builder: (context) => PaymentDetailsDialog(
-                                                  booking: booking,
-                                                  onEdit: (payment) {
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (context) =>
-                                                          PaymentEditDialog(
-                                                            invoiceNo:
-                                                                booking
-                                                                    .invoiceNo ??
-                                                                "",
-                                                            invoiceAmount:
-                                                                booking
-                                                                    .finalTotal ??
-                                                                0.0,
-                                                            currentMode:
-                                                                payment.mode ??
-                                                                "Cash",
-                                                            currentAmount:
-                                                                payment
-                                                                    .amount ??
-                                                                0.0,
-                                                            availableWalletBalance:
-                                                                booking.customer
-                                                                    ?.wallet ??
-                                                                0.0,
-                                                            onUpdate: (mode, amount) {
-                                                              context
-                                                                  .read<
-                                                                    BookingCubit
-                                                                  >()
-                                                                  .updatePaymentMode(
-                                                                    paymentId:
-                                                                        payment
-                                                                            .id!,
-                                                               
-                                                                    mode: mode,
-                                                                    amount:
-                                                                        amount,
-                                                                  );
-                                                            },
-                                                          ),
-                                                    );
-                                                  },
+                                          if (index ==
+                                              state.transactions.length) {
+                                            return Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                vertical: 16,
+                                              ),
+                                              alignment: Alignment.center,
+                                              child: const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2.5,
                                                 ),
-                                              );
-                                            },
-                                            onBalanceTap: () {
-                                              final booking =
-                                                  state.transactions[index];
-                                              final List<CartItemModel>
-                                              cartItems =
-                                                  booking.details
-                                                      ?.where(
-                                                        (detail) =>
-                                                            detail.service !=
-                                                            null,
-                                                      )
-                                                      .map(
-                                                        (
-                                                          detail,
-                                                        ) => CartItemModel(
-                                                          service: detail
-                                                              .service!
-                                                              .copyWith(
-                                                                charge:
-                                                                    detail
-                                                                        .rate ??
-                                                                    detail
-                                                                        .service!
-                                                                        .charge,
-                                                              ),
-                                                          quantity:
-                                                              detail.quantity ??
-                                                              1,
-                                                        ),
-                                                      )
-                                                      .toList() ??
-                                                  [];
+                                              ),
+                                            );
+                                          }
 
-                                              SettlePaymentRequestModel
-                                              request = SettlePaymentRequestModel(
-                                                onlineBookingId: booking.onlineBookingId,
-                                                finalTotalbefore:
-                                                    booking.finalTotalbefore,
-                                                paymentStatus:
-                                                    booking.paymentStatus,
-                                                transactionId: booking.id,
-                                                customerName:
-                                                    booking.customerName,
-                                                customerNumber:
-                                                    booking.customerNumber,
-                                                subTotalValue:
-                                                    booking.subtotal ?? 0,
-                                                taxTotal: booking.taxTotal ?? 0,
-                                                discount: booking.discount ?? 0,
-                                                roundOff: 0.0,
-                                                finalTotal:
-                                                    booking.finalTotal ?? 0,
-                                                serviceId: [],
-                                                quantity: cartItems
-                                                    .map((e) => e.quantity)
-                                                    .toList(),
-                                                rate: cartItems
-                                                    .map(
-                                                      (e) =>
-                                                          e.service.price ??
-                                                          0.0,
-                                                    )
-                                                    .toList(),
-                                                taxAmount: cartItems
-                                                    .map((e) => 0.0)
-                                                    .toList(), // Placeholder
-                                                currency: cartItems
-                                                    .map((e) => "AED")
-                                                    .toList(),
-                                                amountTotal: cartItems
-                                                    .map(
-                                                      (e) =>
-                                                          (e.service.price ??
-                                                              0.0) *
-                                                          e.quantity,
-                                                    )
-                                                    .toList(),
-                                                tax: cartItems
-                                                    .map(
-                                                      (e) =>
-                                                          (e.service.unitTax ??
-                                                              0.0) *
-                                                          e.quantity,
-                                                    )
-                                                    .toList(), // Placeholder
-                                                subTotalList: cartItems.map((
-                                                  e,
-                                                ) {
-                                                  final price =
-                                                      e.service.price ?? 0.0;
-                                                  final tax =
-                                                      e.service.unitTax ?? 0.0;
-                                                  return (price + tax) *
-                                                      e.quantity;
-                                                }).toList(),
-                                                isTip: cartItems
-                                                    .map(
-                                                      (e) =>
-                                                          e.service.isTip ?? 0,
-                                                    )
-                                                    .toList(),
-                                                collectedUserId: [
-                                                  booking.userId!,
-                                                ], // Placeholder
-                                                mode: [],
-                                                amount: [],
-                                                tenderCash: [0.0],
-                                                change: [0.0],
-                                              );
+                                          final booking =
+                                              state.transactions[index];
 
-                                              final balenceAmount =
-                                                  (booking.finalTotal ?? 0) -
-                                                  ((booking.totalPayment ?? 0));
-
-                                              final bool isAdmin =
-                                                  widget.staff?.role ==
-                                                  Role.admin;
-
-                                              showResettmentScreen(
-                                                booking: booking,
-                                                isAdmin: isAdmin,
-                                                balance: balenceAmount,
-                                                paidAmount: booking.totalPayment
-                                                    ?.toString(),
-                                                context,
-                                                settlePayment: request,
-                                                staffName: booking.staff?.name,
-                                                bookingTime:
-                                                    booking.transactionDate,
-                                                invoiceNumber:
-                                                    booking.invoiceNo,
-                                                cartItems: cartItems,
-                                              );
-                                            },
-                                            onCustomerNameTap: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (context) {
-                                                  final transaction =
-                                                      state.transactions[index];
-                                                  return EditCustomerNameDialog(
-                                                    booking: transaction,
-                                                    currentName:
-                                                        transaction
-                                                            .customerName ??
-                                                        "",
-                                                    currentNumber:
-                                                        transaction
-                                                            .customerNumber ??
-                                                        "",
-                                                    onSave: (newName, newNumber) {
-                                                      context
-                                                          .read<BookingCubit>()
-                                                          .updateCustomerDetails(
-                                                            booking:
-                                                                transaction,
-                                                            customerName:
-                                                                newName,
-                                                            customerNumber:
-                                                                newNumber,
-                                                          );
-                                                    },
-                                                  );
-                                                },
-                                              );
-                                            },
-                                            printTheInvoice: () {
-                                              final ShopModel? shopData =
-                                                  context
-                                                      .read<AuthCubit>()
-                                                      .currentShop;
-
-                                              final booking =
-                                                  state.transactions[index];
-                                              // Map BookingResponseModel to List<CartItemModel>
-                                              final List<CartItemModel>
-                                              cartItems =
-                                                  booking.details
-                                                      ?.where(
-                                                        (detail) =>
-                                                            detail.service !=
-                                                            null,
-                                                      )
-                                                      .map(
-                                                        (
-                                                          detail,
-                                                        ) => CartItemModel(
-                                                          service: detail
-                                                              .service!
-                                                              .copyWith(
-                                                                charge:
-                                                                    detail
-                                                                        .rate ??
-                                                                    detail
-                                                                        .service!
-                                                                        .charge,
-                                                              ),
-                                                          quantity:
-                                                              detail.quantity ??
-                                                              1,
-                                                        ),
-                                                      )
-                                                      .toList() ??
-                                                  [];
-                                              final String? staffName =
-                                                  booking.staff?.name;
-                                              final String? invoiceNumber =
-                                                  booking.invoiceNo;
-                                              final String? bookingTime =
-                                                  booking.transactionDate;
-
-                                              SettlePaymentRequestModel
-                                              request = SettlePaymentRequestModel(
-                                                onlineBookingId: booking.onlineBookingId,
-                                                finalTotalbefore:
-                                                    booking.finalTotalbefore,
-                                                paymentStatus:
-                                                    booking.paymentStatus,
-                                                transactionId: booking.id,
-                                                customerName:
-                                                    booking.customerName,
-                                                customerNumber:
-                                                    booking.customerNumber,
-                                                subTotalValue:
-                                                    booking.subtotal ?? 0,
-                                                taxTotal: booking.taxTotal ?? 0,
-                                                discount: booking.discount,
-                                                roundOff: 0.0,
-                                                finalTotal:
-                                                    booking.finalTotal ?? 0,
-                                                serviceId: [],
-                                                quantity: cartItems
-                                                    .map((e) => e.quantity)
-                                                    .toList(),
-                                                rate: cartItems
-                                                    .map(
-                                                      (e) =>
-                                                          e.service.price ??
-                                                          0.0,
-                                                    )
-                                                    .toList(),
-                                                taxAmount: cartItems
-                                                    .map((e) => 0.0)
-                                                    .toList(), // Placeholder
-                                                currency: cartItems
-                                                    .map((e) => "AED")
-                                                    .toList(),
-                                                amountTotal: cartItems
-                                                    .map(
-                                                      (e) =>
-                                                          (e.service.price ??
-                                                              0.0) *
-                                                          e.quantity,
-                                                    )
-                                                    .toList(),
-                                                tax: cartItems
-                                                    .map((e) => 0.0)
-                                                    .toList(), // Placeholder
-                                                subTotalList: cartItems.map((
-                                                  e,
-                                                ) {
-                                                  final price =
-                                                      e.service.price ?? 0.0;
-                                                  final tax =
-                                                      e.service.unitTax ?? 0.0;
-                                                  return (price + tax) *
-                                                      e.quantity;
-                                                }).toList(),
-
-                                                isTip: cartItems
-                                                    .map(
-                                                      (e) =>
-                                                          e.service.isTip ?? 0,
-                                                    )
-                                                    .toList(),
-                                                collectedUserId: [
-                                                  booking.userId!,
-                                                ], // Placeholder
-                                                mode: booking.payments
-                                                    ?.map((e) => e.mode ?? '')
-                                                    .toList(),
-                                                amount: booking.payments
-                                                    ?.map(
-                                                      (e) => e.amount ?? 0.0,
-                                                    )
-                                                    .toList(),
-                                                tenderCash: [0.0],
-                                                change: [0.0],
-                                              );
-
-                                              if (shopData != null) {
-                                                final balenceAmount =
-                                                    (booking.finalTotal ?? 0) -
-                                                    ((booking.totalPayment ??
-                                                        0));
-
-                                                final printCubit = context
-                                                    .read<PrintingCubit>();
-                                                printCubit.printInvoice(
-                                                  chairId: booking.chairId,
-                                                  printCount: printCubit
-                                                      .state
-                                                      .settings
-                                                      ?.printCount
-                                                      .invoiceList
-                                                      .toInt(),
-                                                  balanceAmount: balenceAmount,
-                                                  request: request,
-                                                  shopData: shopData,
-                                                  cartItems: cartItems,
-                                                  staffName: staffName,
-                                                  invoiceNumber: invoiceNumber,
-                                                  bookingTime: bookingTime,
-                                                  invoiceDate:
-                                                      booking.invoiceDate,
-                                                  endTime: booking.endTime,
-                                                );
-                                              }
-                                            },
-                                            viewFunction: () {
-                                              final ShopModel? shopData =
-                                                  context
-                                                      .read<AuthCubit>()
-                                                      .currentShop;
-
-                                              if (shopData != null) {
-                                                showReceiptDialog(
-                                                  context,
-                                                  booking:
-                                                      state.transactions[index],
-                                                  shopData: shopData,
-                                                );
-                                              }
-                                            },
-                                            transaction:
-                                                state.transactions[index],
+                                          return ReportTableRow(
+                                            paymentSettleFunction: () =>
+                                                ReportDialogHelper
+                                                    .showPaymentDetails(
+                                              context,
+                                              booking: booking,
+                                            ),
+                                            onBalanceTap: () =>
+                                                ReportDialogHelper
+                                                    .showResettlement(
+                                              context,
+                                              booking: booking,
+                                              staff: widget.staff,
+                                            ),
+                                            onCustomerNameTap: () =>
+                                                ReportDialogHelper
+                                                    .showEditCustomerName(
+                                              context,
+                                              booking: booking,
+                                            ),
+                                            printTheInvoice: () =>
+                                                ReportDialogHelper.printInvoice(
+                                              context,
+                                              booking: booking,
+                                            ),
+                                            viewFunction: () =>
+                                                ReportDialogHelper.showReceipt(
+                                              context,
+                                              booking: booking,
+                                            ),
+                                            transaction: booking,
                                             index: index,
                                           );
                                         },
@@ -483,7 +151,7 @@ class _ReportDataTableState extends State<ReportDataTable> {
                       if (state is ReportLoading)
                         const Center(child: CircularProgressIndicator())
                       else if (state is ReportFailure)
-                        Center(child: Text('Something went wrong'))
+                        const Center(child: Text('Something went wrong'))
                       else if (state is ReportSuccess &&
                           state.transactions.isEmpty)
                         Center(
@@ -518,3 +186,5 @@ class _ReportDataTableState extends State<ReportDataTable> {
     );
   }
 }
+
+

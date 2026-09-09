@@ -111,3 +111,33 @@ class BookingResponseModel {
     );
   }
 }
+
+extension BookingResponseDiscountX on BookingResponseModel {
+  /// Calculates the monetary discount amount (in AED).
+  ///
+  /// - Priority 1: Fixed transaction discount (`discount` > 0).
+  /// - Priority 2: Customer percentage discount (`customer.discount` > 0%),
+  ///   calculated as `(subTotal * customer.discount) / 100`.
+  double calculateEffectiveDiscount(double subTotal) {
+    if (discount != null && discount! > 0) {
+      return discount!;
+    }
+    final percent = customer?.discount ?? 0.0;
+    if (percent > 0) {
+      return (subTotal * percent) / 100;
+    }
+    return 0.0;
+  }
+}
+
+extension CustomerModelDiscountX on CustomerModel {
+  /// Calculates monetary discount amount (in AED) from customer percentage on [subTotal].
+  double calculateDiscountAmount(double subTotal) {
+    final percent = discount ?? 0.0;
+    if (percent > 0) {
+      return (subTotal * percent) / 100;
+    }
+    return 0.0;
+  }
+}
+

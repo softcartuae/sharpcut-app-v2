@@ -74,7 +74,7 @@ class _StaffFilterItemState extends State<StaffFilterItem> {
                   return DropdownMenuItem<int>(
                     value: staff.id,
                     child: Text(
-                      staff.name ?? "",
+                      staff.name,
                       overflow: TextOverflow.ellipsis,
                     ),
                   );

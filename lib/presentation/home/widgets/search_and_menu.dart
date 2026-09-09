@@ -3,10 +3,10 @@ import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 
 class SearchAndMenu extends StatelessWidget {
-  SearchAndMenu({required this.icon, super.key, this.onTap});
+  const SearchAndMenu({required this.icon, super.key, this.onTap});
 
   final IconData icon;
-  void Function()? onTap;
+  final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {

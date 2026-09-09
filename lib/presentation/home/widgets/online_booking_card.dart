@@ -8,7 +8,6 @@ import 'package:sharp_cut/presentation/home/widgets/cutting_masters_dialog.dart'
 import 'package:sharp_cut/presentation/home/widgets/online_booking_services_dialog.dart';
 import 'package:sharp_cut/presentation/home/widgets/online_booking_status_chip.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
-import 'package:sharp_cut/utils/helpers/enums.dart';
 
 class OnlineBookingCard extends StatelessWidget {
   final OnlineBookingModel booking;

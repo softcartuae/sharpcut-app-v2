@@ -10,8 +10,13 @@ class ReportService {
     String? dateRange,
     String? transactionStatus,
     String? paidStatus,
+    int page = 1,
+    int perPage = 15,
   }) async {
-    final Map<String, dynamic> queryParams = {};
+    final Map<String, dynamic> queryParams = {
+      'page': page,
+      'per_page': perPage,
+    };
 
     if (userId != null) queryParams['user_id'] = userId;
     if (searchQuery != null && searchQuery.isNotEmpty) {

@@ -146,14 +146,4 @@ class ReportTableRow extends StatelessWidget {
       ),
     );
   }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return "-";
-    try {
-      final DateTime date = DateTime.parse(dateStr);
-      return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
-    } catch (e) {
-      return dateStr;
-    }
-  }
 }

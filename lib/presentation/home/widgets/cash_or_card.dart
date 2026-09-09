@@ -5,6 +5,7 @@ import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/booking/booking_state.dart';
 import 'package:sharp_cut/presentation/home/widgets/quick_payment_editable_field.dart';
 import 'package:sharp_cut/presentation/home/widgets/quick_payment_read_only_field.dart';
+import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 Future<void> showQuickPaymentPopup(
   BuildContext context,
@@ -81,6 +82,16 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
     setState(() {
       _uiGrandTotal = widget.total - discount;
     });
+  }
+
+  void _submitWithValidation(Function(double discount) onSelect) {
+    final double discount = double.tryParse(_discountController.text) ?? 0.0;
+    if (discount > widget.total) {
+      ToastHelper.showError("Discount cannot be greater than Total");
+      return;
+    }
+    Navigator.of(context).pop();
+    onSelect(discount);
   }
 
   @override
@@ -163,13 +174,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                       child: ElevatedButton(
                         onPressed: isLoading
                             ? null
-                            : () {
-                                Navigator.of(context).pop();
-                                final discount =
-                                    double.tryParse(_discountController.text) ??
-                                    0.0;
-                                widget.onCashSelected(discount);
-                              },
+                            : () => _submitWithValidation(widget.onCashSelected),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isLoading
                               ? Colors.grey
@@ -195,13 +200,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                       child: ElevatedButton(
                         onPressed: isLoading
                             ? null
-                            : () {
-                                Navigator.of(context).pop();
-                                final discount =
-                                    double.tryParse(_discountController.text) ??
-                                    0.0;
-                                widget.onCreditCardSelected(discount);
-                              },
+                            : () => _submitWithValidation(widget.onCreditCardSelected),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isLoading
                               ? Colors.grey
@@ -229,15 +228,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                           ? ElevatedButton(
                               onPressed: isLoading
                                   ? null
-                                  : () {
-                                      Navigator.of(context).pop();
-                                      final discount =
-                                          double.tryParse(
-                                            _discountController.text,
-                                          ) ??
-                                          0.0;
-                                      widget.onWalletSelected!(discount);
-                                    },
+                                  : () => _submitWithValidation(widget.onWalletSelected!),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isLoading
                                     ? Colors.grey
@@ -261,15 +252,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                           : ElevatedButton(
                               onPressed: isLoading
                                   ? null
-                                  : () {
-                                      Navigator.of(context).pop();
-                                      final discount =
-                                          double.tryParse(
-                                            _discountController.text,
-                                          ) ??
-                                          0.0;
-                                      widget.onUnPaid(discount);
-                                    },
+                                  : () => _submitWithValidation(widget.onUnPaid),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isLoading
                                     ? Colors.grey

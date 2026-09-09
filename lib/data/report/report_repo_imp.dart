@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/report/service/report_service.dart';
-import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
+import 'package:sharp_cut/domain/report/models/report_paginated_response.dart';
 import 'package:sharp_cut/domain/report/report_repo.dart';
 
 class ReportRepoImp implements ReportRepo {
@@ -9,12 +9,14 @@ class ReportRepoImp implements ReportRepo {
   ReportRepoImp(this._reportService);
 
   @override
-  Future<List<BookingResponseModel>> getTransactions({
+  Future<ReportPaginatedResponse> getTransactions({
     int? userId,
     String? searchQuery,
     String? dateRange,
     String? transactionStatus,
     String? paidStatus,
+    int page = 1,
+    int perPage = 15,
   }) async {
     try {
       final response = await _reportService.getTransactions(
@@ -23,11 +25,12 @@ class ReportRepoImp implements ReportRepo {
         dateRange: dateRange,
         transactionStatus: transactionStatus,
         paidStatus: paidStatus,
+        page: page,
+        perPage: perPage,
       );
 
       if (response.data['success'] == true) {
-        final List<dynamic> data = response.data['data'];
-        return data.map((e) => BookingResponseModel.fromJson(e)).toList();
+        return ReportPaginatedResponse.fromJson(response.data);
       } else {
         throw Exception("Failed to fetch transactions");
       }

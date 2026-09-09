@@ -20,19 +20,19 @@ class ScreenSearch extends StatelessWidget {
           children: [
             const HomeAppBar(),
             const SizedBox(height: 15),
-            SingleChildScrollView(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(24),
-                child: SingleChildScrollView(
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                       SizedBox(
+                      SizedBox(
                         height: 80,
                         width: double.infinity,
                         child: Stack(
