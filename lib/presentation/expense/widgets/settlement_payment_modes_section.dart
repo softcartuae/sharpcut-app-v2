@@ -69,7 +69,7 @@ class SettlementPaymentModesSection extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              // Wallet Card
+              /* Wallet Card temporarily hidden from UI
               GestureDetector(
                 onTap: () {
                   cubit.selectCashCardWallet(
@@ -90,6 +90,7 @@ class SettlementPaymentModesSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
+              */
             ],
           ),
         );

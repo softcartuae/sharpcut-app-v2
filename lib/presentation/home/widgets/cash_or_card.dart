@@ -102,10 +102,14 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // Wallet implementation temporarily commented out / hidden from UI
+    // final bool showWallet = false;
+    /*
     final bool showWallet =
         widget.walletAmount != null &&
         widget.onWalletSelected != null &&
         widget.walletAmount! >= _uiGrandTotal;
+    */
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -157,6 +161,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
               label: "Grand Total :",
               value: _uiGrandTotal.toStringAsFixed(2),
             ),
+            /* Wallet UI temporarily hidden
             if (showWallet) ...[
               const SizedBox(height: 10),
               QuickPaymentReadOnlyField(
@@ -164,6 +169,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                 value: widget.walletAmount!.toStringAsFixed(2),
               ),
             ],
+            */
             const SizedBox(height: 30),
             BlocBuilder<BookingCubit, BookingState>(
               builder: (context, state) {
@@ -224,6 +230,7 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
+                      /* Wallet button temporarily commented out
                       child: showWallet
                           ? ElevatedButton(
                               onPressed: isLoading
@@ -250,6 +257,8 @@ class _QuickPaymentDialogState extends State<QuickPaymentDialog> {
                               ),
                             )
                           : ElevatedButton(
+                      */
+                      child: ElevatedButton(
                               onPressed: isLoading
                                   ? null
                                   : () => _submitWithValidation(widget.onUnPaid),

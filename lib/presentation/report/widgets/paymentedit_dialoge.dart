@@ -33,7 +33,7 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
   final List<String> paymentModes = [
     PaymentMode.Cash.name,
     PaymentMode.Card.name,
-    PaymentMode.Wallet.name,
+    // PaymentMode.Wallet.name, // Wallet temporarily hidden from UI
   ];
 
   @override
@@ -92,6 +92,7 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
               label: 'Invoice Amount :',
               value: widget.invoiceAmount.toStringAsFixed(2),
             ),
+            /* Wallet balance info row temporarily hidden
             if (selectedMode == PaymentMode.Wallet.name) ...[
               const SizedBox(height: 12),
               PaymentEditInfoRow(
@@ -99,6 +100,7 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
                 value: widget.availableWalletBalance.toStringAsFixed(2),
               ),
             ],
+            */
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
