@@ -28,19 +28,23 @@ class OnlineBookingCubit extends Cubit<OnlineBookingState> {
     bool clearStatus = false,
   }) async {
     if (phoneNumber != null) {
-      _phoneNumber = phoneNumber;
+      _phoneNumber = phoneNumber.trim().isEmpty ? null : phoneNumber;
     }
 
     if (clearDate) {
       _date = null;
     } else if (date != null) {
-      _date = date;
+      _date = (date.trim().isEmpty || date.trim().toLowerCase() == 'all')
+          ? null
+          : date;
     }
 
     if (clearStatus) {
       _status = null;
     } else if (status != null) {
-      _status = status;
+      _status = (status.trim().isEmpty || status.trim().toLowerCase() == 'all')
+          ? null
+          : status;
     }
 
     if (isRefresh) {

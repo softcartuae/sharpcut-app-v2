@@ -314,7 +314,7 @@ class BookingRepoImp implements BookingRepo {
         'per_page': perPage,
       };
       if (phoneNumber != null && phoneNumber.trim().isNotEmpty) {
-        queryParams['phone_number'] = phoneNumber.trim();
+        queryParams['search'] = phoneNumber.trim();
       }
       if (date != null && date.trim().isNotEmpty) {
         queryParams['date'] = date.trim();

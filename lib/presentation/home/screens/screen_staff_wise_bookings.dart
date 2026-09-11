@@ -151,7 +151,7 @@ class _ScreenStaffWiseBookingsState extends State<ScreenStaffWiseBookings> {
                           ),
                           onChanged: _onSearchChanged,
                           decoration: InputDecoration(
-                            hintText: "Search staff name or phone...",
+                            hintText: "Search Customer name or phone...",
                             hintStyle: GoogleFonts.rajdhani(
                               color: AppColors.textMutedLight,
                               fontSize: 14,
@@ -194,7 +194,9 @@ class _ScreenStaffWiseBookingsState extends State<ScreenStaffWiseBookings> {
                           .read<StaffWiseBookingCubit>()
                           .currentDateFilter,
                       onDateFilterChanged: (newDateStr) {
-                        if (newDateStr == null) {
+                        if (newDateStr == null ||
+                            newDateStr.trim().isEmpty ||
+                            newDateStr.trim().toLowerCase() == 'all') {
                           context
                               .read<StaffWiseBookingCubit>()
                               .fetchStaffWiseBookings(
@@ -225,7 +227,9 @@ class _ScreenStaffWiseBookingsState extends State<ScreenStaffWiseBookings> {
                           .read<StaffWiseBookingCubit>()
                           .currentStatusFilter,
                       onStatusChanged: (newStatus) {
-                        if (newStatus == null) {
+                        if (newStatus == null ||
+                            newStatus.trim().isEmpty ||
+                            newStatus.trim().toLowerCase() == 'all') {
                           context
                               .read<StaffWiseBookingCubit>()
                               .fetchStaffWiseBookings(

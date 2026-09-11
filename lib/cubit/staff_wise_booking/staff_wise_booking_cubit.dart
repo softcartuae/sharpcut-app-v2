@@ -32,19 +32,23 @@ class StaffWiseBookingCubit extends Cubit<StaffWiseBookingState> {
     if (clearDate) {
       _date = null;
     } else if (date != null) {
-      _date = date;
+      _date = (date.trim().isEmpty || date.trim().toLowerCase() == 'all')
+          ? null
+          : date;
     }
 
     if (clearStatus) {
       _status = null;
     } else if (status != null) {
-      _status = status;
+      _status = (status.trim().isEmpty || status.trim().toLowerCase() == 'all')
+          ? null
+          : status;
     }
 
     if (clearSearch) {
       _search = null;
     } else if (search != null) {
-      _search = search;
+      _search = search.trim().isEmpty ? null : search;
     }
 
     if (isRefresh) {

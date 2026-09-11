@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -110,22 +111,27 @@ class _SettlementFormViewState extends State<SettlementFormView> {
     _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0).toStringAsFixed(2);
 
     final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
-    final double initialDiscount = (widget.settlePayment.discount != null && widget.settlePayment.discount! > 0)
+final double initialDiscount = widget.isReSettlement
+    ? 0.0
+    : (widget.settlePayment.discount != null && widget.settlePayment.discount! > 0)
         ? widget.settlePayment.discount!
         : widget.customer?.calculateDiscountAmount(subTotal) ?? 0.0;
-    _discountController.text = initialDiscount == 0 ? "" : initialDiscount.toStringAsFixed(2);
+
+
 
     if (widget.isReSettlement) {
       _paidController.text = widget.paidAmount ?? "0.00";
       final double balanceVal = widget.initialBalance ?? 0.0;
       _amountController.text = balanceVal == 0 ? "" : balanceVal.toStringAsFixed(2);
       _cashAmountController.text = balanceVal == 0 ? "" : balanceVal.toStringAsFixed(2);
+      _discountController.text =  initialDiscount == 0 ? "" : initialDiscount.toStringAsFixed(2);
     } else {
       final double gross = subTotal + (widget.settlePayment.taxTotal ?? 0.0);
       final double net = gross - initialDiscount;
       final double finalVal = net < 0 ? 0.0 : net;
       _amountController.text = finalVal.toStringAsFixed(2);
       _cashAmountController.text = finalVal.toStringAsFixed(2);
+      _discountController.text =  initialDiscount == 0 ? "" : initialDiscount.toStringAsFixed(2);
     }
 
     _cardAmountController.text = "";

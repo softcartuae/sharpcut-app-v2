@@ -13,8 +13,13 @@ class OnlineBookingStatusFilterDropdown extends StatelessWidget {
     required this.onStatusChanged,
   });
 
+  bool get _isAllStatus =>
+      activeStatus == null ||
+      activeStatus!.trim().isEmpty ||
+      activeStatus!.trim().toLowerCase() == 'all';
+
   String get _displayLabel {
-    if (activeStatus == null || activeStatus!.isEmpty) {
+    if (_isAllStatus) {
       return "ALL STATUS";
     }
     final statusEnum = OnlineBookingStatus.fromString(activeStatus);
@@ -23,7 +28,7 @@ class OnlineBookingStatusFilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasFilter = activeStatus != null && activeStatus!.isNotEmpty;
+    final hasFilter = !_isAllStatus;
 
     return Container(
       height: 46,
@@ -56,21 +61,22 @@ class OnlineBookingStatusFilterDropdown extends StatelessWidget {
         onSelected: onStatusChanged,
         itemBuilder: (context) => [
           PopupMenuItem<String?>(
-            value: null,
+            value: 'all',
             child: Text(
               "ALL STATUS",
               style: GoogleFonts.rajdhani(
-                color: activeStatus == null
+                color: _isAllStatus
                     ? AppColors.violetNormal
                     : AppColors.textPrimaryLight,
                 fontWeight:
-                    activeStatus == null ? FontWeight.bold : FontWeight.w600,
+                    _isAllStatus ? FontWeight.bold : FontWeight.w600,
                 fontSize: 14,
               ),
             ),
           ),
           ...OnlineBookingStatus.values.map((statusEnum) {
-            final isSelected = activeStatus == statusEnum.apiKey;
+            final isSelected = activeStatus?.trim().toLowerCase() ==
+                statusEnum.apiKey.toLowerCase();
             return PopupMenuItem<String?>(
               value: statusEnum.apiKey,
               child: Text(

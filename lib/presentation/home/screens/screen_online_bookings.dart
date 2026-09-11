@@ -140,7 +140,6 @@ class _ScreenOnlineBookingsState extends State<ScreenOnlineBookings> {
                         builder: (context, value, child) {
                           return TextField(
                             controller: _phoneSearchController,
-                            keyboardType: TextInputType.phone,
                             style: GoogleFonts.rajdhani(
                               color: AppColors.textPrimaryLight,
                               fontSize: 15,
@@ -149,7 +148,7 @@ class _ScreenOnlineBookingsState extends State<ScreenOnlineBookings> {
                             onChanged: _onSearchChanged,
                             decoration: InputDecoration(
                               hintText:
-                                  "Filter by phone number (e.g. +971500000)...",
+                                  "Search Customer name or phone...",
                               hintStyle: GoogleFonts.rajdhani(
                                 color: AppColors.textMutedLight,
                                 fontSize: 14,

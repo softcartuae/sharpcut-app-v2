@@ -42,18 +42,25 @@ class CuttingMastersDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildHeader(context),
+            const _CuttingMastersHeader(),
             const SizedBox(height: 16),
             const Divider(height: 1, thickness: 1, color: Colors.grey),
             const SizedBox(height: 24),
-            Expanded(child: _buildChairList()),
+            Expanded(
+              child: _ChairListWidget(onlineBooking: onlineBooking),
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context) {
+class _CuttingMastersHeader extends StatelessWidget {
+  const _CuttingMastersHeader();
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         const Text(
@@ -78,14 +85,21 @@ class CuttingMastersDialog extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _buildChairList() {
+class _ChairListWidget extends StatelessWidget {
+  final OnlineBookingModel? onlineBooking;
+
+  const _ChairListWidget({this.onlineBooking});
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<ChairCubit, ChairState>(
       builder: (context, state) {
         if (state is ChairLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ChairError) {
-          return Center(child: Text('Something went wrong'));
+          return const Center(child: Text('Something went wrong'));
         } else if (state is ChairSuccess) {
           if (state.chairs.isEmpty) {
             return const Center(
@@ -100,7 +114,10 @@ class CuttingMastersDialog extends StatelessWidget {
             itemCount: state.chairs.length,
             separatorBuilder: (context, index) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
-              return _buildChairItem(context, state.chairs[index]);
+              return _ChairItemWidget(
+                chair: state.chairs[index],
+                onlineBooking: onlineBooking,
+              );
             },
           );
         }
@@ -108,8 +125,19 @@ class CuttingMastersDialog extends StatelessWidget {
       },
     );
   }
+}
 
-  Widget _buildChairItem(BuildContext context, ChairModel chair) {
+class _ChairItemWidget extends StatelessWidget {
+  final ChairModel chair;
+  final OnlineBookingModel? onlineBooking;
+
+  const _ChairItemWidget({
+    required this.chair,
+    this.onlineBooking,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
         if (chair.liveState != LiveState.occupied.name) {
@@ -142,12 +170,14 @@ class CuttingMastersDialog extends StatelessWidget {
             showStaffSelectionDialog(context, chair);
           }
         } else {
+          if(onlineBooking != null)return;
           final result = await ServicesOrCancelDialog.show(context);
           if (!context.mounted) return;
 
           if (result == true) {
             // Services selected
             if (chair.transaction != null) {
+          
               showPasswordForValidation(
                 context,
                 false,
@@ -185,7 +215,6 @@ class CuttingMastersDialog extends StatelessWidget {
           color: const Color(0xFF1A1B25),
           borderRadius: BorderRadius.circular(8),
         ),
-
         child: Stack(
           children: [
             Column(
@@ -200,8 +229,6 @@ class CuttingMastersDialog extends StatelessWidget {
                     fit: BoxFit.contain,
                   ),
                 ),
-
-                // const SizedBox(height: 10),
                 if (chair.liveState == LiveState.occupied.name)
                   Text(
                     chair.transaction?.transactionDate ?? 'Unknown',
@@ -241,7 +268,7 @@ class CuttingMastersDialog extends StatelessWidget {
                 child: Column(
                   children: [
                     Container(
-                      width: 40, // Adjust size as needed
+                      width: 40,
                       height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -281,3 +308,4 @@ class CuttingMastersDialog extends StatelessWidget {
     );
   }
 }
+

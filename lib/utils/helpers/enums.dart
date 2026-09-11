@@ -31,7 +31,11 @@ enum OnlineBookingStatus {
   inProgress;
 
   static OnlineBookingStatus? fromString(String? status) {
-    if (status == null || status.trim().isEmpty) return null;
+    if (status == null ||
+        status.trim().isEmpty ||
+        status.trim().toLowerCase() == 'all') {
+      return null;
+    }
     switch (status.trim().toLowerCase()) {
       case 'pending':
         return OnlineBookingStatus.pending;
@@ -47,7 +51,7 @@ enum OnlineBookingStatus {
       case 'in progress':
         return OnlineBookingStatus.inProgress;
       default:
-        return OnlineBookingStatus.pending;
+        return null;
     }
   }
 

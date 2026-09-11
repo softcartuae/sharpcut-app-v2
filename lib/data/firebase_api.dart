@@ -104,11 +104,14 @@ class FirebaseApi {
     });
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      log('Got a message whilst in the foreground!');
+      log('Got a message whilst in the foreground! ${message.data}');
    
 
       // Show system notification banner in foreground
+      if(message.data["type"]== "customer_booking_created"){
       showLocalNotification(message);
+
+      }
 
       final context = navigatorKey.currentContext;
       debugPrint("context: $context");
