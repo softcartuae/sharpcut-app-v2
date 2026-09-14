@@ -51,6 +51,7 @@ import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/presentation/sync/cubit/sync_cubit.dart';
 import 'package:sharp_cut/presentation/sync/cubit/master_sync_cubit.dart';
 import 'package:sharp_cut/presentation/sync/cubit/master_sync_state.dart';
+import 'package:sharp_cut/presentation/sync/widgets/sync_progress_dialog.dart';
 import 'package:sharp_cut/presentation/test/database_viewer_screen.dart';
 
 class HomeServicesSection extends StatefulWidget {
@@ -1415,6 +1416,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                                         ),
                                                       );
                                                     } else {
+                                                      SyncProgressDialog.show(
+                                                        context,
+                                                      );
                                                       context
                                                           .read<
                                                             MasterSyncCubit
@@ -1511,6 +1515,9 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                                             : () {
                                                 _selectedButtonNotifier.value =
                                                     "SYNC";
+                                                SyncProgressDialog.show(
+                                                  context,
+                                                );
                                                 context
                                                     .read<MasterSyncCubit>()
                                                     .syncAll(

@@ -242,6 +242,14 @@ class DatabaseHelper {
         FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE CASCADE ON UPDATE CASCADE
       )
     ''');
+
+    // Sync Checkpoints Table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sync_checkpoints (
+        endpoint TEXT PRIMARY KEY,
+        next_cursor TEXT
+      )
+    ''');
   }
 
   // --- Delegate to DAOs ---
@@ -305,8 +313,8 @@ class DatabaseHelper {
   Future<bool> hasPendingTransactions(int cashRegisterId) =>
       transactionDao.hasPendingTransactions(cashRegisterId);
 
-  Future<List<Map<String, dynamic>>> getUnsyncedTransactions() =>
-      transactionDao.getUnsyncedTransactions();
+  Future<List<Map<String, dynamic>>> getUnsyncedTransactions({int? limit}) =>
+      transactionDao.getUnsyncedTransactions(limit: limit);
 
   Future<void> markTransactionsAsSynced(List<int> ids) =>
       transactionDao.markTransactionsAsSynced(ids);
@@ -369,6 +377,9 @@ class DatabaseHelper {
 
   Future<Map<String, double>> calculateSalesTotal(int cashRegisterId) =>
       cashRegisterDao.calculateSalesTotal(cashRegisterId);
+
+  Future<List<Map<String, dynamic>>> getUnsyncedCashRegisters() =>
+      cashRegisterDao.getUnsyncedCashRegisters();
 
   // Invoice
   Future<void> saveInvoiceSettings(Map<String, dynamic> settings) =>
@@ -474,5 +485,40 @@ class DatabaseHelper {
     return false;
   }
 
-  
+  // --- Sync Checkpoint Helpers ---
+  Future<void> saveSyncCheckpoint(
+    String endpoint, {
+    required String? cursor,
+  }) async {
+    final db = await database;
+    await db.insert(
+      'sync_checkpoints',
+      {
+        'endpoint': endpoint,
+        'next_cursor': cursor,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<String?> getSyncCheckpoint(String endpoint) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'sync_checkpoints',
+      columns: ['next_cursor'],
+      where: 'endpoint = ?',
+      whereArgs: [endpoint],
+    );
+    if (maps.isEmpty) return null;
+    return maps.first['next_cursor'] as String?;
+  }
+
+  Future<void> deleteSyncCheckpoint(String endpoint) async {
+    final db = await database;
+    await db.delete(
+      'sync_checkpoints',
+      where: 'endpoint = ?',
+      whereArgs: [endpoint],
+    );
+  }
 }

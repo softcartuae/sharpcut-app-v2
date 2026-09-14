@@ -511,13 +511,16 @@ class TransactionDao {
     return result.isNotEmpty;
   }
 
-  Future<List<Map<String, dynamic>>> getUnsyncedTransactions() async {
-    log("Fetching unsynced transactions");
+  Future<List<Map<String, dynamic>>> getUnsyncedTransactions({
+    int? limit,
+  }) async {
+    log("Fetching unsynced transactions (limit: $limit)");
     final db = await _dbFuture;
     return await db.query(
       'transactions',
       where: 'is_synced = ? AND LOWER(status) = ?',
       whereArgs: [0, 'completed'],
+      limit: limit,
     );
   }
 
@@ -952,4 +955,26 @@ class TransactionDao {
       whereArgs: [transactionId],
     );
   }
+
+  /// Returns total number of transactions in SQLite database
+  Future<int> getTotalTransactionCount() async {
+    final db = await _dbFuture;
+    return Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM transactions'),
+        ) ??
+        0;
+  }
+
+  /// Returns the count of unsynced completed transactions
+  Future<int> getUnsyncedTransactionCount() async {
+    final db = await _dbFuture;
+    return Sqflite.firstIntValue(
+          await db.rawQuery(
+            "SELECT COUNT(*) FROM transactions WHERE is_synced = 0 AND LOWER(status) = 'completed'",
+          ),
+        ) ??
+        0;
+  }
+
+
 }

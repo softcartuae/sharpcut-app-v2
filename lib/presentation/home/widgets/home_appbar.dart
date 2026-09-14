@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sharp_cut/core/database/daos/transaction_dao.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/data/local_storage/database/database_helper.dart';
 import 'package:sharp_cut/domain/pusher/pusher_repo.dart';
 import 'package:sharp_cut/injection_container.dart';
 
@@ -38,19 +40,21 @@ class _HomeAppBarState extends State<HomeAppBar> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Left Section: Logo & Shop Name
+        
         Row(
           children: [
             GestureDetector(
-              onTap: () {
-                final pusherRepo = sl<PusherRepo>();
-                pusherRepo.notifyChairUpdate();
+              onTap: () async{
+                    final transactionDao =  TransactionDao(
+      DatabaseHelper().database,
+    );
+                final count = await transactionDao.getTotalTransactionCount();
+
+                print('Total transactions: $count');
               },
               onLongPress: () {
-                final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
-                  context.read<AuthCubit>().currentShop,
-                );
+                
 
-                print("isNoChair: $isNoChair");
 
                 showDialog(
                   context: context,

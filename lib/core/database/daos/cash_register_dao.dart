@@ -150,4 +150,15 @@ class CashRegisterDao {
       'count': count.toDouble(),
     };
   }
+
+  /// Fetch all cash registers that haven't been synced to the server yet (is_synced = 0)
+  Future<List<Map<String, dynamic>>> getUnsyncedCashRegisters() async {
+    log("Fetching all unsynced cash registers");
+    final db = await _dbFuture;
+    return await db.query(
+      'cash_registers',
+      where: 'is_synced = 0',
+      orderBy: 'created_at ASC',
+    );
+  }
 }

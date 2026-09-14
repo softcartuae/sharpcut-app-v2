@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
-import 'package:sharp_cut/data/sync/sync_to_server.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_appbar.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_input_section.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_services_section.dart';
-import 'package:sharp_cut/injection_container.dart';
+import 'package:sharp_cut/presentation/sync/cubit/master_sync_cubit.dart';
+import 'package:sharp_cut/presentation/sync/cubit/sync_cubit.dart';
+import 'package:sharp_cut/presentation/sync/widgets/sync_progress_dialog.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
@@ -19,37 +20,28 @@ class ScreenHome extends StatefulWidget {
 }
 
 class _ScreenHomeState extends State<ScreenHome> {
-  final ValueNotifier<bool> _isSyncing = ValueNotifier(false);
-
   @override
   void initState() {
     super.initState();
-    context.read<ChairCubit>().getChairsAndStaffs();
     _performInitialSync();
   }
 
   Future<void> _performInitialSync() async {
-    _isSyncing.value = true;
-    try {
-      await sl<SyncToServer>().syncTransactionsFromServer();
-      await sl<SyncToServer>().syncCashRegistersFromServer();
-    } finally {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _isSyncing.value = false;
+        SyncProgressDialog.show(context);
+        context.read<MasterSyncCubit>().syncAll(
+              chairCubit: context.read<ChairCubit>(),
+              serviceCubit: context.read<ServiceCubit>(),
+              syncCubit: context.read<SyncCubit>(),
+            );
       }
-    }
-  }
-
-  @override
-  void dispose() {
-    _isSyncing.dispose();
-    super.dispose();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-
-     final isWindows = Theme.of(context).platform == TargetPlatform.windows;
+    final isWindows = Theme.of(context).platform == TargetPlatform.windows;
 
     Widget content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 39.0, vertical: 10),
@@ -66,50 +58,18 @@ class _ScreenHomeState extends State<ScreenHome> {
       ),
     );
 
-
     return Scaffold(
-      body: Stack(
-        children: [
-          BlocListener<BookingCubit, BookingState>(
-            listener: (context, state) {
-              if (state is BookingCancelled || state is BookingInitial) {
-                context.read<ChairCubit>().getChairsAndStaffs(
+      body: BlocListener<BookingCubit, BookingState>(
+        listener: (context, state) {
+          if (state is BookingCancelled || state is BookingInitial) {
+            context.read<ChairCubit>().getChairsAndStaffs(
                   forceRefresh: true,
                 );
 
-                context.read<ServiceCubit>().clearCart();
-              }
-            },
-            child: isWindows ? content : SingleChildScrollView(child: content),
-          ),
-          ValueListenableBuilder<bool>(
-            valueListenable: _isSyncing,
-            builder: (context, isSyncing, child) {
-              if (!isSyncing) return const SizedBox.shrink();
-
-              return Container(
-                color: Colors.black54,
-                child: const Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(color: Colors.white),
-                      SizedBox(height: 16),
-                      Text(
-                        'Syncing data...',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
+            context.read<ServiceCubit>().clearCart();
+          }
+        },
+        child: isWindows ? content : SingleChildScrollView(child: content),
       ),
     );
   }
