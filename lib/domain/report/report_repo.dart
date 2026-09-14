@@ -7,5 +7,7 @@ abstract class ReportRepo {
     String? dateRange,
     String? transactionStatus,
     String? paidStatus,
+    int limit = 50,
+    int page = 1,
   });
 }

@@ -33,10 +33,25 @@ class ReportDataTable extends StatefulWidget {
 
 class _ReportDataTableState extends State<ReportDataTable> {
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _verticalScrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _verticalScrollController.addListener(_onVerticalScroll);
+  }
+
+  void _onVerticalScroll() {
+    if (_verticalScrollController.position.pixels >=
+        _verticalScrollController.position.maxScrollExtent - 300) {
+      context.read<ReportCubit>().fetchMoreTransactions();
+    }
+  }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _verticalScrollController.dispose();
     super.dispose();
   }
 
@@ -74,9 +89,27 @@ class _ReportDataTableState extends State<ReportDataTable> {
                                       state.transactions.isNotEmpty)
                                     Expanded(
                                       child: ListView.builder(
+                                        controller: _verticalScrollController,
                                         padding: EdgeInsets.zero,
-                                        itemCount: state.transactions.length,
+                                        itemCount: state.transactions.length +
+                                            (state.isLoadingMore ? 1 : 0),
                                         itemBuilder: (context, index) {
+                                          if (index == state.transactions.length) {
+                                            return const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical: 16.0,
+                                              ),
+                                              child: Center(
+                                                child: SizedBox(
+                                                  width: 24,
+                                                  height: 24,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2.5,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
                                           return ReportTableRow(
                                             paymentSettleFunction: () {
 

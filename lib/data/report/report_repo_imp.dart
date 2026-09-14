@@ -14,6 +14,8 @@ class ReportRepoImp implements ReportRepo {
     String? dateRange,
     String? transactionStatus,
     String? paidStatus,
+    int limit = 50,
+    int page = 1,
   }) async {
     try {
       final db = await _databaseHelper.database;
@@ -54,7 +56,6 @@ class ReportRepoImp implements ReportRepo {
             return d.trim();
           }
 
-          // Construct YYYY-MM-DD from dd/MM/yyyy for string comparison
           whereClause +=
               '(substr(transaction_date, 7, 4) || "-" || substr(transaction_date, 4, 2) || "-" || substr(transaction_date, 1, 2)) BETWEEN ? AND ?';
           whereArgs.add(formatDate(dates[0]));
@@ -67,8 +68,7 @@ class ReportRepoImp implements ReportRepo {
           transactionStatus.isNotEmpty &&
           transactionStatus != 'All') {
         if (whereClause.isNotEmpty) whereClause += ' AND ';
-        whereClause +=
-            'status LIKE ?'; // Case-insensitive often handled by DB or LIKE
+        whereClause += 'status LIKE ?';
         whereArgs.add(transactionStatus);
       }
 
@@ -79,76 +79,108 @@ class ReportRepoImp implements ReportRepo {
         whereArgs.add(paidStatus);
       }
 
-      // Execute Query
+      final int offset = (page - 1) * limit;
+
+      // 2. Execute Paginated Query (50 items max)
       final List<Map<String, dynamic>> transactionMaps = await db.query(
         'transactions',
         where: whereClause.isEmpty ? null : whereClause,
         whereArgs: whereArgs.isEmpty ? null : whereArgs,
         orderBy:
             'substr(transaction_date, 7, 4) DESC, substr(transaction_date, 4, 2) DESC, substr(transaction_date, 1, 2) DESC, substr(transaction_date, 12, 2) DESC, substr(transaction_date, 15, 2) DESC, id DESC',
+        limit: limit,
+        offset: offset,
       );
 
-      List<BookingResponseModel> transactions = [];
+      if (transactionMaps.isEmpty) {
+        return [];
+      }
 
-      // 2. Fetch Details & Map to Model
+      // 3. Bulk Optimization: Fetch Users, Services & Payments in Bulk
+      final List<int> txIds = transactionMaps.map((t) => t['id'] as int).toList();
+      final String idPlaceholders = List.filled(txIds.length, '?').join(',');
+
+      // Bulk fetch users
+      final Set<int> userIds = transactionMaps
+          .where((t) => t['user_id'] != null)
+          .map((t) => t['user_id'] as int)
+          .toSet();
+      Map<int, Map<String, dynamic>> userMap = {};
+      if (userIds.isNotEmpty) {
+        final userPlaceholders = List.filled(userIds.length, '?').join(',');
+        final userRows = await db.query(
+          'users',
+          where: 'id IN ($userPlaceholders)',
+          whereArgs: userIds.toList(),
+        );
+        for (var u in userRows) {
+          userMap[u['id'] as int] = u;
+        }
+      }
+
+      // Bulk fetch services
+      final servicesRows = await db.query(
+        'transaction_services',
+        where: 'transaction_id IN ($idPlaceholders)',
+        whereArgs: txIds,
+      );
+
+      // Bulk fetch service master names
+      final Set<int> serviceIds = servicesRows
+          .where((s) => s['service_id'] != null)
+          .map((s) => s['service_id'] as int)
+          .toSet();
+      Map<int, Map<String, dynamic>> masterServiceMap = {};
+      if (serviceIds.isNotEmpty) {
+        final sPlaceholders = List.filled(serviceIds.length, '?').join(',');
+        final masterRows = await db.query(
+          'services',
+          where: 'id IN ($sPlaceholders)',
+          whereArgs: serviceIds.toList(),
+        );
+        for (var s in masterRows) {
+          masterServiceMap[s['id'] as int] = s;
+        }
+      }
+
+      // Group services by transaction_id
+      Map<int, List<Map<String, dynamic>>> txServicesMap = {};
+      for (var sRow in servicesRows) {
+        final txId = sRow['transaction_id'] as int;
+        final enrichedService = Map<String, dynamic>.from(sRow);
+        if (sRow['service_id'] != null && masterServiceMap.containsKey(sRow['service_id'])) {
+          enrichedService['service'] = masterServiceMap[sRow['service_id']];
+        }
+        txServicesMap.putIfAbsent(txId, () => []).add(enrichedService);
+      }
+
+      // Bulk fetch payments
+      final paymentsRows = await db.query(
+        'transaction_payments',
+        where: 'transaction_id IN ($idPlaceholders)',
+        whereArgs: txIds,
+      );
+
+      Map<int, List<Map<String, dynamic>>> txPaymentsMap = {};
+      for (var pRow in paymentsRows) {
+        final txId = pRow['transaction_id'] as int;
+        txPaymentsMap.putIfAbsent(txId, () => []).add(pRow);
+      }
+
+      // 4. Fast Model Mapping in Memory
+      List<BookingResponseModel> transactions = [];
       for (var transaction in transactionMaps) {
-        // We need a mutable map to add details
         final Map<String, dynamic> mutableTransaction =
             Map<String, dynamic>.from(transaction);
         final int transactionId = transaction['id'];
 
-        // Fetch User (Staff)
-        if (transaction['user_id'] != null) {
-          final userResult = await db.query(
-            'users',
-            where: 'id = ?',
-            whereArgs: [transaction['user_id']],
-          );
-          if (userResult.isNotEmpty) {
-            mutableTransaction['user'] = userResult.first;
-          }
+        if (transaction['user_id'] != null && userMap.containsKey(transaction['user_id'])) {
+          mutableTransaction['user'] = userMap[transaction['user_id']];
         }
 
-        // Fetch Services
-        final servicesResult = await db.query(
-          'transaction_services',
-          where: 'transaction_id = ?',
-          whereArgs: [transactionId],
-        );
+        mutableTransaction['details'] = txServicesMap[transactionId] ?? [];
+        mutableTransaction['payments'] = txPaymentsMap[transactionId] ?? [];
 
-        // For each service, we might want to fetch the ServiceModel (name, etc.) if it's not fully in transaction_services
-        // But BookingDetail.fromJson expects 'service' object inside.
-        // The transaction_services table in database_helper.dart has: service_id, quantity, etc.
-        // It does NOT have the service name directly (it's in services table).
-        // So we need to join or fetch service details.
-
-        List<Map<String, dynamic>> enrichedServices = [];
-        for (var serviceRow in servicesResult) {
-          final Map<String, dynamic> enrichedService =
-              Map<String, dynamic>.from(serviceRow);
-          if (serviceRow['service_id'] != null) {
-            final serviceInfo = await db.query(
-              'services',
-              where: 'id = ?',
-              whereArgs: [serviceRow['service_id']],
-            );
-            if (serviceInfo.isNotEmpty) {
-              enrichedService['service'] = serviceInfo.first;
-            }
-          }
-          enrichedServices.add(enrichedService);
-        }
-        mutableTransaction['details'] = enrichedServices;
-
-        // Fetch Payments
-        final paymentsResult = await db.query(
-          'transaction_payments',
-          where: 'transaction_id = ?',
-          whereArgs: [transactionId],
-        );
-        mutableTransaction['payments'] = paymentsResult;
-
-        // Deduct Discount from Final Total as requested
         final double currentFinalTotal =
             (mutableTransaction['final_total'] as num?)?.toDouble() ?? 0.0;
         final double currentDiscount =
@@ -157,20 +189,17 @@ class ReportRepoImp implements ReportRepo {
 
         if (currentDiscount != 0) {
           mutableTransaction['grand_total'] =
-              (mutableTransaction['grand_total_after'] as num?)?.toDouble() ??
-              0.0;
+              (mutableTransaction['grand_total_after'] as num?)?.toDouble() ?? 0.0;
           mutableTransaction['tax_total'] =
-              (mutableTransaction['tax_total_after'] as num?)?.toDouble() ??
-              0.0;
+              (mutableTransaction['tax_total_after'] as num?)?.toDouble() ?? 0.0;
         }
 
-        // Map to Model
         transactions.add(BookingResponseModel.fromJson(mutableTransaction));
       }
 
       return transactions;
     } catch (e) {
-      throw Exception("Failed to fetch transactions form local db: $e");
+      throw Exception("Failed to fetch transactions from local db: $e");
     }
   }
 }
