@@ -9,7 +9,7 @@ import 'package:sharp_cut/data/local_storage/url_storage.dart';
 class ApiClient {
   static String productionBaseUrl = "https://app.sharpcutae.com/api/v2/";
   static String developmentBaseUrl = "https://saloon.softcart.io/api/v2/";
-  static String baseUrl = developmentBaseUrl;
+  static String baseUrl = productionBaseUrl;
 
   static final dio = Dio(
     BaseOptions(
@@ -20,7 +20,6 @@ class ApiClient {
   )..interceptors.add(AuthInterceptor(GetIt.instance<TokenStorage>()));
 
   static Future<void> init() async {
-    
     log("Base URL: $baseUrl");
     final urlStorage = UrlStorage();
     final details = await urlStorage.getConnectionDetails();
@@ -30,28 +29,24 @@ class ApiClient {
     if (ip != null && ip.isNotEmpty && port != null && port.isNotEmpty) {
       baseUrl = "http://$ip:$port/api/v2/";
     } else {
-      baseUrl = developmentBaseUrl;
+      baseUrl = productionBaseUrl;
     }
     dio.options.baseUrl = baseUrl;
-    
   }
 
   static Future<void> setConnectionDetails(String ip, String port) async {
-
     baseUrl = "http://$ip:$port/api/v2/";
     dio.options.baseUrl = baseUrl;
     final urlStorage = UrlStorage();
     await urlStorage.saveConnectionDetails(ip, port);
-
   }
 
   static Future<void> resetToDefault() async {
     // reset to default
-    baseUrl = developmentBaseUrl;
+    baseUrl = productionBaseUrl;
     dio.options.baseUrl = baseUrl;
     final urlStorage = UrlStorage();
     await urlStorage.clearConnectionDetails();
-
   }
 
   //POST API ENDPOINTS
@@ -108,6 +103,3 @@ class ApiClient {
   static final printCashRegisterApi = "print/cash-register-report";
   static final versionApi = "version";
 }
-
-
-
