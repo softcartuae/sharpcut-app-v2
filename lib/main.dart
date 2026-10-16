@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:sharp_cut/cubit/shop_expenses/shop_expense_cubit.dart';
 
 import 'package:sharp_cut/data/api_client.dart';
-import 'package:sharp_cut/firebase_options.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/presentation/report/cubit/report_cubit.dart';
 import 'package:sharp_cut/cubit/quick_report/quick_report_cubit.dart';
@@ -21,6 +20,8 @@ import 'package:sharp_cut/cubit/expenses/expense_cubit.dart';
 import 'package:sharp_cut/cubit/booking/customer_search_cubit.dart';
 import 'package:sharp_cut/cubit/online_booking/online_booking_cubit.dart';
 import 'package:sharp_cut/cubit/staff_wise_booking/staff_wise_booking_cubit.dart';
+import 'package:sharp_cut/cubit/update/app_update_cubit.dart';
+import 'package:sharp_cut/presentation/update/widgets/app_update_listener.dart';
 import 'package:sharp_cut/presentation/splash/screens/splash_screen.dart';
 import 'package:sharp_cut/utils/simple_bloc_observer.dart';
 
@@ -33,6 +34,7 @@ import 'package:sharp_cut/firebase_push/firebase_push_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:sharp_cut/data/firebase_api.dart';
 import 'package:sharp_cut/injection_container.dart' as di;
+import 'package:sharp_cut/firebase_options.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -73,6 +75,9 @@ void main() async {
             BlocProvider(create: (_) => di.sl<ShopExpenseCubit>()),
             BlocProvider(create: (_) => di.sl<OnlineBookingCubit>()),
             BlocProvider(create: (_) => di.sl<StaffWiseBookingCubit>()),
+            BlocProvider(
+              create: (_) => di.sl<AppUpdateCubit>()..checkForUpdate(),
+            ),
           ],
           child: MyApp(),
         ), // Wrap your app
@@ -182,16 +187,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       title: 'Sharpcut',
       theme: appTheme,
       builder: (context, child) {
-        return BlocListener<AuthCubit, AuthCubitState>(
-          listener: (context, state) {
-            if (state is AuthUnauthenticated) {
-              navigatorKey.currentState?.pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const ScreenLogin()),
-                (route) => false,
-              );
-            }
-          },
-          child: child!,
+        return AppUpdateListener(
+          child: BlocListener<AuthCubit, AuthCubitState>(
+            listener: (context, state) {
+              if (state is AuthUnauthenticated) {
+                navigatorKey.currentState?.pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const ScreenLogin()),
+                  (route) => false,
+                );
+              }
+            },
+            child: child!,
+          ),
         );
       },
       home: SplashScreen(),

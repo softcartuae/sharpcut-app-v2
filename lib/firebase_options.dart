@@ -25,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -47,28 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAC_eGV8uSKmN5CtxZuzNL7fb_i_oArMa4',
-    appId: '1:758621203820:web:a37b75dc6a1728ceb5d749',
-    messagingSenderId: '758621203820',
-    projectId: 'sharpcut-notification',
-    authDomain: 'sharpcut-notification.firebaseapp.com',
-    storageBucket: 'sharpcut-notification.firebasestorage.app',
+    apiKey: 'AIzaSyCYuj2PdlIU3MDSNr776oHiwTVHmZC_YBA',
+    appId: '1:444818848806:web:8042f6a7cb71ba060ebae7',
+    messagingSenderId: '444818848806',
+    projectId: 'sharpcut-2224a',
+    authDomain: 'sharpcut-2224a.firebaseapp.com',
+    storageBucket: 'sharpcut-2224a.firebasestorage.app',
+    measurementId: 'G-BFVKNFVM97',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCKuMm7TfaTy-ZpvawjuM_vX2JHevsiBDg',
-    appId: '1:758621203820:android:53f294611d3a1054b5d749',
-    messagingSenderId: '758621203820',
-    projectId: 'sharpcut-notification',
-    storageBucket: 'sharpcut-notification.firebasestorage.app',
+    apiKey: 'AIzaSyAISAs_dA90VoQjSCtMlPvIybJzrgfGINk',
+    appId: '1:444818848806:android:6c51268ef9b405320ebae7',
+    messagingSenderId: '444818848806',
+    projectId: 'sharpcut-2224a',
+    storageBucket: 'sharpcut-2224a.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAgO1vkBnIauVKzWYZ871ZVQ0sxXUdDuck',
-    appId: '1:758621203820:ios:0a9580d52fa8517ab5d749',
-    messagingSenderId: '758621203820',
-    projectId: 'sharpcut-notification',
-    storageBucket: 'sharpcut-notification.firebasestorage.app',
-    iosBundleId: 'com.example.sharpCut',
+    apiKey: 'AIzaSyAQskRUobf81shnEiugDISYfm3W3N7fp2c',
+    appId: '1:444818848806:ios:afcc27131010eea40ebae7',
+    messagingSenderId: '444818848806',
+    projectId: 'sharpcut-2224a',
+    storageBucket: 'sharpcut-2224a.firebasestorage.app',
+    iosBundleId: 'com.sharpcut.app',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAQskRUobf81shnEiugDISYfm3W3N7fp2c',
+    appId: '1:444818848806:ios:afcc27131010eea40ebae7',
+    messagingSenderId: '444818848806',
+    projectId: 'sharpcut-2224a',
+    storageBucket: 'sharpcut-2224a.firebasestorage.app',
+    iosBundleId: 'com.sharpcut.app',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyCYuj2PdlIU3MDSNr776oHiwTVHmZC_YBA',
+    appId: '1:444818848806:web:4c792e5d046a0b8d0ebae7',
+    messagingSenderId: '444818848806',
+    projectId: 'sharpcut-2224a',
+    authDomain: 'sharpcut-2224a.firebaseapp.com',
+    storageBucket: 'sharpcut-2224a.firebasestorage.app',
+    measurementId: 'G-1H7WPMLRBY',
   );
 }

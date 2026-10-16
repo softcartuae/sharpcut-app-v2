@@ -17,7 +17,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     
-    namespace = "com.example.sharp_cut"
+    namespace = "com.sharpcut.app"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
 
@@ -36,7 +36,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.sharp_cut"
+        applicationId = "com.sharpcut.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

@@ -36,6 +36,8 @@ dependencies:
   win32: ^5.15.0
   ffi: ^2.1.5
   shimmer: ^3.0.0
+  in_app_update: ^5.0.0
+  package_info_plus: ^9.0.1
 
 dev_dependencies:
   flutter_test:

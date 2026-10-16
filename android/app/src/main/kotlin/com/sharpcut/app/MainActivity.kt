@@ -1,4 +1,4 @@
-package com.example.sharp_cut
+package com.sharpcut.app
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -27,7 +27,7 @@ class MainActivity : FlutterActivity() {
     private val NETWORK_CHANNEL = "com.example.sharp_cut/network_printer"
     private val EVENT_CHANNEL = "com.example.sharp_cut/printer_status"
     
-    private val ACTION_USB_PERMISSION = "com.example.sharp_cut.USB_PERMISSION"
+    private val ACTION_USB_PERMISSION = "com.sharpcut.app.USB_PERMISSION"
 
     // Power Manager Variables
     private var powerManager: PowerManager? = null

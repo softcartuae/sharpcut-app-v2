@@ -1,21 +1,40 @@
 {
   "project_info": {
-    "project_number": "758621203820",
-    "project_id": "sharpcut-notification",
-    "storage_bucket": "sharpcut-notification.firebasestorage.app"
+    "project_number": "444818848806",
+    "project_id": "sharpcut-2224a",
+    "storage_bucket": "sharpcut-2224a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:758621203820:android:53f294611d3a1054b5d749",
+        "mobilesdk_app_id": "1:444818848806:android:3fa7c10a3a8c07760ebae7",
         "android_client_info": {
-          "package_name": "com.example.sharp_cut"
+          "package_name": "com.groomer.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCKuMm7TfaTy-ZpvawjuM_vX2JHevsiBDg"
+          "current_key": "AIzaSyAISAs_dA90VoQjSCtMlPvIybJzrgfGINk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444818848806:android:6c51268ef9b405320ebae7",
+        "android_client_info": {
+          "package_name": "com.sharpcut.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAISAs_dA90VoQjSCtMlPvIybJzrgfGINk"
         }
       ],
       "services": {

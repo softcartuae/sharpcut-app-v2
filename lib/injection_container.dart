@@ -46,10 +46,17 @@ import 'package:sharp_cut/cubit/shop_expenses/shop_expense_cubit.dart';
 import 'package:sharp_cut/domain/shop_expenses/shop_expense_repo.dart';
 import 'package:sharp_cut/data/shop_expenses/shop_expense_repo_impl.dart';
 
+import 'package:sharp_cut/cubit/update/app_update_cubit.dart';
+import 'package:sharp_cut/data/update/app_update_service.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
   // Cubits
+  sl.registerFactory<AppUpdateCubit>(
+    () => AppUpdateCubit(updateService: sl<AppUpdateService>()),
+  );
+
   sl.registerFactory<AuthCubit>(
     () => AuthCubit(authRepo: sl<AuthRepo>(), tokenStorage: sl<TokenStorage>()),
   );
@@ -126,4 +133,5 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<CashRegistoryRepo>(() => CashRegistoryRepoImp());
   sl.registerLazySingleton<ShopExpenseRepo>(() => ShopExpenseRepoImpl());
+  sl.registerLazySingleton<AppUpdateService>(() => AppUpdateService());
 }
