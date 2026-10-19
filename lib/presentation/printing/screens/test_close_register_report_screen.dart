@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:sharp_cut/domain/auth/models/shop_model.dart';
+import 'package:sharp_cut/domain/auth/models/branchModel.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 import 'package:sharp_cut/presentation/cash_registory/widgets/close_register_print_widget.dart';
 
@@ -11,7 +11,7 @@ class TestCloseRegisterReportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dummyShop = ShopModel(
+    final dummyShop = BranchModel(
       isVatIncluded: true,
       isChargeOrServiceCanEdit: false,
       name: 'TAJ SHALEELA SALON',
@@ -21,7 +21,10 @@ class TestCloseRegisterReportScreen extends StatelessWidget {
 
     // Dummy Transaction Report Data (QuickReportModel)
     final dummyTransactionReport = QuickReportModel(
-      expenseDetails: ExpenseDetailsModel(totalShopExpense: 0, totalUserExpense: 9),
+      expenseDetails: ExpenseDetailsModel(
+        totalShopExpense: 0,
+        totalUserExpense: 9,
+      ),
       salonName: "TAJ SHALEELA Salon test1",
       branch: "MAIN",
       dateRange: "14/01/2026 - 14/01/2026",

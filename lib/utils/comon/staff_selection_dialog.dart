@@ -77,7 +77,7 @@ Future<StaffModel?> showStaffSelectionDialog(
                   children: staffList.map((staff) {
                     return InkWell(
                       onTap: () {
-                        final shop = context.read<AuthCubit>().currentShop;
+                        final shop = context.read<AuthCubit>().currentBranch;
                         final isNoChair =
                             CheckNoChair.checkIsThisAppNoChairOrNot(shop);
 

@@ -36,7 +36,7 @@ Future<void> showPasswordForValidation(
       )
       .toList();
 
-  final shop = context.read<AuthCubit>().currentShop;
+  final shop = context.read<AuthCubit>().currentBranch;
   final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
 
   // If preSelectedStaff is provided, try to find it in the list to ensure object equality for Dropdown

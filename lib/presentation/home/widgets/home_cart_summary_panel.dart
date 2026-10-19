@@ -60,14 +60,20 @@ class HomeCartSummaryPanel extends StatelessWidget {
                   if (state is ServiceStateSuccess) {
                     return ListView.separated(
                       padding: EdgeInsets.zero,
-                      separatorBuilder: (context, index) => const SizedBox(height: 10),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 10),
                       itemCount: state.cartItems.length,
                       itemBuilder: (context, index) {
                         final item = state.cartItems[index];
                         return AddedItem(
                           onEditCharge: () {
-                            final shop = context.read<AuthCubit>().currentShop;
-                            final canEdit = CheckNoChair.checkShopCanEditServiceOrCharge(shop);
+                            final shop = context
+                                .read<AuthCubit>()
+                                .currentBranch;
+                            final canEdit =
+                                CheckNoChair.checkShopCanEditServiceOrCharge(
+                                  shop,
+                                );
                             if (!canEdit) return;
 
                             showDialog(
@@ -75,17 +81,26 @@ class HomeCartSummaryPanel extends StatelessWidget {
                               builder: (context) => TipDialog(
                                 title: "EDIT CHARGE",
                                 onTipSelected: (amount) {
-                                  context.read<ServiceCubit>().updateCharge(item, amount);
+                                  context.read<ServiceCubit>().updateCharge(
+                                    item,
+                                    amount,
+                                  );
                                 },
                               ),
                             );
                           },
                           item: item,
                           onIncrement: () {
-                            context.read<ServiceCubit>().updateQuantity(item, 1);
+                            context.read<ServiceCubit>().updateQuantity(
+                              item,
+                              1,
+                            );
                           },
                           onDecrement: () {
-                            context.read<ServiceCubit>().updateQuantity(item, -1);
+                            context.read<ServiceCubit>().updateQuantity(
+                              item,
+                              -1,
+                            );
                           },
                           onRemove: () {
                             context.read<ServiceCubit>().removeFromCart(item);
@@ -122,14 +137,8 @@ class HomeCartSummaryPanel extends StatelessWidget {
                       value: subTotal.toStringAsFixed(2),
                     ),
                     const TotalItem(label: "Discount", value: "0"),
-                    TotalItem(
-                      label: "Vat",
-                      value: vat.toStringAsFixed(2),
-                    ),
-                    TotalItem(
-                      label: "Total",
-                      value: total.toStringAsFixed(2),
-                    ),
+                    TotalItem(label: "Vat", value: vat.toStringAsFixed(2)),
+                    TotalItem(label: "Total", value: total.toStringAsFixed(2)),
                   ],
                 );
               },

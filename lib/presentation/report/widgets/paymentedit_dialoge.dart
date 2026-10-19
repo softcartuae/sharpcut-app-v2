@@ -39,7 +39,7 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
   @override
   void initState() {
     super.initState();
-    
+
     selectedMode = widget.currentMode;
     if (!paymentModes.contains(selectedMode)) {
       if (paymentModes.any(
@@ -56,7 +56,6 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
     amountController = TextEditingController(
       text: widget.currentAmount.toString(),
     );
-
   }
 
   @override
@@ -222,8 +221,8 @@ class _PaymentEditDialogState extends State<PaymentEditDialog> {
                     if (selectedMode == PaymentMode.Wallet.name) {
                       final double alreadyUsedWallet =
                           (widget.currentMode.toLowerCase() == 'wallet')
-                              ? widget.currentAmount
-                              : 0.0;
+                          ? widget.currentAmount
+                          : 0.0;
                       final double effectiveMaxWallet =
                           widget.availableWalletBalance + alreadyUsedWallet;
 

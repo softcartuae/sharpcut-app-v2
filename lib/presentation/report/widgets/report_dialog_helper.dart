@@ -19,6 +19,8 @@ class ReportDialogHelper {
     BuildContext context, {
     required BookingResponseModel booking,
   }) {
+    final bookingCubit = context.read<BookingCubit>();
+
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -26,19 +28,19 @@ class ReportDialogHelper {
         booking: booking,
         onEdit: (payment) {
           showDialog(
-            context: dialogContext,
-            builder: (context) => PaymentEditDialog(
+            context: context,
+            builder: (editDialogContext) => PaymentEditDialog(
               currentMode: payment.mode ?? "Cash",
               currentAmount: payment.amount ?? 0.0,
               invoiceNo: booking.invoiceNo ?? "",
               invoiceAmount: booking.finalTotal ?? 0.0,
               availableWalletBalance: booking.customer?.wallet ?? 0.0,
               onUpdate: (mode, amount) {
-                dialogContext.read<BookingCubit>().updatePaymentMode(
-                      paymentId: payment.id!,
-                      mode: mode,
-                      amount: amount,
-                    );
+                bookingCubit.updatePaymentMode(
+                  paymentId: payment.id!,
+                  mode: mode,
+                  amount: amount,
+                );
               },
             ),
           );
@@ -52,6 +54,8 @@ class ReportDialogHelper {
     BuildContext context, {
     required BookingResponseModel booking,
   }) {
+    final bookingCubit = context.read<BookingCubit>();
+
     showDialog(
       context: context,
       builder: (dialogContext) => EditCustomerNameDialog(
@@ -59,11 +63,11 @@ class ReportDialogHelper {
         currentName: booking.customerName ?? "",
         currentNumber: booking.customerNumber ?? "",
         onSave: (newName, newNumber) {
-          dialogContext.read<BookingCubit>().updateCustomerDetails(
-                booking: booking,
-                customerName: newName,
-                customerNumber: newNumber,
-              );
+          bookingCubit.updateCustomerDetails(
+            booking: booking,
+            customerName: newName,
+            customerNumber: newNumber,
+          );
         },
       ),
     );
@@ -104,7 +108,7 @@ class ReportDialogHelper {
     BuildContext context, {
     required BookingResponseModel booking,
   }) {
-    final shopData = context.read<AuthCubit>().currentShop;
+    final shopData = context.read<AuthCubit>().currentBranch;
     if (shopData == null) return;
 
     final cartItems = PaymentRequestMapper.extractCartItems(booking);
@@ -137,14 +141,9 @@ class ReportDialogHelper {
     BuildContext context, {
     required BookingResponseModel booking,
   }) {
-    final shopData = context.read<AuthCubit>().currentShop;
+    final shopData = context.read<AuthCubit>().currentBranch;
     if (shopData != null) {
-      showReceiptDialog(
-        context,
-        booking: booking,
-        shopData: shopData,
-      );
+      showReceiptDialog(context, booking: booking, shopData: shopData);
     }
   }
 }
-

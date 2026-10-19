@@ -49,7 +49,9 @@ class _PendingPrintData {
 }
 
 class _HomeServicesSectionState extends State<HomeServicesSection> {
-  final ValueNotifier<String> _selectedButtonNotifier = ValueNotifier("BOOK A SLOT");
+  final ValueNotifier<String> _selectedButtonNotifier = ValueNotifier(
+    "BOOK A SLOT",
+  );
   _PendingPrintData? _pendingPrintData;
 
   @override
@@ -71,7 +73,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
       listeners: [
         BlocListener<ChairCubit, ChairState>(
           listener: (context, state) {
-            final shop = context.read<AuthCubit>().currentShop;
+            final shop = context.read<AuthCubit>().currentBranch;
             final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
             final bookingState = context.read<BookingCubit>().state;
 
@@ -81,8 +83,8 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
                   chair.transaction != null &&
                   bookingState is! BookingSuccess) {
                 context.read<BookingCubit>().restoreBooking(
-                      bookingResponse: chair.transaction!,
-                    );
+                  bookingResponse: chair.transaction!,
+                );
               }
             }
           },
@@ -94,23 +96,30 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             } else if (state is BookingError) {
               ToastHelper.showError(state.message);
               if (state.message == "This chair is already booked") {
-                context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
+                context.read<ChairCubit>().getChairsAndStaffs(
+                  forceRefresh: true,
+                );
               }
             } else if (state is BookingPaymentSettled) {
               if (_pendingPrintData != null) {
                 final printCubit = context.read<PrintingCubit>();
-                final SettlePaymentRequestModel updatedData = _pendingPrintData!.request.copyWith(
-                  finalTotal: state.response.bookingResponse?.finalTotal,
-                  discount: state.response.bookingResponse?.discount,
-                  subTotalValue: state.response.bookingResponse?.subtotal,
-                  taxTotal: state.response.bookingResponse?.taxTotal,
-                  paymentStatus: state.response.bookingResponse?.paymentStatus,
-                  finalTotalbefore: state.response.bookingResponse?.finalTotalbefore,
-                );
+                final SettlePaymentRequestModel updatedData = _pendingPrintData!
+                    .request
+                    .copyWith(
+                      finalTotal: state.response.bookingResponse?.finalTotal,
+                      discount: state.response.bookingResponse?.discount,
+                      subTotalValue: state.response.bookingResponse?.subtotal,
+                      taxTotal: state.response.bookingResponse?.taxTotal,
+                      paymentStatus:
+                          state.response.bookingResponse?.paymentStatus,
+                      finalTotalbefore:
+                          state.response.bookingResponse?.finalTotalbefore,
+                    );
 
                 printCubit.printInvoice(
                   chairId: _pendingPrintData!.chairId,
-                  printCount: printCubit.state.settings?.printCount.quickPayment.toInt(),
+                  printCount: printCubit.state.settings?.printCount.quickPayment
+                      .toInt(),
                   balanceAmount: _pendingPrintData!.balanceAmount,
                   request: updatedData,
                   shopData: _pendingPrintData!.shopData,
@@ -127,10 +136,16 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
               context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
             } else if (state is BookingSuccess) {
               context.read<ChairCubit>().getChairsAndStaffs(forceRefresh: true);
-              final customerBookingServices = state.bookingResponse.customerBookingServices;
-              log("customerBookingServices: ${customerBookingServices?.length}");
-              if (customerBookingServices != null && customerBookingServices.isNotEmpty) {
-                final restoredCartItems = customerBookingServices.map((service) {
+              final customerBookingServices =
+                  state.bookingResponse.customerBookingServices;
+              log(
+                "customerBookingServices: ${customerBookingServices?.length}",
+              );
+              if (customerBookingServices != null &&
+                  customerBookingServices.isNotEmpty) {
+                final restoredCartItems = customerBookingServices.map((
+                  service,
+                ) {
                   return CartItemModel(
                     service: ServiceModel(
                       beforeVat: service.beforeVat,
@@ -153,13 +168,14 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         BlocListener<CashRegistoryCubit, CashRegistoryState>(
           listener: (context, state) {
             if (state is CashRegistoryReportLoaded) {
-              final shop = context.read<AuthCubit>().currentShop;
+              final shop = context.read<AuthCubit>().currentBranch;
               if (shop != null) {
                 final printCubit = context.read<PrintingCubit>();
                 printCubit.printCloseRegisterReport(
                   report: state.report,
                   shop: shop,
-                  printCount: printCubit.state.settings?.printCount.report.toInt(),
+                  printCount: printCubit.state.settings?.printCount.report
+                      .toInt(),
                 );
               } else {
                 ToastHelper.showError("Shop data not found");
@@ -190,25 +206,26 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
             // 4. Action Buttons Sidebar
             HomeActionSidebar(
               selectedButtonNotifier: _selectedButtonNotifier,
-              onPendingPrintSet: ({
-                required int? chairId,
-                required double balanceAmount,
-                required SettlePaymentRequestModel request,
-                required dynamic shopData,
-                required List<CartItemModel> cartItems,
-                required String? staffName,
-                required String bookingTime,
-              }) {
-                _pendingPrintData = _PendingPrintData(
-                  chairId: chairId,
-                  balanceAmount: balanceAmount,
-                  request: request,
-                  shopData: shopData,
-                  cartItems: cartItems,
-                  staffName: staffName,
-                  bookingTime: bookingTime,
-                );
-              },
+              onPendingPrintSet:
+                  ({
+                    required int? chairId,
+                    required double balanceAmount,
+                    required SettlePaymentRequestModel request,
+                    required dynamic shopData,
+                    required List<CartItemModel> cartItems,
+                    required String? staffName,
+                    required String bookingTime,
+                  }) {
+                    _pendingPrintData = _PendingPrintData(
+                      chairId: chairId,
+                      balanceAmount: balanceAmount,
+                      request: request,
+                      shopData: shopData,
+                      cartItems: cartItems,
+                      staffName: staffName,
+                      bookingTime: bookingTime,
+                    );
+                  },
             ),
           ],
         ),

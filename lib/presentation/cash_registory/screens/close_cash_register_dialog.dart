@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_state.dart';
-import 'package:sharp_cut/domain/auth/models/shop_model.dart';
+import 'package:sharp_cut/domain/auth/models/branchModel.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
@@ -74,7 +74,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
   Widget build(BuildContext context) {
     final chairCubit = context.read<ChairCubit>();
     List<StaffModel> staffList = List<StaffModel>.from(chairCubit.staffs);
-    final shop = context.read<AuthCubit>().currentShop;
+    final shop = context.read<AuthCubit>().currentBranch;
     final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
     return BlocListener<CashRegistoryCubit, CashRegistoryState>(
       listener: (context, state) {
@@ -83,7 +83,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
           ToastHelper.showSuccess(state.response.message);
           final report = state.response.report;
           if (report != null) {
-            final ShopModel? shop = context.read<AuthCubit>().currentShop;
+            final BranchModel? shop = context.read<AuthCubit>().currentBranch;
             if (shop != null) {
               context.read<PrintingCubit>().printCloseRegisterReport(
                 report: report,

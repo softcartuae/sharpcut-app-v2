@@ -65,24 +65,34 @@ class _SettlementDialogState extends State<SettlementDialog> {
       listener: (context, state) {
         if (state is BookingPaymentSettled) {
           if (_shouldPrint && _pendingRequest != null) {
-            final shopData = context.read<AuthCubit>().currentShop;
+            final shopData = context.read<AuthCubit>().currentBranch;
             if (shopData != null) {
               final printCubit = context.read<PrintingCubit>();
-              final SettlePaymentRequestModel updatedData = _pendingRequest!.copyWith(
-                finalTotal: state.response.bookingResponse?.finalTotal,
-                discount: state.response.bookingResponse?.discount,
-                subTotalValue: state.response.bookingResponse?.subtotal,
-                taxTotal: state.response.bookingResponse?.taxTotal,
-                paymentStatus: state.response.bookingResponse?.paymentStatus,
-                finalTotalbefore: state.response.bookingResponse?.finalTotalbefore,
-              );
+              final SettlePaymentRequestModel updatedData = _pendingRequest!
+                  .copyWith(
+                    finalTotal: state.response.bookingResponse?.finalTotal,
+                    discount: state.response.bookingResponse?.discount,
+                    subTotalValue: state.response.bookingResponse?.subtotal,
+                    taxTotal: state.response.bookingResponse?.taxTotal,
+                    paymentStatus:
+                        state.response.bookingResponse?.paymentStatus,
+                    finalTotalbefore:
+                        state.response.bookingResponse?.finalTotalbefore,
+                  );
 
-              final double paidSum = updatedData.amount?.fold<double>(0.0, (prev, element) => prev + element) ?? 0.0;
-              final double balanceAmt = (updatedData.finalTotal ?? 0.0) - paidSum;
+              final double paidSum =
+                  updatedData.amount?.fold<double>(
+                    0.0,
+                    (prev, element) => prev + element,
+                  ) ??
+                  0.0;
+              final double balanceAmt =
+                  (updatedData.finalTotal ?? 0.0) - paidSum;
 
               printCubit.printInvoice(
                 chairId: widget.chairId,
-                printCount: printCubit.state.settings?.printCount.settlePayment.toInt(),
+                printCount: printCubit.state.settings?.printCount.settlePayment
+                    .toInt(),
                 balanceAmount: balanceAmt < 0 ? 0.0 : balanceAmt,
                 request: updatedData,
                 shopData: shopData,
@@ -104,26 +114,27 @@ class _SettlementDialogState extends State<SettlementDialog> {
         bookingTime: widget.bookingTime,
         walletBalance: widget.customer?.wallet ?? 0.0,
         isReSettlement: false,
-        onSettleSubmit: ({
-          required bool alsoPrint,
-          required SettlePaymentRequestModel request,
-          required double discount,
-          required double cashAmount,
-          required double cardAmount,
-          required double walletAmount,
-          required double tenderCash,
-          required double change,
-          required List<String> modes,
-          required List<double> amounts,
-          required List<double> tenders,
-          required List<double> changes,
-          required String customerName,
-          required String customerNumber,
-        }) {
-          _pendingRequest = request;
-          _shouldPrint = alsoPrint;
-          context.read<BookingCubit>().settlePayment(request: request);
-        },
+        onSettleSubmit:
+            ({
+              required bool alsoPrint,
+              required SettlePaymentRequestModel request,
+              required double discount,
+              required double cashAmount,
+              required double cardAmount,
+              required double walletAmount,
+              required double tenderCash,
+              required double change,
+              required List<String> modes,
+              required List<double> amounts,
+              required List<double> tenders,
+              required List<double> changes,
+              required String customerName,
+              required String customerNumber,
+            }) {
+              _pendingRequest = request;
+              _shouldPrint = alsoPrint;
+              context.read<BookingCubit>().settlePayment(request: request);
+            },
       ),
     );
   }

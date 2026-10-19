@@ -10,7 +10,7 @@ import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class BookingFlowHelper {
   static Future<void> handleBookingAction(BuildContext context) async {
-    final shop = context.read<AuthCubit>().currentShop;
+    final shop = context.read<AuthCubit>().currentBranch;
     final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
 
     if (isNoChair) {

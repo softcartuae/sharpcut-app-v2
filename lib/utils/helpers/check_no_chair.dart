@@ -1,22 +1,22 @@
-import 'package:sharp_cut/domain/auth/models/shop_model.dart';
+import 'package:sharp_cut/domain/auth/models/branchModel.dart';
 
 class CheckNoChair {
-  static bool checkIsThisAppNoChairOrNot(ShopModel? shop) {
+  static bool checkIsThisAppNoChairOrNot(BranchModel? shop) {
     if (shop == null) return false;
     return shop.isChair == false;
   }
 
-  static bool checkShopCanEditServiceOrCharge(ShopModel? shop) {
+  static bool checkShopCanEditServiceOrCharge(BranchModel? shop) {
     if (shop == null) return false;
     return shop.isChargeOrServiceCanEdit == true;
   }
 
-  static bool checkShowShopExpenses(ShopModel? shop) {
+  static bool checkShowShopExpenses(BranchModel? shop) {
     if (shop == null) return false;
     return shop.isShopExpenses == true;
   }
 
-  static bool checkShowUserExpenses(ShopModel? shop) {
+  static bool checkShowUserExpenses(BranchModel? shop) {
     if (shop == null) return false;
     return shop.isUserExpenses == true;
   }

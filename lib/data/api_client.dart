@@ -79,7 +79,7 @@ class ApiClient {
   static final userExpenseGETapi = "users/expenses";
   static final shopExpenseGETapi = "shop-expenses";
   static final transactionsGETApi = "transactions";
-  static final authentcatedUserApi = "shop";
+  static final authentcatedUserApi = "branch";
   static final chairsApi = "chairs";
   static final serviceCategoriesApi = "service-categories";
   static final servicesApi = "services";

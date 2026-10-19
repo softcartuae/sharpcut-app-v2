@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_thermal_printer/utils/printer.dart';
 
-import 'package:sharp_cut/domain/auth/models/shop_model.dart';
+import 'package:sharp_cut/domain/auth/models/branchModel.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/printing/model/printer_settings_model.dart';
@@ -135,7 +135,7 @@ class PrintingCubit extends Cubit<PrintingState> {
 
   Future<void> printInvoice({
     required SettlePaymentRequestModel request,
-    required ShopModel shopData,
+    required BranchModel shopData,
     required List<CartItemModel> cartItems,
     required double balanceAmount,
     required String? staffName,
@@ -302,7 +302,7 @@ class PrintingCubit extends Cubit<PrintingState> {
 
   Future<void> printCloseRegisterReport({
     required CloseRegisterReportModel report,
-    required ShopModel shop,
+    required BranchModel shop,
     required int? printCount,
   }) async {
     if (state.isServerPrinting) {

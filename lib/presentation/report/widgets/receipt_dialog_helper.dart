@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:sharp_cut/domain/auth/models/shop_model.dart';
+import 'package:sharp_cut/domain/auth/models/branchModel.dart';
 import 'package:sharp_cut/domain/booking/models/booking_response_model.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
@@ -10,7 +10,7 @@ import 'package:sharp_cut/presentation/printing/widgets/receipt_widget.dart';
 void showReceiptDialog(
   BuildContext context, {
   required BookingResponseModel booking,
-  required ShopModel shopData,
+  required BranchModel shopData,
 }) {
   // Map BookingResponseModel to List<CartItemModel>
   final List<CartItemModel> cartItems =

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sharp_cut/domain/auth/models/shop_model.dart';
+import 'package:sharp_cut/domain/auth/models/branchModel.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/home/models/service_model.dart';
@@ -11,13 +11,12 @@ class TestReceiptScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Dummy Shop Data
-    final dummyShop = ShopModel(
+    final dummyShop = BranchModel(
       isVatIncluded: true,
       isChargeOrServiceCanEdit: false,
       name: 'TAJ SHALEELA SALON',
       address: 'Abu Dhabi _ U.A.E',
       vatNo: '104426133500003',
-     
     );
 
     // Dummy Cart Items

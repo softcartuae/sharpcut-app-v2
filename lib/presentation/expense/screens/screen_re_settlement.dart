@@ -78,30 +78,42 @@ class _ResettlementScreenState extends State<ResettlementScreen> {
       listener: (context, state) {
         if (state is BookingPaymentSettled) {
           if (_shouldPrint && _pendingRequest != null) {
-            final shopData = context.read<AuthCubit>().currentShop;
+            final shopData = context.read<AuthCubit>().currentBranch;
             if (shopData != null) {
               final printCubit = context.read<PrintingCubit>();
-              final SettlePaymentRequestModel updatedData = _pendingRequest!.copyWith(
-                finalTotal: state.response.bookingResponse?.finalTotal,
-                discount: state.response.bookingResponse?.discount,
-                subTotalValue: state.response.bookingResponse?.subtotal,
-                taxTotal: state.response.bookingResponse?.taxTotal,
-                paymentStatus: state.response.bookingResponse?.paymentStatus,
-                finalTotalbefore: state.response.bookingResponse?.finalTotalbefore,
-              );
+              final SettlePaymentRequestModel updatedData = _pendingRequest!
+                  .copyWith(
+                    finalTotal: state.response.bookingResponse?.finalTotal,
+                    discount: state.response.bookingResponse?.discount,
+                    subTotalValue: state.response.bookingResponse?.subtotal,
+                    taxTotal: state.response.bookingResponse?.taxTotal,
+                    paymentStatus:
+                        state.response.bookingResponse?.paymentStatus,
+                    finalTotalbefore:
+                        state.response.bookingResponse?.finalTotalbefore,
+                  );
 
-              final double paidSum = updatedData.amount?.fold<double>(0.0, (prev, element) => prev + element) ?? 0.0;
-              final double balanceAmt = (updatedData.finalTotal ?? 0.0) - paidSum;
+              final double paidSum =
+                  updatedData.amount?.fold<double>(
+                    0.0,
+                    (prev, element) => prev + element,
+                  ) ??
+                  0.0;
+              final double balanceAmt =
+                  (updatedData.finalTotal ?? 0.0) - paidSum;
 
               printCubit.printInvoice(
                 chairId: null,
-                printCount: printCubit.state.settings?.printCount.settlePayment.toInt(),
+                printCount: printCubit.state.settings?.printCount.settlePayment
+                    .toInt(),
                 balanceAmount: balanceAmt < 0 ? 0.0 : balanceAmt,
                 request: updatedData,
                 shopData: shopData,
                 cartItems: widget.cartItems,
                 staffName: widget.staffName,
-                invoiceNumber: state.response.bookingResponse?.invoiceNo ?? widget.invoiceNumber,
+                invoiceNumber:
+                    state.response.bookingResponse?.invoiceNo ??
+                    widget.invoiceNumber,
                 bookingTime: widget.bookingTime ?? "--:--",
                 invoiceDate: state.response.bookingResponse?.invoiceDate,
               );
@@ -120,39 +132,47 @@ class _ResettlementScreenState extends State<ResettlementScreen> {
         initialBalance: widget.balance,
         walletBalance: widget.booking.customer?.wallet ?? 0.0,
         isReSettlement: true,
-        onSettleSubmit: ({
-          required bool alsoPrint,
-          required SettlePaymentRequestModel request,
-          required double discount,
-          required double cashAmount,
-          required double cardAmount,
-          required double walletAmount,
-          required double tenderCash,
-          required double change,
-          required List<String> modes,
-          required List<double> amounts,
-          required List<double> tenders,
-          required List<double> changes,
-          required String customerName,
-          required String customerNumber,
-        }) {
-          final ResettleModel resettleModel = ResettleModel(
-            onlineBookingId: widget.settlePayment.onlineBookingId,
-            discount: discount,
-            transactionId: widget.settlePayment.transactionId,
-            collectedUserId: widget.settlePayment.collectedUserId != null && widget.settlePayment.collectedUserId!.isNotEmpty
-                ? List.filled(modes.length, widget.settlePayment.collectedUserId!.first)
-                : [],
-            mode: modes,
-            amount: amounts,
-            tenderCash: tenders,
-            change: changes,
-          );
+        onSettleSubmit:
+            ({
+              required bool alsoPrint,
+              required SettlePaymentRequestModel request,
+              required double discount,
+              required double cashAmount,
+              required double cardAmount,
+              required double walletAmount,
+              required double tenderCash,
+              required double change,
+              required List<String> modes,
+              required List<double> amounts,
+              required List<double> tenders,
+              required List<double> changes,
+              required String customerName,
+              required String customerNumber,
+            }) {
+              final ResettleModel resettleModel = ResettleModel(
+                onlineBookingId: widget.settlePayment.onlineBookingId,
+                discount: discount,
+                transactionId: widget.settlePayment.transactionId,
+                collectedUserId:
+                    widget.settlePayment.collectedUserId != null &&
+                        widget.settlePayment.collectedUserId!.isNotEmpty
+                    ? List.filled(
+                        modes.length,
+                        widget.settlePayment.collectedUserId!.first,
+                      )
+                    : [],
+                mode: modes,
+                amount: amounts,
+                tenderCash: tenders,
+                change: changes,
+              );
 
-          _pendingRequest = request;
-          _shouldPrint = alsoPrint;
-          context.read<BookingCubit>().reSettlePayment(resettleModel: resettleModel);
-        },
+              _pendingRequest = request;
+              _shouldPrint = alsoPrint;
+              context.read<BookingCubit>().reSettlePayment(
+                resettleModel: resettleModel,
+              );
+            },
       ),
     );
   }

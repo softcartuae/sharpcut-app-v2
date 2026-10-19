@@ -1,4 +1,4 @@
-class ShopModel {
+class BranchModel {
   final int? id;
   final String? name;
   final String? description;
@@ -11,7 +11,7 @@ class ShopModel {
   final bool isShopExpenses;
   final bool isUserExpenses;
 
-  ShopModel({
+  BranchModel({
     this.id,
     this.name,
     this.description,
@@ -25,8 +25,8 @@ class ShopModel {
     this.isUserExpenses = false,
   });
 
-  factory ShopModel.fromJson(Map<String, dynamic> json) {
-    return ShopModel(
+  factory BranchModel.fromJson(Map<String, dynamic> json) {
+    return BranchModel(
       isVatIncluded: json['is_vat'] ?? false,
       id: json['id'],
       isChargeOrServiceCanEdit: json['is_service_price_editable'] ?? false,

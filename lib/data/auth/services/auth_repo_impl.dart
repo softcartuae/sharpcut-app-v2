@@ -5,7 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:sharp_cut/data/api_client.dart';
-import 'package:sharp_cut/domain/auth/models/shop_model.dart';
+import 'package:sharp_cut/domain/auth/models/branchModel.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
 
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
@@ -97,12 +97,12 @@ class AuthRepoImpl implements AuthRepo {
   }
 
   @override
-  Future<ShopModel> getUser() async {
+  Future<BranchModel> getUser() async {
     try {
       final response = await ApiClient.dio.get(ApiClient.authentcatedUserApi);
 
       if (response.statusCode == 200) {
-        return ShopModel.fromJson(response.data);
+        return BranchModel.fromJson(response.data);
       } else {
         throw Exception("Failed to get user: ${response.statusMessage}");
       }
@@ -144,16 +144,16 @@ class AuthRepoImpl implements AuthRepo {
     try {
       final response = await ApiClient.dio.post(
         ApiClient.refreshDeviceTokenApi,
-        data: {
-          "device_token": deviceToken,
-        },
+        data: {"device_token": deviceToken},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         log("Device token refreshed successfully");
         return const Right(null);
       } else {
-        return Left("Failed to refresh device token: ${response.statusMessage}");
+        return Left(
+          "Failed to refresh device token: ${response.statusMessage}",
+        );
       }
     } catch (e) {
       log("Refresh device token error: $e");

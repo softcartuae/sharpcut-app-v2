@@ -21,7 +21,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
   @override
   void initState() {
-    storeName = context.read<AuthCubit>().currentShop?.name ?? "";
+    storeName = context.read<AuthCubit>().currentBranch?.name ?? "";
     super.initState();
   }
 
@@ -41,7 +41,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
             GestureDetector(
               onLongPress: () {
                 final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
-                  context.read<AuthCubit>().currentShop,
+                  context.read<AuthCubit>().currentBranch,
                 );
                 print("isNoChair: $isNoChair");
 
@@ -103,9 +103,9 @@ class _HomeAppBarState extends State<HomeAppBar> {
             Builder(
               builder: (context) {
                 String modeType = "";
-                final mode = context.read<AuthCubit>().currentShop?.mode;
+                final mode = context.read<AuthCubit>().currentBranch?.mode;
                 final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
-                  context.read<AuthCubit>().currentShop,
+                  context.read<AuthCubit>().currentBranch,
                 );
                 modeType = findMode(mode, isNoChair);
 

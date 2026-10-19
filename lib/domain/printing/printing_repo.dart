@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_thermal_printer/utils/printer.dart';
-import 'package:sharp_cut/domain/auth/models/shop_model.dart';
+import 'package:sharp_cut/domain/auth/models/branchModel.dart';
 import 'package:sharp_cut/domain/booking/models/settle_payment_request_model.dart';
 import 'package:sharp_cut/domain/home/models/cart_item_model.dart';
 import 'package:sharp_cut/domain/quick_report/models/quick_report_model.dart';
@@ -19,7 +19,7 @@ abstract class PrintingRepo {
   Future<void> printInvoice({
     required Printer printer,
     required SettlePaymentRequestModel request,
-    required ShopModel shopData,
+    required BranchModel shopData,
     required double balanceAmount,
     required List<CartItemModel> cartItems,
     required String? staffName,
@@ -42,7 +42,7 @@ abstract class PrintingRepo {
   Future<void> printCloseRegisterReport({
     required Printer printer,
     required CloseRegisterReportModel report,
-    required ShopModel shop,
+    required BranchModel shop,
     int copies = 1,
     bool openDrawer = false,
   });
@@ -91,6 +91,4 @@ abstract class PrintingRepo {
   Future<void> clearLastConnectedPrinter();
   Future<void> sendHeartbeat(Printer printer);
   Future<int?> checkPrinterStatus(Printer printer);
-
-  
 }

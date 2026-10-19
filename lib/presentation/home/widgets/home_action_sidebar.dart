@@ -44,7 +44,8 @@ class HomeActionSidebar extends StatefulWidget {
     required List<CartItemModel> cartItems,
     required String? staffName,
     required String bookingTime,
-  }) onPendingPrintSet;
+  })
+  onPendingPrintSet;
 
   const HomeActionSidebar({
     super.key,
@@ -78,23 +79,26 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
       return;
     }
 
-    final SettlePaymentRequestModel request = PaymentRequestMapper.fromQuickPayment(
-      transactionId: transactionId,
-      onlineBookingId: onlineBookingId,
-      customerName: bookingFormState.customerName,
-      customerNumber: bookingFormState.customerNumber,
-      subTotal: serviceState.subTotal,
-      taxTotal: serviceState.vat,
-      discount: discount,
-      finalTotal: finalTotal,
-      cartItems: serviceState.cartItems,
-      userId: userId,
-      paymentMode: paymentMode,
-    );
+    final SettlePaymentRequestModel request =
+        PaymentRequestMapper.fromQuickPayment(
+          transactionId: transactionId,
+          onlineBookingId: onlineBookingId,
+          customerName: bookingFormState.customerName,
+          customerNumber: bookingFormState.customerNumber,
+          subTotal: serviceState.subTotal,
+          taxTotal: serviceState.vat,
+          discount: discount,
+          finalTotal: finalTotal,
+          cartItems: serviceState.cartItems,
+          userId: userId,
+          paymentMode: paymentMode,
+        );
 
-    final shopData = context.read<AuthCubit>().currentShop;
+    final shopData = context.read<AuthCubit>().currentBranch;
     if (shopData != null) {
-      final double balanceAmount = (paymentMode == PaymentMode.Unpaid.name) ? serviceState.total : 0.0;
+      final double balanceAmount = (paymentMode == PaymentMode.Unpaid.name)
+          ? serviceState.total
+          : 0.0;
       widget.onPendingPrintSet(
         chairId: chairId,
         balanceAmount: balanceAmount,
@@ -121,9 +125,13 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
             return ValueListenableBuilder<String>(
               valueListenable: widget.selectedButtonNotifier,
               builder: (context, selectedButton, child) {
-                final shop = context.read<AuthCubit>().currentShop;
-                final isShowUserExpenses = CheckNoChair.checkShowUserExpenses(shop);
-                final isShowShopExpenses = CheckNoChair.checkShowShopExpenses(shop);
+                final shop = context.read<AuthCubit>().currentBranch;
+                final isShowUserExpenses = CheckNoChair.checkShowUserExpenses(
+                  shop,
+                );
+                final isShowShopExpenses = CheckNoChair.checkShowShopExpenses(
+                  shop,
+                );
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -144,7 +152,8 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => ScreenSearch(staff: staff),
+                                          builder: (context) =>
+                                              ScreenSearch(staff: staff),
                                         ),
                                       );
                                     },
@@ -157,7 +166,10 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                           icon: Icons.menu,
                           onTap: isBooked
                               ? null
-                              : () => HomeHeaderMenuHandler.showHeaderMenu(context, menuKey: _menuKey),
+                              : () => HomeHeaderMenuHandler.showHeaderMenu(
+                                  context,
+                                  menuKey: _menuKey,
+                                ),
                         ),
                       ],
                     ),
@@ -179,13 +191,19 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                             opacity: isBooked ? 0.5 : 1.0,
                             child: ActionButton(
                               label: isBooked ? "SLOT BOOKED" : "BOOK A SLOT",
-                              isPrimary: !isBooked && selectedButton == "BOOK A SLOT",
-                              isLoading: state is CashRegistoryLoading && selectedButton == "BOOK A SLOT",
+                              isPrimary:
+                                  !isBooked && selectedButton == "BOOK A SLOT",
+                              isLoading:
+                                  state is CashRegistoryLoading &&
+                                  selectedButton == "BOOK A SLOT",
                               onTap: isBooked
                                   ? null
                                   : () {
-                                      widget.selectedButtonNotifier.value = "BOOK A SLOT";
-                                      context.read<CashRegistoryCubit>().checkCashRegisterStatus();
+                                      widget.selectedButtonNotifier.value =
+                                          "BOOK A SLOT";
+                                      context
+                                          .read<CashRegistoryCubit>()
+                                          .checkCashRegisterStatus();
                                     },
                             ),
                           );
@@ -201,14 +219,20 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                           widget.selectedButtonNotifier.value = "HISTORY";
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const ScreenOnlineBookings()),
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const ScreenOnlineBookings(),
+                            ),
                           );
                         },
                         onTapStaffWise: () {
                           widget.selectedButtonNotifier.value = "STAFF WISE";
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const ScreenStaffWiseBookings()),
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const ScreenStaffWiseBookings(),
+                            ),
                           );
                         },
                       ),
@@ -217,7 +241,8 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                     if (isBooked)
                       Builder(
                         builder: (context) {
-                          final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+                          final isNoChair =
+                              CheckNoChair.checkIsThisAppNoChairOrNot(shop);
                           if (!isNoChair) return const SizedBox.shrink();
 
                           return Padding(
@@ -227,7 +252,10 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                               isPrimary: false,
                               onTap: () {
                                 if (bookingState.bookingResponse.id != null) {
-                                  CancellationDialog.show(context, bookingState.bookingResponse.id!);
+                                  CancellationDialog.show(
+                                    context,
+                                    bookingState.bookingResponse.id!,
+                                  );
                                 }
                               },
                             ),
@@ -243,23 +271,38 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                         opacity: !isBooked ? 0.5 : 1.0,
                         child: ActionButton(
                           label: "QUICK PAYMENT",
-                          isPrimary: isBooked && selectedButton == "QUICK PAYMENT",
+                          isPrimary:
+                              isBooked && selectedButton == "QUICK PAYMENT",
                           onTap: !isBooked
                               ? null
                               : () {
-                                  widget.selectedButtonNotifier.value = "QUICK PAYMENT";
-                                  final serviceState = context.read<ServiceCubit>().state;
+                                  widget.selectedButtonNotifier.value =
+                                      "QUICK PAYMENT";
+                                  final serviceState = context
+                                      .read<ServiceCubit>()
+                                      .state;
                                   if (serviceState is ServiceStateSuccess) {
                                     if (serviceState.cartItems.isEmpty) {
-                                      ToastHelper.showError("You have to select the services");
+                                      ToastHelper.showError(
+                                        "You have to select the services",
+                                      );
                                       return;
                                     }
 
-                                    final int? transactionId = bookingState.bookingResponse.id;
-                                    final int? userId = bookingState.bookingResponse.userId;
-                                    final int? onlineBookingId = bookingState.bookingResponse.onlineBookingId;
-                                    final bookingFormState = context.read<BookingFormCubit>().state;
-                                    final double? walletAmount = bookingState.bookingResponse.customer?.wallet;
+                                    final int? transactionId =
+                                        bookingState.bookingResponse.id;
+                                    final int? userId =
+                                        bookingState.bookingResponse.userId;
+                                    final int? onlineBookingId = bookingState
+                                        .bookingResponse
+                                        .onlineBookingId;
+                                    final bookingFormState = context
+                                        .read<BookingFormCubit>()
+                                        .state;
+                                    final double? walletAmount = bookingState
+                                        .bookingResponse
+                                        .customer
+                                        ?.wallet;
 
                                     showQuickPaymentPopup(
                                       context,
@@ -272,11 +315,18 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                                           serviceState: serviceState,
                                           bookingFormState: bookingFormState,
                                           paymentMode: PaymentMode.Cash.name,
-                                          staffName: bookingState.bookingResponse.staff?.name,
-                                          bookingTime: bookingState.bookingResponse.transactionDate,
+                                          staffName: bookingState
+                                              .bookingResponse
+                                              .staff
+                                              ?.name,
+                                          bookingTime: bookingState
+                                              .bookingResponse
+                                              .transactionDate,
                                           discount: discount,
                                           finalTotal: serviceState.total,
-                                          chairId: bookingState.bookingResponse.chairId,
+                                          chairId: bookingState
+                                              .bookingResponse
+                                              .chairId,
                                         );
                                       },
                                       (discount) {
@@ -288,11 +338,18 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                                           serviceState: serviceState,
                                           bookingFormState: bookingFormState,
                                           paymentMode: PaymentMode.Card.name,
-                                          staffName: bookingState.bookingResponse.staff?.name,
-                                          bookingTime: bookingState.bookingResponse.transactionDate,
+                                          staffName: bookingState
+                                              .bookingResponse
+                                              .staff
+                                              ?.name,
+                                          bookingTime: bookingState
+                                              .bookingResponse
+                                              .transactionDate,
                                           discount: discount,
                                           finalTotal: serviceState.total,
-                                          chairId: bookingState.bookingResponse.chairId,
+                                          chairId: bookingState
+                                              .bookingResponse
+                                              .chairId,
                                         );
                                       },
                                       (discount) {
@@ -304,17 +361,25 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                                           serviceState: serviceState,
                                           bookingFormState: bookingFormState,
                                           paymentMode: PaymentMode.Unpaid.name,
-                                          staffName: bookingState.bookingResponse.staff?.name,
-                                          bookingTime: bookingState.bookingResponse.transactionDate,
+                                          staffName: bookingState
+                                              .bookingResponse
+                                              .staff
+                                              ?.name,
+                                          bookingTime: bookingState
+                                              .bookingResponse
+                                              .transactionDate,
                                           discount: discount,
                                           finalTotal: serviceState.total,
-                                          chairId: bookingState.bookingResponse.chairId,
+                                          chairId: bookingState
+                                              .bookingResponse
+                                              .chairId,
                                         );
                                       },
                                       total: serviceState.total,
-                                      discount: bookingState.bookingResponse.calculateEffectiveDiscount(
-                                        serviceState.subTotal,
-                                      ),
+                                      discount: bookingState.bookingResponse
+                                          .calculateEffectiveDiscount(
+                                            serviceState.subTotal,
+                                          ),
                                       grandTotal: serviceState.subTotal,
                                       walletAmount: walletAmount,
                                       onWalletSelected: (discount) {
@@ -326,11 +391,18 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                                           serviceState: serviceState,
                                           bookingFormState: bookingFormState,
                                           paymentMode: PaymentMode.Wallet.name,
-                                          staffName: bookingState.bookingResponse.staff?.name,
-                                          bookingTime: bookingState.bookingResponse.transactionDate,
+                                          staffName: bookingState
+                                              .bookingResponse
+                                              .staff
+                                              ?.name,
+                                          bookingTime: bookingState
+                                              .bookingResponse
+                                              .transactionDate,
                                           discount: discount,
                                           finalTotal: serviceState.total,
-                                          chairId: bookingState.bookingResponse.chairId,
+                                          chairId: bookingState
+                                              .bookingResponse
+                                              .chairId,
                                         );
                                       },
                                     );
@@ -347,43 +419,66 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                         opacity: !isBooked ? 0.5 : 1.0,
                         child: ActionButton(
                           label: "SAVE & SETTLE BILL",
-                          isPrimary: isBooked && selectedButton == "SAVE & SETTLE BILL",
+                          isPrimary:
+                              isBooked &&
+                              selectedButton == "SAVE & SETTLE BILL",
                           onTap: !isBooked
                               ? null
                               : () {
-                                  widget.selectedButtonNotifier.value = "SAVE & SETTLE BILL";
-                                  final serviceState = context.read<ServiceCubit>().state;
+                                  widget.selectedButtonNotifier.value =
+                                      "SAVE & SETTLE BILL";
+                                  final serviceState = context
+                                      .read<ServiceCubit>()
+                                      .state;
                                   if (serviceState is ServiceStateSuccess) {
                                     if (serviceState.cartItems.isEmpty) {
-                                      ToastHelper.showError("You have to select the services");
+                                      ToastHelper.showError(
+                                        "You have to select the services",
+                                      );
                                       return;
                                     }
 
-                                    final int? transactionId = bookingState.bookingResponse.id;
-                                    final int? userId = bookingState.bookingResponse.userId;
-                                    final int? onlineBookingId = bookingState.bookingResponse.onlineBookingId;
-                                    final bookingFormState = context.read<BookingFormCubit>().state;
+                                    final int? transactionId =
+                                        bookingState.bookingResponse.id;
+                                    final int? userId =
+                                        bookingState.bookingResponse.userId;
+                                    final int? onlineBookingId = bookingState
+                                        .bookingResponse
+                                        .onlineBookingId;
+                                    final bookingFormState = context
+                                        .read<BookingFormCubit>()
+                                        .state;
 
-                                    final SettlePaymentRequestModel request = PaymentRequestMapper.fromSaveAndSettle(
-                                      transactionId: transactionId,
-                                      onlineBookingId: onlineBookingId,
-                                      customerName: bookingFormState.customerName,
-                                      customerNumber: bookingFormState.customerNumber,
-                                      subTotal: serviceState.subTotal,
-                                      taxTotal: serviceState.vat,
-                                      total: serviceState.total,
-                                      cartItems: serviceState.cartItems,
-                                      userId: userId,
-                                    );
+                                    final SettlePaymentRequestModel request =
+                                        PaymentRequestMapper.fromSaveAndSettle(
+                                          transactionId: transactionId,
+                                          onlineBookingId: onlineBookingId,
+                                          customerName:
+                                              bookingFormState.customerName,
+                                          customerNumber:
+                                              bookingFormState.customerNumber,
+                                          subTotal: serviceState.subTotal,
+                                          taxTotal: serviceState.vat,
+                                          total: serviceState.total,
+                                          cartItems: serviceState.cartItems,
+                                          userId: userId,
+                                        );
 
                                     showSettlementDialog(
                                       context,
                                       settlePayment: request,
-                                      customer: bookingState.bookingResponse.customer,
-                                      staffName: bookingState.bookingResponse.staff?.name,
-                                      bookingTime: bookingState.bookingResponse.transactionDate,
+                                      customer:
+                                          bookingState.bookingResponse.customer,
+                                      staffName: bookingState
+                                          .bookingResponse
+                                          .staff
+                                          ?.name,
+                                      bookingTime: bookingState
+                                          .bookingResponse
+                                          .transactionDate,
                                       cartItems: serviceState.cartItems,
-                                      chairId: bookingState.bookingResponse.chairId,
+                                      chairId:
+                                          bookingState.bookingResponse.chairId,
                                     );
                                   }
                                 },
@@ -396,7 +491,8 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                     if (isBooked)
                       Builder(
                         builder: (context) {
-                          final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+                          final isNoChair =
+                              CheckNoChair.checkIsThisAppNoChairOrNot(shop);
                           if (isNoChair) return const SizedBox.shrink();
 
                           return Opacity(
@@ -407,8 +503,11 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                               onTap: !isBooked
                                   ? null
                                   : () {
-                                      widget.selectedButtonNotifier.value = "BACK";
-                                      context.read<BookingCubit>().backToInitialState();
+                                      widget.selectedButtonNotifier.value =
+                                          "BACK";
+                                      context
+                                          .read<BookingCubit>()
+                                          .backToInitialState();
                                       context.read<ServiceCubit>().clearCart();
                                     },
                             ),
@@ -428,10 +527,14 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                           onTap: isBooked
                               ? null
                               : () {
-                                  widget.selectedButtonNotifier.value = "REPORT";
+                                  widget.selectedButtonNotifier.value =
+                                      "REPORT";
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const ScreenQuickReport()),
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ScreenQuickReport(),
+                                    ),
                                   );
                                 },
                         ),
@@ -444,21 +547,29 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                       BlocConsumer<CashRegistoryCubit, CashRegistoryState>(
                         listener: (context, state) {
                           if (state is CashRegistorySalesTotalLoaded) {
-                            CloseCashRegisterDialog.show(context, state.closeRegisterModel);
+                            CloseCashRegisterDialog.show(
+                              context,
+                              state.closeRegisterModel,
+                            );
                           } else if (state is CashRegistoryAddError) {
                             ToastHelper.showError(state.message);
                           }
                         },
                         builder: (context, state) {
                           return ActionButton(
-                            isLoading: state is CashRegistoryLoading && selectedButton == "CLOSE REGISTER",
+                            isLoading:
+                                state is CashRegistoryLoading &&
+                                selectedButton == "CLOSE REGISTER",
                             label: "CLOSE REGISTER",
                             isPrimary: selectedButton == "CLOSE REGISTER",
                             onTap: isBooked
                                 ? null
                                 : () {
-                                    widget.selectedButtonNotifier.value = "CLOSE REGISTER";
-                                    context.read<CashRegistoryCubit>().getSalesTotal();
+                                    widget.selectedButtonNotifier.value =
+                                        "CLOSE REGISTER";
+                                    context
+                                        .read<CashRegistoryCubit>()
+                                        .getSalesTotal();
                                   },
                           );
                         },
@@ -484,7 +595,8 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ScreenShopExpense(staff: staff),
+                                builder: (context) =>
+                                    ScreenShopExpense(staff: staff),
                               ),
                             );
                           },
@@ -499,7 +611,8 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ScreenExpense(staff: staff),
+                                builder: (context) =>
+                                    ScreenExpense(staff: staff),
                               ),
                             );
                           },
