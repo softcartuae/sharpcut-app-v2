@@ -7,7 +7,7 @@ import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
-import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 
 Future<StaffModel?> showStaffSelectionDialog(
@@ -78,10 +78,15 @@ Future<StaffModel?> showStaffSelectionDialog(
                     return InkWell(
                       onTap: () {
                         final shop = context.read<AuthCubit>().currentBranch;
-                        final isNoChair =
-                            CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+                        // Staff booking a slot: check if password is required for this staff.
+                        final passwordRequired =
+                            ShopConfigHelper.isPasswordRequired(
+                              shop: shop,
+                              isAdmin: staff.role == Role.admin,
+                            );
 
-                        if (isNoChair) {
+                        if (!passwordRequired) {
+                          // No-chair or cashier mode: book directly without password.
                           context.read<BookingCubit>().bookSlot(
                             chairId: chair.id ?? 0,
                             userId: staff.id,

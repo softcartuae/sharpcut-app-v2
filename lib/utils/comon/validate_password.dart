@@ -8,7 +8,7 @@ import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/cubit/password/password_cubit.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
-import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 
 Future<void> showPasswordForValidation(
   BuildContext context,
@@ -37,7 +37,12 @@ Future<void> showPasswordForValidation(
       .toList();
 
   final shop = context.read<AuthCubit>().currentBranch;
-  final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+  // isPasswordRequired is re-evaluated after staff selection because the
+  // requirement differs for admin vs regular staff in cashier mode.
+  bool resolvePasswordRequired(StaffModel? staff) {
+    final isAdmin = staff?.role == Role.admin;
+    return ShopConfigHelper.isPasswordRequired(shop: shop, isAdmin: isAdmin);
+  }
 
   // If preSelectedStaff is provided, try to find it in the list to ensure object equality for Dropdown
   if (preSelectedStaff != null) {
@@ -191,8 +196,8 @@ Future<void> showPasswordForValidation(
                               ),
                               const SizedBox(height: 16),
 
-                              // Password Field
-                              if (!isNoChair)
+                              // Password Field — shown only when required for the selected staff role.
+                              if (resolvePasswordRequired(selectedStaff))
                                 Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
@@ -265,23 +270,30 @@ Future<void> showPasswordForValidation(
                                             );
                                             return;
                                           }
-                                          if (!isNoChair &&
+
+                                          // Determine if admin for the cubit call.
+                                          final isAdminForCall =
+                                              (showAdminToo == true ||
+                                                  isAdminOnly == true)
+                                              ? (selectedStaff?.role ==
+                                                  Role.admin)
+                                              : isAdmin;
+
+                                          final needsPassword =
+                                              resolvePasswordRequired(
+                                                selectedStaff,
+                                              );
+
+                                          if (needsPassword &&
                                               passwordController.text.isEmpty) {
                                             ToastHelper.showError(
                                               "Please enter password",
                                             );
                                             return;
                                           }
-                                          // if show admin too is true and selected staff is admin then set isAdmin to true
-                                          if (showAdminToo == true ||
-                                              isAdminOnly == true) {
-                                            if (selectedStaff?.role ==
-                                                Role.admin) {
-                                              isAdmin = true;
-                                            }
-                                          }
 
-                                          if (isNoChair) {
+                                          if (!needsPassword) {
+                                            // Bypass: no password needed for this staff / mode.
                                             Navigator.of(context).pop();
                                             if (onSuccess != null) {
                                               onSuccess();
@@ -296,7 +308,7 @@ Future<void> showPasswordForValidation(
                                             context
                                                 .read<PasswordCubit>()
                                                 .validatePassword(
-                                                  isAdmin: isAdmin,
+                                                  isAdmin: isAdminForCall,
                                                   password:
                                                       passwordController.text,
                                                   userId: selectedStaff!.id,

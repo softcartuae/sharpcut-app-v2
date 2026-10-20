@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
@@ -9,27 +8,30 @@ class AuthInterceptor extends Interceptor {
   AuthInterceptor(this.tokenStorage);
 
   @override
-  Future<void> onRequest(
+  void onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
-  ) async {
-    // Set Accept header
+  ) {
     options.headers['Accept'] = 'application/json';
 
-    // Get token and set Authorization header if available
-    final token = await tokenStorage.getToken();
+    final token = tokenStorage.getToken();
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
-    final mode = await tokenStorage.getMode();
+    final mode = tokenStorage.getMode();
     if (mode != null) {
       options.headers['mode'] = mode;
     }
 
-    final isChair = await tokenStorage.getIsChair();
+    final isChair = tokenStorage.getIsChair();
     if (isChair != null) {
       options.headers['is-chair'] = isChair;
+    }
+
+    final isCashier = tokenStorage.getIsCashier();
+    if (isCashier != null) {
+      options.headers['is-cashier'] = isCashier;
     }
 
     super.onRequest(options, handler);
@@ -46,5 +48,4 @@ class AuthInterceptor extends Interceptor {
     }
     super.onError(err, handler);
   }
-  
 }

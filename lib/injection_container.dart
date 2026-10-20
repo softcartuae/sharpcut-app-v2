@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/home/service_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_cubit.dart';
@@ -13,6 +14,7 @@ import 'package:sharp_cut/domain/home/chair/chair_repo.dart';
 import 'package:sharp_cut/domain/password/service/password_repo.dart';
 import 'package:sharp_cut/data/password/service/password_repo_imp.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
+import 'package:sharp_cut/data/local_storage/url_storage.dart';
 import 'package:sharp_cut/domain/booking/booking_repo.dart';
 import 'package:sharp_cut/data/booking/booking_repo_imp.dart';
 import 'package:sharp_cut/cubit/booking/booking_cubit.dart';
@@ -52,6 +54,12 @@ import 'package:sharp_cut/data/update/app_update_service.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // ─────────── External ───────────
+  // SharedPreferences is loaded once and shared as a singleton.
+  // All consumers (TokenStorage, interceptor) get the same in-memory instance.
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerSingleton<SharedPreferences>(sharedPreferences);
+
   // Cubits
   sl.registerFactory<AppUpdateCubit>(
     () => AppUpdateCubit(updateService: sl<AppUpdateService>()),
@@ -119,11 +127,16 @@ Future<void> init() async {
   sl.registerLazySingleton<ServiceRepo>(() => ServiceRepoImpl());
   sl.registerLazySingleton<ChairRepo>(() => ChairRepoImpl());
   sl.registerLazySingleton<PasswordRepo>(() => PasswordRepoImp());
-  sl.registerLazySingleton<TokenStorage>(() => TokenStorage());
+  sl.registerLazySingleton<TokenStorage>(
+    () => TokenStorage(sl<SharedPreferences>()),
+  );
+  sl.registerLazySingleton<UrlStorage>(
+    () => UrlStorage(sl<SharedPreferences>()),
+  );
   sl.registerLazySingleton<BookingRepo>(() => BookingRepoImp());
   sl.registerLazySingleton<ExpenseRepo>(() => ExpenseRepoImpl());
   sl.registerLazySingleton<PrintingRepo>(
-    () => PrintingRepoImp(PrintingService()),
+    () => PrintingRepoImp(PrintingService(), sl<SharedPreferences>()),
   );
   sl.registerLazySingleton<ReportRepo>(() => ReportRepoImp(ReportService()));
   sl.registerLazySingleton<QuickReportRepo>(

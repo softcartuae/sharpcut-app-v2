@@ -51,7 +51,9 @@ class PrintingRepoImp implements PrintingRepo {
     'com.example.sharp_cut/printer_status',
   );
 
-  PrintingRepoImp(this._printingService);
+  final SharedPreferences _prefs;
+
+  PrintingRepoImp(this._printingService, this._prefs);
 
   @override
   Stream<List<Printer>> get printersStream => _printersController.stream;
@@ -608,16 +610,14 @@ class PrintingRepoImp implements PrintingRepo {
 
   @override
   Future<void> savePaperSize(PrinterPaperSize size) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = "printer_size";
-    await prefs.setString(key, size.name);
+    const key = "printer_size";
+    await _prefs.setString(key, size.name);
   }
 
   @override
   Future<PrinterPaperSize> getPaperSize() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = "printer_size";
-    final sizeName = prefs.getString(key);
+    const key = "printer_size";
+    final sizeName = _prefs.getString(key);
     if (sizeName != null) {
       return PrinterPaperSize.values.firstWhere(
         (e) => e.name == sizeName,
@@ -629,21 +629,18 @@ class PrintingRepoImp implements PrintingRepo {
 
   @override
   Future<bool> hasPaperSize() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = "printer_size";
-    return prefs.containsKey(key);
+    const key = "printer_size";
+    return _prefs.containsKey(key);
   }
 
   @override
   Future<void> settingPrintingToServerSide({required bool isApiPrinter}) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("is_server_printing", isApiPrinter);
+    await _prefs.setBool("is_server_printing", isApiPrinter);
   }
 
   @override
   Future<bool> isPrintingFromServerSideOrNot() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool("is_server_printing") ?? false;
+    return _prefs.getBool("is_server_printing") ?? false;
   }
 
   @override
@@ -690,14 +687,12 @@ class PrintingRepoImp implements PrintingRepo {
 
   @override
   Future<void> saveSelectedServerPrinter(ServerPrinter printer) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selected_server_printer', printer.name ?? '');
+    await _prefs.setString('selected_server_printer', printer.name ?? '');
   }
 
   @override
   Future<ServerPrinter?> getSelectedServerPrinter() async {
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('selected_server_printer');
+    final name = _prefs.getString('selected_server_printer');
     if (name != null && name.isNotEmpty) {
       return ServerPrinter(name: name);
     }
@@ -754,25 +749,23 @@ class PrintingRepoImp implements PrintingRepo {
 
   @override
   Future<void> saveLastConnectedPrinter(Printer printer) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('last_printer_name', printer.name ?? '');
-    await prefs.setString('last_printer_vendor', printer.vendorId ?? '');
-    await prefs.setString('last_printer_product', printer.productId ?? '');
-    await prefs.setString('last_printer_address', printer.address ?? '');
-    await prefs.setInt('last_printer_type', printer.connectionType?.index ?? 0);
+    await _prefs.setString('last_printer_name', printer.name ?? '');
+    await _prefs.setString('last_printer_vendor', printer.vendorId ?? '');
+    await _prefs.setString('last_printer_product', printer.productId ?? '');
+    await _prefs.setString('last_printer_address', printer.address ?? '');
+    await _prefs.setInt('last_printer_type', printer.connectionType?.index ?? 0);
   }
 
   @override
   Future<Printer?> getLastConnectedPrinter() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!prefs.containsKey('last_printer_type')) return null;
+    if (!_prefs.containsKey('last_printer_type')) return null;
 
-    final typeIndex = prefs.getInt('last_printer_type');
+    final typeIndex = _prefs.getInt('last_printer_type');
     final type = ConnectionType.values[typeIndex!];
-    final name = prefs.getString('last_printer_name');
-    final vendor = prefs.getString('last_printer_vendor');
-    final product = prefs.getString('last_printer_product');
-    final address = prefs.getString('last_printer_address');
+    final name = _prefs.getString('last_printer_name');
+    final vendor = _prefs.getString('last_printer_vendor');
+    final product = _prefs.getString('last_printer_product');
+    final address = _prefs.getString('last_printer_address');
 
     return Printer(
       name: name,
@@ -785,12 +778,11 @@ class PrintingRepoImp implements PrintingRepo {
 
   @override
   Future<void> clearLastConnectedPrinter() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('last_printer_name');
-    await prefs.remove('last_printer_vendor');
-    await prefs.remove('last_printer_product');
-    await prefs.remove('last_printer_address');
-    await prefs.remove('last_printer_type');
+    await _prefs.remove('last_printer_name');
+    await _prefs.remove('last_printer_vendor');
+    await _prefs.remove('last_printer_product');
+    await _prefs.remove('last_printer_address');
+    await _prefs.remove('last_printer_type');
   }
 
   @override

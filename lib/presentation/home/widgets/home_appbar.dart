@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/build_config.dart';
-import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 
 class HomeAppBar extends StatefulWidget {
   const HomeAppBar({super.key});
@@ -40,7 +40,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
           children: [
             GestureDetector(
               onLongPress: () {
-                final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
+                final isNoChair = ShopConfigHelper.isNoChairMode(
                   context.read<AuthCubit>().currentBranch,
                 );
                 print("isNoChair: $isNoChair");
@@ -104,7 +104,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
               builder: (context) {
                 String modeType = "";
                 final mode = context.read<AuthCubit>().currentBranch?.mode;
-                final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(
+                final isNoChair = ShopConfigHelper.isNoChairMode(
                   context.read<AuthCubit>().currentBranch,
                 );
                 modeType = findMode(mode, isNoChair);

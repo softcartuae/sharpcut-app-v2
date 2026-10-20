@@ -15,6 +15,8 @@ import 'package:sharp_cut/presentation/home/widgets/services_or_cancel_dialog.da
 import 'package:sharp_cut/domain/booking/models/online_booking_model.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/comon/password_showdialoge.dart';
+import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 
 class CuttingMastersDialog extends StatelessWidget {
   final OnlineBookingModel? onlineBooking;
@@ -46,9 +48,7 @@ class CuttingMastersDialog extends StatelessWidget {
             const SizedBox(height: 16),
             const Divider(height: 1, thickness: 1, color: Colors.grey),
             const SizedBox(height: 24),
-            Expanded(
-              child: _ChairListWidget(onlineBooking: onlineBooking),
-            ),
+            Expanded(child: _ChairListWidget(onlineBooking: onlineBooking)),
           ],
         ),
       ),
@@ -131,10 +131,7 @@ class _ChairItemWidget extends StatelessWidget {
   final ChairModel chair;
   final OnlineBookingModel? onlineBooking;
 
-  const _ChairItemWidget({
-    required this.chair,
-    this.onlineBooking,
-  });
+  const _ChairItemWidget({required this.chair, this.onlineBooking});
 
   @override
   Widget build(BuildContext context) {
@@ -153,12 +150,27 @@ class _ChairItemWidget extends StatelessWidget {
             }
 
             if (preSelectedStaff != null) {
-              showPasswordDialoge(
-                context,
-                chair,
-                preSelectedStaff,
-                onlineBookingId: onlineBooking!.id,
+              final shop = context.read<AuthCubit>().currentBranch;
+              final passwordRequired = ShopConfigHelper.isPasswordRequired(
+                shop: shop,
+                isAdmin: preSelectedStaff.role == Role.admin,
               );
+              if (passwordRequired) {
+                showPasswordDialoge(
+                  context,
+                  chair,
+                  preSelectedStaff,
+                  onlineBookingId: onlineBooking!.id,
+                );
+              } else {
+                context.read<BookingCubit>().bookSlot(
+                  chairId: chair.id ?? 0,
+                  userId: preSelectedStaff.id,
+                  userPassword: "0000",
+                  onlineBookingId: onlineBooking!.id,
+                );
+                Navigator.pop(context);
+              }
             } else {
               showStaffSelectionDialog(
                 context,
@@ -170,14 +182,13 @@ class _ChairItemWidget extends StatelessWidget {
             showStaffSelectionDialog(context, chair);
           }
         } else {
-          if(onlineBooking != null)return;
+          if (onlineBooking != null) return;
           final result = await ServicesOrCancelDialog.show(context);
           if (!context.mounted) return;
 
           if (result == true) {
             // Services selected
             if (chair.transaction != null) {
-          
               showPasswordForValidation(
                 context,
                 false,
@@ -308,4 +319,3 @@ class _ChairItemWidget extends StatelessWidget {
     );
   }
 }
-

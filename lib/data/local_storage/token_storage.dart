@@ -1,44 +1,49 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenStorage {
+  final SharedPreferences _prefs;
+
+  TokenStorage(this._prefs);
+
   static const String _tokenKey = 'auth_token';
   static const String _modeKey = 'auth_mode';
   static const String _isChairKey = 'auth_is_chair';
+  static const String _isCashierKey = 'auth_is_cashier';
 
-  Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, token);
-  }
+  // ─────────────── Token ───────────────
 
-  Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_tokenKey);
-  }
+  Future<void> saveToken(String token) async =>
+      _prefs.setString(_tokenKey, token);
 
-  Future<void> saveMode(String mode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_modeKey, mode);
-  }
+  String? getToken() => _prefs.getString(_tokenKey);
 
-  Future<String?> getMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_modeKey);
-  }
+  // ─────────────── Mode ────────────────
 
-  Future<void> saveIsChair(bool isChair) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_isChairKey, isChair);
-  }
+  Future<void> saveMode(String mode) async =>
+      _prefs.setString(_modeKey, mode);
 
-  Future<bool?> getIsChair() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_isChairKey);
-  }
+  String? getMode() => _prefs.getString(_modeKey);
+
+  // ─────────────── isChair ─────────────
+
+  Future<void> saveIsChair(bool isChair) async =>
+      _prefs.setBool(_isChairKey, isChair);
+
+  bool? getIsChair() => _prefs.getBool(_isChairKey);
+
+  // ─────────────── isCashier ───────────
+
+  Future<void> saveIsCashier(bool isCashier) async =>
+      _prefs.setBool(_isCashierKey, isCashier);
+
+  bool? getIsCashier() => _prefs.getBool(_isCashierKey);
+
+  // ─────────────── Cleanup ─────────────
 
   Future<void> deleteToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
-    await prefs.remove(_modeKey);
-    await prefs.remove(_isChairKey);
+    await _prefs.remove(_tokenKey);
+    await _prefs.remove(_modeKey);
+    await _prefs.remove(_isChairKey);
+    await _prefs.remove(_isCashierKey);
   }
 }

@@ -17,7 +17,7 @@ import 'package:sharp_cut/presentation/home/widgets/home_cart_summary_panel.dart
 import 'package:sharp_cut/presentation/home/widgets/home_category_sidebar.dart';
 import 'package:sharp_cut/presentation/home/widgets/home_services_grid.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
-import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
@@ -74,7 +74,7 @@ class _HomeServicesSectionState extends State<HomeServicesSection> {
         BlocListener<ChairCubit, ChairState>(
           listener: (context, state) {
             final shop = context.read<AuthCubit>().currentBranch;
-            final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+            final isNoChair = ShopConfigHelper.isNoChairMode(shop);
             final bookingState = context.read<BookingCubit>().state;
 
             if (isNoChair && state is ChairSuccess && state.chairs.isNotEmpty) {

@@ -6,6 +6,7 @@ class BranchModel {
   final String? vatNo;
   final String? mode;
   final bool? isChair;
+  final bool? isCashier;
   final bool isChargeOrServiceCanEdit;
   final bool isVatIncluded;
   final bool isShopExpenses;
@@ -21,6 +22,7 @@ class BranchModel {
     this.vatNo,
     required this.isChargeOrServiceCanEdit,
     this.isChair,
+    this.isCashier,
     this.isShopExpenses = false,
     this.isUserExpenses = false,
   });
@@ -36,6 +38,7 @@ class BranchModel {
       vatNo: json['vat_no'],
       mode: json['mode'],
       isChair: json['is_chair'],
+      isCashier: json['is_cashier'],
       isShopExpenses: json['is_branch_expenses'] ?? false,
       isUserExpenses: json['is_user_expenses'] ?? false,
     );
@@ -49,6 +52,7 @@ class BranchModel {
       'address': address,
       'vat_no': vatNo,
       'is_chair': isChair,
+      'is_cashier': isCashier,
       'is_branch_expenses': isShopExpenses,
       'is_user_expenses': isUserExpenses,
     };

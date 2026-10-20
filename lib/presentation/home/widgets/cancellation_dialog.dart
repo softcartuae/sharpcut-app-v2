@@ -9,7 +9,7 @@ import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
-import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 
 class CancellationDialog extends StatefulWidget {
   final int transactionId;
@@ -65,6 +65,12 @@ class _CancellationDialogState extends State<CancellationDialog> {
 
   @override
   Widget build(BuildContext context) {
+    // Cancellation is always approved by an admin.
+    final adminPasswordRequired = ShopConfigHelper.isPasswordRequired(
+      shop: context.read<AuthCubit>().currentBranch,
+      isAdmin: true,
+    );
+
     return BlocListener<BookingCubit, BookingState>(
       listener: (context, state) {
         if (state is BookingCancelled) {
@@ -176,15 +182,10 @@ class _CancellationDialogState extends State<CancellationDialog> {
                 ),
               ),
 
-              if (!CheckNoChair.checkIsThisAppNoChairOrNot(
-                context.read<AuthCubit>().currentBranch,
-              ))
-                const SizedBox(height: 16),
+              if (adminPasswordRequired) const SizedBox(height: 16),
 
-              // Password Field
-              if (!CheckNoChair.checkIsThisAppNoChairOrNot(
-                context.read<AuthCubit>().currentBranch,
-              ))
+              // Password Field — only shown when admin password is required.
+              if (adminPasswordRequired)
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
@@ -281,12 +282,14 @@ class _CancellationDialogState extends State<CancellationDialog> {
                                         .read<AuthCubit>()
                                         .currentBranch;
 
-                                    final isNoChair =
-                                        CheckNoChair.checkIsThisAppNoChairOrNot(
-                                          shop,
+                                    // Cancellation always needs admin.
+                                    final adminPasswordRequired =
+                                        ShopConfigHelper.isPasswordRequired(
+                                          shop: shop,
+                                          isAdmin: true,
                                         );
 
-                                    if (!isNoChair &&
+                                    if (adminPasswordRequired &&
                                         _passwordController.text.isEmpty) {
                                       ToastHelper.showError(
                                         "Please enter password",
@@ -304,9 +307,9 @@ class _CancellationDialogState extends State<CancellationDialog> {
                                     context.read<BookingCubit>().cancelBooking(
                                       transactionId: widget.transactionId,
                                       userId: selectedStaff!.id,
-                                      userPassword: isNoChair
-                                          ? "0000"
-                                          : _passwordController.text,
+                                      userPassword: adminPasswordRequired
+                                          ? _passwordController.text
+                                          : "0000",
                                       reason: _reasonController.text,
                                     );
                                   },

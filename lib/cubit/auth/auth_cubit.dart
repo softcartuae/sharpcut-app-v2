@@ -54,6 +54,9 @@ class AuthCubit extends Cubit<AuthCubitState> {
       if (user.isChair != null) {
         await tokenStorage.saveIsChair(user.isChair!);
       }
+      if (user.isCashier != null) {
+        await tokenStorage.saveIsCashier(user.isCashier!);
+      }
 
       emit(AuthAuthenticated(user));
     } catch (e) {
@@ -63,7 +66,7 @@ class AuthCubit extends Cubit<AuthCubitState> {
 
   Future<void> checkAuthStatus() async {
     try {
-      final token = await tokenStorage.getToken();
+      final token = tokenStorage.getToken();
       if (token != null) {
         await getUser();
       } else {

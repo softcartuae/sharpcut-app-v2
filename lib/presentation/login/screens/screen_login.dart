@@ -7,6 +7,7 @@ import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/presentation/home/screens/screen_home.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/data/local_storage/url_storage.dart';
+import 'package:sharp_cut/injection_container.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
@@ -32,7 +33,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
   }
 
   Future<void> _loadConnectionDetails() async {
-    final urlStorage = UrlStorage();
+    final urlStorage = sl<UrlStorage>();
     final details = await urlStorage.getConnectionDetails();
     final ip = details['ip'];
     final port = details['port'];

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_state.dart';
+import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +11,7 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/domain/home/models/staff_model.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
-import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 
 Future<void> showCashRegistoryDialoge(BuildContext context) {
   final TextEditingController passwordController = TextEditingController();
@@ -23,7 +24,11 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
   List<StaffModel> staffListAll = List<StaffModel>.from(chairCubit.staffs);
   List<StaffModel> staffList = staffListAll;
   final shop = context.read<AuthCubit>().currentBranch;
-  final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+  // Password requirement is resolved per-staff-selection (role matters in cashier mode).
+  bool resolvePasswordRequired(StaffModel? staff) {
+    final isAdmin = staff?.role == Role.admin;
+    return ShopConfigHelper.isPasswordRequired(shop: shop, isAdmin: isAdmin);
+  }
 
   return showDialog(
     context: context,
@@ -132,7 +137,7 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
                         const SizedBox(height: 16),
 
                         // Password Field
-                        if (!isNoChair)
+                        if (resolvePasswordRequired(selectedStaff))
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
@@ -175,7 +180,8 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
                               ),
                             ),
                           ),
-                        if (!isNoChair) const SizedBox(height: 10),
+                        if (resolvePasswordRequired(selectedStaff))
+                          const SizedBox(height: 10),
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
@@ -237,7 +243,9 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
                                       );
                                       return;
                                     }
-                                    if (!isNoChair &&
+                                    if (resolvePasswordRequired(
+                                          selectedStaff,
+                                        ) &&
                                         passwordController.text.isEmpty) {
                                       ToastHelper.showError(
                                         "Please enter password",
@@ -260,9 +268,12 @@ Future<void> showCashRegistoryDialoge(BuildContext context) {
                                           amount: double.parse(
                                             cashController.text,
                                           ),
-                                          password: isNoChair
-                                              ? "0000"
-                                              : passwordController.text,
+                                          password:
+                                              resolvePasswordRequired(
+                                                selectedStaff,
+                                              )
+                                              ? passwordController.text
+                                              : "0000",
                                         );
                                   },
                             style: ElevatedButton.styleFrom(

@@ -8,7 +8,7 @@ import 'package:sharp_cut/presentation/home/widgets/added_item.dart';
 import 'package:sharp_cut/presentation/home/widgets/common_container.dart';
 import 'package:sharp_cut/presentation/home/widgets/features_bottons.dart';
 import 'package:sharp_cut/presentation/home/widgets/tip_dialoge.dart';
-import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 
 class HomeCartSummaryPanel extends StatelessWidget {
   const HomeCartSummaryPanel({super.key});
@@ -71,7 +71,7 @@ class HomeCartSummaryPanel extends StatelessWidget {
                                 .read<AuthCubit>()
                                 .currentBranch;
                             final canEdit =
-                                CheckNoChair.checkShopCanEditServiceOrCharge(
+                                ShopConfigHelper.canEditServiceOrCharge(
                                   shop,
                                 );
                             if (!canEdit) return;

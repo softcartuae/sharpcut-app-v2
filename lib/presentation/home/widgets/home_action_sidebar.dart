@@ -29,7 +29,7 @@ import 'package:sharp_cut/presentation/quick_report/screens/screen_quick_report.
 import 'package:sharp_cut/presentation/shop_expense/screens/screen_shop_expense.dart';
 import 'package:sharp_cut/utils/comon/validate_password.dart';
 import 'package:sharp_cut/utils/helpers/booking_flow_helper.dart';
-import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 import 'package:sharp_cut/utils/helpers/enums.dart';
 import 'package:sharp_cut/utils/helpers/payment_request_mapper.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
@@ -126,10 +126,10 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
               valueListenable: widget.selectedButtonNotifier,
               builder: (context, selectedButton, child) {
                 final shop = context.read<AuthCubit>().currentBranch;
-                final isShowUserExpenses = CheckNoChair.checkShowUserExpenses(
+                final isShowUserExpenses = ShopConfigHelper.showUserExpenses(
                   shop,
                 );
-                final isShowShopExpenses = CheckNoChair.checkShowShopExpenses(
+                final isShowShopExpenses = ShopConfigHelper.showShopExpenses(
                   shop,
                 );
 
@@ -242,7 +242,7 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                       Builder(
                         builder: (context) {
                           final isNoChair =
-                              CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+                              ShopConfigHelper.isNoChairMode(shop);
                           if (!isNoChair) return const SizedBox.shrink();
 
                           return Padding(
@@ -492,7 +492,7 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                       Builder(
                         builder: (context) {
                           final isNoChair =
-                              CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+                              ShopConfigHelper.isNoChairMode(shop);
                           if (isNoChair) return const SizedBox.shrink();
 
                           return Opacity(

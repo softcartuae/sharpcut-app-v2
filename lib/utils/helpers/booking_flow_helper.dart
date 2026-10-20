@@ -5,13 +5,13 @@ import 'package:sharp_cut/cubit/home/chair_cubit.dart';
 import 'package:sharp_cut/cubit/home/chair_state.dart';
 import 'package:sharp_cut/presentation/home/widgets/cutting_masters_dialog.dart';
 import 'package:sharp_cut/utils/comon/staff_selection_dialog.dart';
-import 'package:sharp_cut/utils/helpers/check_no_chair.dart';
+import 'package:sharp_cut/utils/helpers/shop_config_helper.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
 class BookingFlowHelper {
   static Future<void> handleBookingAction(BuildContext context) async {
     final shop = context.read<AuthCubit>().currentBranch;
-    final isNoChair = CheckNoChair.checkIsThisAppNoChairOrNot(shop);
+    final isNoChair = ShopConfigHelper.isNoChairMode(shop);
 
     if (isNoChair) {
       final chairCubit = context.read<ChairCubit>();
