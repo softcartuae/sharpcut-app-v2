@@ -1,38 +1,38 @@
 import 'package:sharp_cut/domain/expenses/models/expense_model.dart';
 
-abstract class ShopExpenseState {}
+abstract class BranchExpenseState {}
 
-class ShopExpenseInitial extends ShopExpenseState {}
+class BranchExpenseInitial extends BranchExpenseState {}
 
-class ShopExpenseLoading extends ShopExpenseState {}
+class BranchExpenseLoading extends BranchExpenseState {}
 
-class ShopExpenseLoaded extends ShopExpenseState {
+class ShopExpenseLoaded extends BranchExpenseState {
   final List<ExpenseModel> expenses;
   ShopExpenseLoaded({required this.expenses});
 }
 
-class ShopExpenseSubmitting extends ShopExpenseState {}
+class BranchExpenseSubmitting extends BranchExpenseState {}
 
-class ShopExpenseSubmitted extends ShopExpenseState {
+class BranchExpenseSubmitted extends BranchExpenseState {
   final String message;
-  ShopExpenseSubmitted({required this.message});
+  BranchExpenseSubmitted({required this.message});
 }
 
-class ShopExpenseError extends ShopExpenseState {
+class BranchExpenseError extends BranchExpenseState {
   final String message;
-  ShopExpenseError({required this.message});
+  BranchExpenseError({required this.message});
 }
 
-class ShopExpenseDeleting extends ShopExpenseState {}
+class BranchExpenseDeleting extends BranchExpenseState {}
 
-class ShopExpenseDeleted extends ShopExpenseState {
+class BranchExpenseDeleted extends BranchExpenseState {
   final String message;
-  ShopExpenseDeleted({required this.message});
+  BranchExpenseDeleted({required this.message});
 }
 
-class ShopExpenseUpdating extends ShopExpenseState {}
+class BranchExpenseUpdating extends BranchExpenseState {}
 
-class ShopExpenseUpdated extends ShopExpenseState {
+class BranchExpenseUpdated extends BranchExpenseState {
   final String message;
-  ShopExpenseUpdated({required this.message});
+  BranchExpenseUpdated({required this.message});
 }

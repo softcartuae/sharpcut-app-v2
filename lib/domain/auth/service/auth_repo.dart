@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:sharp_cut/domain/auth/models/branchModel.dart';
+import 'package:sharp_cut/domain/auth/models/branch_model.dart';
 
 abstract class AuthRepo {
   Future<Either<String, String>> login(String licenseNo);

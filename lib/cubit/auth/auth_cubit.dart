@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/data/local_storage/token_storage.dart';
-import 'package:sharp_cut/domain/auth/models/branchModel.dart';
+import 'package:sharp_cut/domain/auth/models/branch_model.dart';
 import 'package:sharp_cut/domain/auth/service/auth_repo.dart';
 
 part 'auth_cubit_state.dart';

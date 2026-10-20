@@ -215,7 +215,7 @@ class _PrintCountDialogState extends State<PrintCountDialog> {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
           ),
           child: Stack(
             clipBehavior: Clip.none,
@@ -230,7 +230,7 @@ class _PrintCountDialogState extends State<PrintCountDialog> {
                   child: Text(
                     label,
                     style: GoogleFonts.rajdhani(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                     ),
                   ),

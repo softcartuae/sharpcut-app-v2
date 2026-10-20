@@ -88,7 +88,7 @@ class _EditShopExpenseDialogState extends State<EditShopExpenseDialog> {
         TextButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              context.read<ShopExpenseCubit>().updateShopExpense(
+              context.read<BranchExpenseCubit>().updateShopExpense(
                 id: widget.expense.id!,
                 staffId: widget.staffId,
                 data: {

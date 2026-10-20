@@ -753,7 +753,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
       ),
       value: value,
       onChanged: onChanged,
-      activeColor: Colors.white,
+      activeThumbColor: Colors.white,
       activeTrackColor: AppColors.violetNormal,
       inactiveThumbColor: Colors.grey,
       inactiveTrackColor: Colors.grey.shade300,

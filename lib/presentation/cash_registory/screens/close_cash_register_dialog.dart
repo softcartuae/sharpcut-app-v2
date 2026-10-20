@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_state.dart';
-import 'package:sharp_cut/domain/auth/models/branchModel.dart';
+import 'package:sharp_cut/domain/auth/models/branch_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_model.dart';
 import 'package:sharp_cut/presentation/home/widgets/action_button.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
@@ -227,7 +227,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     border: Border.all(color: Colors.white12),
                   ),
                   child: DropdownButtonHideUnderline(
@@ -242,7 +242,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                       hint: Text(
                         "Select User",
                         style: GoogleFonts.rajdhani(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 16,
                         ),
                       ),
@@ -279,7 +279,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                       hintText: "Enter Password",
                       hintStyle: GoogleFonts.rajdhani(color: Colors.white24),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.05),
+                      fillColor: Colors.white.withValues(alpha: 0.05),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -331,7 +331,7 @@ class _CloseCashRegisterDialogState extends State<CloseCashRegisterDialog> {
                     hintText: "Enter amount",
                     hintStyle: GoogleFonts.rajdhani(color: Colors.white24),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.05),
+                    fillColor: Colors.white.withValues(alpha: 0.05),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,

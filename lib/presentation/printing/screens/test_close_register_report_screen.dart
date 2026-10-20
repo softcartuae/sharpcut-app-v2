@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:sharp_cut/domain/auth/models/branchModel.dart';
+import 'package:sharp_cut/domain/auth/models/branch_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 import 'package:sharp_cut/presentation/cash_registory/widgets/close_register_print_widget.dart';
 

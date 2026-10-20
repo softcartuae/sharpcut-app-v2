@@ -293,7 +293,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<StaffModel>(
@@ -329,7 +329,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.3)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
       ),
       child: TextField(
         controller: controller,
@@ -338,7 +338,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: GoogleFonts.rajdhani(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             fontSize: 16,
           ),
           border: InputBorder.none,
@@ -351,7 +351,7 @@ class _ResetPasswordDialogState extends State<ResetPasswordDialog> {
               obscureText
                   ? Icons.visibility_outlined
                   : Icons.visibility_off_outlined,
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               size: 20,
             ),
             onPressed: onToggleVisibility,

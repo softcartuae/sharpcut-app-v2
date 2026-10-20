@@ -2,19 +2,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/shop_expenses/shop_expense_state.dart';
 import 'package:sharp_cut/domain/shop_expenses/shop_expense_repo.dart';
 
-class ShopExpenseCubit extends Cubit<ShopExpenseState> {
-  final ShopExpenseRepo shopExpenseRepo;
+class BranchExpenseCubit extends Cubit<BranchExpenseState> {
+  final BranchExpenseRepo shopExpenseRepo;
 
-  ShopExpenseCubit({required this.shopExpenseRepo})
-    : super(ShopExpenseInitial());
+  BranchExpenseCubit({required this.shopExpenseRepo})
+    : super(BranchExpenseInitial());
 
   Future<void> getShopExpensesByStaff({required int staffId}) async {
-    emit(ShopExpenseLoading());
+    emit(BranchExpenseLoading());
     final result = await shopExpenseRepo.getShopExpensesByStaff(
       staffId: staffId,
     );
     result.fold(
-      (error) => emit(ShopExpenseError(message: error)),
+      (error) => emit(BranchExpenseError(message: error)),
       (expenses) => emit(ShopExpenseLoaded(expenses: expenses)),
     );
   }
@@ -23,14 +23,14 @@ class ShopExpenseCubit extends Cubit<ShopExpenseState> {
     required int staffId,
     required List<Map<String, dynamic>> items,
   }) async {
-    emit(ShopExpenseSubmitting());
+    emit(BranchExpenseSubmitting());
     final result = await shopExpenseRepo.submitShopExpense(
       staffId: staffId,
       items: items,
     );
     result.fold(
-      (error) => emit(ShopExpenseError(message: error)),
-      (message) => emit(ShopExpenseSubmitted(message: message)),
+      (error) => emit(BranchExpenseError(message: error)),
+      (message) => emit(BranchExpenseSubmitted(message: message)),
     );
   }
 
@@ -38,10 +38,10 @@ class ShopExpenseCubit extends Cubit<ShopExpenseState> {
     required int id,
     required int staffId,
   }) async {
-    emit(ShopExpenseDeleting());
+    emit(BranchExpenseDeleting());
     final result = await shopExpenseRepo.deleteShopExpense(id: id);
-    result.fold((error) => emit(ShopExpenseError(message: error)), (message) {
-      emit(ShopExpenseDeleted(message: message));
+    result.fold((error) => emit(BranchExpenseError(message: error)), (message) {
+      emit(BranchExpenseDeleted(message: message));
       getShopExpensesByStaff(staffId: staffId);
     });
   }
@@ -51,10 +51,10 @@ class ShopExpenseCubit extends Cubit<ShopExpenseState> {
     required int staffId,
     required Map<String, dynamic> data,
   }) async {
-    emit(ShopExpenseUpdating());
+    emit(BranchExpenseUpdating());
     final result = await shopExpenseRepo.updateShopExpense(id: id, data: data);
-    result.fold((error) => emit(ShopExpenseError(message: error)), (message) {
-      emit(ShopExpenseUpdated(message: message));
+    result.fold((error) => emit(BranchExpenseError(message: error)), (message) {
+      emit(BranchExpenseUpdated(message: message));
       getShopExpensesByStaff(staffId: staffId);
     });
   }

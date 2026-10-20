@@ -231,12 +231,12 @@ class _ScreenAddShopExpenseState extends State<ScreenAddShopExpense> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ShopExpenseCubit, ShopExpenseState>(
+    return BlocListener<BranchExpenseCubit, BranchExpenseState>(
       listener: (context, state) {
-        if (state is ShopExpenseSubmitted) {
+        if (state is BranchExpenseSubmitted) {
           ToastHelper.showSuccess(state.message);
           Navigator.of(context).pop(true);
-        } else if (state is ShopExpenseError) {
+        } else if (state is BranchExpenseError) {
           ToastHelper.showError(state.message);
         }
       },
@@ -264,7 +264,7 @@ class _ScreenAddShopExpenseState extends State<ScreenAddShopExpense> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "ADD SHOP EXPENSE",
+                              "ADD EXPENSE",
                               style: GoogleFonts.rajdhani(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -350,12 +350,12 @@ class _ScreenAddShopExpenseState extends State<ScreenAddShopExpense> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            BlocBuilder<ShopExpenseCubit, ShopExpenseState>(
+                            BlocBuilder<BranchExpenseCubit, BranchExpenseState>(
                               builder: (context, state) {
                                 return GestureDetector(
                                   onTap:
                                       _addedExpenses.isEmpty ||
-                                          state is ShopExpenseSubmitting
+                                          state is BranchExpenseSubmitting
                                       ? null
                                       : () {
                                           final items = _addedExpenses
@@ -363,7 +363,7 @@ class _ScreenAddShopExpenseState extends State<ScreenAddShopExpense> {
                                               .toList();
 
                                           context
-                                              .read<ShopExpenseCubit>()
+                                              .read<BranchExpenseCubit>()
                                               .submitShopExpense(
                                                 staffId: widget.staff.id,
                                                 items: items,
@@ -377,14 +377,14 @@ class _ScreenAddShopExpenseState extends State<ScreenAddShopExpense> {
                                     decoration: BoxDecoration(
                                       color:
                                           _addedExpenses.isEmpty ||
-                                              state is ShopExpenseSubmitting
+                                              state is BranchExpenseSubmitting
                                           ? Colors.grey
                                           : Colors.green,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Row(
                                       children: [
-                                        if (state is ShopExpenseSubmitting)
+                                        if (state is BranchExpenseSubmitting)
                                           const Padding(
                                             padding: EdgeInsets.only(
                                               right: 8.0,

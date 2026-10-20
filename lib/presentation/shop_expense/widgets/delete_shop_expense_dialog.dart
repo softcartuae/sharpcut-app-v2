@@ -38,7 +38,7 @@ class DeleteShopExpenseDialog extends StatelessWidget {
         ),
         TextButton(
           onPressed: () {
-            context.read<ShopExpenseCubit>().deleteShopExpense(
+            context.read<BranchExpenseCubit>().deleteShopExpense(
               id: expenseId,
               staffId: staffId,
             );

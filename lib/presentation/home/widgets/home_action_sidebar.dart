@@ -585,7 +585,7 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                       isShowShopExpenses: isShowShopExpenses,
                       isShowUserExpenses: isShowUserExpenses,
                       onTapShop: () {
-                        widget.selectedButtonNotifier.value = "SHOP EXPENSE";
+                        widget.selectedButtonNotifier.value = "EXPENSE";
                         showPasswordForValidation(
                           showAdminToo: false,
                           isAdminOnly: true,

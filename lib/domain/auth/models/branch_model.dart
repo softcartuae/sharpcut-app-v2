@@ -36,7 +36,7 @@ class BranchModel {
       vatNo: json['vat_no'],
       mode: json['mode'],
       isChair: json['is_chair'],
-      isShopExpenses: json['is_shop_expenses'] ?? false,
+      isShopExpenses: json['is_branch_expenses'] ?? false,
       isUserExpenses: json['is_user_expenses'] ?? false,
     );
   }
@@ -49,7 +49,7 @@ class BranchModel {
       'address': address,
       'vat_no': vatNo,
       'is_chair': isChair,
-      'is_shop_expenses': isShopExpenses,
+      'is_branch_expenses': isShopExpenses,
       'is_user_expenses': isUserExpenses,
     };
   }

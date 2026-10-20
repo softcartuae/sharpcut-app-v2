@@ -41,15 +41,15 @@ class CustomTextField extends StatelessWidget {
             child: Container(
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: GradientBoxBorder(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppColors.violetLight.withOpacity(0.9), // highlight
-                      AppColors.violetLight.withOpacity(0.6), // shadow
+                      AppColors.violetLight.withValues(alpha: 0.9), // highlight
+                      AppColors.violetLight.withValues(alpha: 0.6), // shadow
                     ],
                   ),
                   width: 0.5,
@@ -66,11 +66,11 @@ class CustomTextField extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: hint,
                   hintStyle: GoogleFonts.rajdhani(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                   ),
                   prefixIcon: Icon(
                     icon,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     size: 20,
                   ),
                   border: InputBorder.none,

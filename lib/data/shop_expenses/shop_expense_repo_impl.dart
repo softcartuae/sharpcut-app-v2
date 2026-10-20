@@ -4,14 +4,14 @@ import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/shop_expenses/shop_expense_repo.dart';
 import 'package:sharp_cut/domain/expenses/models/expense_model.dart';
 
-class ShopExpenseRepoImpl implements ShopExpenseRepo {
+class ShopExpenseRepoImpl implements BranchExpenseRepo {
   @override
   Future<Either<String, List<ExpenseModel>>> getShopExpensesByStaff({
     required int staffId,
   }) async {
     try {
       final response = await ApiClient.dio.get(
-        "${ApiClient.shopExpenseGETapi}?user_id=$staffId",
+        "${ApiClient.branchExpenseGETapi}?user_id=$staffId",
       );
 
       if (response.statusCode == 200) {
@@ -48,7 +48,7 @@ class ShopExpenseRepoImpl implements ShopExpenseRepo {
   }) async {
     try {
       final response = await ApiClient.dio.post(
-        ApiClient.shopExpensePostApi,
+        ApiClient.branchExpensePostApi,
         data: {"user_id": staffId, "items": items},
       );
 
@@ -79,7 +79,7 @@ class ShopExpenseRepoImpl implements ShopExpenseRepo {
   Future<Either<String, String>> deleteShopExpense({required int id}) async {
     try {
       final response = await ApiClient.dio.delete(
-        "${ApiClient.shopExpenseGETapi}/$id",
+        "${ApiClient.branchExpenseGETapi}/$id",
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
@@ -108,7 +108,7 @@ class ShopExpenseRepoImpl implements ShopExpenseRepo {
   }) async {
     try {
       final response = await ApiClient.dio.put(
-        "${ApiClient.shopExpenseGETapi}/$id",
+        "${ApiClient.branchExpenseGETapi}/$id",
         data: data,
       );
 

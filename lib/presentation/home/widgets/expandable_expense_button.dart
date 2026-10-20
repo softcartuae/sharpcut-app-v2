@@ -35,7 +35,7 @@ class _ExpandableExpenseButtonState extends State<ExpandableExpenseButton> {
     }
 
     final bool isAnyExpenseSelected =
-        widget.selectedButton == "SHOP EXPENSE" ||
+        widget.selectedButton == "EXPENSE" ||
         widget.selectedButton == "STAFF EXPENSE";
 
     return Column(
@@ -68,8 +68,8 @@ class _ExpandableExpenseButtonState extends State<ExpandableExpenseButton> {
                       if (widget.isShowShopExpenses) ...[
                         const SizedBox(height: 12),
                         ActionButton(
-                          label: "SHOP EXPENSE",
-                          isPrimary: widget.selectedButton == "SHOP EXPENSE",
+                          label: "EXPENSE",
+                          isPrimary: widget.selectedButton == "EXPENSE",
                           onTap: widget.onTapShop,
                         ),
                       ],

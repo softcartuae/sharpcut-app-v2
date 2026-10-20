@@ -104,17 +104,17 @@ class _ScreenLoginState extends State<ScreenLogin> {
                               end: Alignment.bottomRight,
                               colors: [
                                 AppColors.violetDarker, // Dark purple/black
-                                Colors.black.withOpacity(0.8),
+                                Colors.black.withValues(alpha: 0.8),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withValues(alpha: 0.1),
                             ),
                             boxShadow: [
                               BoxShadow(
                                 spreadRadius: 0,
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withValues(alpha: 0.5),
                                 blurRadius: 4,
                                 offset: const Offset(0, 4),
                               ),
@@ -435,7 +435,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
                   padding: const EdgeInsets.all(16),
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.9),
+                    color: Colors.black.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white24),
                   ),

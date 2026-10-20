@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:sharp_cut/domain/auth/models/branchModel.dart';
+import 'package:sharp_cut/domain/auth/models/branch_model.dart';
 import 'package:sharp_cut/domain/cash_registory/models/close_register_report_model.dart';
 
 class CloseRegisterPrintWidget extends StatelessWidget {

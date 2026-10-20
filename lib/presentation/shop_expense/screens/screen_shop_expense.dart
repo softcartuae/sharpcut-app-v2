@@ -22,20 +22,20 @@ class _ScreenShopExpenseState extends State<ScreenShopExpense> {
   @override
   void initState() {
     super.initState();
-    context.read<ShopExpenseCubit>().getShopExpensesByStaff(
+    context.read<BranchExpenseCubit>().getShopExpensesByStaff(
       staffId: widget.staff.id,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ShopExpenseCubit, ShopExpenseState>(
+    return BlocListener<BranchExpenseCubit, BranchExpenseState>(
       listener: (context, state) {
-        if (state is ShopExpenseDeleted) {
+        if (state is BranchExpenseDeleted) {
           ToastHelper.showSuccess(state.message);
-        } else if (state is ShopExpenseUpdated) {
+        } else if (state is BranchExpenseUpdated) {
           ToastHelper.showSuccess(state.message);
-        } else if (state is ShopExpenseError) {
+        } else if (state is BranchExpenseError) {
           ToastHelper.showError(state.message);
         }
       },
@@ -63,7 +63,7 @@ class _ScreenShopExpenseState extends State<ScreenShopExpense> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "SHOP EXPENSE",
+                              "EXPENSE",
                               style: GoogleFonts.rajdhani(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -131,7 +131,7 @@ class _ScreenShopExpenseState extends State<ScreenShopExpense> {
 
                                 if (result == true && context.mounted) {
                                   context
-                                      .read<ShopExpenseCubit>()
+                                      .read<BranchExpenseCubit>()
                                       .getShopExpensesByStaff(
                                         staffId: widget.staff.id,
                                       );
@@ -221,13 +221,13 @@ class _ScreenShopExpenseState extends State<ScreenShopExpense> {
                       ),
                       const SizedBox(height: 12),
                       Expanded(
-                        child: BlocBuilder<ShopExpenseCubit, ShopExpenseState>(
+                        child: BlocBuilder<BranchExpenseCubit, BranchExpenseState>(
                           builder: (context, state) {
-                            if (state is ShopExpenseLoading) {
+                            if (state is BranchExpenseLoading) {
                               return const Center(
                                 child: CircularProgressIndicator(),
                               );
-                            } else if (state is ShopExpenseError) {
+                            } else if (state is BranchExpenseError) {
                               return Center(
                                 child: Text(
                                   state.message,

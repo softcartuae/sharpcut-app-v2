@@ -1,6 +1,5 @@
 
 
-import 'dart:developer';
 
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/domain/home/models/chair_model.dart';

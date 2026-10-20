@@ -1,4 +1,4 @@
-import 'package:sharp_cut/domain/auth/models/branchModel.dart';
+import 'package:sharp_cut/domain/auth/models/branch_model.dart';
 
 class CheckNoChair {
   static bool checkIsThisAppNoChairOrNot(BranchModel? shop) {

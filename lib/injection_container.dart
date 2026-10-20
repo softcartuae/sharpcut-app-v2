@@ -105,8 +105,8 @@ Future<void> init() async {
     () => CustomerSearchCubit(sl<BookingRepo>()),
   );
 
-  sl.registerFactory<ShopExpenseCubit>(
-    () => ShopExpenseCubit(shopExpenseRepo: sl<ShopExpenseRepo>()),
+  sl.registerFactory<BranchExpenseCubit>(
+    () => BranchExpenseCubit(shopExpenseRepo: sl<BranchExpenseRepo>()),
   );
 
   sl.registerFactory<SettlementFormCubit>(() => SettlementFormCubit());
@@ -125,13 +125,11 @@ Future<void> init() async {
   sl.registerLazySingleton<PrintingRepo>(
     () => PrintingRepoImp(PrintingService()),
   );
-  sl.registerLazySingleton<ReportRepo>(
-    () => ReportRepoImp(ReportService()),
-  );
+  sl.registerLazySingleton<ReportRepo>(() => ReportRepoImp(ReportService()));
   sl.registerLazySingleton<QuickReportRepo>(
     () => QuickReportRepoImp(QuickReportService()),
   );
   sl.registerLazySingleton<CashRegistoryRepo>(() => CashRegistoryRepoImp());
-  sl.registerLazySingleton<ShopExpenseRepo>(() => ShopExpenseRepoImpl());
+  sl.registerLazySingleton<BranchExpenseRepo>(() => ShopExpenseRepoImpl());
   sl.registerLazySingleton<AppUpdateService>(() => AppUpdateService());
 }

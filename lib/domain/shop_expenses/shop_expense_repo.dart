@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:sharp_cut/domain/expenses/models/expense_model.dart';
 
-abstract class ShopExpenseRepo {
+abstract class BranchExpenseRepo {
   Future<Either<String, List<ExpenseModel>>> getShopExpensesByStaff({
     required int staffId,
   });

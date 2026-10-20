@@ -27,9 +27,9 @@ class CustomerSuggestionsOverlay extends StatelessWidget {
               width: 300,
               constraints: const BoxConstraints(maxHeight: 250),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
               child: ListView.builder(
                 padding: EdgeInsets.zero,
@@ -50,7 +50,7 @@ class CustomerSuggestionsOverlay extends StatelessWidget {
                         border: index != options.length - 1
                             ? Border(
                                 bottom: BorderSide(
-                                  color: Colors.white.withOpacity(0.05),
+                                  color: Colors.white.withValues(alpha: 0.05),
                                 ),
                               )
                             : null,
