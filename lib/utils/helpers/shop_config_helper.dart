@@ -65,4 +65,5 @@ class ShopConfigHelper {
     if (shop == null) return false;
     return shop.isUserExpenses == true;
   }
+  
 }
