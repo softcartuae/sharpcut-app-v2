@@ -241,8 +241,9 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                     if (isBooked)
                       Builder(
                         builder: (context) {
-                          final isNoChair =
-                              ShopConfigHelper.isNoChairMode(shop);
+                          final isNoChair = ShopConfigHelper.isNoChairMode(
+                            shop,
+                          );
                           if (!isNoChair) return const SizedBox.shrink();
 
                           return Padding(
@@ -491,8 +492,9 @@ class _HomeActionSidebarState extends State<HomeActionSidebar> {
                     if (isBooked)
                       Builder(
                         builder: (context) {
-                          final isNoChair =
-                              ShopConfigHelper.isNoChairMode(shop);
+                          final isNoChair = ShopConfigHelper.isNoChairMode(
+                            shop,
+                          );
                           if (isNoChair) return const SizedBox.shrink();
 
                           return Opacity(

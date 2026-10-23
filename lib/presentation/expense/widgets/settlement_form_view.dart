@@ -271,6 +271,14 @@ final double initialDiscount = widget.isReSettlement
       amount: amounts,
       tenderCash: tenders,
       change: changes,
+      collectedUserId:
+          widget.settlePayment.collectedUserId != null &&
+                  widget.settlePayment.collectedUserId!.isNotEmpty
+              ? List.filled(
+                  modes.length,
+                  widget.settlePayment.collectedUserId!.first,
+                )
+              : [],
     );
 
     widget.onSettleSubmit(

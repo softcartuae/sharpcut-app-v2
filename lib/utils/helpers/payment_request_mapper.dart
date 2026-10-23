@@ -37,9 +37,9 @@ abstract class PaymentRequestMapper {
       subTotalValue: booking.subtotal ?? 0.0,
       taxTotal: booking.taxTotal ?? 0.0,
       discount: booking.discount ?? 0.0,
-      roundOff:  0.0,
+      roundOff: 0.0,
       finalTotal: booking.finalTotal ?? 0.0,
-      serviceId: items.map((e) => e.service.id!).toList(),
+      serviceId: items.map((e) => e.service.id ?? 0).toList(),
       quantity: items.map((e) => e.quantity).toList(),
       rate: items.map((e) => e.service.price ?? 0.0).toList(),
       taxAmount: items.map((e) => e.service.unitTax ?? 0.0).toList(),
@@ -61,6 +61,7 @@ abstract class PaymentRequestMapper {
       change: [0.0],
     );
   }
+
   /// Maps Quick Payment parameters into [SettlePaymentRequestModel]
   static SettlePaymentRequestModel fromQuickPayment({
     required int? transactionId,
@@ -76,7 +77,7 @@ abstract class PaymentRequestMapper {
     required String paymentMode,
   }) {
     final bool isUnpaid = paymentMode == PaymentMode.Unpaid.name;
-    final double amount = isUnpaid ? 0.0 : (subTotal - discount);
+    final double amount = isUnpaid ? 0.0 : (finalTotal - discount);
 
     return SettlePaymentRequestModel(
       paymentStatus: isUnpaid ? "unpaid" : "full",
@@ -90,7 +91,7 @@ abstract class PaymentRequestMapper {
       roundOff: 0.0,
       finalTotal: finalTotal,
       finalTotalbefore: finalTotal,
-      serviceId: cartItems.map((e) => e.service.id!).toList(),
+      serviceId: cartItems.map((e) => e.service.id ?? 0).toList(),
       quantity: cartItems.map((e) => e.quantity).toList(),
       rate: cartItems.map((e) => e.service.price ?? 0.0).toList(),
       taxAmount: cartItems.map((e) => e.service.unitTax ?? 0.0).toList(),
@@ -98,7 +99,9 @@ abstract class PaymentRequestMapper {
       amountTotal: cartItems
           .map((e) => (e.service.price ?? 0.0) * e.quantity)
           .toList(),
-      tax: cartItems.map((e) => (e.service.unitTax ?? 0.0) * e.quantity).toList(),
+      tax: cartItems
+          .map((e) => (e.service.unitTax ?? 0.0) * e.quantity)
+          .toList(),
       subTotalList: cartItems.map((e) {
         final price = e.service.price ?? 0.0;
         final tax = e.service.unitTax ?? 0.0;
@@ -136,7 +139,7 @@ abstract class PaymentRequestMapper {
       discount: 0.0,
       roundOff: 0.0,
       finalTotal: total,
-      serviceId: cartItems.map((e) => e.service.id!).toList(),
+      serviceId: cartItems.map((e) => e.service.id ?? 0).toList(),
       quantity: cartItems.map((e) => e.quantity).toList(),
       rate: cartItems.map((e) => e.service.price ?? 0.0).toList(),
       taxAmount: cartItems.map((e) => e.service.unitTax ?? 0.0).toList(),
@@ -144,7 +147,9 @@ abstract class PaymentRequestMapper {
       amountTotal: cartItems
           .map((e) => (e.service.price ?? 0.0) * e.quantity)
           .toList(),
-      tax: cartItems.map((e) => (e.service.unitTax ?? 0.0) * e.quantity).toList(),
+      tax: cartItems
+          .map((e) => (e.service.unitTax ?? 0.0) * e.quantity)
+          .toList(),
       subTotalList: cartItems.map((e) {
         final price = e.service.price ?? 0.0;
         final tax = e.service.unitTax ?? 0.0;
