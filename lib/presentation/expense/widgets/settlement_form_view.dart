@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,7 +46,8 @@ class SettlementFormView extends StatefulWidget {
     required List<double> changes,
     required String customerName,
     required String customerNumber,
-  }) onSettleSubmit;
+  })
+  onSettleSubmit;
 
   const SettlementFormView({
     super.key,
@@ -71,21 +73,47 @@ class _SettlementFormViewState extends State<SettlementFormView> {
   final TextEditingController _staffNameController = TextEditingController();
   final TextEditingController _invoiceController = TextEditingController();
 
-  final TextEditingController _amountController = TextEditingController(text: "");
-  final TextEditingController _tenderCashController = TextEditingController(text: "");
-  final TextEditingController _chargeController = TextEditingController(text: "");
+  final TextEditingController _amountController = TextEditingController(
+    text: "",
+  );
+  final TextEditingController _tenderCashController = TextEditingController(
+    text: "",
+  );
+  final TextEditingController _chargeController = TextEditingController(
+    text: "",
+  );
 
-  final TextEditingController _totalQtyController = TextEditingController(text: "0");
-  final TextEditingController _subTotalController = TextEditingController(text: "0.00");
-  final TextEditingController _discountController = TextEditingController(text: "");
-  final TextEditingController _paidController = TextEditingController(text: "0.00");
-  final TextEditingController _curPaymentController = TextEditingController(text: "0.00");
-  final TextEditingController _balanceController = TextEditingController(text: "0.00");
-  final TextEditingController _vatController = TextEditingController(text: "0.00");
+  final TextEditingController _totalQtyController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController _subTotalController = TextEditingController(
+    text: "0.00",
+  );
+  final TextEditingController _discountController = TextEditingController(
+    text: "",
+  );
+  final TextEditingController _paidController = TextEditingController(
+    text: "0.00",
+  );
+  final TextEditingController _curPaymentController = TextEditingController(
+    text: "0.00",
+  );
+  final TextEditingController _balanceController = TextEditingController(
+    text: "0.00",
+  );
+  final TextEditingController _vatController = TextEditingController(
+    text: "0.00",
+  );
 
-  final TextEditingController _cashAmountController = TextEditingController(text: "");
-  final TextEditingController _cardAmountController = TextEditingController(text: "");
-  final TextEditingController _walletAmountController = TextEditingController(text: "");
+  final TextEditingController _cashAmountController = TextEditingController(
+    text: "",
+  );
+  final TextEditingController _cardAmountController = TextEditingController(
+    text: "",
+  );
+  final TextEditingController _walletAmountController = TextEditingController(
+    text: "",
+  );
 
   @override
   void initState() {
@@ -97,7 +125,8 @@ class _SettlementFormViewState extends State<SettlementFormView> {
     _mobileController.text = widget.settlePayment.customerNumber ?? '';
     _nameController.text = widget.settlePayment.customerName ?? '';
     _staffNameController.text = widget.staffName ?? "";
-    _vatController.text = (widget.settlePayment.taxTotal ?? 0.0).toStringAsFixed(2);
+    _vatController.text = (widget.settlePayment.taxTotal ?? 0.0)
+        .toStringAsFixed(2);
     _invoiceController.text = widget.invoiceNumber ?? "";
 
     int totalQty = 0;
@@ -107,30 +136,41 @@ class _SettlementFormViewState extends State<SettlementFormView> {
       }
     }
     _totalQtyController.text = totalQty.toString();
-    _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0).toStringAsFixed(2);
+    _subTotalController.text = (widget.settlePayment.subTotalValue ?? 0.0)
+        .toStringAsFixed(2);
 
     final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
-final double initialDiscount = widget.isReSettlement
-    ? 0.0
-    : (widget.settlePayment.discount != null && widget.settlePayment.discount! > 0)
+    final double initialDiscount = widget.isReSettlement
+        ? 0.0
+        : (widget.settlePayment.discount != null &&
+              widget.settlePayment.discount! > 0)
         ? widget.settlePayment.discount!
         : widget.customer?.calculateDiscountAmount(subTotal) ?? 0.0;
 
-
+    log(initialDiscount.toString());
+    log(widget.isReSettlement.toString());
 
     if (widget.isReSettlement) {
       _paidController.text = widget.paidAmount ?? "0.00";
       final double balanceVal = widget.initialBalance ?? 0.0;
-      _amountController.text = balanceVal == 0 ? "" : balanceVal.toStringAsFixed(2);
-      _cashAmountController.text = balanceVal == 0 ? "" : balanceVal.toStringAsFixed(2);
-      _discountController.text =  initialDiscount == 0 ? "" : initialDiscount.toStringAsFixed(2);
+      _amountController.text = balanceVal == 0
+          ? ""
+          : balanceVal.toStringAsFixed(2);
+      _cashAmountController.text = balanceVal == 0
+          ? ""
+          : balanceVal.toStringAsFixed(2);
+      _discountController.text = initialDiscount == 0
+          ? ""
+          : initialDiscount.toStringAsFixed(2);
     } else {
       final double gross = subTotal + (widget.settlePayment.taxTotal ?? 0.0);
       final double net = gross - initialDiscount;
       final double finalVal = net < 0 ? 0.0 : net;
       _amountController.text = finalVal.toStringAsFixed(2);
       _cashAmountController.text = finalVal.toStringAsFixed(2);
-      _discountController.text =  initialDiscount == 0 ? "" : initialDiscount.toStringAsFixed(2);
+      _discountController.text = initialDiscount == 0
+          ? ""
+          : initialDiscount.toStringAsFixed(2);
     }
 
     _cardAmountController.text = "";
@@ -252,7 +292,9 @@ final double initialDiscount = widget.isReSettlement
       }
     }
 
-    final double effectivePaid = widget.isReSettlement ? (state.curPayment + state.paidAmount) : state.curPayment;
+    final double effectivePaid = widget.isReSettlement
+        ? (state.curPayment + state.paidAmount)
+        : state.curPayment;
     final String paymentStatus = SettlementCalculator.determinePaymentStatus(
       totalPaid: effectivePaid,
       finalTotal: calculatedFinalTotal,
@@ -266,19 +308,21 @@ final double initialDiscount = widget.isReSettlement
       taxTotal: taxTotal,
       discount: discount,
       roundOff: 0.0,
-      finalTotal: widget.isReSettlement ? (calculatedFinalTotal - discount) : calculatedFinalTotal,
+      finalTotal: widget.isReSettlement
+          ? (calculatedFinalTotal - discount)
+          : calculatedFinalTotal,
       mode: modes,
       amount: amounts,
       tenderCash: tenders,
       change: changes,
       collectedUserId:
           widget.settlePayment.collectedUserId != null &&
-                  widget.settlePayment.collectedUserId!.isNotEmpty
-              ? List.filled(
-                  modes.length,
-                  widget.settlePayment.collectedUserId!.first,
-                )
-              : [],
+              widget.settlePayment.collectedUserId!.isNotEmpty
+          ? List.filled(
+              modes.length,
+              widget.settlePayment.collectedUserId!.first,
+            )
+          : [],
     );
 
     widget.onSettleSubmit(
@@ -303,12 +347,18 @@ final double initialDiscount = widget.isReSettlement
   Widget build(BuildContext context) {
     final double subTotal = widget.settlePayment.subTotalValue ?? 0.0;
     final double taxTotal = widget.settlePayment.taxTotal ?? 0.0;
-    final double paidAmount = double.tryParse(widget.paidAmount ?? "0.00") ?? 0.0;
-    final double initialDiscount = (widget.settlePayment.discount != null && widget.settlePayment.discount! > 0)
+    final double paidAmount =
+        double.tryParse(widget.paidAmount ?? "0.00") ?? 0.0;
+    final double initialDiscount = widget.isReSettlement
+        ? 0.0
+        : (widget.settlePayment.discount != null &&
+              widget.settlePayment.discount! > 0)
         ? widget.settlePayment.discount!
         : widget.customer?.calculateDiscountAmount(subTotal) ?? 0.0;
     final double initialBalance = widget.initialBalance ?? 0.0;
     final double initialFinalTotal = widget.settlePayment.finalTotal ?? 0.0;
+
+    log(initialDiscount.toString());
 
     return BlocProvider<SettlementFormCubit>(
       create: (context) => di.sl<SettlementFormCubit>()
@@ -381,7 +431,10 @@ final double initialDiscount = widget.isReSettlement
                             const SizedBox(width: 20),
                             IconButton(
                               onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.close, color: Colors.white),
+                              icon: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
@@ -392,7 +445,9 @@ final double initialDiscount = widget.isReSettlement
                           nameController: _nameController,
                           mobileController: _mobileController,
                           staffNameController: _staffNameController,
-                          invoiceController: widget.invoiceNumber != null ? _invoiceController : null,
+                          invoiceController: widget.invoiceNumber != null
+                              ? _invoiceController
+                              : null,
                         ),
 
                         const SizedBox(height: 8),
@@ -416,7 +471,8 @@ final double initialDiscount = widget.isReSettlement
                                 flex: 3,
                                 child: BlocBuilder<SettlementFormCubit, SettlementFormState>(
                                   builder: (context, state) {
-                                    final cubit = context.read<SettlementFormCubit>();
+                                    final cubit = context
+                                        .read<SettlementFormCubit>();
                                     return SingleChildScrollView(
                                       child: Column(
                                         children: [
@@ -425,62 +481,114 @@ final double initialDiscount = widget.isReSettlement
                                             child: Column(
                                               children: [
                                                 Wrap(
-                                                  alignment: WrapAlignment.spaceBetween,
-                                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                                  alignment: WrapAlignment
+                                                      .spaceBetween,
+                                                  crossAxisAlignment:
+                                                      WrapCrossAlignment.center,
                                                   children: [
                                                     Text(
                                                       "Total Cash: ${state.curPayment.toStringAsFixed(2)}",
-                                                      style: GoogleFonts.rajdhani(
-                                                        color: Colors.white,
-                                                        fontWeight: FontWeight.bold,
-                                                      ),
+                                                      style:
+                                                          GoogleFonts.rajdhani(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
                                                     ),
                                                     const SizedBox(width: 5),
                                                     Row(
-                                                      mainAxisSize: MainAxisSize.min,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
                                                       children: [
                                                         Text(
                                                           "Split Payment",
-                                                          style: GoogleFonts.rajdhani(color: Colors.white),
+                                                          style:
+                                                              GoogleFonts.rajdhani(
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
                                                         ),
-                                                        const SizedBox(width: 8),
+                                                        const SizedBox(
+                                                          width: 8,
+                                                        ),
                                                         Switch(
-                                                          value: state.splitPayment,
+                                                          value: state
+                                                              .splitPayment,
                                                           onChanged: (val) {
-                                                            cubit.toggleSplitPayment(val);
+                                                            cubit
+                                                                .toggleSplitPayment(
+                                                                  val,
+                                                                );
                                                             if (!val) {
-                                                              _amountController.text = (widget.settlePayment.finalTotal ?? 0.0).toStringAsFixed(2);
+                                                              _amountController
+                                                                      .text =
+                                                                  (widget.settlePayment.finalTotal ??
+                                                                          0.0)
+                                                                      .toStringAsFixed(
+                                                                        2,
+                                                                      );
                                                             } else {
-                                                              _cashAmountController.text = _amountController.text;
-                                                              _cardAmountController.text = "";
-                                                              _walletAmountController.text = "";
+                                                              _cashAmountController
+                                                                      .text =
+                                                                  _amountController
+                                                                      .text;
+                                                              _cardAmountController
+                                                                      .text =
+                                                                  "";
+                                                              _walletAmountController
+                                                                      .text =
+                                                                  "";
                                                             }
                                                           },
-                                                          activeTrackColor: AppColors.violetNormal,
+                                                          activeTrackColor:
+                                                              AppColors
+                                                                  .violetNormal,
                                                         ),
                                                       ],
                                                     ),
                                                   ],
                                                 ),
-                                                const Divider(color: Colors.white24),
+                                                const Divider(
+                                                  color: Colors.white24,
+                                                ),
                                                 const SizedBox(height: 8),
 
                                                 if (state.isCashSelected) ...[
                                                   SettlementLabelInput(
-                                                    label: state.splitPayment ? "Cash Amount" : "Amount",
-                                                    controller: state.splitPayment ? _cashAmountController : _amountController,
+                                                    label: state.splitPayment
+                                                        ? "Cash Amount"
+                                                        : "Amount",
+                                                    controller:
+                                                        state.splitPayment
+                                                        ? _cashAmountController
+                                                        : _amountController,
                                                     onChanged: (val) {
-                                                      final double d = double.tryParse(val) ?? 0.0;
+                                                      final double d =
+                                                          double.tryParse(
+                                                            val,
+                                                          ) ??
+                                                          0.0;
                                                       if (state.splitPayment) {
-                                                        cubit.updateCashAmount(d);
+                                                        cubit.updateCashAmount(
+                                                          d,
+                                                        );
                                                       } else {
-                                                        _cashAmountController.text = val;
+                                                        _cashAmountController
+                                                                .text =
+                                                            val;
                                                         cubit.updateAmount(d);
                                                       }
                                                     },
-                                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                    keyboardType:
+                                                        const TextInputType.numberWithOptions(
+                                                          decimal: true,
+                                                        ),
                                                     inputFormatters: [
-                                                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                                                      FilteringTextInputFormatter.allow(
+                                                        RegExp(
+                                                          r'^\d*\.?\d{0,2}',
+                                                        ),
+                                                      ),
                                                     ],
                                                   ),
                                                   const SizedBox(height: 10),
@@ -489,14 +597,29 @@ final double initialDiscount = widget.isReSettlement
                                                       Expanded(
                                                         child: SettlementLabelInput(
                                                           label: "Tender Cash",
-                                                          controller: _tenderCashController,
+                                                          controller:
+                                                              _tenderCashController,
                                                           onChanged: (val) {
-                                                            final double d = double.tryParse(val) ?? 0.0;
-                                                            cubit.updateTenderCash(d);
+                                                            final double d =
+                                                                double.tryParse(
+                                                                  val,
+                                                                ) ??
+                                                                0.0;
+                                                            cubit
+                                                                .updateTenderCash(
+                                                                  d,
+                                                                );
                                                           },
-                                                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                          keyboardType:
+                                                              const TextInputType.numberWithOptions(
+                                                                decimal: true,
+                                                              ),
                                                           inputFormatters: [
-                                                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                                                            FilteringTextInputFormatter.allow(
+                                                              RegExp(
+                                                                r'^\d*\.?\d{0,2}',
+                                                              ),
+                                                            ),
                                                           ],
                                                         ),
                                                       ),
@@ -504,10 +627,18 @@ final double initialDiscount = widget.isReSettlement
                                                       Expanded(
                                                         child: SettlementLabelInput(
                                                           label: "Change",
-                                                          controller: _chargeController,
-                                                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                          controller:
+                                                              _chargeController,
+                                                          keyboardType:
+                                                              const TextInputType.numberWithOptions(
+                                                                decimal: true,
+                                                              ),
                                                           inputFormatters: [
-                                                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                                                            FilteringTextInputFormatter.allow(
+                                                              RegExp(
+                                                                r'^\d*\.?\d{0,2}',
+                                                              ),
+                                                            ),
                                                           ],
                                                         ),
                                                       ),
@@ -518,20 +649,40 @@ final double initialDiscount = widget.isReSettlement
 
                                                 if (state.isCardSelected) ...[
                                                   SettlementLabelInput(
-                                                    label: state.splitPayment ? "Card Amount" : "Amount",
-                                                    controller: state.splitPayment ? _cardAmountController : _amountController,
+                                                    label: state.splitPayment
+                                                        ? "Card Amount"
+                                                        : "Amount",
+                                                    controller:
+                                                        state.splitPayment
+                                                        ? _cardAmountController
+                                                        : _amountController,
                                                     onChanged: (val) {
-                                                      final double d = double.tryParse(val) ?? 0.0;
+                                                      final double d =
+                                                          double.tryParse(
+                                                            val,
+                                                          ) ??
+                                                          0.0;
                                                       if (state.splitPayment) {
-                                                        cubit.updateCardAmount(d);
+                                                        cubit.updateCardAmount(
+                                                          d,
+                                                        );
                                                       } else {
-                                                        _cardAmountController.text = val;
+                                                        _cardAmountController
+                                                                .text =
+                                                            val;
                                                         cubit.updateAmount(d);
                                                       }
                                                     },
-                                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                    keyboardType:
+                                                        const TextInputType.numberWithOptions(
+                                                          decimal: true,
+                                                        ),
                                                     inputFormatters: [
-                                                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                                                      FilteringTextInputFormatter.allow(
+                                                        RegExp(
+                                                          r'^\d*\.?\d{0,2}',
+                                                        ),
+                                                      ),
                                                     ],
                                                   ),
                                                   const SizedBox(height: 10),
@@ -539,20 +690,41 @@ final double initialDiscount = widget.isReSettlement
 
                                                 if (state.isWalletSelected) ...[
                                                   SettlementLabelInput(
-                                                    label: state.splitPayment ? "Wallet Amount" : "Amount",
-                                                    controller: state.splitPayment ? _walletAmountController : _amountController,
+                                                    label: state.splitPayment
+                                                        ? "Wallet Amount"
+                                                        : "Amount",
+                                                    controller:
+                                                        state.splitPayment
+                                                        ? _walletAmountController
+                                                        : _amountController,
                                                     onChanged: (val) {
-                                                      final double d = double.tryParse(val) ?? 0.0;
+                                                      final double d =
+                                                          double.tryParse(
+                                                            val,
+                                                          ) ??
+                                                          0.0;
                                                       if (state.splitPayment) {
-                                                        cubit.updateWalletAmount(d);
+                                                        cubit
+                                                            .updateWalletAmount(
+                                                              d,
+                                                            );
                                                       } else {
-                                                        _walletAmountController.text = val;
+                                                        _walletAmountController
+                                                                .text =
+                                                            val;
                                                         cubit.updateAmount(d);
                                                       }
                                                     },
-                                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                    keyboardType:
+                                                        const TextInputType.numberWithOptions(
+                                                          decimal: true,
+                                                        ),
                                                     inputFormatters: [
-                                                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                                                      FilteringTextInputFormatter.allow(
+                                                        RegExp(
+                                                          r'^\d*\.?\d{0,2}',
+                                                        ),
+                                                      ),
                                                     ],
                                                   ),
                                                 ],
@@ -579,8 +751,10 @@ final double initialDiscount = widget.isReSettlement
                                     paidController: _paidController,
                                     curPaymentController: _curPaymentController,
                                     balanceController: _balanceController,
-                                    onSettleAndPrint: () => _onSubmit(ctx, alsoPrint: true),
-                                    onSettle: () => _onSubmit(ctx, alsoPrint: false),
+                                    onSettleAndPrint: () =>
+                                        _onSubmit(ctx, alsoPrint: true),
+                                    onSettle: () =>
+                                        _onSubmit(ctx, alsoPrint: false),
                                   ),
                                 ),
                               ),
