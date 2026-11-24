@@ -40,11 +40,6 @@ class _HomeAppBarState extends State<HomeAppBar> {
           children: [
             GestureDetector(
               onLongPress: () {
-                final isNoChair = ShopConfigHelper.isNoChairMode(
-                  context.read<AuthCubit>().currentBranch,
-                );
-                print("isNoChair: $isNoChair");
-
                 showDialog(
                   context: context,
                   builder: (context) {

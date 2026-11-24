@@ -1,5 +1,21 @@
 import 'package:flutter/material.dart' as material;
-import 'package:flutter/material.dart' show BuildContext, GlobalKey, RenderBox, Offset, RelativeRect, Colors, RoundedRectangleBorder, BorderSide, Icons, AlertDialog, Text, TextButton, Navigator, MaterialPageRoute, showDialog;
+import 'package:flutter/material.dart'
+    show
+        BuildContext,
+        GlobalKey,
+        RenderBox,
+        Offset,
+        RelativeRect,
+        Colors,
+        RoundedRectangleBorder,
+        BorderSide,
+        Icons,
+        AlertDialog,
+        Text,
+        TextButton,
+        Navigator,
+        MaterialPageRoute,
+        showDialog;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/cubit/auth/auth_cubit.dart';
 import 'package:sharp_cut/cubit/cash_registory/cash_registory_cubit.dart';
@@ -9,13 +25,15 @@ import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:sharp_cut/presentation/printing/screens/screen_printing_settings.dart';
 import 'package:sharp_cut/presentation/printing/widgets/print_count_dialog.dart';
 import 'package:sharp_cut/presentation/printing/widgets/reset_password_dialog.dart';
+import 'package:sharp_cut/utils/helpers/url_launcher_helper.dart';
 
 abstract class HomeHeaderMenuHandler {
   static Future<void> showHeaderMenu(
     BuildContext context, {
     required GlobalKey menuKey,
   }) async {
-    final RenderBox? renderBox = menuKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? renderBox =
+        menuKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
 
     final offset = renderBox.localToGlobal(Offset.zero);
@@ -33,47 +51,63 @@ abstract class HomeHeaderMenuHandler {
         borderRadius: material.BorderRadius.circular(12),
         side: const BorderSide(color: Colors.white12),
       ),
-      items: const [
-        material.PopupMenuItem(
+      items: [
+        const material.PopupMenuItem(
           value: 1,
           child: MenuItem(
             icon: Icons.admin_panel_settings_outlined,
             text: "Reset Admin Password",
           ),
         ),
-        material.PopupMenuItem(
+        const material.PopupMenuItem(
           value: 2,
           child: MenuItem(
             icon: Icons.badge_outlined,
             text: "Reset Staff Password",
           ),
         ),
-        material.PopupMenuItem(
+        const material.PopupMenuItem(
           value: 3,
           child: MenuItem(icon: Icons.print_outlined, text: "Printer Settings"),
         ),
-        material.PopupMenuItem(
+        const material.PopupMenuItem(
           value: 4,
           child: MenuItem(icon: Icons.print, text: "Print Count"),
         ),
-        material.PopupMenuItem(
+        const material.PopupMenuItem(
           value: 5,
           child: MenuItem(icon: Icons.logout, text: "Logout"),
         ),
-        material.PopupMenuItem(
+        const material.PopupMenuItem(
           value: 6,
           child: MenuItem(
             icon: Icons.receipt_long,
             text: "Print Register Report",
           ),
         ),
-        material.PopupMenuItem(
+        const material.PopupMenuItem(
           value: 7,
           child: MenuItem(
             icon: Icons.point_of_sale_outlined,
             text: "Open Drawer",
           ),
         ),
+        if (UrlLauncherHelper.isMobile) ...[
+          const material.PopupMenuItem(
+            value: 8,
+            child: MenuItem(
+              icon: Icons.description_outlined,
+              text: "Terms & Conditions",
+            ),
+          ),
+          const material.PopupMenuItem(
+            value: 9,
+            child: MenuItem(
+              icon: Icons.privacy_tip_outlined,
+              text: "Privacy Policy",
+            ),
+          ),
+        ],
       ],
     );
 
@@ -148,7 +182,9 @@ abstract class HomeHeaderMenuHandler {
                   onPressed: () {
                     Navigator.pop(dialogContext);
                     if (context.mounted) {
-                      context.read<CashRegistoryCubit>().getLastCloseRegisterReport();
+                      context
+                          .read<CashRegistoryCubit>()
+                          .getLastCloseRegisterReport();
                     }
                   },
                   child: const Text("Print"),
@@ -161,6 +197,12 @@ abstract class HomeHeaderMenuHandler {
           if (context.mounted) {
             context.read<PrintingCubit>().openDrawer();
           }
+          break;
+        case 8:
+          UrlLauncherHelper.openTermsAndConditions();
+          break;
+        case 9:
+          UrlLauncherHelper.openPrivacyPolicy();
           break;
       }
     }

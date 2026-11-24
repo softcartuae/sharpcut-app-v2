@@ -8,6 +8,7 @@ import 'package:sharp_cut/presentation/home/screens/screen_home.dart';
 import 'package:sharp_cut/data/api_client.dart';
 import 'package:sharp_cut/data/local_storage/url_storage.dart';
 import 'package:sharp_cut/injection_container.dart';
+import 'package:sharp_cut/presentation/login/widgets/login_legal_links.dart';
 import 'package:sharp_cut/utils/app_colors.dart';
 import 'package:sharp_cut/utils/helpers/toast_helper.dart';
 
@@ -19,7 +20,6 @@ class ScreenLogin extends StatefulWidget {
 }
 
 class _ScreenLoginState extends State<ScreenLogin> {
-  
   bool _isPasswordVisible = false;
   final TextEditingController _pinController = TextEditingController();
   final TextEditingController _ipController = TextEditingController();
@@ -422,6 +422,8 @@ class _ScreenLoginState extends State<ScreenLogin> {
                             ],
                           ),
                         ),
+                        const SizedBox(height: 20),
+                        const LoginLegalLinks(),
                       ],
                     ),
                   ),
@@ -480,5 +482,4 @@ class _ScreenLoginState extends State<ScreenLogin> {
     }
     return 'Custom: ${ApiClient.baseUrl}';
   }
-
 }

@@ -102,6 +102,64 @@ class PrintingCubit extends Cubit<PrintingState> {
     }
   }
 
+  Future<bool> connectManualNetworkPrinter({
+    required String name,
+    required String ipAddress,
+    int port = 9100,
+  }) async {
+    final cleanIp = ipAddress.trim();
+    final cleanName = name.trim().isEmpty ? "Network Printer ($cleanIp)" : name.trim();
+    final address = "$cleanIp:$port";
+
+    final printer = Printer(
+      name: cleanName,
+      address: address,
+      connectionType: ConnectionType.NETWORK,
+      isConnected: false,
+    );
+
+    emit(state.copyWith(status: PrintingStatus.connecting));
+    try {
+      await _printingRepo.stopScan();
+      _printerSubscription?.cancel();
+
+      final isConnected = await _printingRepo.connect(printer);
+      if (isConnected) {
+        final hasPaperSize = await _printingRepo.hasPaperSize();
+        emit(
+          state.copyWith(
+            status: PrintingStatus.connected,
+            connectedPrinter: printer,
+            showPaperSizeDialog: !hasPaperSize,
+          ),
+        );
+        _printingRepo.saveLastConnectedPrinter(printer);
+        _startHeartbeat();
+        ToastHelper.showSuccess("Connected to $cleanName");
+        return true;
+      } else {
+        emit(
+          state.copyWith(
+            status: PrintingStatus.error,
+            errorMessage: "Could not connect to printer at $address",
+          ),
+        );
+        ToastHelper.showError("Could not connect to printer at $address");
+        return false;
+      }
+    } catch (e) {
+      log("Manual network connect error: $e");
+      emit(
+        state.copyWith(
+          status: PrintingStatus.error,
+          errorMessage: "Connection failed: $e",
+        ),
+      );
+      ToastHelper.showError("Connection failed: $e");
+      return false;
+    }
+  }
+
   Future<void> disconnect() async {
     if (state.connectedPrinter != null) {
       emit(state.copyWith(status: PrintingStatus.disconnecting));

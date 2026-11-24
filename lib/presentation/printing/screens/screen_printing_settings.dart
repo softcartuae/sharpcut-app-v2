@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sharp_cut/presentation/printing/cubit/printing_cubit.dart';
 import 'package:flutter_thermal_printer/utils/printer.dart';
 import 'package:sharp_cut/presentation/printing/widgets/paper_width_selection_dialog.dart';
+import 'package:sharp_cut/presentation/printing/widgets/dialog_add_network_printer.dart';
 import 'package:sharp_cut/domain/printing/model/printer_paper_size.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
@@ -343,7 +344,7 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                               ),
                             ),
                           ),
-                        if (!Platform.isWindows) ...[
+                        if (!Platform.isWindows && !Platform.isIOS) ...[
                           // Scan Button (USB)
                           Card(
                             color: AppColors.violetLight,
@@ -507,6 +508,51 @@ class _ScreenPrintingSettingsState extends State<ScreenPrintingSettings> {
                                                     ConnectionType.BLE)
                                             ? Colors.grey
                                             : AppColors.violetNormal,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        if (!Platform.isWindows) ...[
+                          // Add Network Printer Manually Button
+                          Card(
+                            color: AppColors.violetNormal,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            clipBehavior: Clip.hardEdge,
+                            child: InkWell(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) =>
+                                      const DialogAddNetworkPrinter(),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.add_circle_outline,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "Add Network Printer (IP)",
+                                      style: GoogleFonts.rajdhani(
+                                        color: Colors.white,
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                       ),

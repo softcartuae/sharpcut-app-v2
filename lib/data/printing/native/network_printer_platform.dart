@@ -20,6 +20,7 @@ class NetworkPrinterPlatform {
   /// Returns true if connection was successful.
   Future<bool> connect(String ipAddress, int port) async {
     try {
+      await disconnect();
       _socket = await Socket.connect(
         ipAddress,
         port,
