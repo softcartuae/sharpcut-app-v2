@@ -9,7 +9,6 @@ import 'package:sharp_cut/data/local_storage/url_storage.dart';
 class ApiClient {
   // static String productionBaseUrl = "https://app.sharpcutae.com/api/v2/";
   static String productionBaseUrl = "https://app.sharpcutae.com/api/v2/";
-
   static String developmentBaseUrl = "https://saloon.softcart.io/api/v2/";
   static String baseUrl = productionBaseUrl;
 
